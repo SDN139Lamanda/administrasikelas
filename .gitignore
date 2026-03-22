@@ -1,0 +1,14 @@
+# Abaikan file config Firebase agar tidak upload ke GitHub
+config-firebase.js
+
+# Abaikan file sistem & editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Abaikan file rahasia lain
+.env
+*.key
+*.pem
+serviceAccount.json
