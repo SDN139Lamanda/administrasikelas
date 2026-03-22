@@ -1,14 +1,17 @@
-# Abaikan file config Firebase agar tidak upload ke GitHub
-config-firebase.js
+# 1. Pastikan .env sudah ada di .gitignore
+# Isi .gitignore:
+# .env
+# node_modules/
+# dist/
 
-# Abaikan file sistem & editor
-.DS_Store
-Thumbs.db
-.vscode/
-.idea/
+# 2. Tambahkan semua file ke staging
+git add .
 
-# Abaikan file rahasia lain
-.env
-*.key
-*.pem
-serviceAccount.json
+# 3. Cek status (pastikan .env TIDAK muncul di sini)
+git status
+
+# 4. Commit perubahan
+git commit -m "Menambahkan halaman login, register, dan dashboard"
+
+# 5. Upload ke GitHub
+git push origin main
