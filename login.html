@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Masuk - BrandSaya</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* Gunakan style yang sama dengan register.html */
+        .login-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%);
+            padding: 20px;
+        }
+
+        .login-container {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .login-header h1 {
+            color: #1e293b;
+            margin-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #1e293b;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-login:hover {
+            background: #1d4ed8;
+        }
+
+        .forgot-password {
+            text-align: right;
+            margin-bottom: 20px;
+        }
+
+        .forgot-password a {
+            color: #2563eb;
+            font-size: 0.9rem;
+            text-decoration: none;
+        }
+
+        .divider {
+            text-align: center;
+            margin: 25px 0;
+            color: #64748b;
+            position: relative;
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            width: 100%;
+            height: 1px;
+            background: #e2e8f0;
+            z-index: -1;
+        }
+
+        .divider span {
+            background: white;
+            padding: 0 10px;
+        }
+
+        .social-login {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .social-btn {
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+
+        .register-link {
+            text-align: center;
+            margin-top: 25px;
+            color: #64748b;
+        }
+
+        .register-link a {
+            color: #2563eb;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-page">
+        <div class="login-container">
+            <div class="login-header">
+                <h1><i class="fas fa-sign-in-alt" style="color: #2563eb;"></i> Selamat Datang</h1>
+                <p>Masuk untuk melanjutkan</p>
+            </div>
+
+            <div id="alertBox" class="alert"></div>
+
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" placeholder="contoh@email.com" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="••••••••" required>
+                </div>
+
+                <div class="forgot-password">
+                    <a href="#">Lupa password?</a>
+                </div>
+
+                <button type="submit" class="btn-login" id="submitBtn">
+                    Masuk
+                </button>
+            </form>
+
+            <div class="divider">
+                <span>atau masuk dengan</span>
+            </div>
+
+            <div class="social-login">
+                <button class="social-btn" id="googleLogin">
+                    <i class="fab fa-google" style="color: #DB4437;"></i> Google
+                </button>
+                <button class="social-btn" id="githubLogin">
+                    <i class="fab fa-github"></i> GitHub
+                </button>
+            </div>
+
+            <div class="register-link">
+                Belum punya akun? <a href="register.html">Daftar disini</a>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { auth, db } from './config-firebase.js';
+        import { 
+            signInWithEmailAndPassword, 
+            signInWithPopup,
+            GoogleAuthProvider,
+            GithubAuthProvider
+        } from "firebase/auth";
+        import { doc, setDoc, getDoc } from "firebase/firestore";
+
+        const loginForm = document.getElementById('loginForm');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const submitBtn = document.getElementById('submitBtn');
+        const alertBox = document.getElementById('alertBox');
+
+        function showAlert(message, type) {
+            alertBox.textContent = message;
+            alertBox.className = `alert alert-${type}`;
+            alertBox.style.display = 'block';
+            
+            setTimeout(() => {
+                alertBox.style.display = 'none';
+            }, 5000);
+        }
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="loading"></span> Memproses...';
+
+            try {
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                // Update last login in Firestore
+                await setDoc(doc(db, "users", user.uid), {
+                    lastLogin: new Date().toISOString()
+                }, { merge: true });
+
+                showAlert('Login berhasil! Mengalihkan...', 'success');
+                
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 2000);
+
+            } catch (error) {
+                console.error('Login error:', error);
+                
+                let errorMessage = 'Login gagal. Silakan coba lagi.';
+                
+                switch (error.code) {
+                    case 'auth/user-not-found':
+                        errorMessage = 'Email tidak terdaftar.';
+                        break;
+                    case 'auth/wrong-password':
+                        errorMessage = 'Password salah.';
+                        break;
+                    case 'auth/invalid-email':
+                        errorMessage = 'Format email tidak valid.';
+                        break;
+                    case 'auth/too-many-requests':
+                        errorMessage = 'Terlalu banyak percobaan. Coba lagi nanti.';
+                        break;
+                    default:
+                        errorMessage = error.message;
+                }
+                
+                showAlert(errorMessage, 'error');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Masuk';
+            }
+        });
+
+        // Google Login
+        document.getElementById('googleLogin').addEventListener('click', async () => {
+            const provider = new GoogleAuthProvider();
+            
+            try {
+                const result = await signInWithPopup(auth, provider);
+                const user = result.user;
+
+                await setDoc(doc(db, "users", user.uid), {
+                    fullName: user.displayName,
+                    email: user.email,
+                    photoURL: user.photoURL,
+                    provider: 'google',
+                    lastLogin: new Date().toISOString()
+                }, { merge: true });
+
+                showAlert('Login dengan Google berhasil!', 'success');
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 2000);
+
+            } catch (error) {
+                showAlert('Login Google gagal: ' + error.message, 'error');
+            }
+        });
+
+        // GitHub Login
+        document.getElementById('githubLogin').addEventListener('click', async () => {
+            const provider = new GithubAuthProvider();
+            
+            try {
+                const result = await signInWithPopup(auth, provider);
+                const user = result.user;
+
+                await setDoc(doc(db, "users", user.uid), {
+                    fullName: user.displayName,
+                    email: user.email,
+                    photoURL: user.photoURL,
+                    provider: 'github',
+                    lastLogin: new Date().toISOString()
+                }, { merge: true });
+
+                showAlert('Login dengan GitHub berhasil!', 'success');
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 2000);
+
+            } catch (error) {
+                showAlert('Login GitHub gagal: ' + error.message, 'error');
+            }
+        });
+    </script>
+</body>
+</html>
