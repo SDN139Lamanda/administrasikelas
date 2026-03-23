@@ -340,7 +340,7 @@
             } else {
                 // ❌ USER BELUM LOGIN - REDIRECT KE LOGIN
                 console.log('❌ Tidak ada user, redirect ke login.html');
-                window.location.href = 'login.html';
+                window.location.href = 'dashboard.html';
             }
         });
 
@@ -370,7 +370,7 @@
         function setupDashboard() {
             loadingScreen.style.display = 'none'; // Sembunyikan loading
             updateDateTime();
-            setInterval(updateDateTime, 1000);
+            setInterval(updateDateTime, 1500);
             document.getElementById('footerYear').textContent = new Date().getFullYear();
             populateTahunPelajaran();
             updateSemesterButton();
