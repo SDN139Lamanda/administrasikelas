@@ -1,482 +1,150 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - SDN 139 Lamanda</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - SDN 139 Lamanda</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f8fafc; color: #1e293b;
+    }
     
-    <style>
-        :root {
-            --primary: #2563eb;
-            --primary-dark: #1d4ed8;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --bg-light: #f8fafc;
-            --bg-white: #ffffff;
-            --text-dark: #1e293b;
-            --text-light: #64748b;
-            --border: #e2e8f0;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            --radius: 12px;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { background: var(--bg-light); color: var(--text-dark); }
-
-        /* Loading Screen */
-        .loading-screen {
-            position: fixed; top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: var(--bg-white);
-            display: flex; align-items: center; justify-content: center;
-            z-index: 9999; flex-direction: column; gap: 20px;
-        }
-        .spinner {
-            width: 50px; height: 50px;
-            border: 4px solid var(--border);
-            border-top-color: var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* Navbar */
-        .navbar {
-            background: var(--bg-white);
-            padding: 1rem 0;
-            box-shadow: var(--shadow);
-            position: sticky; top: 0; z-index: 100;
-        }
-        .nav-container {
-            max-width: 1200px; margin: 0 auto; padding: 0 20px;
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .logo {
-            display: flex; align-items: center; gap: 10px;
-            font-size: 1.3rem; font-weight: 700; color: var(--primary);
-        }
-        .user-menu { display: flex; align-items: center; gap: 15px; }
-        .user-info { text-align: right; }
-        .user-info h4 { font-size: 0.95rem; font-weight: 600; }
-        .user-info p { font-size: 0.8rem; color: var(--text-light); }
-        .user-avatar {
-            width: 45px; height: 45px; border-radius: 50%;
-            background: var(--primary); color: white;
-            display: flex; align-items: center; justify-content: center;
-            font-weight: 600;
-        }
-        .btn-logout {
-            padding: 8px 16px; background: var(--danger); color: white;
-            border: none; border-radius: 8px; cursor: pointer;
-            font-size: 0.9rem; font-weight: 500;
-            display: flex; align-items: center; gap: 6px;
-        }
-        .btn-logout:hover { background: #dc2626; }
-
-        /* Main Content */
-        .dashboard-main { max-width: 1200px; margin: 0 auto; padding: 30px 20px; }
-
-        /* Welcome Card */
-        .welcome-card {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            color: white; padding: 30px; border-radius: var(--radius);
-            margin-bottom: 30px;
-            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;
-        }
-        .welcome-text h1 { font-size: 1.8rem; margin-bottom: 8px; }
-        .welcome-text p { opacity: 0.9; }
-        .welcome-date { text-align: right; opacity: 0.9; }
-
-        /* Settings Card */
-        .settings-card {
-            background: var(--bg-white); border-radius: var(--radius);
-            padding: 25px; margin-bottom: 30px;
-            box-shadow: var(--shadow); border: 1px solid var(--border);
-        }
-        .settings-card h3 { font-size: 1.2rem; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
-        .settings-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;
-        }
-        .setting-group label { display: block; font-size: 0.9rem; font-weight: 500; color: var(--text-light); margin-bottom: 8px; }
-        .setting-group select {
-            width: 100%; padding: 12px 16px; border: 1px solid var(--border);
-            border-radius: 8px; font-size: 1rem; background: var(--bg-white); cursor: pointer;
-        }
-        .setting-group select:focus { outline: none; border-color: var(--primary); }
-        
-        .semester-toggle {
-            display: flex; background: var(--bg-light); border-radius: 8px;
-            padding: 4px; border: 1px solid var(--border);
-        }
-        .semester-toggle button {
-            flex: 1; padding: 10px; border: none; background: transparent;
-            border-radius: 6px; font-size: 0.9rem; font-weight: 500; cursor: pointer; color: var(--text-light);
-        }
-        .semester-toggle button.active { background: var(--primary); color: white; }
-        .semester-toggle button:first-child { border-radius: 6px 0 0 6px; }
-        .semester-toggle button:last-child { border-radius: 0 6px 6px 0; }
-
-        .btn-save {
-            padding: 12px 20px; background: var(--success); color: white;
-            border: none; border-radius: 8px; cursor: pointer; font-weight: 500; width: 100%;
-        }
-        .btn-save:hover { background: #059669; }
-
-        /* Menu Grid */
-        .menu-section h3 { font-size: 1.2rem; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
-        .menu-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;
-        }
-        .menu-card {
-            background: var(--bg-white); border-radius: var(--radius); padding: 25px;
-            box-shadow: var(--shadow); border: 1px solid var(--border);
-            transition: all 0.3s ease; cursor: pointer; text-decoration: none; color: inherit;
-            display: flex; align-items: center; gap: 15px;
-        }
-        .menu-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); border-color: var(--primary); }
-        .menu-card.coming-soon { opacity: 0.7; cursor: not-allowed; }
-        .menu-card.coming-soon:hover { transform: none; box-shadow: var(--shadow); border-color: var(--border); }
-        
-        .menu-icon {
-            width: 50px; height: 50px; border-radius: 12px;
-            display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0;
-        }
-        .menu-icon.blue { background: #dbeafe; color: var(--primary); }
-        .menu-icon.green { background: #d1fae5; color: var(--success); }
-        .menu-icon.yellow { background: #fef3c7; color: var(--warning); }
-        .menu-icon.purple { background: #ede9fe; color: #7c3aed; }
-        .menu-icon.gray { background: var(--bg-light); color: var(--text-light); }
-        
-        .menu-content h4 { font-size: 1.1rem; font-weight: 600; margin-bottom: 5px; }
-        .menu-content p { font-size: 0.9rem; color: var(--text-light); }
-        .badge {
-            display: inline-block; padding: 3px 10px; border-radius: 20px;
-            font-size: 0.75rem; font-weight: 500; margin-top: 8px;
-        }
-        .badge.coming { background: var(--bg-light); color: var(--text-light); }
-        .badge.active { background: #d1fae5; color: #065f46; }
-
-        /* Alert */
-        .alert {
-            padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; display: none;
-        }
-        .alert-success { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
-        .alert-error { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
-
-        /* Footer */
-        .dashboard-footer { text-align: center; padding: 30px 20px; color: var(--text-light); font-size: 0.9rem; }
-
-        @media (max-width: 768px) {
-            .welcome-card { flex-direction: column; text-align: center; }
-            .welcome-date { text-align: center; }
-            .user-info { display: none !important; }
-            .settings-grid { grid-template-columns: 1fr; }
-        }
-    </style>
+    /* Loading Screen - Wajib Ada */
+    #loading {
+      position: fixed; inset: 0; background: white;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; color: #64748b; z-index: 9999;
+    }
+    
+    /* Navbar */
+    .navbar {
+      background: white; padding: 15px 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      display: flex; justify-content: space-between; align-items: center;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .logo { font-weight: 700; color: #667eea; display: flex; align-items: center; gap: 8px; }
+    .user-info { display: flex; align-items: center; gap: 15px; }
+    .user-email { color: #64748b; font-size: 0.9rem; }
+    .btn-logout {
+      padding: 8px 16px; background: #ef4444; color: white;
+      border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem;
+    }
+    .btn-logout:hover { background: #dc2626; }
+    
+    /* Main Content */
+    .main { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
+    .card {
+      background: white; padding: 25px; border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 20px;
+    }
+    .card h1 { font-size: 1.5rem; margin-bottom: 8px; }
+    .card p { color: #64748b; }
+    
+    /* Menu Grid */
+    .menu-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px; margin-top: 20px;
+    }
+    .menu-item {
+      padding: 20px; background: #f1f5f9; border-radius: 10px;
+      text-align: center; cursor: pointer; transition: 0.2s;
+    }
+    .menu-item:hover { background: #e2e8f0; transform: translateY(-2px); }
+    .menu-item.coming { opacity: 0.6; cursor: not-allowed; }
+    .menu-item h4 { margin-bottom: 5px; }
+    .menu-item span { font-size: 0.8rem; color: #64748b; }
+  </style>
 </head>
 <body>
 
-    <!-- Loading Screen -->
-    <div id="loadingScreen" class="loading-screen">
-        <div class="spinner"></div>
-        <p>Memuat dashboard...</p>
+  <!-- Loading Screen -->
+  <div id="loading">🔄 Memeriksa login...</div>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="logo">🏫 SDN 139 Lamanda</div>
+    <div class="user-info">
+      <span class="user-email" id="userEmail">-</span>
+      <button class="btn-logout" id="logoutBtn">Keluar</button>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="main">
+    <div class="card">
+      <h1>👋 Selamat Datang, <span id="welcomeName">User</span>!</h1>
+      <p>Kelola data akademik sekolah dengan mudah.</p>
     </div>
 
-    <!-- Navbar -->
-    <nav class="navbar">
-        <div class="nav-container">
-            <div class="logo">
-                <i class="fas fa-school"></i>
-                <span>SDN 139 Lamanda</span>
-            </div>
-            <div class="user-menu">
-                <div class="user-info">
-                    <h4 id="userName">User</h4>
-                    <p id="userEmail">user@email.com</p>
-                </div>
-                <div class="user-avatar" id="userAvatar">U</div>
-                <button class="btn-logout" id="logoutBtn">
-                    <i class="fas fa-sign-out-alt"></i> Keluar
-                </button>
-            </div>
+    <div class="card">
+      <h3>📦 Menu</h3>
+      <div class="menu-grid">
+        <div class="menu-item coming">
+          <h4>📚 Data Siswa</h4>
+          <span>Segera</span>
         </div>
-    </nav>
-
-    <!-- Main Content -->
-    <main class="dashboard-main">
-        
-        <!-- Alert Box -->
-        <div id="alertBox" class="alert"></div>
-
-        <!-- Welcome Card -->
-        <div class="welcome-card">
-            <div class="welcome-text">
-                <h1>Selamat Datang, <span id="welcomeName">User</span>! 👋</h1>
-                <p>Kelola data akademik sekolah dengan mudah dan terintegrasi.</p>
-            </div>
-            <div class="welcome-date">
-                <div id="currentDate">-</div>
-                <div id="currentTime" style="font-size: 1.2rem; font-weight: 600; margin-top: 5px;">-</div>
-            </div>
+        <div class="menu-item coming">
+          <h4>👨‍🏫 Data Guru</h4>
+          <span>Segera</span>
         </div>
-
-        <!-- Settings: Tahun & Semester -->
-        <div class="settings-card">
-            <h3><i class="fas fa-cog"></i> Pengaturan Periode</h3>
-            <div class="settings-grid">
-                <div class="setting-group">
-                    <label for="tahunPelajaran">Tahun Pelajaran</label>
-                    <select id="tahunPelajaran"></select>
-                </div>
-                <div class="setting-group">
-                    <label>Semester</label>
-                    <div class="semester-toggle">
-                        <button type="button" id="btnGanjil" class="active">Ganjil</button>
-                        <button type="button" id="btnGenap">Genap</button>
-                    </div>
-                </div>
-                <div class="setting-group">
-                    <label>&nbsp;</label>
-                    <button class="btn-save" id="btnSimpanPeriode">
-                        <i class="fas fa-save"></i> Simpan Periode
-                    </button>
-                </div>
-            </div>
+        <div class="menu-item coming">
+          <h4>📊 Nilai</h4>
+          <span>Segera</span>
         </div>
-
-        <!-- Menu Utama -->
-        <div class="menu-section">
-            <h3><i class="fas fa-th-large"></i> Menu Utama</h3>
-            <div class="menu-grid">
-                <div class="menu-card coming-soon">
-                    <div class="menu-icon blue"><i class="fas fa-user-graduate"></i></div>
-                    <div class="menu-content">
-                        <h4>Data Siswa</h4>
-                        <p>Kelola data siswa dan kelas.</p>
-                        <span class="badge coming">Segera</span>
-                    </div>
-                </div>
-                <div class="menu-card coming-soon">
-                    <div class="menu-icon green"><i class="fas fa-chalkboard-teacher"></i></div>
-                    <div class="menu-content">
-                        <h4>Data Guru</h4>
-                        <p>Informasi guru dan jadwal.</p>
-                        <span class="badge coming">Segera</span>
-                    </div>
-                </div>
-                <div class="menu-card coming-soon">
-                    <div class="menu-icon yellow"><i class="fas fa-clipboard-list"></i></div>
-                    <div class="menu-content">
-                        <h4>Nilai & Raport</h4>
-                        <p>Input nilai dan cetak raport.</p>
-                        <span class="badge coming">Segera</span>
-                    </div>
-                </div>
-                <div class="menu-card coming-soon">
-                    <div class="menu-icon purple"><i class="fas fa-calendar-alt"></i></div>
-                    <div class="menu-content">
-                        <h4>Jadwal Pelajaran</h4>
-                        <p>Kelola jadwal per kelas.</p>
-                        <span class="badge coming">Segera</span>
-                    </div>
-                </div>
-                <div class="menu-card coming-soon">
-                    <div class="menu-icon blue"><i class="fas fa-user-check"></i></div>
-                    <div class="menu-content">
-                        <h4>Presensi</h4>
-                        <p>Rekap kehadiran siswa.</p>
-                        <span class="badge coming">Segera</span>
-                    </div>
-                </div>
-                <div class="menu-card coming-soon">
-                    <div class="menu-icon gray"><i class="fas fa-cogs"></i></div>
-                    <div class="menu-content">
-                        <h4>Pengaturan</h4>
-                        <p>Konfigurasi sistem.</p>
-                        <span class="badge coming">Segera</span>
-                    </div>
-                </div>
-            </div>
+        <div class="menu-item coming">
+          <h4>📅 Jadwal</h4>
+          <span>Segera</span>
         </div>
-    </main>
+      </div>
+    </div>
+  </main>
 
-    <!-- Footer -->
-    <footer class="dashboard-footer">
-        <p>&copy; <span id="footerYear">2024</span> SDN 139 Lamanda. All rights reserved.</p>
-    </footer>
+  <!-- Script -->
+  <script type="module">
+    // 🔗 Import dari config-firebase.js (path harus sama dengan login.html)
+    import { auth } from './config-firebase.js';
+    import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-    <!-- JavaScript -->
-    <script type="module">
-        // Import Firebase
-        import { auth, db } from './js/config-firebase.js';
-        import { onAuthStateChanged, signOut } from "firebase/auth";
-        import { doc, getDoc, setDoc } from "firebase/firestore";
+    const loading = document.getElementById('loading');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const userEmail = document.getElementById('userEmail');
+    const welcomeName = document.getElementById('welcomeName');
 
-        // DOM Elements
-        const loadingScreen = document.getElementById('loadingScreen');
-        const alertBox = document.getElementById('alertBox');
-        const logoutBtn = document.getElementById('logoutBtn');
-        const btnSimpanPeriode = document.getElementById('btnSimpanPeriode');
-        const btnGanjil = document.getElementById('btnGanjil');
-        const btnGenap = document.getElementById('btnGenap');
-        const selectTahun = document.getElementById('tahunPelajaran');
+    // 🔐 CEK AUTH STATE - INI KUNCI REDIRECT YANG BENAR
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        // ❌ User belum login → redirect ke login.html
+        console.log('❌ Tidak ada user, redirect ke login');
+        window.location.href = 'login.html';
+        return;
+      }
 
-        // State
-        let currentSemester = 'ganjil';
-        let currentTahun = '';
+      // ✅ User sudah login → tampilkan dashboard
+      console.log('✅ User login:', user.email);
+      
+      // Tampilkan data user
+      userEmail.textContent = user.email;
+      welcomeName.textContent = user.email.split('@')[0];
+      
+      // Sembunyikan loading screen
+      loading.style.display = 'none';
+    });
 
-        // === AUTH CHECK - INI YANG PENTING ===
-        onAuthStateChanged(auth, async (user) => {
-            console.log('🔍 Auth State:', user ? 'LOGIN' : 'LOGOUT');
-            
-            if (user) {
-                // ✅ USER SUDAH LOGIN - TAMPILKAN DASHBOARD
-                console.log('✅ User:', user.email);
-                await loadUserData(user);
-                setupDashboard();
-            } else {
-                // ❌ USER BELUM LOGIN - REDIRECT KE LOGIN
-                console.log('❌ Tidak ada user, redirect ke login.html');
-                window.location.href = 'dashboard.html';
-            }
-        });
-
-        // Load user data
-        async function loadUserData(user) {
-            try {
-                document.getElementById('userName').textContent = user.displayName || 'User';
-                document.getElementById('userEmail').textContent = user.email;
-                document.getElementById('welcomeName').textContent = user.displayName || user.email.split('@')[0];
-                
-                const firstLetter = (user.displayName || user.email).charAt(0).toUpperCase();
-                document.getElementById('userAvatar').textContent = firstLetter;
-
-                // Load preferences from Firestore
-                const userDoc = await getDoc(doc(db, "users", user.uid));
-                if (userDoc.exists()) {
-                    const prefs = userDoc.data().preferences || {};
-                    if (prefs.tahunPelajaran) currentTahun = prefs.tahunPelajaran;
-                    if (prefs.semester) currentSemester = prefs.semester;
-                }
-            } catch (error) {
-                console.error('Error loading user data:', error);
-            }
+    // 🚪 Fungsi Logout
+    logoutBtn.addEventListener('click', async () => {
+      if (confirm('Apakah Anda yakin ingin keluar?')) {
+        try {
+          await signOut(auth);
+          // Setelah logout, onAuthStateChanged akan otomatis redirect ke login
+        } catch (error) {
+          console.error('Logout error:', error);
+          alert('Gagal logout: ' + error.message);
         }
-
-        // Setup dashboard
-        function setupDashboard() {
-            loadingScreen.style.display = 'none'; // Sembunyikan loading
-            updateDateTime();
-            setInterval(updateDateTime, 1500);
-            document.getElementById('footerYear').textContent = new Date().getFullYear();
-            populateTahunPelajaran();
-            updateSemesterButton();
-            setupEventListeners();
-        }
-
-        // Update tanggal & waktu
-        function updateDateTime() {
-            const now = new Date();
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            document.getElementById('currentDate').textContent = now.toLocaleDateString('id-ID', options);
-            document.getElementById('currentTime').textContent = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        }
-
-        // Populate tahun pelajaran
-        function populateTahunPelajaran() {
-            const currentYear = new Date().getFullYear();
-            selectTahun.innerHTML = '';
-            for (let year = currentYear - 10; year <= currentYear + 5; year++) {
-                const option = document.createElement('option');
-                option.value = `${year}/${year + 1}`;
-                option.textContent = `${year}/${year + 1}`;
-                selectTahun.appendChild(option);
-            }
-            if (currentTahun) {
-                selectTahun.value = currentTahun;
-            } else {
-                const defaultYear = new Date().getMonth() >= 6 ? currentYear : currentYear - 1;
-                selectTahun.value = `${defaultYear}/${defaultYear + 1}`;
-            }
-        }
-
-        // Update semester button
-        function updateSemesterButton() {
-            if (currentSemester === 'ganjil') {
-                btnGanjil.classList.add('active');
-                btnGenap.classList.remove('active');
-            } else {
-                btnGanjil.classList.remove('active');
-                btnGenap.classList.add('active');
-            }
-        }
-
-        // Setup event listeners
-        function setupEventListeners() {
-            btnGanjil.addEventListener('click', () => {
-                currentSemester = 'ganjil';
-                updateSemesterButton();
-            });
-
-            btnGenap.addEventListener('click', () => {
-                currentSemester = 'genap';
-                updateSemesterButton();
-            });
-
-            btnSimpanPeriode.addEventListener('click', savePeriodPreferences);
-            logoutBtn.addEventListener('click', handleLogout);
-        }
-
-        // Save preferences
-        async function savePeriodPreferences() {
-            const user = auth.currentUser;
-            if (!user) return;
-
-            currentTahun = selectTahun.value;
-            btnSimpanPeriode.disabled = true;
-            btnSimpanPeriode.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
-
-            try {
-                await setDoc(doc(db, "users", user.uid), {
-                    preferences: {
-                        tahunPelajaran: currentTahun,
-                        semester: currentSemester,
-                        updatedAt: new Date().toISOString()
-                    }
-                }, { merge: true });
-                showAlert(`Periode disimpan: ${currentTahun} - ${currentSemester === 'ganjil' ? 'Ganjil' : 'Genap'}`, 'success');
-            } catch (error) {
-                console.error('Error saving preferences:', error);
-                showAlert('Gagal menyimpan periode', 'error');
-            } finally {
-                btnSimpanPeriode.disabled = false;
-                btnSimpanPeriode.innerHTML = '<i class="fas fa-save"></i> Simpan Periode';
-            }
-        }
-
-        // Handle logout
-        async function handleLogout() {
-            if (confirm('Apakah Anda yakin ingin keluar?')) {
-                try {
-                    await signOut(auth);
-                    showAlert('Anda telah keluar. Mengalihkan...', 'success');
-                    setTimeout(() => { window.location.href = 'login.html'; }, 1500);
-                } catch (error) {
-                    showAlert('Gagal logout: ' + error.message, 'error');
-                }
-            }
-        }
-
-        // Show alert
-        function showAlert(message, type) {
-            alertBox.textContent = message;
-            alertBox.className = `alert alert-${type}`;
-            alertBox.style.display = 'block';
-            setTimeout(() => { alertBox.style.display = 'none'; }, 4000);
-        }
-    </script>
+      }
+    });
+  </script>
 </body>
 </html>
