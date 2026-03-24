@@ -1,139 +1,501 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login - SDN 139 Lamanda</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      display: flex; align-items: center; justify-content: center;
-      min-height: 100vh; padding: 20px;
-    }
-    .card {
-      background: white; padding: 30px; border-radius: 16px;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.2); width: 100%; max-width: 400px;
-    }
-    .card h2 { text-align: center; margin-bottom: 20px; color: #1e293b; }
-    .form-group { margin-bottom: 16px; }
-    .form-group label { display: block; margin-bottom: 6px; font-weight: 500; color: #334155; }
-    .form-group input {
-      width: 100%; padding: 12px; border: 1px solid #cbd5e1;
-      border-radius: 8px; font-size: 1rem;
-    }
-    .form-group input:focus {
-      outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102,126,234,0.2);
-    }
-    .btn {
-      width: 100%; padding: 12px; background: #667eea; color: white;
-      border: none; border-radius: 8px; font-size: 1rem; font-weight: 600;
-      cursor: pointer; margin-top: 8px;
-    }
-    .btn:hover { background: #556cd6; }
-    .btn:disabled { background: #a5b4fc; cursor: not-allowed; }
-    .alert {
-      padding: 10px 14px; border-radius: 8px; margin-bottom: 16px;
-      font-size: 0.9rem; display: none;
-    }
-    .alert.error { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
-    .alert.success { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
-    .footer { text-align: center; margin-top: 20px; color: #64748b; font-size: 0.9rem; }
-    .footer a { color: #667eea; text-decoration: none; font-weight: 500; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Login - Sistem Administrasi Kelas SDN 139 Lamanda">
+    <title>Login - SDN 139 LAMANDA</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary-color: #64748b;
+            --bg-light: #f8fafc;
+            --text-dark: #1e293b;
+            --white: #ffffff;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        
+        body {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: var(--white);
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 420px;
+            padding: 2.5rem;
+            animation: slideUp 0.4s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .login-logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            color: white;
+            font-size: 2rem;
+        }
+
+        .login-header h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .login-header p {
+            color: var(--secondary-color);
+            font-size: 0.9rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-dark);
+            font-size: 0.9rem;
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .input-group i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--secondary-color);
+            font-size: 1rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 14px 12px 42px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--secondary-color);
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 0;
+        }
+
+        .toggle-password:hover {
+            color: var(--primary-color);
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 12px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-login:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-login:disabled {
+            background: var(--secondary-color);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .alert-error {
+            background: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+
+        .alert-success {
+            background: #f0fdf4;
+            color: #16a34a;
+            border: 1px solid #bbf7d0;
+        }
+
+        .alert.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .login-footer {
+            text-align: center;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .login-footer p {
+            color: var(--secondary-color);
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .login-footer a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .login-footer a:hover {
+            text-decoration: underline;
+        }
+
+        .back-home {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .back-home:hover {
+            color: rgba(255,255,255,0.8);
+        }
+
+        .spinner {
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 2rem 1.5rem;
+            }
+            
+            .back-home {
+                position: static;
+                margin-bottom: 1rem;
+                justify-content: center;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="card">
-    <h2>🔐 Masuk</h2>
-    
-    <div id="alert" class="alert"></div>
-    
-    <form id="loginForm">
-      <div class="form-group">
-        <label for="email">Email</label>
-        <input type="email" id="email" placeholder="contoh@sdn139.sch.id" required>
-      </div>
-      
-      <div class="form-group">
-        <label for="password">Password</label>
-        <input type="password" id="password" placeholder="••••••••" required>
-      </div>
-      
-      <button type="submit" class="btn" id="btnSubmit">Masuk</button>
-    </form>
-    
-    <div class="footer">
-      Belum punya akun? <a href="register.html">Daftar disini</a>
+    <!-- Back to Home -->
+    <a href="index.html" class="back-home">
+        <i class="fas fa-arrow-left"></i>
+        <span>Kembali ke Beranda</span>
+    </a>
+
+    <!-- Login Container -->
+    <div class="login-container">
+        <!-- Header -->
+        <div class="login-header">
+            <div class="login-logo">
+                <i class="fas fa-mortar-board"></i>
+            </div>
+            <h2>Selamat Datang</h2>
+            <p>Silakan login untuk mengakses sistem administrasi</p>
+        </div>
+
+        <!-- Alert Box -->
+        <div id="loginAlert" class="alert alert-error"></div>
+        <div id="successAlert" class="alert alert-success"></div>
+
+        <!-- Login Form -->
+        <form id="loginForm" autocomplete="off">
+            <!-- Email Input -->
+            <div class="form-group">
+                <label for="email">
+                    <i class="fas fa-envelope me-1"></i> Email
+                </label>
+                <div class="input-group">
+                    <i class="fas fa-envelope"></i>
+                    <input 
+                        type="email" 
+                        class="form-control" 
+                        id="email" 
+                        name="email"
+                        placeholder="guru@sdn139lamanda.sch.id"
+                        required
+                        autocomplete="email"
+                    >
+                </div>
+            </div>
+
+            <!-- Password Input -->
+            <div class="form-group">
+                <label for="password">
+                    <i class="fas fa-lock me-1"></i> Password
+                </label>
+                <div class="input-group">
+                    <i class="fas fa-lock"></i>
+                    <input 
+                        type="password" 
+                        class="form-control" 
+                        id="password" 
+                        name="password"
+                        placeholder="••••••••"
+                        required
+                        minlength="6"
+                        autocomplete="current-password"
+                    >
+                    <button 
+                        type="button" 
+                        class="toggle-password" 
+                        id="togglePassword"
+                        title="Tampilkan/Sembunyikan password"
+                    >
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn-login" id="loginBtn">
+                <span id="btnText">Masuk</span>
+                <span id="btnSpinner" class="spinner" style="display: none;"></span>
+            </button>
+        </form>
+
+        <!-- Footer -->
+        <div class="login-footer">
+            <p>
+                <i class="fas fa-info-circle me-1"></i>
+                Akun dibuat oleh administrator sekolah
+            </p>
+            <p>
+                Lupa password? <a href="#" id="forgotPassword">Hubungi Admin</a>
+            </p>
+        </div>
     </div>
-  </div>
 
-  <script type="module">
-    // 🔗 Import dari config-firebase.js yang sudah kita upload
-    import { auth } from './config-firebase.js';
-    import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-    const form = document.getElementById('loginForm');
-    const alertBox = document.getElementById('alert');
-    const btnSubmit = document.getElementById('btnSubmit');
+    <!-- Firebase + App Logic -->
+    <script type="module">
+        // === IMPORT FIREBASE & AUTH MODULES ===
+        import { auth, onAuthStateChanged } from './js/firebase-config.js';
+        import { handleLogin } from './js/auth.js';
 
-    function showAlert(message, type) {
-      alertBox.textContent = message;
-      alertBox.className = `alert ${type}`;
-      alertBox.style.display = 'block';
-      setTimeout(() => { alertBox.style.display = 'none'; }, 4000);
-    }
+        // === DOM ELEMENTS ===
+        const loginForm = document.getElementById('loginForm');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const loginBtn = document.getElementById('loginBtn');
+        const btnText = document.getElementById('btnText');
+        const btnSpinner = document.getElementById('btnSpinner');
+        const loginAlert = document.getElementById('loginAlert');
+        const successAlert = document.getElementById('successAlert');
+        const togglePassword = document.getElementById('togglePassword');
+        const forgotPassword = document.getElementById('forgotPassword');
 
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value;
-      
-      // UI Loading
-      btnSubmit.disabled = true;
-      btnSubmit.textContent = 'Memproses...';
-      alertBox.style.display = 'none';
+        // === 1. CHECK IF USER ALREADY LOGGED IN ===
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                // User already logged in - redirect to dashboard
+                const { getCurrentUserData } = await import('./js/firebase-config.js');
+                const userData = await getCurrentUserData(user.uid);
+                
+                if (userData?.role) {
+                    showSuccess('Sesi aktif ditemukan. Mengalihkan...');
+                    setTimeout(() => {
+                        if (userData.role === 'guru') {
+                            window.location.href = 'dashboard-guru.html';
+                        } else if (userData.role === 'siswa') {
+                            window.location.href = 'dashboard-siswa.html';
+                        }
+                    }, 1000);
+                }
+            }
+        });
 
-      try {
-        // 🔐 Proses login dengan Firebase
-        await signInWithEmailAndPassword(auth, email, password);
-        
-        showAlert('✅ Login berhasil! Mengalihkan...', 'success');
-        
-        // 🎯 Redirect ke dashboard setelah 800ms
-        setTimeout(() => {
-          window.location.href = 'dashboard.html';
-        }, 800);
-        
-      } catch (error) {
-        console.error('Login error:', error);
-        
-        let message = 'Login gagal. Silakan coba lagi.';
-        
-        // Pesan error yang lebih ramah
-        switch (error.code) {
-          case 'auth/user-not-found':
-            message = 'Email tidak terdaftar.';
-            break;
-          case 'auth/wrong-password':
-            message = 'Password salah.';
-            break;
-          case 'auth/invalid-email':
-            message = 'Format email tidak valid.';
-            break;
-          case 'auth/too-many-requests':
-            message = 'Terlalu banyak percobaan. Coba lagi nanti.';
-            break;
+        // === 2. TOGGLE PASSWORD VISIBILITY ===
+        togglePassword.addEventListener('click', function() {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            
+            const icon = this.querySelector('i');
+            icon.classList.toggle('fa-eye');
+            icon.classList.toggle('fa-eye-slash');
+        });
+
+        // === 3. LOGIN FORM HANDLER ===
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+            
+            // Reset alerts
+            hideAlerts();
+            
+            // Set loading state
+            setLoading(true);
+            
+            try {
+                // Call login handler
+                const result = await handleLogin(email, password);
+                
+                if (result.success) {
+                    // Login successful
+                    showSuccess('Login berhasil! Mengalihkan ke dashboard...');
+                    
+                    // Redirect based on role
+                    setTimeout(() => {
+                        if (result.role === 'guru') {
+                            window.location.href = 'dashboard-guru.html';
+                        } else if (result.role === 'siswa') {
+                            window.location.href = 'dashboard-siswa.html';
+                        } else {
+                            window.location.href = 'index.html';
+                        }
+                    }, 1000);
+                    
+                } else {
+                    // Login failed
+                    showError(result.message || 'Login gagal. Silakan coba lagi.');
+                    setLoading(false);
+                }
+                
+            } catch (error) {
+                console.error('Login error:', error);
+                showError('Terjadi kesalahan sistem. Silakan coba lagi.');
+                setLoading(false);
+            }
+        });
+
+        // === 4. HELPER FUNCTIONS ===
+        function setLoading(isLoading) {
+            loginBtn.disabled = isLoading;
+            btnText.textContent = isLoading ? 'Memproses...' : 'Masuk';
+            btnSpinner.style.display = isLoading ? 'inline-block' : 'none';
         }
-        
-        showAlert(message, 'error');
-        
-        // Kembalikan tombol
-        btnSubmit.disabled = false;
-        btnSubmit.textContent = 'Masuk';
-      }
-    });
-  </script>
+
+        function showError(message) {
+            loginAlert.textContent = message;
+            loginAlert.classList.add('show');
+            successAlert.classList.remove('show');
+        }
+
+        function showSuccess(message) {
+            successAlert.textContent = message;
+            successAlert.classList.add('show');
+            loginAlert.classList.remove('show');
+        }
+
+        function hideAlerts() {
+            loginAlert.classList.remove('show');
+            successAlert.classList.remove('show');
+        }
+
+        // === 5. FORGOT PASSWORD HANDLER ===
+        forgotPassword.addEventListener('click', (e) => {
+            e.preventDefault();
+            alert('Untuk reset password, silakan hubungi administrator sekolah.\n\n📧 Email: admin@sdn139lamanda.sch.id\n📱 WhatsApp: +62 812-3456-7890');
+        });
+
+        // === 6. ALLOW ENTER KEY TO SUBMIT ===
+        passwordInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                loginForm.requestSubmit();
+            }
+        });
+
+        // === 7. CLEAR PASSWORD ON ERROR ===
+        emailInput.addEventListener('input', () => {
+            hideAlerts();
+        });
+
+        console.log('✅ Login page loaded with Firebase integration');
+    </script>
 </body>
 </html>
