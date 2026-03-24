@@ -483,7 +483,7 @@ async function initModule() {
     }
 
     // ============================================
-    // ABSENSI - LOAD SISWA UNTUK ABSEN
+    // ABSENSI - LOAD SISWA UNTUK ABSEN (DIPERBAIKI)
     // ============================================
     window.loadSiswaUntukAbsen = async () => {
         const kelas = document.getElementById('absenKelas').value;
@@ -499,37 +499,57 @@ async function initModule() {
         tbodyAbsensi.innerHTML = '';
 
         try {
-            const q = query(collection(db, collectionName), where("kelas", "==", kelas), orderBy("nama"));
+            console.log("🔍 Loading siswa untuk kelas:", kelas);
+            
+            // Query TANPA orderBy untuk hindari index requirement
+            const q = query(collection(db, collectionName), where("kelas", "==", kelas));
+            console.log("📋 Query:", q);
+            
             const querySnapshot = await getDocs(q);
+            console.log("📊 Jumlah dokumen:", querySnapshot.size);
 
             if (querySnapshot.empty) {
                 loadingAbsensi.classList.add('hidden');
                 emptyAbsensi.innerHTML = `
                     <i class="fas fa-users-slash text-4xl text-gray-300"></i>
                     <p class="text-gray-500 mt-2">Tidak ada siswa di Kelas ${kelas}</p>
+                    <p class="text-gray-400 text-sm mt-2">Silakan input data siswa terlebih dahulu di tab Data Siswa</p>
+                    <button onclick="window.showTab('data-siswa')" class="mt-4 bg-blue-600 text-white px-4 py-2 rounded text-sm">
+                        <i class="fas fa-plus mr-2"></i>Tambah Siswa
+                    </button>
                 `;
                 emptyAbsensi.classList.remove('hidden');
                 return;
             }
 
-            let no = 1;
+            // Sort client-side berdasarkan nama
+            const siswaList = [];
             querySnapshot.forEach((docSnap) => {
                 const data = docSnap.data();
+                console.log("✅ Siswa ditemukan:", data.nama, "Kelas:", data.kelas);
+                siswaList.push({ id: docSnap.id, ...data });
+            });
+            
+            // Urutkan berdasarkan nama
+            siswaList.sort((a, b) => a.nama.localeCompare(b.nama));
+
+            let no = 1;
+            siswaList.forEach((siswa) => {
                 tbodyAbsensi.innerHTML += `
                     <tr class="border-b hover:bg-gray-50">
                         <td class="px-4 py-3">${no++}</td>
-                        <td class="px-4 py-3 font-medium">${data.nama}</td>
+                        <td class="px-4 py-3 font-medium">${siswa.nama}</td>
                         <td class="px-4 py-3 text-center">
-                            <input type="radio" name="absen_${docSnap.id}" value="H" checked class="h-4 w-4 text-green-600">
+                            <input type="radio" name="absen_${siswa.id}" value="H" checked class="h-4 w-4 text-green-600">
                         </td>
                         <td class="px-4 py-3 text-center">
-                            <input type="radio" name="absen_${docSnap.id}" value="S" class="h-4 w-4 text-yellow-600">
+                            <input type="radio" name="absen_${siswa.id}" value="S" class="h-4 w-4 text-yellow-600">
                         </td>
                         <td class="px-4 py-3 text-center">
-                            <input type="radio" name="absen_${docSnap.id}" value="I" class="h-4 w-4 text-blue-600">
+                            <input type="radio" name="absen_${siswa.id}" value="I" class="h-4 w-4 text-blue-600">
                         </td>
                         <td class="px-4 py-3 text-center">
-                            <input type="radio" name="absen_${docSnap.id}" value="A" class="h-4 w-4 text-red-600">
+                            <input type="radio" name="absen_${siswa.id}" value="A" class="h-4 w-4 text-red-600">
                         </td>
                         <td class="px-4 py-3">
                             <input type="text" class="w-full px-2 py-1 border rounded text-sm" placeholder="Keterangan...">
@@ -540,11 +560,26 @@ async function initModule() {
 
             loadingAbsensi.classList.add('hidden');
             tableAbsensi.classList.remove('hidden');
+            console.log("✅ Berhasil load", siswaList.length, "siswa");
 
         } catch (error) {
-            console.error("Error loading siswa untuk absen:", error);
+            console.error("❌ Error loading siswa untuk absen:", error);
+            console.error("Error code:", error.code);
+            console.error("Error message:", error.message);
+            
             loadingAbsensi.classList.add('hidden');
-            alert("❌ Gagal memuat data siswa: " + error.message);
+            
+            let errorMessage = error.message;
+            
+            if (error.code === 'failed-precondition') {
+                errorMessage = 'Firestore memerlukan index untuk query ini.';
+            }
+            
+            if (error.code === 'permission-denied') {
+                errorMessage = 'Akses ditolak. Cek Firestore Security Rules.';
+            }
+            
+            alert("❌ Gagal memuat data siswa:\n\n" + errorMessage);
         }
     }
 
@@ -601,7 +636,6 @@ async function initModule() {
 
             alert(`✅ Absensi berhasil disimpan untuk ${saved} siswa!`);
             
-            // Update ttd guru
             document.getElementById('ttdGuru').textContent = guru;
             document.getElementById('namaGuruTtd').textContent = guru;
             document.getElementById('tanggalCetak').textContent = new Date().toLocaleDateString('id-ID', {
@@ -629,7 +663,6 @@ async function initModule() {
         const tanggal = document.getElementById('absenTanggal').value;
         const guru = document.getElementById('absenGuru').value;
 
-        // Build Excel content
         let excelContent = `
             <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
             <head><meta charset="UTF-8"></head><body>
@@ -670,7 +703,6 @@ async function initModule() {
             </table></body></html>
         `;
 
-        // Create download
         const blob = new Blob(['\ufeff', excelContent], { type: 'application/vnd.ms-excel' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -702,7 +734,6 @@ async function initModule() {
             return;
         }
         
-        // Update ttd before print
         const guru = document.getElementById('absenGuru').value;
         document.getElementById('ttdGuru').textContent = guru;
         document.getElementById('namaGuruTtd').textContent = guru;
