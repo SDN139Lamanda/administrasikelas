@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Guru - Sistem Manajemen Kelas</title>
+    <!-- Menggunakan Tailwind CSS untuk styling cepat -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Menggunakan FontAwesome untuk Ikon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* Transisi halus untuk konten */
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .active-menu {
+            background-color: #3b82f6; /* Warna biru aktif */
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans antialiased">
+
+    <div class="flex h-screen overflow-hidden">
+
+        <!-- SIDEBAR (Menu Utama) -->
+        <aside class="w-64 bg-slate-800 text-white flex flex-col transition-all duration-300 hidden md:flex">
+            <!-- Logo / Header Sidebar -->
+            <div class="h-16 flex items-center justify-center border-b border-slate-700">
+                <h1 class="text-xl font-bold"><i class="fas fa-graduation-cap mr-2"></i>EduDashboard</h1>
+            </div>
+
+            <!-- Menu Navigasi -->
+            <nav class="flex-1 px-2 py-4 space-y-2">
+                
+                <!-- Menu 1: Administrasi Kelas -->
+                <button onclick="showSection('kelas')" id="btn-kelas" class="w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg hover:bg-slate-700 transition-colors active-menu">
+                    <i class="fas fa-users w-6"></i>
+                    <span>Adm. Kelas</span>
+                </button>
+
+                <!-- Menu 2: Administrasi Pembelajaran -->
+                <button onclick="showSection('pembelajaran')" id="btn-pembelajaran" class="w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg hover:bg-slate-700 transition-colors">
+                    <i class="fas fa-book-open w-6"></i>
+                    <span>Adm. Pembelajaran</span>
+                </button>
+
+                <!-- Menu 3: Refleksi -->
+                <button onclick="showSection('refleksi')" id="btn-refleksi" class="w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg hover:bg-slate-700 transition-colors">
+                    <i class="fas fa-mirror w-6"></i>
+                    <span>Refleksi</span>
+                </button>
+
+                <!-- Menu 4: Penilaian -->
+                <button onclick="showSection('penilaian')" id="btn-penilaian" class="w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg hover:bg-slate-700 transition-colors">
+                    <i class="fas fa-chart-line w-6"></i>
+                    <span>Penilaian</span>
+                </button>
+
+            </nav>
+
+            <!-- Footer Sidebar -->
+            <div class="p-4 border-t border-slate-700">
+                <button class="flex items-center w-full px-4 py-2 text-sm font-medium text-red-400 hover:text-red-300">
+                    <i class="fas fa-sign-out-alt w-6"></i>
+                    <span>Keluar</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- KONTEN UTAMA -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            
+            <!-- Top Header -->
+            <header class="h-16 bg-white shadow-sm flex items-center justify-between px-6">
+                <div class="flex items-center">
+                    <button class="md:hidden text-gray-500 hover:text-gray-700 focus:outline-none mr-4">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                    <h2 class="text-xl font-semibold text-gray-800" id="page-title">Dashboard Overview</h2>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="text-right hidden sm:block">
+                        <p class="text-sm font-medium text-gray-900">Budi Santoso</p>
+                        <p class="text-xs text-gray-500">Guru Matematika</p>
+                    </div>
+                    <img class="h-10 w-10 rounded-full object-cover border-2 border-blue-500" src="https://ui-avatars.com/api/?name=Budi+Santoso&background=0D8ABC&color=fff" alt="Profile">
+                </div>
+            </header>
+
+            <!-- Area Konten Dinamis -->
+            <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
+                
+                <!-- SECTION 1: ADMINISTRASI KELAS -->
+                <div id="section-kelas" class="content-section fade-in">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                        <!-- Card Statistik -->
+                        <div class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-blue-500">
+                            <div class="flex items-center">
+                                <div class="p-3 rounded-full bg-blue-100 text-blue-500 mr-4">
+                                    <i class="fas fa-users text-xl"></i>
+                                </div>
+                                <div>
+                                    <p class="text-gray-500 text-sm">Total Siswa</p>
+                                    <p class="text-2xl font-bold">32</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-green-500">
+                            <div class="flex items-center">
+                                <div class="p-3 rounded-full bg-green-100 text-green-500 mr-4">
+                                    <i class="fas fa-check-circle text-xl"></i>
+                                </div>
+                                <div>
+                                    <p class="text-gray-500 text-sm">Hadir Hari Ini</p>
+                                    <p class="text-2xl font-bold">30</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-yellow-500">
+                            <div class="flex items-center">
+                                <div class="p-3 rounded-full bg-yellow-100 text-yellow-500 mr-4">
+                                    <i class="fas fa-calendar-alt text-xl"></i>
+                                </div>
+                                <div>
+                                    <p class="text-gray-500 text-sm">Jadwal Berikutnya</p>
+                                    <p class="text-lg font-bold">10:00 - Mat</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tabel Data Siswa -->
+                    <div class="bg-white rounded-lg shadow-sm p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-bold text-gray-700">Data Siswa Kelas X-A</h3>
+                            <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm">
+                                <i class="fas fa-plus mr-1"></i> Tambah Siswa
+                            </button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full text-left text-sm whitespace-nowrap">
+                                <thead class="uppercase tracking-wider border-b-2 border-gray-200 bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3">NISN</th>
+                                        <th class="px-6 py-3">Nama Siswa</th>
+                                        <th class="px-6 py-3">L/P</th>
+                                        <th class="px-6 py-3">Status</th>
+                                        <th class="px-6 py-3">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="border-b hover:bg-gray-50">
+                                        <td class="px-6 py-4">12345</td>
+                                        <td class="px-6 py-4 font-medium">Ahmad Dani</td>
+                                        <td class="px-6 py-4">L</td>
+                                        <td class="px-6 py-4"><span class="bg-green-100 text-green-800 py-1 px-3 rounded-full text-xs">Aktif</span></td>
+                                        <td class="px-6 py-4 text-blue-600 cursor-pointer hover:underline">Edit</td>
+                                    </tr>
+                                    <tr class="border-b hover:bg-gray-50">
+                                        <td class="px-6 py-4">12346</td>
+                                        <td class="px-6 py-4 font-medium">Siti Aminah</td>
+                                        <td class="px-6 py-4">P</td>
+                                        <td class="px-6 py-4"><span class="bg-green-100 text-green-800 py-1 px-3 rounded-full text-xs">Aktif</span></td>
+                                        <td class="px-6 py-4 text-blue-600 cursor-pointer hover:underline">Edit</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 2: ADMINISTRASI PEMBELAJARAN -->
+                <div id="section-pembelajaran" class="content-section hidden fade-in">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-white p-6 rounded-lg shadow-sm">
+                            <h3 class="text-lg font-bold text-gray-700 mb-4">Modul Ajar / RPP</h3>
+                            <ul class="space-y-3">
+                                <li class="flex justify-between items-center p-3 bg-gray-50 rounded border">
+                                    <span class="text-sm"><i class="fas fa-file-pdf text-red-500 mr-2"></i> RPP Pertemuan 1.pdf</span>
+                                    <button class="text-gray-500 hover:text-blue-600"><i class="fas fa-download"></i></button>
+                                </li>
+                                <li class="flex justify-between items-center p-3 bg-gray-50 rounded border">
+                                    <span class="text-sm"><i class="fas fa-file-word text-blue-500 mr-2"></i> Modul Ajar Bab 2.docx</span>
+                                    <button class="text-gray-500 hover:text-blue-600"><i class="fas fa-download"></i></button>
+                                </li>
+                            </ul>
+                            <button class="mt-4 w-full border-2 border-dashed border-gray-300 text-gray-500 py-2 rounded hover:border-blue-500 hover:text-blue-500 transition">
+                                + Upload Dokumen Baru
+                            </button>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow-sm">
+                            <h3 class="text-lg font-bold text-gray-700 mb-4">Materi Presentasi</h3>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="border rounded p-4 text-center hover:shadow-md cursor-pointer">
+                                    <i class="fas fa-chalkboard-teacher text-3xl text-purple-500 mb-2"></i>
+                                    <p class="text-sm font-semibold">Materi Aljabar</p>
+                                </div>
+                                <div class="border rounded p-4 text-center hover:shadow-md cursor-pointer">
+                                    <i class="fas fa-chalkboard-teacher text-3xl text-purple-500 mb-2"></i>
+                                    <p class="text-sm font-semibold">Materi Geometri</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 3: REFLEKSI -->
+                <div id="section-refleksi" class="content-section hidden fade-in">
+                    <div class="max-w-3xl mx-auto">
+                        <div class="bg-white rounded-lg shadow-sm p-8">
+                            <h3 class="text-2xl font-bold text-gray-800 mb-2">Jurnal Refleksi Guru</h3>
+                            <p class="text-gray-500 mb-6">Catat apa yang berjalan baik dan apa yang perlu diperbaiki hari ini.</p>
+                            
+                            <form>
+                                <div class="mb-4">
+                                    <label class="block text-gray-700 text-sm font-bold mb-2">Tanggal</label>
+                                    <input type="date" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500">
+                                </div>
+                                <div class="mb-4">
+                                    <label class="block text-gray-700 text-sm font-bold mb-2">Topik Pembelajaran</label>
+                                    <input type="text" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500" placeholder="Misal: Persamaan Linear">
+                                </div>
+                                <div class="mb-4">
+                                    <label class="block text-gray-700 text-sm font-bold mb-2">Catatan Refleksi</label>
+                                    <textarea class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500 h-32" placeholder="Tuliskan refleksi Anda di sini..."></textarea>
+                                </div>
+                                <button type="button" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">Simpan Refleksi</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 4: PENILAIAN -->
+                <div id="section-penilaian" class="content-section hidden fade-in">
+                    <div class="bg-white rounded-lg shadow-sm p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-lg font-bold text-gray-700">Input Nilai & Analisis</h3>
+                            <select class="border rounded px-3 py-2 text-sm">
+                                <option>Pilih Kelas</option>
+                                <option>X-A</option>
+                                <option>X-B</option>
+                            </select>
+                        </div>
+
+                        <!-- Grafik Sederhana (Placeholder) -->
+                        <div class="w-full h-48 bg-gray-50 rounded mb-6 flex items-center justify-center border border-dashed border-gray-300">
+                            <p class="text-gray-400"><i class="fas fa-chart-bar mr-2"></i> Grafik Distribusi Nilai (Area untuk Chart.js)</p>
+                        </div>
+
+                        <!-- Tabel Nilai -->
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full text-left text-sm">
+                                <thead class="bg-gray-100 uppercase text-xs font-bold text-gray-600">
+                                    <tr>
+                                        <th class="px-4 py-3">Nama</th>
+                                        <th class="px-4 py-3">Tugas 1</th>
+                                        <th class="px-4 py-3">Tugas 2</th>
+                                        <th class="px-4 py-3">UTS</th>
+                                        <th class="px-4 py-3">UAS</th>
+                                        <th class="px-4 py-3">Rata-rata</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200">
+                                    <tr>
+                                        <td class="px-4 py-3 font-medium">Ahmad Dani</td>
+                                        <td class="px-4 py-3"><input type="number" class="w-16 border rounded px-2 py-1" value="85"></td>
+                                        <td class="px-4 py-3"><input type="number" class="w-16 border rounded px-2 py-1" value="90"></td>
+                                        <td class="px-4 py-3"><input type="number" class="w-16 border rounded px-2 py-1" value="88"></td>
+                                        <td class="px-4 py-3"><input type="number" class="w-16 border rounded px-2 py-1" value="92"></td>
+                                        <td class="px-4 py-3 font-bold text-blue-600">88.75</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-4 py-3 font-medium">Siti Aminah</td>
+                                        <td class="px-4 py-3"><input type="number" class="w-16 border rounded px-2 py-1" value="75"></td>
+                                        <td class="px-4 py-3"><input type="number" class="w-16 border rounded px-2 py-1" value="80"></td>
+                                        <td class="px-4 py-3"><input type="number" class="w-16 border rounded px-2 py-1" value="78"></td>
+                                        <td class="px-4 py-3"><input type="number" class="w-16 border rounded px-2 py-1" value="85"></td>
+                                        <td class="px-4 py-3 font-bold text-blue-600">79.50</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <button class="mt-4 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 text-sm">
+                            <i class="fas fa-save mr-2"></i> Simpan Nilai
+                        </button>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT UNTUK INTERAKSI MENU -->
+    <script>
+        function showSection(sectionId) {
+            // 1. Sembunyikan semua section
+            const sections = document.querySelectorAll('.content-section');
+            sections.forEach(section => {
+                section.classList.add('hidden');
+            });
+
+            // 2. Tampilkan section yang dipilih
+            const activeSection = document.getElementById('section-' + sectionId);
+            if (activeSection) {
+                activeSection.classList.remove('hidden');
+            }
+
+            // 3. Update status tombol menu (Active State)
+            const buttons = document.querySelectorAll('aside button');
+            buttons.forEach(btn => {
+                btn.classList.remove('active-menu', 'bg-blue-600', 'text-white');
+                // Reset style default (hapus inline style jika ada, tapi kita pakai class tailwind)
+                btn.classList.add('hover:bg-slate-700'); 
+            });
+
+            // 4. Set tombol yang diklik menjadi aktif
+            const activeBtn = document.getElementById('btn-' + sectionId);
+            if (activeBtn) {
+                activeBtn.classList.add('active-menu');
+                activeBtn.classList.remove('hover:bg-slate-700');
+            }
+
+            // 5. Update Judul Halaman
+            const titles = {
+                'kelas': 'Administrasi Kelas',
+                'pembelajaran': 'Administrasi Pembelajaran',
+                'refleksi': 'Refleksi Pembelajaran',
+                'penilaian': 'Penilaian & Laporan'
+            };
+            document.getElementById('page-title').innerText = titles[sectionId];
+        }
+    </script>
+</body>
+</html>
