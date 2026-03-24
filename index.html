@@ -430,34 +430,77 @@
     });
 
     // === LOGIN FORM HANDLER ===
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value;
-      const loginBtn = document.getElementById('loginBtnSubmit');
-      const btnText = document.getElementById('btnText');
-      const spinner = document.getElementById('spinner');
-      
-      // Reset UI
-      errorAlert.classList.remove('show');
-      successAlert.classList.remove('show');
-      loginBtn.disabled = true;
-      btnText.textContent = 'Memproses...';
-      spinner.style.display = 'inline-block';
-      
-      try {
-        // 1. Login dengan Firebase Auth
-        await signInWithEmailAndPassword(auth, email, password);
-        
-        // 2. Ambil data user dari database
-        const userData = await getUserData(auth.currentUser.uid);
-        
-        if (!userData) {
-          throw new Error('Data pengguna tidak ditemukan');
-        }
-        
-        // 3. Simpan ke session
+   // === LOGIN FORM HANDLER (EMAIL PATTERN) ===
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  const loginBtn = document.getElementById('loginBtnSubmit');
+  const btnText = document.getElementById('btnText');
+  const spinner = document.getElementById('spinner');
+  
+  // Reset UI
+  errorAlert.classList.remove('show');
+  successAlert.classList.remove('show');
+  loginBtn.disabled = true;
+  btnText.textContent = 'Memproses...';
+  spinner.style.display = 'inline-block';
+  
+  try {
+    // 1. Login dengan Firebase Auth
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+    
+    // 2. Tentukan role berdasarkan email pattern
+    const role = determineRoleFromEmail(email);
+    
+    // 3. Simpan ke session
+    sessionStorage.setItem('currentUser', JSON.stringify({
+      uid: user.uid,
+      email: user.email,
+      name: user.email.split('@')[0], // Gunakan bagian sebelum @ sebagai nama
+      role: role
+    }));
+    
+    // 4. Tampilkan sukses & redirect
+    successAlert.textContent = 'Login berhasil! Mengalihkan...';
+    successAlert.classList.add('show');
+    
+    setTimeout(() => {
+      if (role === 'guru') {
+        window.location.href = 'dashboard.html';
+      } else {
+        window.location.href = 'dashboard-siswa.html';
+      }
+    }, 1000);
+    
+  } catch (error) {
+    console.error('Login error:', error);
+    errorAlert.textContent = getErrorMessage(error.code || error.message);
+    errorAlert.classList.add('show');
+    
+    // Reset button
+    loginBtn.disabled = false;
+    btnText.textContent = 'Masuk';
+    spinner.style.display = 'none';
+  }
+});
+
+// === HELPER: Tentukan Role dari Email ===
+function determineRoleFromEmail(email) {
+  const emailLower = email.toLowerCase();
+  
+  if (emailLower.includes('guru') || emailLower.includes('admin')) {
+    return 'guru';
+  } else if (emailLower.includes('siswa') || emailLower.includes('parent') || emailLower.includes('orangtua')) {
+    return 'siswa';
+  } else {
+    // Default: guru
+    return 'guru';
+  }
+}
+    // 3. Simpan ke session
         sessionStorage.setItem('currentUser', JSON.stringify(userData));
         
         // 4. Tampilkan sukses & redirect
