@@ -3,73 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Guru - Sistem Manajemen Kelas</title>
-    <!-- Menggunakan Tailwind CSS untuk styling cepat -->
+    <title>Dashboard Guru - SDN 139 LAMANDA</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Menggunakan FontAwesome untuk Ikon -->
+    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
-        /* Transisi halus untuk konten */
-        .fade-in {
-            animation: fadeIn 0.3s ease-in-out;
-        }
+        body { font-family: 'Inter', sans-serif; }
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
         .active-menu {
-            background-color: #3b82f6; /* Warna biru aktif */
+            background-color: #2563eb;
             color: white;
+        }
+        .active-menu:hover {
+            background-color: #1d4ed8;
         }
     </style>
 </head>
 <body class="bg-gray-100 font-sans antialiased">
 
+    <!-- 🔐 FIREBASE AUTH PROTECTION (Wajib Ada) -->
+    <script type="module">
+        import { auth } from './config-firebase.js';
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                // Jika tidak login, redirect ke login.html
+                window.location.href = 'login.html';
+            } else {
+                // Tampilkan info user di dashboard
+                document.getElementById('userEmail').textContent = user.email;
+                document.getElementById('userName').textContent = user.email.split('@')[0];
+                console.log("✅ User logged in:", user.email);
+            }
+        });
+    </script>
+
     <div class="flex h-screen overflow-hidden">
 
-        <!-- SIDEBAR (Menu Utama) -->
+        <!-- SIDEBAR -->
         <aside class="w-64 bg-slate-800 text-white flex flex-col transition-all duration-300 hidden md:flex">
-            <!-- Logo / Header Sidebar -->
+            <!-- Logo -->
             <div class="h-16 flex items-center justify-center border-b border-slate-700">
                 <h1 class="text-xl font-bold"><i class="fas fa-graduation-cap mr-2"></i>EduDashboard</h1>
             </div>
 
             <!-- Menu Navigasi -->
             <nav class="flex-1 px-2 py-4 space-y-2">
-                
-                <!-- Menu 1: Administrasi Kelas -->
                 <button onclick="showSection('kelas')" id="btn-kelas" class="w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg hover:bg-slate-700 transition-colors active-menu">
                     <i class="fas fa-users w-6"></i>
                     <span>Adm. Kelas</span>
                 </button>
-
-                <!-- Menu 2: Administrasi Pembelajaran -->
                 <button onclick="showSection('pembelajaran')" id="btn-pembelajaran" class="w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg hover:bg-slate-700 transition-colors">
                     <i class="fas fa-book-open w-6"></i>
                     <span>Adm. Pembelajaran</span>
                 </button>
-
-                <!-- Menu 3: Refleksi -->
                 <button onclick="showSection('refleksi')" id="btn-refleksi" class="w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg hover:bg-slate-700 transition-colors">
                     <i class="fas fa-mirror w-6"></i>
                     <span>Refleksi</span>
                 </button>
-
-                <!-- Menu 4: Penilaian -->
                 <button onclick="showSection('penilaian')" id="btn-penilaian" class="w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg hover:bg-slate-700 transition-colors">
                     <i class="fas fa-chart-line w-6"></i>
                     <span>Penilaian</span>
                 </button>
-
             </nav>
 
-            <!-- Footer Sidebar -->
+            <!-- Footer Sidebar (Logout) -->
             <div class="p-4 border-t border-slate-700">
-                <button class="flex items-center w-full px-4 py-2 text-sm font-medium text-red-400 hover:text-red-300">
+                <a href="#" id="logoutBtn" class="flex items-center w-full px-4 py-2 text-sm font-medium text-red-400 hover:text-red-300">
                     <i class="fas fa-sign-out-alt w-6"></i>
                     <span>Keluar</span>
-                </button>
+                </a>
             </div>
         </aside>
 
@@ -86,10 +98,12 @@
                 </div>
                 <div class="flex items-center space-x-4">
                     <div class="text-right hidden sm:block">
-                        <p class="text-sm font-medium text-gray-900">Budi Santoso</p>
-                        <p class="text-xs text-gray-500">Guru Matematika</p>
+                        <p class="text-sm font-medium text-gray-900" id="userName">Loading...</p>
+                        <p class="text-xs text-gray-500" id="userEmail">Loading...</p>
                     </div>
-                    <img class="h-10 w-10 rounded-full object-cover border-2 border-blue-500" src="https://ui-avatars.com/api/?name=Budi+Santoso&background=0D8ABC&color=fff" alt="Profile">
+                    <img class="h-10 w-10 rounded-full object-cover border-2 border-blue-500" 
+                         src="https://ui-avatars.com/api/?name=Guru&background=0D8ABC&color=fff" 
+                         alt="Profile" id="userAvatar">
                 </div>
             </header>
 
@@ -99,7 +113,6 @@
                 <!-- SECTION 1: ADMINISTRASI KELAS -->
                 <div id="section-kelas" class="content-section fade-in">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                        <!-- Card Statistik -->
                         <div class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-blue-500">
                             <div class="flex items-center">
                                 <div class="p-3 rounded-full bg-blue-100 text-blue-500 mr-4">
@@ -135,7 +148,6 @@
                         </div>
                     </div>
 
-                    <!-- Tabel Data Siswa -->
                     <div class="bg-white rounded-lg shadow-sm p-6">
                         <div class="flex justify-between items-center mb-4">
                             <h3 class="text-lg font-bold text-gray-700">Data Siswa Kelas X-A</h3>
@@ -216,7 +228,6 @@
                         <div class="bg-white rounded-lg shadow-sm p-8">
                             <h3 class="text-2xl font-bold text-gray-800 mb-2">Jurnal Refleksi Guru</h3>
                             <p class="text-gray-500 mb-6">Catat apa yang berjalan baik dan apa yang perlu diperbaiki hari ini.</p>
-                            
                             <form>
                                 <div class="mb-4">
                                     <label class="block text-gray-700 text-sm font-bold mb-2">Tanggal</label>
@@ -247,13 +258,9 @@
                                 <option>X-B</option>
                             </select>
                         </div>
-
-                        <!-- Grafik Sederhana (Placeholder) -->
                         <div class="w-full h-48 bg-gray-50 rounded mb-6 flex items-center justify-center border border-dashed border-gray-300">
-                            <p class="text-gray-400"><i class="fas fa-chart-bar mr-2"></i> Grafik Distribusi Nilai (Area untuk Chart.js)</p>
+                            <p class="text-gray-400"><i class="fas fa-chart-bar mr-2"></i> Grafik Distribusi Nilai</p>
                         </div>
-
-                        <!-- Tabel Nilai -->
                         <div class="overflow-x-auto">
                             <table class="min-w-full text-left text-sm">
                                 <thead class="bg-gray-100 uppercase text-xs font-bold text-gray-600">
@@ -299,34 +306,33 @@
     <!-- JAVASCRIPT UNTUK INTERAKSI MENU -->
     <script>
         function showSection(sectionId) {
-            // 1. Sembunyikan semua section
+            // Sembunyikan semua section
             const sections = document.querySelectorAll('.content-section');
             sections.forEach(section => {
                 section.classList.add('hidden');
             });
 
-            // 2. Tampilkan section yang dipilih
+            // Tampilkan section yang dipilih
             const activeSection = document.getElementById('section-' + sectionId);
             if (activeSection) {
                 activeSection.classList.remove('hidden');
             }
 
-            // 3. Update status tombol menu (Active State)
+            // Update status tombol menu
             const buttons = document.querySelectorAll('aside button');
             buttons.forEach(btn => {
-                btn.classList.remove('active-menu', 'bg-blue-600', 'text-white');
-                // Reset style default (hapus inline style jika ada, tapi kita pakai class tailwind)
-                btn.classList.add('hover:bg-slate-700'); 
+                btn.classList.remove('active-menu');
+                btn.classList.add('hover:bg-slate-700');
             });
 
-            // 4. Set tombol yang diklik menjadi aktif
+            // Set tombol yang diklik menjadi aktif
             const activeBtn = document.getElementById('btn-' + sectionId);
             if (activeBtn) {
                 activeBtn.classList.add('active-menu');
                 activeBtn.classList.remove('hover:bg-slate-700');
             }
 
-            // 5. Update Judul Halaman
+            // Update Judul Halaman
             const titles = {
                 'kelas': 'Administrasi Kelas',
                 'pembelajaran': 'Administrasi Pembelajaran',
@@ -335,25 +341,26 @@
             };
             document.getElementById('page-title').innerText = titles[sectionId];
         }
-        <!-- 🔐 FIREBASE AUTH PROTECTION -->
-<script type="module">
-  import { auth } from './config-firebase.js';
-  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-
-  onAuthStateChanged(auth, (user) => {
-    if (!user) {
-      // Jika tidak ada user yang login, tendang kembali ke login
-      window.location.href = 'login.html';
-    } else {
-      // Opsional: Tampilkan info user di console
-      console.log("User logged in:", user.email);
-      
-      // Opsional: Tampilkan nama user di dashboard (lihat Langkah 3)
-      const userEmail = document.getElementById('userEmail');
-      if(userEmail) userEmail.textContent = user.email;
-    }
-  });
-</script>
     </script>
+
+    <!-- 🔐 SCRIPT LOGOUT (Firebase) -->
+    <script type="module">
+        import { auth } from './config-firebase.js';
+        import { signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+
+        document.getElementById('logoutBtn').addEventListener('click', async (e) => {
+            e.preventDefault();
+            if(confirm('Apakah Anda yakin ingin keluar?')) {
+                try {
+                    await signOut(auth);
+                    window.location.href = 'login.html';
+                } catch (error) {
+                    console.error('Logout error:', error);
+                    alert('Gagal logout');
+                }
+            }
+        });
+    </script>
+
 </body>
 </html>
