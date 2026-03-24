@@ -335,6 +335,25 @@
             };
             document.getElementById('page-title').innerText = titles[sectionId];
         }
+        <!-- 🔐 FIREBASE AUTH PROTECTION -->
+<script type="module">
+  import { auth } from './config-firebase.js';
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+
+  onAuthStateChanged(auth, (user) => {
+    if (!user) {
+      // Jika tidak ada user yang login, tendang kembali ke login
+      window.location.href = 'login.html';
+    } else {
+      // Opsional: Tampilkan info user di console
+      console.log("User logged in:", user.email);
+      
+      // Opsional: Tampilkan nama user di dashboard (lihat Langkah 3)
+      const userEmail = document.getElementById('userEmail');
+      if(userEmail) userEmail.textContent = user.email;
+    }
+  });
+</script>
     </script>
 </body>
 </html>
