@@ -1,11 +1,11 @@
 // config-firebase.js
-// Konfigurasi Firebase - Auth + Firestore
+// Konfigurasi Firebase - Auth + Firestore (VERSI DIPERBAIKI)
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
-const firebaseConfig = {
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+
+// ✅ firebaseConfig DIPERBAIKI - Hapus spasi di databaseURL
 const firebaseConfig = {
   apiKey: "AIzaSyCYoUcSKj8aAZTaNgKtrn0bYHPmedVHAE4",
   authDomain: "sdn139lamanda-a67a8.firebaseapp.com",
@@ -17,12 +17,10 @@ const firebaseConfig = {
   measurementId: "G-S012NQH5LS"
 };
 
-// Initialize Firebase
+// ✅ Initialize Firebase (JANGAN diubah)
 const app = initializeApp(firebaseConfig);
-
-// Initialize Services
 const auth = getAuth(app);
-const db = getFirestore(app); // ✅ Ini yang tadi kurang!
+const db = getFirestore(app);
 
-// Export semua yang dibutuhkan
-export { auth, signInWithEmailAndPassword, signOut, db }; // ✅ db sudah di-export
+// ✅ Export semua yang dibutuhkan (JANGAN diubah)
+export { auth, signInWithEmailAndPassword, signOut, db };
