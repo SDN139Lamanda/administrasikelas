@@ -119,7 +119,7 @@ export function render() {
 
         <!-- TAB CONTENT: ABSENSI DIGITAL -->
         <div id="content-absensi" class="tab-content hidden">
-            <div class="bg-white rounded-lg shadow-sm p-8">
+            <div class="bg-white rounded-lg shadow-sm p-8" id="absensiContent">
                 <!-- KOP ABSENSI -->
                 <div class="text-center mb-6 pb-6 border-b-2 border-gray-300">
                     <h2 class="text-2xl font-bold text-gray-800 mb-2">ABSENSI DIGITAL SDN 139 LAMANDA</h2>
@@ -127,17 +127,17 @@ export function render() {
                 </div>
 
                 <!-- FORM INFO ABSENSI -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                     <div>
                         <label class="block text-gray-700 text-sm font-bold mb-2">Kelas *</label>
                         <select id="absenKelas" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500" required>
                             <option value="">Pilih Kelas</option>
-                            <option value="satu>X-A</option>
-                            <option value="DUA">X-B</option>
-                            <option value="TIGA">XI-A</option>
-                            <option value="EMPAT">XI-B</option>
-                            <option value="LIMA">XII-A</option>
-                            <option value="ENAM">XII-B</option>
+                            <option value="1">Kelas 1</option>
+                            <option value="2">Kelas 2</option>
+                            <option value="3">Kelas 3</option>
+                            <option value="4">Kelas 4</option>
+                            <option value="5">Kelas 5</option>
+                            <option value="6">Kelas 6</option>
                         </select>
                     </div>
                     <div>
@@ -153,18 +153,16 @@ export function render() {
                         <input type="text" id="absenTahun" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500" 
                             placeholder="2025/2026" value="2025/2026">
                     </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     <div>
-                        <label class="block text-gray-700 text-sm font-bold mb-2">Tanggal Absensi *</label>
+                        <label class="block text-gray-700 text-sm font-bold mb-2">Tanggal *</label>
                         <input type="date" id="absenTanggal" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500" required>
                     </div>
-                    <div>
-                        <label class="block text-gray-700 text-sm font-bold mb-2">Nama Guru *</label>
-                        <input type="text" id="absenGuru" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500" 
-                            placeholder="Nama guru pengajar" required>
-                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Nama Guru *</label>
+                    <input type="text" id="absenGuru" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500" 
+                        placeholder="Nama guru pengajar" required>
                 </div>
 
                 <!-- TOMBOL LOAD SISWA -->
@@ -187,7 +185,7 @@ export function render() {
                             <tr>
                                 <th class="px-4 py-3">No</th>
                                 <th class="px-4 py-3">Nama Siswa</th>
-                                <th class="px-4 py-3 text-center">✓</th>
+                                <th class="px-4 py-3 text-center">H</th>
                                 <th class="px-4 py-3 text-center">S</th>
                                 <th class="px-4 py-3 text-center">I</th>
                                 <th class="px-4 py-3 text-center">A</th>
@@ -204,13 +202,19 @@ export function render() {
                     <p class="text-gray-500 mt-2">Pilih kelas dan klik "Load Data Siswa"</p>
                 </div>
 
-                <!-- TOMBOL SIMPAN -->
-                <div class="mt-6 flex gap-4">
+                <!-- TOMBOL AKSI -->
+                <div class="mt-6 flex flex-wrap gap-4">
                     <button onclick="window.simpanAbsensi()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg text-sm transition">
                         <i class="fas fa-save mr-2"></i>Simpan Absensi
                     </button>
+                    <button onclick="window.downloadExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-lg text-sm transition">
+                        <i class="fas fa-file-excel mr-2"></i>Download Excel
+                    </button>
+                    <button onclick="window.downloadPDF()" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg text-sm transition">
+                        <i class="fas fa-file-pdf mr-2"></i>Download PDF
+                    </button>
                     <button onclick="window.cetakAbsensi()" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg text-sm transition">
-                        <i class="fas fa-print mr-2"></i>Cetak / PDF
+                        <i class="fas fa-print mr-2"></i>Cetak
                     </button>
                 </div>
 
@@ -245,7 +249,7 @@ export function render() {
                     
                     <div class="mb-4">
                         <label class="block text-gray-700 text-sm font-bold mb-2">NISN</label>
-                        <input type="text" id="nisn" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500" required placeholder="Contoh: 1234567890">
+                        <input type="text" id="nisn" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500" required placeholder="Contoh: 0012345678">
                     </div>
                     
                     <div class="mb-4">
@@ -257,12 +261,12 @@ export function render() {
                         <label class="block text-gray-700 text-sm font-bold mb-2">Kelas *</label>
                         <select id="kelas" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500" required>
                             <option value="">Pilih Kelas</option>
-                            <option value="X-A">X-A</option>
-                            <option value="X-B">X-B</option>
-                            <option value="XI-A">XI-A</option>
-                            <option value="XI-B">XI-B</option>
-                            <option value="XII-A">XII-A</option>
-                            <option value="XII-B">XII-B</option>
+                            <option value="1">Kelas 1</option>
+                            <option value="2">Kelas 2</option>
+                            <option value="3">Kelas 3</option>
+                            <option value="4">Kelas 4</option>
+                            <option value="5">Kelas 5</option>
+                            <option value="6">Kelas 6</option>
                         </select>
                     </div>
                     
@@ -317,7 +321,9 @@ async function initModule() {
 
     // Set tanggal hari ini
     document.getElementById('absenTanggal').valueAsDate = new Date();
-    document.getElementById('tanggalCetak').textContent = new Date().toLocaleDateString('id-ID');
+    document.getElementById('tanggalCetak').textContent = new Date().toLocaleDateString('id-ID', {
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+    });
 
     // ============================================
     // FUNGSI MODAL SISWA
@@ -381,7 +387,7 @@ async function initModule() {
                         <tr class="border-b hover:bg-gray-50">
                             <td class="px-6 py-4">${data.nisn}</td>
                             <td class="px-6 py-4 font-medium">${data.nama}</td>
-                            <td class="px-6 py-4"><span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">${data.kelas}</span></td>
+                            <td class="px-6 py-4"><span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">Kelas ${data.kelas}</span></td>
                             <td class="px-6 py-4">${data.jenisKelamin}</td>
                             <td class="px-6 py-4">
                                 <span class="${data.status === 'Aktif' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'} py-1 px-3 rounded-full text-xs">
@@ -500,7 +506,7 @@ async function initModule() {
                 loadingAbsensi.classList.add('hidden');
                 emptyAbsensi.innerHTML = `
                     <i class="fas fa-users-slash text-4xl text-gray-300"></i>
-                    <p class="text-gray-500 mt-2">Tidak ada siswa di kelas ${kelas}</p>
+                    <p class="text-gray-500 mt-2">Tidak ada siswa di Kelas ${kelas}</p>
                 `;
                 emptyAbsensi.classList.remove('hidden');
                 return;
@@ -609,6 +615,85 @@ async function initModule() {
     }
 
     // ============================================
+    // ABSENSI - DOWNLOAD EXCEL
+    // ============================================
+    window.downloadExcel = () => {
+        if (tbodyAbsensi.innerHTML.trim() === '') {
+            alert('⚠️ Load data siswa terlebih dahulu!');
+            return;
+        }
+
+        const kelas = document.getElementById('absenKelas').value;
+        const semester = document.getElementById('absenSemester').value;
+        const tahun = document.getElementById('absenTahun').value;
+        const tanggal = document.getElementById('absenTanggal').value;
+        const guru = document.getElementById('absenGuru').value;
+
+        // Build Excel content
+        let excelContent = `
+            <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+            <head><meta charset="UTF-8"></head><body>
+            <table border="1">
+                <tr><td colspan="7" style="text-align:center;font-weight:bold;font-size:16px;">ABSENSI DIGITAL SDN 139 LAMANDA</td></tr>
+                <tr><td colspan="7" style="text-align:center;">Kelas ${kelas} | Semester ${semester} | Tahun ${tahun}</td></tr>
+                <tr><td colspan="7" style="text-align:center;">Tanggal: ${tanggal} | Guru: ${guru}</td></tr>
+                <tr>
+                    <th>No</th><th>Nama Siswa</th><th>H</th><th>S</th><th>I</th><th>A</th><th>Keterangan</th>
+                </tr>
+        `;
+
+        const rows = tbodyAbsensi.querySelectorAll('tr');
+        rows.forEach((row, index) => {
+            const nama = row.querySelector('td:nth-child(2)').textContent;
+            const H = row.querySelector('input[value="H"]:checked') ? '✓' : '';
+            const S = row.querySelector('input[value="S"]:checked') ? '✓' : '';
+            const I = row.querySelector('input[value="I"]:checked') ? '✓' : '';
+            const A = row.querySelector('input[value="A"]:checked') ? '✓' : '';
+            const ket = row.querySelector('input[type="text"]').value;
+
+            excelContent += `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td>${nama}</td>
+                    <td style="text-align:center;">${H}</td>
+                    <td style="text-align:center;">${S}</td>
+                    <td style="text-align:center;">${I}</td>
+                    <td style="text-align:center;">${A}</td>
+                    <td>${ket}</td>
+                </tr>
+            `;
+        });
+
+        excelContent += `
+                <tr><td colspan="7" style="height:80px;"></td></tr>
+                <tr><td colspan="4"></td><td colspan="3" style="text-align:center;">Guru Mata Pelajaran,<br><br><br>_________________________<br>${guru}</td></tr>
+            </table></body></html>
+        `;
+
+        // Create download
+        const blob = new Blob(['\ufeff', excelContent], { type: 'application/vnd.ms-excel' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Absensi_Kelas${kelas}_${tanggal}.xls`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    // ============================================
+    // ABSENSI - DOWNLOAD PDF
+    // ============================================
+    window.downloadPDF = () => {
+        if (tbodyAbsensi.innerHTML.trim() === '') {
+            alert('⚠️ Load data siswa terlebih dahulu!');
+            return;
+        }
+        window.cetakAbsensi();
+    }
+
+    // ============================================
     // ABSENSI - CETAK
     // ============================================
     window.cetakAbsensi = () => {
@@ -616,6 +701,12 @@ async function initModule() {
             alert('⚠️ Load data siswa terlebih dahulu!');
             return;
         }
+        
+        // Update ttd before print
+        const guru = document.getElementById('absenGuru').value;
+        document.getElementById('ttdGuru').textContent = guru;
+        document.getElementById('namaGuruTtd').textContent = guru;
+        
         window.print();
     }
 
