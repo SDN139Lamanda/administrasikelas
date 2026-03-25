@@ -28,6 +28,48 @@
         .active-menu:hover {
             background-color: #1d4ed8;
         }
+        
+        /* Mobile Sidebar */
+        #sidebar {
+            transition: transform 0.3s ease-in-out;
+        }
+        
+        /* Responsive Tables */
+        @media (max-width: 768px) {
+            main {
+                padding: 1rem;
+            }
+            .overflow-x-auto {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            table {
+                min-width: 600px;
+            }
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            .px-6 {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+        }
+        
+        /* Print Style untuk Absensi */
+        @media print {
+            aside, header, button {
+                display: none !important;
+            }
+            #sidebarOverlay {
+                display: none !important;
+            }
+            main {
+                padding: 0 !important;
+            }
+            #absensiContent {
+                box-shadow: none !important;
+            }
+        }
     </style>
 </head>
 <body class="bg-gray-100 font-sans antialiased">
@@ -44,7 +86,6 @@
                 document.getElementById('userEmail').textContent = user.email;
                 document.getElementById('userName').textContent = user.email.split('@')[0];
                 
-                // Update avatar dengan nama user
                 const avatarImg = document.getElementById('userAvatar');
                 if (avatarImg) {
                     avatarImg.src = `https://ui-avatars.com/api/?name=${user.email.split('@')[0]}&background=0D8ABC&color=fff`;
@@ -55,8 +96,8 @@
 
     <div class="flex h-screen overflow-hidden">
 
-        <!-- SIDEBAR -->
-        <aside class="w-64 bg-slate-800 text-white flex flex-col hidden md:flex">
+        <!-- SIDEBAR (Dengan Mobile Support) -->
+        <aside id="sidebar" class="w-64 bg-slate-800 text-white flex flex-col fixed inset-y-0 left-0 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out z-50">
             <!-- Logo -->
             <div class="h-16 flex items-center justify-center border-b border-slate-700">
                 <h1 class="text-xl font-bold"><i class="fas fa-graduation-cap mr-2"></i>EduDashboard</h1>
@@ -91,13 +132,17 @@
             </div>
         </aside>
 
+        <!-- OVERLAY untuk mobile -->
+        <div id="sidebarOverlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden md:hidden"></div>
+
         <!-- KONTEN UTAMA -->
         <div class="flex-1 flex flex-col overflow-hidden">
             
             <!-- Top Header -->
             <header class="h-16 bg-white shadow-sm flex items-center justify-between px-6">
                 <div class="flex items-center">
-                    <button class="md:hidden text-gray-500 hover:text-gray-700 focus:outline-none mr-4">
+                    <!-- Hamburger Button (Mobile Only) -->
+                    <button onclick="toggleSidebar()" class="md:hidden text-gray-500 hover:text-gray-700 focus:outline-none mr-4">
                         <i class="fas fa-bars text-xl"></i>
                     </button>
                     <h2 class="text-xl font-semibold text-gray-800" id="page-title">Dashboard Overview</h2>
@@ -122,7 +167,43 @@
         </div>
     </div>
 
+    <!-- ============================================ -->
+    <!-- SCRIPT MOBILE SIDEBAR TOGGLE -->
+    <!-- ============================================ -->
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            if (sidebar.classList.contains('-translate-x-full')) {
+                // Buka sidebar
+                sidebar.classList.remove('-translate-x-full');
+                sidebar.classList.add('translate-x-0');
+                overlay.classList.remove('hidden');
+            } else {
+                // Tutup sidebar
+                sidebar.classList.add('-translate-x-full');
+                sidebar.classList.remove('translate-x-0');
+                overlay.classList.add('hidden');
+            }
+        }
+
+        // Tutup sidebar saat klik menu (mobile)
+        document.addEventListener('click', (e) => {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            if (window.innerWidth < 768 && e.target.closest('aside button')) {
+                sidebar.classList.add('-translate-x-full');
+                sidebar.classList.remove('translate-x-0');
+                overlay.classList.add('hidden');
+            }
+        });
+    </script>
+
+    <!-- ============================================ -->
     <!-- SCRIPT UTAMA DASHBOARD (Load Module) -->
+    <!-- ============================================ -->
     <script>
         async function loadModule(moduleName) {
             const container = document.getElementById('module-container');
@@ -199,7 +280,9 @@
         });
     </script>
 
+    <!-- ============================================ -->
     <!-- SCRIPT LOGOUT (Firebase) -->
+    <!-- ============================================ -->
     <script type="module">
         import { auth } from './config-firebase.js';
         import { signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
