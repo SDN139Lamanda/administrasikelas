@@ -100,7 +100,8 @@
         <aside id="sidebar" class="w-64 bg-slate-800 text-white flex flex-col fixed inset-y-0 left-0 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out z-50">
             <!-- Logo -->
             <div class="h-16 flex items-center justify-center border-b border-slate-700">
-                <h1 class="text-xl font-bold"><i class="fas fa-graduation-cap mr-2"></i>EduDashboard</h1>
+                <img src="logo-sekolah.jpeg" alt="Logo SDN 139 LAMANDA" class="h-8 w-8 mr-2 object-contain bg-white rounded-full p-1">
+                <h1 class="text-xl font-bold">SDN 139 LAMANDA</h1>
             </div>
 
             <!-- Menu Navigasi -->
@@ -112,6 +113,11 @@
                 <button onclick="loadModule('adm-pembelajaran')" id="btn-pembelajaran" class="w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg hover:bg-slate-700 transition-colors">
                     <i class="fas fa-book-open w-6"></i>
                     <span>Adm. Pembelajaran</span>
+                </button>
+                <!-- ✨ MENU BARU: Asisten Modul -->
+                <button onclick="loadModule('asisten-modul')" id="btn-asisten-modul" class="w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg hover:bg-slate-700 transition-colors">
+                    <i class="fas fa-wand-magic-sparkles w-6"></i>
+                    <span>Asisten Modul</span>
                 </button>
                 <button onclick="loadModule('refleksi')" id="btn-refleksi" class="w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg hover:bg-slate-700 transition-colors">
                     <i class="fas fa-mirror w-6"></i>
@@ -210,6 +216,7 @@
             const titles = {
                 'adm-kelas': 'Administrasi Kelas',
                 'adm-pembelajaran': 'Administrasi Pembelajaran',
+                'asisten-modul': 'Asisten Modul Ajar',  // ✨ TAMBAHAN BARU
                 'refleksi': 'Refleksi Pembelajaran',
                 'penilaian': 'Penilaian & Laporan'
             };
@@ -223,7 +230,14 @@
                 btn.classList.add('hover:bg-slate-700');
             });
 
-            const activeBtn = document.getElementById(`btn-${moduleName.split('-')[0]}`);
+            // Handle active button highlight (support for multi-word module names)
+            let activeBtn = null;
+            if (moduleName === 'asisten-modul') {
+                activeBtn = document.getElementById('btn-asisten-modul');
+            } else {
+                activeBtn = document.getElementById(`btn-${moduleName.split('-')[0]}`);
+            }
+            
             if (activeBtn) {
                 activeBtn.classList.add('active-menu');
                 activeBtn.classList.remove('hover:bg-slate-700');
