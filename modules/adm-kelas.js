@@ -3,6 +3,7 @@
 // SDN 139 LAMANDA
 
 import { db } from '../config-firebase.js';
+import { auth } from '../config-firebase.js';  // ✅ TAMBAH: Import auth untuk security
 import { 
     collection, 
     addDoc, 
@@ -17,6 +18,7 @@ import {
 
 const collectionName = "siswa";
 const absensiCollection = "absensi";
+const ADMIN_EMAIL = 'andi@139batuassung.com';  // ✅ TAMBAH: Email admin Anda
 
 // ============================================
 // FUNGSI RENDER - Menghasilkan HTML Module
@@ -26,13 +28,13 @@ export function render() {
     div.innerHTML = `
         <!-- TAB NAVIGATION -->
         <div class="border-b border-gray-200 mb-6">
-            <nav class="-mb-px flex space-x-8">
+            <nav class="-mb-px flex space-x-8 overflow-x-auto">
                 <button onclick="window.showTab('data-siswa')" id="tab-data-siswa" 
-                    class="tab-button py-4 px-1 border-b-2 font-medium text-sm active border-blue-500 text-blue-600">
+                    class="tab-button py-4 px-1 border-b-2 font-medium text-sm active border-blue-500 text-blue-600 whitespace-nowrap">
                     <i class="fas fa-users mr-2"></i>Data Siswa
                 </button>
                 <button onclick="window.showTab('absensi')" id="tab-absensi" 
-                    class="tab-button py-4 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700">
+                    class="tab-button py-4 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 whitespace-nowrap">
                     <i class="fas fa-clipboard-check mr-2"></i>Absensi Digital
                 </button>
             </nav>
@@ -82,7 +84,7 @@ export function render() {
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-lg font-bold text-gray-700">Data Siswa</h3>
                     <button onclick="window.openModalSiswa()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm transition">
-                        <i class="fas fa-plus mr-1"></i> Tambah Siswa
+                        <i class="fas fa-plus mr-1"></i> <span class="hidden sm:inline">Tambah Siswa</span>
                     </button>
                 </div>
                 
@@ -360,11 +362,26 @@ async function initModule() {
     }
 
     // ============================================
-    // DATA SISWA - LOAD
+    // DATA SISWA - LOAD (✅ UPDATED: Security Filter)
     // ============================================
     async function loadSiswa() {
         try {
-            const q = query(collection(db, collectionName), orderBy("nama"));
+            // ✅ Admin Bypass Logic
+            const userEmail = auth.currentUser?.email;
+            const isAdmin = userEmail === ADMIN_EMAIL;
+            
+            let q;
+            if (isAdmin) {
+                // Admin: load SEMUA data
+                q = query(collection(db, collectionName), orderBy("nama"));
+            } else {
+                // Guru: hanya load data milik sendiri
+                q = query(collection(db, collectionName), 
+                    where("userId", "==", auth.currentUser?.uid),
+                    orderBy("nama")
+                );
+            }
+            
             const querySnapshot = await getDocs(q);
             
             tbodySiswa.innerHTML = '';
@@ -416,13 +433,17 @@ async function initModule() {
 
         } catch (error) {
             console.error("Error loading siswa:", error);
+            // Handle index error gracefully
+            if (error.code === 'failed-precondition' && error.message.includes('index')) {
+                console.warn('⚠️ Index diperlukan untuk query ini. Buat index di Firebase Console.');
+            }
         } finally {
             loadingTable.classList.add('hidden');
         }
     }
 
     // ============================================
-    // DATA SISWA - SUBMIT FORM
+    // DATA SISWA - SUBMIT FORM (✅ UPDATED: Add userId)
     // ============================================
     formSiswa.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -439,10 +460,13 @@ async function initModule() {
 
         try {
             if (id) {
+                // Update existing - admin/guru hanya bisa update data sendiri
                 await updateDoc(doc(db, collectionName, id), data);
                 alert('✅ Data berhasil diupdate!');
             } else {
+                // Create new with userId
                 data.createdAt = new Date();
+                data.userId = auth.currentUser?.uid;  // ✅ TAMBAH: Field userId
                 await addDoc(collection(db, collectionName), data);
                 alert('✅ Siswa berhasil ditambahkan!');
             }
@@ -483,7 +507,7 @@ async function initModule() {
     }
 
     // ============================================
-    // ABSENSI - LOAD SISWA UNTUK ABSEN (DIPERBAIKI)
+    // ABSENSI - LOAD SISWA UNTUK ABSEN (✅ UPDATED: Security Filter)
     // ============================================
     window.loadSiswaUntukAbsen = async () => {
         const kelas = document.getElementById('absenKelas').value;
@@ -501,8 +525,22 @@ async function initModule() {
         try {
             console.log("🔍 Loading siswa untuk kelas:", kelas);
             
-            // Query TANPA orderBy untuk hindari index requirement
-            const q = query(collection(db, collectionName), where("kelas", "==", kelas));
+            // ✅ Admin Bypass Logic
+            const userEmail = auth.currentUser?.email;
+            const isAdmin = userEmail === ADMIN_EMAIL;
+            
+            let q;
+            if (isAdmin) {
+                // Admin: load semua siswa di kelas ini
+                q = query(collection(db, collectionName), where("kelas", "==", kelas));
+            } else {
+                // Guru: hanya load siswa milik sendiri di kelas ini
+                q = query(collection(db, collectionName), 
+                    where("kelas", "==", kelas),
+                    where("userId", "==", auth.currentUser?.uid)
+                );
+            }
+            
             console.log("📋 Query:", q);
             
             const querySnapshot = await getDocs(q);
@@ -584,7 +622,7 @@ async function initModule() {
     }
 
     // ============================================
-    // ABSENSI - SIMPAN
+    // ABSENSI - SIMPAN (✅ UPDATED: Add userId)
     // ============================================
     window.simpanAbsensi = async () => {
         const kelas = document.getElementById('absenKelas').value;
@@ -629,6 +667,7 @@ async function initModule() {
                     namaSiswa: namaSiswa,
                     status: status,
                     keterangan: keteranganInput.value,
+                    userId: auth.currentUser?.uid,  // ✅ TAMBAH: Field userId
                     createdAt: new Date()
                 });
                 saved++;
@@ -649,7 +688,7 @@ async function initModule() {
     }
 
     // ============================================
-    // ABSENSI - DOWNLOAD EXCEL
+    // ABSENSI - DOWNLOAD EXCEL (✅ TETAP SAMA)
     // ============================================
     window.downloadExcel = () => {
         if (tbodyAbsensi.innerHTML.trim() === '') {
@@ -715,7 +754,7 @@ async function initModule() {
     }
 
     // ============================================
-    // ABSENSI - DOWNLOAD PDF
+    // ABSENSI - DOWNLOAD PDF (✅ TETAP SAMA)
     // ============================================
     window.downloadPDF = () => {
         if (tbodyAbsensi.innerHTML.trim() === '') {
@@ -726,7 +765,7 @@ async function initModule() {
     }
 
     // ============================================
-    // ABSENSI - CETAK
+    // ABSENSI - CETAK (✅ TETAP SAMA)
     // ============================================
     window.cetakAbsensi = () => {
         if (tbodyAbsensi.innerHTML.trim() === '') {
