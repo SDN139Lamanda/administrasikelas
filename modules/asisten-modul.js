@@ -16,7 +16,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
 const collectionName = "modul-ajar";
-const ADMIN_EMAIL = 'admin@sdn139lamanda.sch.id';  // ✅ TAMBAH: Email admin (ganti dengan email Anda)
+const ADMIN_EMAIL = 'andi@139batuassung.com';  // ✅ TAMBAH: Email admin (ganti dengan email Anda)
 
 // ============================================
 // FUNGSI RENDER - Menghasilkan HTML Module
