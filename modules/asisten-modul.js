@@ -3,6 +3,7 @@
 // SDN 139 LAMANDA
 
 import { db } from '../config-firebase.js';
+import { auth } from '../config-firebase.js';  // ✅ TAMBAH: Import auth
 import { 
     collection, 
     addDoc, 
@@ -15,6 +16,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
 const collectionName = "modul-ajar";
+const ADMIN_EMAIL = 'admin@sdn139lamanda.sch.id';  // ✅ TAMBAH: Email admin (ganti dengan email Anda)
 
 // ============================================
 // FUNGSI RENDER - Menghasilkan HTML Module
@@ -752,6 +754,9 @@ async function initModule() {
         printWindow.print();
     }
 
+    // ============================================
+    // ✅ UPDATED: SAVE TO FIREBASE (With userId)
+    // ============================================
     window.saveToFirebase = async () => {
         if (!confirm('Simpan modul ini ke database?')) return;
 
@@ -761,6 +766,7 @@ async function initModule() {
             await addDoc(collection(db, collectionName), {
                 ...data,
                 htmlContent: window.currentModulHTML,
+                userId: auth.currentUser?.uid,  // ✅ TAMBAH: Field userId
                 createdAt: new Date(),
                 updatedAt: new Date()
             });
@@ -774,9 +780,8 @@ async function initModule() {
     }
 
     // ============================================
-    // RIWAYAT MODULE
+    // ✅ UPDATED: RIWAYAT MODULE (With userId filter)
     // ============================================
-
     window.loadRiwayat = async () => {
         const loadingRiwayat = document.getElementById('loadingRiwayat');
         const gridRiwayat = document.getElementById('gridRiwayat');
@@ -787,7 +792,22 @@ async function initModule() {
         emptyRiwayat.classList.add('hidden');
 
         try {
-            const q = query(collection(db, collectionName), orderBy("createdAt", "desc"));
+            // ✅ TAMBAH: Filter berdasarkan userId (kecuali admin)
+            const userEmail = auth.currentUser?.email;
+            const isAdmin = userEmail === ADMIN_EMAIL;
+            
+            let q;
+            if (isAdmin) {
+                // Admin: load semua data
+                q = query(collection(db, collectionName), orderBy("createdAt", "desc"));
+            } else {
+                // Guru: hanya load data milik sendiri
+                q = query(collection(db, collectionName), 
+                    where("userId", "==", auth.currentUser?.uid),
+                    orderBy("createdAt", "desc")
+                );
+            }
+            
             const snapshot = await getDocs(q);
 
             gridRiwayat.innerHTML = '';
