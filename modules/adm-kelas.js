@@ -18,7 +18,7 @@ import {
 
 const collectionName = "siswa";
 const absensiCollection = "absensi";
-const ADMIN_EMAIL = 'andi@139batuassung.com';
+const ADMIN_EMAIL = 'andi@139batuassung.com';  // ✅ KONSTANTA ADMIN
 
 // ============================================
 // FUNGSI HELPER: READ-ONLY MODE
@@ -43,6 +43,28 @@ function enableReadOnlyMode() {
         });
     
     console.log('🔒 Read-only mode enabled: Akun pending approval');
+}
+
+// ============================================
+// FUNGSI HELPER: CHECK STATUS DENGAN ADMIN BYPASS
+// ============================================
+function checkAccessPermission() {
+    const currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
+    const userEmail = currentUser?.email;
+    const isAdmin = userEmail === ADMIN_EMAIL;
+    
+    // ✅ Admin selalu punya akses
+    if (isAdmin) {
+        return true;
+    }
+    
+    // User biasa: cek status
+    if (currentUser?.status !== 'active') {
+        alert('⚠️ Fitur ini belum aktif. Akun Anda masih menunggu persetujuan admin.');
+        return false;
+    }
+    
+    return true;
 }
 
 // ============================================
@@ -331,9 +353,14 @@ export function render() {
 // FUNGSI INIT - Mengaktifkan Logic Module
 // ============================================
 async function initModule() {
-    // ✅ CHECK USER STATUS - Enable read-only mode if pending
+    // ✅ CHECK USER STATUS - Enable read-only mode if pending (dengan Admin Bypass)
     const currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
-    if (currentUser?.status !== 'active') {
+    const userEmail = currentUser?.email;
+    const isAdmin = userEmail === ADMIN_EMAIL;
+    
+    console.log('🔍 initModule:', { email: userEmail, isAdmin: isAdmin, status: currentUser?.status });
+    
+    if (!isAdmin && currentUser?.status !== 'active') {
         enableReadOnlyMode();
         // Tetap load data untuk read-only view
     }
@@ -363,9 +390,8 @@ async function initModule() {
     // FUNGSI MODAL SISWA
     // ============================================
     window.openModalSiswa = () => {
-        // ✅ Check status sebelum buka modal
-        if (currentUser?.status !== 'active') {
-            alert('⚠️ Fitur ini belum aktif. Akun Anda masih menunggu persetujuan admin.');
+        // ✅ Check status dengan admin bypass
+        if (!checkAccessPermission()) {
             return;
         }
         modal.classList.remove('hidden');
@@ -480,14 +506,13 @@ async function initModule() {
     }
 
     // ============================================
-    // DATA SISWA - SUBMIT FORM (✅ UPDATED: Add userId)
+    // DATA SISWA - SUBMIT FORM
     // ============================================
     formSiswa.addEventListener('submit', async (e) => {
         e.preventDefault();
         
-        // ✅ Check status sebelum submit
-        if (currentUser?.status !== 'active') {
-            alert('⚠️ Fitur ini belum aktif. Akun Anda masih menunggu persetujuan admin.');
+        // ✅ Check status dengan admin bypass
+        if (!checkAccessPermission()) {
             return;
         }
         
@@ -503,13 +528,13 @@ async function initModule() {
 
         try {
             if (id) {
-                // Update existing - admin/guru hanya bisa update data sendiri
+                // Update existing
                 await updateDoc(doc(db, collectionName, id), data);
                 alert('✅ Data berhasil diupdate!');
             } else {
                 // Create new with userId
                 data.createdAt = new Date();
-                data.userId = auth.currentUser?.uid;  // ✅ TAMBAH: Field userId
+                data.userId = auth.currentUser?.uid;
                 await addDoc(collection(db, collectionName), data);
                 alert('✅ Siswa berhasil ditambahkan!');
             }
@@ -524,9 +549,8 @@ async function initModule() {
     // DATA SISWA - EDIT
     // ============================================
     window.editSiswa = (id, nisn, nama, kelas, jenisKelamin, status) => {
-        // ✅ Check status sebelum edit
-        if (currentUser?.status !== 'active') {
-            alert('⚠️ Fitur ini belum aktif. Akun Anda masih menunggu persetujuan admin.');
+        // ✅ Check status dengan admin bypass
+        if (!checkAccessPermission()) {
             return;
         }
         document.getElementById('siswaId').value = id;
@@ -543,9 +567,8 @@ async function initModule() {
     // DATA SISWA - DELETE
     // ============================================
     window.deleteSiswa = async (id) => {
-        // ✅ Check status sebelum delete
-        if (currentUser?.status !== 'active') {
-            alert('⚠️ Fitur ini belum aktif. Akun Anda masih menunggu persetujuan admin.');
+        // ✅ Check status dengan admin bypass
+        if (!checkAccessPermission()) {
             return;
         }
         if (confirm('⚠️ Apakah Anda yakin ingin menghapus data siswa ini?')) {
@@ -560,12 +583,11 @@ async function initModule() {
     }
 
     // ============================================
-    // ABSENSI - LOAD SISWA UNTUK ABSEN (✅ UPDATED: Security Filter)
+    // ABSENSI - LOAD SISWA UNTUK ABSEN
     // ============================================
     window.loadSiswaUntukAbsen = async () => {
-        // ✅ Check status sebelum load
-        if (currentUser?.status !== 'active') {
-            alert('⚠️ Fitur ini belum aktif. Akun Anda masih menunggu persetujuan admin.');
+        // ✅ Check status dengan admin bypass
+        if (!checkAccessPermission()) {
             return;
         }
         
@@ -681,12 +703,11 @@ async function initModule() {
     }
 
     // ============================================
-    // ABSENSI - SIMPAN (✅ UPDATED: Add userId)
+    // ABSENSI - SIMPAN
     // ============================================
     window.simpanAbsensi = async () => {
-        // ✅ Check status sebelum simpan
-        if (currentUser?.status !== 'active') {
-            alert('⚠️ Fitur ini belum aktif. Akun Anda masih menunggu persetujuan admin.');
+        // ✅ Check status dengan admin bypass
+        if (!checkAccessPermission()) {
             return;
         }
         
@@ -732,7 +753,7 @@ async function initModule() {
                     namaSiswa: namaSiswa,
                     status: status,
                     keterangan: keteranganInput.value,
-                    userId: auth.currentUser?.uid,  // ✅ TAMBAH: Field userId
+                    userId: auth.currentUser?.uid,
                     createdAt: new Date()
                 });
                 saved++;
