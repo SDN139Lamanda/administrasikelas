@@ -1,7 +1,10 @@
 // modules/refleksi.js
 // Module Refleksi Pembelajaran - Jurnal Refleksi Guru
+// SDN 139 LAMANDA
+// ✅ UPDATED: Security (userId + admin bypass) + Navigasi Dashboard
 
 import { db } from '../config-firebase.js';
+import { auth } from '../config-firebase.js';  // ✅ TAMBAH: Import auth untuk security
 import { 
     collection, 
     addDoc, 
@@ -15,6 +18,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
 const collectionName = "refleksi";
+const ADMIN_EMAIL = 'andi@139batuassung.com';  // ✅ TAMBAH: Email admin Anda
 
 // ============================================
 // FUNGSI RENDER - Menghasilkan HTML Module
@@ -22,6 +26,14 @@ const collectionName = "refleksi";
 export function render() {
     const div = document.createElement('div');
     div.innerHTML = `
+        <!-- Navigation Bar -->
+        <div class="mb-4">
+            <button onclick="window.kembaliKeDashboard()" class="text-gray-600 hover:text-gray-800 text-sm flex items-center gap-2">
+                <i class="fas fa-arrow-left"></i>
+                <span>Kembali ke Dashboard</span>
+            </button>
+        </div>
+
         <!-- Header Section -->
         <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
             <div>
@@ -178,6 +190,18 @@ async function initModule() {
     // Set tanggal hari ini default
     document.getElementById('tanggal').valueAsDate = new Date();
 
+    // ============================================
+    // NAVIGASI: KEMBALI KE DASHBOARD
+    // ============================================
+    window.kembaliKeDashboard = () => {
+        // Navigate back to dashboard
+        if (window.loadModule) {
+            window.loadModule('dashboard');
+        } else {
+            window.location.href = 'dashboard.html';
+        }
+    }
+
     // --- FUNGSI MODAL ---
     window.openModalRefleksi = () => {
         modal.classList.remove('hidden');
@@ -289,14 +313,30 @@ async function initModule() {
         document.getElementById('rataRataMinggu').textContent = rataRata;
     }
 
-    // --- READ: Load Data dari Firestore ---
+    // ============================================
+    // READ: Load Data dari Firestore (✅ UPDATED: Security Filter)
+    // ============================================
     async function loadRefleksi() {
         try {
             loadingRefleksi.classList.remove('hidden');
             listRefleksi.classList.add('hidden');
             emptyRefleksi.classList.add('hidden');
 
-            let q = query(collection(db, collectionName), orderBy("tanggal", "desc"));
+            // ✅ Admin Bypass Logic
+            const userEmail = auth.currentUser?.email;
+            const isAdmin = userEmail === ADMIN_EMAIL;
+            
+            let q;
+            if (isAdmin) {
+                // Admin: load SEMUA data
+                q = query(collection(db, collectionName), orderBy("tanggal", "desc"));
+            } else {
+                // Guru: hanya load data milik sendiri
+                q = query(collection(db, collectionName), 
+                    where("userId", "==", auth.currentUser?.uid),
+                    orderBy("tanggal", "desc")
+                );
+            }
             
             const snapshot = await getDocs(q);
             
@@ -357,7 +397,9 @@ async function initModule() {
         }
     }
 
-    // --- CREATE & UPDATE: Submit Form ---
+    // ============================================
+    // CREATE & UPDATE: Submit Form (✅ UPDATED: Add userId)
+    // ============================================
     formRefleksi.addEventListener('submit', async (e) => {
         e.preventDefault();
         
@@ -375,10 +417,13 @@ async function initModule() {
 
         try {
             if (id) {
+                // Update existing
                 await updateDoc(doc(db, collectionName, id), data);
                 alert('✅ Refleksi berhasil diupdate!');
             } else {
+                // Create new with userId
                 data.createdAt = new Date();
+                data.userId = auth.currentUser?.uid;  // ✅ TAMBAH: Field userId
                 await addDoc(collection(db, collectionName), data);
                 alert('✅ Refleksi berhasil ditambahkan!');
             }
