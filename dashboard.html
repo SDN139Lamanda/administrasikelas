@@ -164,7 +164,7 @@
                 </div>
             </header>
 
-            <!-- ✅ BANNER PENDING USER (BARU DITAMBAHKAN) -->
+            <!-- ✅ BANNER PENDING USER (Admin Bypass Included) -->
             <div id="pendingBanner" class="hidden bg-yellow-50 border-l-4 border-yellow-400 px-6 py-3">
                 <div class="flex items-center">
                     <i class="fas fa-clock text-yellow-400 text-lg mr-3"></i>
@@ -172,7 +172,7 @@
                         <p class="font-medium text-yellow-800 text-sm">Akun Menunggu Persetujuan Admin</p>
                         <p class="text-yellow-700 text-xs">
                             Fitur input data belum aktif. Hubungi admin: 
-                            <a href="mailto:radiah.tifarahs@gmail.com" class="underline font-medium">radiah.tifarahs@gmail.com</a>
+                            <a href="mailto:andi@139batuassung.com" class="underline font-medium">andi@139batuassung.com</a>
                         </p>
                     </div>
                 </div>
@@ -222,16 +222,30 @@
     </script>
 
     <!-- ============================================ -->
-    <!-- SCRIPT UTAMA DASHBOARD (Load Module + Read-Only Mode) -->
+    <!-- SCRIPT UTAMA DASHBOARD (Load Module + Read-Only Mode + Admin Bypass) -->
     <!-- ============================================ -->
     <script>
-        // ✅ FUNGSI BARU: Check user status & enable read-only mode
+        // ✅ KONSTANTA ADMIN EMAIL
+        const ADMIN_EMAIL = 'andi@139batuassung.com';
+
+        // ✅ FUNGSI: Check user status & enable read-only mode (dengan Admin Bypass)
         function checkUserStatus() {
             try {
                 const currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
+                const userEmail = currentUser?.email;
                 const pendingBanner = document.getElementById('pendingBanner');
                 
-                if (currentUser?.status !== 'active') {
+                // ✅ ADMIN BYPASS: Admin selalu full access
+                const isAdmin = userEmail === ADMIN_EMAIL;
+                
+                console.log('🔍 checkUserStatus:', {
+                    email: userEmail,
+                    status: currentUser?.status,
+                    isAdmin: isAdmin,
+                    isPending: currentUser?.isPending
+                });
+                
+                if (!isAdmin && currentUser?.status !== 'active') {
                     // Tampilkan banner
                     if (pendingBanner) pendingBanner.classList.remove('hidden');
                     
@@ -255,8 +269,9 @@
                     
                     console.log('🔒 Read-only mode: Akun pending approval');
                 } else {
-                    // User active: pastikan banner tersembunyi
+                    // User active ATAU admin: pastikan banner tersembunyi
                     if (pendingBanner) pendingBanner.classList.add('hidden');
+                    console.log('✅ Full access: User active atau Admin');
                 }
             } catch (e) {
                 console.warn('⚠️ checkUserStatus error:', e);
