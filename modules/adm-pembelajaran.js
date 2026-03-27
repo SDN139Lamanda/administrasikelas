@@ -14,7 +14,29 @@ import {
 } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
 const collectionName = "pembelajaran";
-const ADMIN_EMAIL = 'andi@139batuassung.com';
+const ADMIN_EMAIL = 'andi@139batuassung.com';  // ✅ KONSTANTA ADMIN
+
+// ============================================
+// FUNGSI HELPER: CHECK STATUS DENGAN ADMIN BYPASS
+// ============================================
+function checkAccessPermission() {
+    const currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
+    const userEmail = currentUser?.email;
+    const isAdmin = userEmail === ADMIN_EMAIL;
+    
+    // ✅ Admin selalu punya akses
+    if (isAdmin) {
+        return true;
+    }
+    
+    // User biasa: cek status
+    if (currentUser?.status !== 'active') {
+        alert('⚠️ Fitur ini belum aktif. Akun Anda masih menunggu persetujuan admin.');
+        return false;
+    }
+    
+    return true;
+}
 
 // ============================================
 // KONFIGURASI SUB ITEM
@@ -165,6 +187,29 @@ export function render() {
 // FUNGSI INIT - Mengaktifkan Logic
 // ============================================
 async function initModule() {
+    // ✅ CHECK USER STATUS - Enable read-only mode if pending (dengan Admin Bypass)
+    const currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
+    const userEmail = currentUser?.email;
+    const isAdmin = userEmail === ADMIN_EMAIL;
+    
+    console.log('🔍 adm-pembelajaran initModule:', { email: userEmail, isAdmin: isAdmin, status: currentUser?.status });
+    
+    // ✅ Jika user pending (bukan admin), tampilkan visual cue
+    if (!isAdmin && currentUser?.status !== 'active') {
+        // Tambahkan visual indicator di setiap card
+        const cards = document.querySelectorAll('[onclick*="bukaSubItem"]');
+        cards.forEach(card => {
+            card.classList.add('opacity-60', 'cursor-not-allowed');
+            card.title = 'Fitur aktif setelah akun disetujui admin';
+            // Hapus onclick untuk prevent click
+            card.onclick = (e) => {
+                e.preventDefault();
+                alert('⚠️ Fitur ini belum aktif. Akun Anda masih menunggu persetujuan admin.');
+            };
+        });
+        console.log('🔒 Read-only mode: adm-pembelajaran');
+    }
+
     // ============================================
     // KEMBALI KE DASHBOARD
     // ============================================
@@ -179,9 +224,14 @@ async function initModule() {
     }
 
     // ============================================
-    // BUKA SUB ITEM
+    // BUKA SUB ITEM (✅ DENGAN ADMIN BYPASS)
     // ============================================
     window.bukaSubItem = (subItemId) => {
+        // ✅ Check status dengan admin bypass
+        if (!checkAccessPermission()) {
+            return;
+        }
+        
         // Simpan sub item yang dipilih di sessionStorage
         sessionStorage.setItem('pembelajaran_subitem', subItemId);
         
@@ -202,7 +252,7 @@ async function initModule() {
     }
 
     // ============================================
-    // LOAD STATISTIK
+    // LOAD STATISTIK (Read-only: selalu diizinkan)
     // ============================================
     window.loadStatistik = async () => {
         const loadingStat = document.getElementById('loadingStat');
