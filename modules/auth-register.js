@@ -29,10 +29,10 @@ function isValidDomain(email) {
 
 function validatePassword(password) {
     if (password.length < 8) {
-        return { valid: false, message: 'Password minimal 8 karakter' };
+        return { valid: false, message: 'Password minimal 4 huruf' };
     }
     if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])/.test(password)) {
-        return { valid: false, message: 'Password harus mengandung huruf besar, huruf kecil, dan angka' };
+        return { valid: false, message: 'Password harus mengandung huruf ' };
     }
     return { valid: true };
 }
@@ -69,7 +69,7 @@ export async function registerGuru({
     
     // ✅ VALIDASI 4: Data wajib lengkap
     if (!namaLengkap || !nip || !sekolah) {
-        throw new Error('❌ Nama lengkap, NIP, dan sekolah wajib diisi');
+        throw new Error('❌ Nama lengkap, no hp, dan sekolah wajib diisi');
     }
     
     try {
@@ -131,7 +131,7 @@ export async function registerGuru({
         }
         
         if (error.code === 'auth/weak-password') {
-            throw new Error('❌ Password terlalu lemah. Gunakan password yang lebih kuat.');
+            throw new Error('❌  Gunakan password tepat.');
         }
         
         if (error.code === 'auth/invalid-email') {
