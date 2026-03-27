@@ -17,7 +17,51 @@ import {
 } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
 const collectionName = "modul-ajar";
-const ADMIN_EMAIL = 'andi@139batuassung.com';
+const ADMIN_EMAIL = 'andi@139batuassung.com';  // ✅ KONSTANTA ADMIN
+
+// ============================================
+// FUNGSI HELPER: CHECK STATUS DENGAN ADMIN BYPASS
+// ============================================
+function checkAccessPermission() {
+    const currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
+    const userEmail = currentUser?.email;
+    const isAdmin = userEmail === ADMIN_EMAIL;
+    
+    // ✅ Admin selalu punya akses
+    if (isAdmin) {
+        return true;
+    }
+    
+    // User biasa: cek status
+    if (currentUser?.status !== 'active') {
+        alert('⚠️ Fitur ini belum aktif. Akun Anda masih menunggu persetujuan admin.');
+        return false;
+    }
+    
+    return true;
+}
+
+// ============================================
+// FUNGSI HELPER: ENABLE READ-ONLY VISUAL CUE
+// ============================================
+function enableReadOnlyVisual() {
+    // Disable tombol action utama
+    document.querySelectorAll('button[onclick*="generateModul"], button[onclick*="saveToFirebase"], button[onclick*="deleteModul"]')
+        .forEach(btn => {
+            btn.disabled = true;
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+            btn.title = 'Fitur aktif setelah akun disetujui admin';
+        });
+    
+    // Disable input form
+    document.querySelectorAll('#formModul input, #formModul textarea, #formModul select')
+        .forEach(input => {
+            input.disabled = true;
+            input.classList.add('bg-gray-100', 'cursor-not-allowed');
+        });
+    
+    console.log('🔒 Read-only mode enabled: asisten-modul');
+}
 
 // ============================================
 // FUNGSI RENDER - Menghasilkan HTML Module
@@ -703,6 +747,18 @@ export function render() {
 // FUNGSI INIT - Mengaktifkan Logic Module
 // ============================================
 async function initModule() {
+    // ✅ CHECK USER STATUS - Enable read-only mode if pending (dengan Admin Bypass)
+    const currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
+    const userEmail = currentUser?.email;
+    const isAdmin = userEmail === ADMIN_EMAIL;
+    
+    console.log('🔍 asisten-modul initModule:', { email: userEmail, isAdmin: isAdmin, status: currentUser?.status });
+    
+    // ✅ Jika user pending (bukan admin), enable read-only visual
+    if (!isAdmin && currentUser?.status !== 'active') {
+        enableReadOnlyVisual();
+    }
+
     const formModul = document.getElementById('formModul');
     const emptyPreview = document.getElementById('emptyPreview');
     const loadingPreview = document.getElementById('loadingPreview');
@@ -741,6 +797,11 @@ async function initModule() {
     // ============================================
 
     window.generateModul = () => {
+        // ✅ Check status dengan admin bypass
+        if (!checkAccessPermission()) {
+            return;
+        }
+        
         // Get all form values
         const data = {
             namaPenyusun: document.getElementById('namaPenyusun').value.trim(),
@@ -1178,9 +1239,14 @@ async function initModule() {
     }
 
     // ============================================
-    // ✅ UPDATED: SAVE TO FIREBASE (With userId)
+    // ✅ UPDATED: SAVE TO FIREBASE (With userId + Admin Bypass)
     // ============================================
     window.saveToFirebase = async () => {
+        // ✅ Check status dengan admin bypass
+        if (!checkAccessPermission()) {
+            return;
+        }
+        
         if (!confirm('Simpan modul ini ke database?')) return;
 
         const data = window.currentModulData;
@@ -1202,7 +1268,7 @@ async function initModule() {
     }
 
     // ============================================
-    // ✅ UPDATED: RIWAYAT MODULE (With userId filter)
+    // ✅ UPDATED: RIWAYAT MODULE (With userId filter + Admin Bypass)
     // ============================================
     window.loadRiwayat = async () => {
         const loadingRiwayat = document.getElementById('loadingRiwayat');
@@ -1274,6 +1340,11 @@ async function initModule() {
     }
 
     window.deleteModul = async (id) => {
+        // ✅ Check status dengan admin bypass
+        if (!checkAccessPermission()) {
+            return;
+        }
+        
         if (!confirm('Hapus modul ini dari riwayat?')) return;
         
         try {
@@ -1286,6 +1357,10 @@ async function initModule() {
     }
 
     window.viewModul = (id) => {
+        // ✅ Check status dengan admin bypass
+        if (!checkAccessPermission()) {
+            return;
+        }
         alert('Fitur view modul akan segera hadir!');
     }
 
