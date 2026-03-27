@@ -141,7 +141,7 @@
         <!-- OVERLAY untuk mobile -->
         <div id="sidebarOverlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden md:hidden"></div>
 
-        <!-- ✅ KONTEN UTAMA (DIPERBAIKI: TAMBAH md:ml-64 AGAR TIDAK TERTUTUP SIDEBAR DI LAPTOP) -->
+        <!-- ✅ KONTEN UTAMA -->
         <div class="flex-1 flex flex-col overflow-hidden md:ml-64">
             
             <!-- Top Header -->
@@ -163,6 +163,20 @@
                          alt="Profile" id="userAvatar">
                 </div>
             </header>
+
+            <!-- ✅ BANNER PENDING USER (BARU DITAMBAHKAN) -->
+            <div id="pendingBanner" class="hidden bg-yellow-50 border-l-4 border-yellow-400 px-6 py-3">
+                <div class="flex items-center">
+                    <i class="fas fa-clock text-yellow-400 text-lg mr-3"></i>
+                    <div class="flex-1">
+                        <p class="font-medium text-yellow-800 text-sm">Akun Menunggu Persetujuan Admin</p>
+                        <p class="text-yellow-700 text-xs">
+                            Fitur input data belum aktif. Hubungi admin: 
+                            <a href="mailto:andi@139batuassung.com" class="underline font-medium">andi@139batuassung.com</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
 
             <!-- Area Konten Dinamis (Module Container) -->
             <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
@@ -208,9 +222,47 @@
     </script>
 
     <!-- ============================================ -->
-    <!-- SCRIPT UTAMA DASHBOARD (Load Module) -->
+    <!-- SCRIPT UTAMA DASHBOARD (Load Module + Read-Only Mode) -->
     <!-- ============================================ -->
     <script>
+        // ✅ FUNGSI BARU: Check user status & enable read-only mode
+        function checkUserStatus() {
+            try {
+                const currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
+                const pendingBanner = document.getElementById('pendingBanner');
+                
+                if (currentUser?.status !== 'active') {
+                    // Tampilkan banner
+                    if (pendingBanner) pendingBanner.classList.remove('hidden');
+                    
+                    // Disable semua tombol action di module container
+                    const container = document.getElementById('module-container');
+                    if (container) {
+                        container.querySelectorAll('button[type="submit"], .btn-save, .btn-edit, .btn-delete, .btn-add, .btn-primary')
+                            .forEach(btn => {
+                                btn.disabled = true;
+                                btn.classList.add('opacity-50', 'cursor-not-allowed');
+                                btn.title = 'Fitur aktif setelah akun disetujui admin';
+                            });
+                        
+                        // Disable semua input form
+                        container.querySelectorAll('input:not([type="checkbox"]), textarea, select')
+                            .forEach(input => {
+                                input.disabled = true;
+                                input.classList.add('bg-gray-100', 'cursor-not-allowed');
+                            });
+                    }
+                    
+                    console.log('🔒 Read-only mode: Akun pending approval');
+                } else {
+                    // User active: pastikan banner tersembunyi
+                    if (pendingBanner) pendingBanner.classList.add('hidden');
+                }
+            } catch (e) {
+                console.warn('⚠️ checkUserStatus error:', e);
+            }
+        }
+
         async function loadModule(moduleName) {
             const container = document.getElementById('module-container');
             const titles = {
@@ -259,6 +311,8 @@
                 container.innerHTML = '';
                 if (module.render) {
                     container.appendChild(module.render());
+                    // ✅ PENTING: Apply read-only mode setelah module dirender
+                    checkUserStatus();
                 } else {
                     container.innerHTML = `
                         <div class="text-center py-12 text-red-500">
@@ -291,6 +345,8 @@
         // Load default module saat halaman pertama kali dibuka
         document.addEventListener('DOMContentLoaded', () => {
             loadModule('adm-kelas');
+            // ✅ Check status setelah DOM ready (untuk default module)
+            setTimeout(checkUserStatus, 500);
         });
     </script>
 
