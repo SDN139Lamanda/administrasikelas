@@ -127,12 +127,12 @@ export function render() {
                             <label class="block text-gray-700 text-sm font-bold mb-2">Kelas</label>
                             <select id="kelas" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500">
                                 <option value="">Pilih Kelas</option>
-                                <option value="1">X-satu</option>
-                                <option value="2">X-dua</option>
-                                <option value="3">XI-tiga</option>
-                                <option value="4">XI-empat</option>
-                                <option value="5">XI-lima</option>
-                                <option value="6">XI-enam</option> 
+                                <option value="1">satu</option>
+                                <option value="2">dua</option>
+                                <option value="3">tiga</option>
+                                <option value="4">empat</option>
+                                <option value="5">lima</option>
+                                <option value="6">enam</option> 
                             </select>
                         </div>
                     </div>
