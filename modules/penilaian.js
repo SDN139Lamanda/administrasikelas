@@ -1,7 +1,7 @@
 // modules/penilaian.js
 // Module Penilaian - Landing Page (Tier 2)
 // SDN 139 LAMANDA
-// ✅ Menu utama untuk memilih jenis penilaian
+// ✅ Menu utama untuk memilih jenis penilaian + Read-Only Mode Support
 
 import { db } from '../config-firebase.js';
 import { auth } from '../config-firebase.js';
@@ -14,7 +14,47 @@ import {
 } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
 const collectionName = "penilaian";
-const ADMIN_EMAIL = 'andi@139batuassung.com';
+const ADMIN_EMAIL = 'andi@139batuassung.com';  // ✅ KONSTANTA ADMIN
+
+// ============================================
+// FUNGSI HELPER: CHECK STATUS DENGAN ADMIN BYPASS
+// ============================================
+function checkAccessPermission() {
+    const currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
+    const userEmail = currentUser?.email;
+    const isAdmin = userEmail === ADMIN_EMAIL;
+    
+    // ✅ Admin selalu punya akses
+    if (isAdmin) {
+        return true;
+    }
+    
+    // User biasa: cek status
+    if (currentUser?.status !== 'active') {
+        alert('⚠️ Fitur ini belum aktif. Akun Anda masih menunggu persetujuan admin.');
+        return false;
+    }
+    
+    return true;
+}
+
+// ============================================
+// FUNGSI HELPER: ENABLE READ-ONLY VISUAL CUE
+// ============================================
+function enableReadOnlyVisual() {
+    // Disable semua card sub item (visual cue)
+    document.querySelectorAll('[onclick*="bukaSubItem"]').forEach(card => {
+        card.classList.add('opacity-60', 'cursor-not-allowed');
+        card.title = 'Fitur aktif setelah akun disetujui admin';
+        // Override onclick untuk prevent navigation
+        card.onclick = (e) => {
+            e.preventDefault();
+            alert('⚠️ Fitur ini belum aktif. Akun Anda masih menunggu persetujuan admin.');
+        };
+    });
+    
+    console.log('🔒 Read-only mode enabled: penilaian');
+}
 
 // ============================================
 // KONFIGURASI SUB ITEM PENILAIAN
@@ -152,6 +192,18 @@ export function render() {
 // FUNGSI INIT - Mengaktifkan Logic
 // ============================================
 async function initModule() {
+    // ✅ CHECK USER STATUS - Enable read-only mode if pending (dengan Admin Bypass)
+    const currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
+    const userEmail = currentUser?.email;
+    const isAdmin = userEmail === ADMIN_EMAIL;
+    
+    console.log('🔍 penilaian initModule:', { email: userEmail, isAdmin: isAdmin, status: currentUser?.status });
+    
+    // ✅ Jika user pending (bukan admin), enable read-only visual
+    if (!isAdmin && currentUser?.status !== 'active') {
+        enableReadOnlyVisual();
+    }
+
     // ============================================
     // KEMBALI KE DASHBOARD
     // ============================================
@@ -164,9 +216,14 @@ async function initModule() {
     }
 
     // ============================================
-    // BUKA SUB ITEM
+    // BUKA SUB ITEM (✅ DENGAN ADMIN BYPASS)
     // ============================================
     window.bukaSubItem = (subItemId) => {
+        // ✅ Check status dengan admin bypass
+        if (!checkAccessPermission()) {
+            return;
+        }
+        
         sessionStorage.setItem('penilaian_subitem', subItemId);
         const moduleName = `penilaian-${subItemId}`;
         
@@ -181,7 +238,7 @@ async function initModule() {
     }
 
     // ============================================
-    // LOAD STATISTIK
+    // LOAD STATISTIK (Read-only: selalu diizinkan)
     // ============================================
     window.loadStatistik = async () => {
         const loadingStat = document.getElementById('loadingStat');
@@ -239,5 +296,6 @@ async function initModule() {
         }
     }
 
+    // Initial load statistik
     window.loadStatistik();
 }
