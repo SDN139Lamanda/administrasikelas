@@ -153,7 +153,6 @@ export function render() {
                 <li>• Upload file ke Google Drive sebelum menambahkan dokumen</li>
                 <li>• Set sharing Google Drive: "Anyone with link can view"</li>
                 <li>• Setiap dokumen terikat dengan akun Anda (tidak bisa dilihat guru lain)</li>
-                <li>• Admin dapat melihat semua dokumen dari semua guru</li>
             </ul>
         </div>
     `;
