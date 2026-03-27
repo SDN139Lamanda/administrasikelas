@@ -3,313 +3,316 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SDN 139 LAMANDA - Sistem Manajemen Kelas</title>
+    <title>Administrasi Kelas Digital - Platform Guru SDN</title>
+    <meta name="description" content="Platform Administrasi Kelas Digital untuk Guru SDN se-Indonesia. Kelola modul, penilaian, refleksi, dan lebih banyak lagi.">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        .hero-gradient {
-            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        .gradient-hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
-        .logo-bulatan {
-            background: white;
-            border-radius: 50%;
-            padding: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .service-card, .contact-card {
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
             transition: all 0.3s ease;
         }
-        .service-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-        }
-        .contact-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-        }
-        html {
-            scroll-behavior: smooth;
+        .step-number {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
     </style>
 </head>
 <body class="bg-gray-50">
-
-    <!-- Navbar -->
+    <!-- Navigation Bar -->
     <nav class="bg-white shadow-sm sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
                 <div class="flex items-center gap-3">
-                    <img src="logo-sekolah.jpeg" alt="Logo SDN 139 LAMANDA" class="h-8 w-8 object-contain">
-                    <span class="font-bold text-gray-800">SDN 139 LAMANDA</span>
+                    <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-school text-purple-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-lg font-bold text-gray-800">Administrasi Kelas</h1>
+                        <p class="text-xs text-gray-500">Platform Guru SDN</p>
+                    </div>
                 </div>
-                <div class="hidden md:flex gap-4">
-                    <a href="#layanan" class="text-gray-600 hover:text-blue-600 px-3 py-2">Layanan</a>
-                    <a href="#kontak" class="text-gray-600 hover:text-blue-600 px-3 py-2">Kontak</a>
-                    <a href="login.html" class="text-gray-600 hover:text-blue-600 px-3 py-2">Login</a>
-                    <a href="register.html" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">Daftar</a>
+                <div class="flex gap-3">
+                    <a href="login.html" class="text-gray-600 hover:text-purple-600 font-medium px-4 py-2 transition">
+                        Login
+                    </a>
+                    <a href="register.html" class="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2 rounded-lg font-medium transition shadow-sm">
+                        <i class="fas fa-user-plus mr-2"></i>Daftar
+                    </a>
                 </div>
-                <!-- Mobile Menu Button -->
-                <button onclick="toggleMobileMenu()" class="md:hidden text-gray-600">
-                    <i class="fas fa-bars text-xl"></i>
-                </button>
-            </div>
-            <!-- Mobile Menu -->
-            <div id="mobileMenu" class="hidden md:hidden pb-4">
-                <a href="#layanan" class="block text-gray-600 hover:text-blue-600 px-3 py-2">Layanan</a>
-                <a href="#kontak" class="block text-gray-600 hover:text-blue-600 px-3 py-2">Kontak</a>
-                <a href="login.html" class="block text-gray-600 hover:text-blue-600 px-3 py-2">Login</a>
-                <a href="register.html" class="block bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg mt-2">Daftar</a>
             </div>
         </div>
     </nav>
 
     <!-- Hero Section -->
-    <section class="hero-gradient text-white py-16 sm:py-20">
+    <section class="gradient-hero text-white py-20 md:py-28">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <!-- LOGO BESAR -->
-            <div class="flex justify-center mb-6">
-                <div class="logo-bulatan">
-                    <img src="logo-sekolah.jpeg" alt="Logo SDN 139 LAMANDA" class="h-20 w-20 sm:h-24 sm:w-24 object-contain">
-                </div>
+            <div class="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-6 backdrop-blur-sm">
+                <i class="fas fa-chalkboard-teacher text-4xl"></i>
             </div>
-            
-            <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">Sistem Manajemen Kelas Digital</h1>
-            <p class="text-lg sm:text-xl md:text-2xl text-blue-100 mb-6 sm:mb-8">SDN 139 LAMANDA</p>
-            <p class="text-base sm:text-lg text-blue-200 mb-8 sm:mb-12 max-w-2xl mx-auto px-4">
-                Platform terintegrasi untuk pengelolaan administrasi kelas, pembelajaran, refleksi, dan penilaian siswa
+            <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
+                Administrasi Kelas Digital<br/>untuk Guru SDN
+            </h1>
+            <p class="text-xl md:text-2xl text-purple-100 mb-10 max-w-3xl mx-auto">
+                Kelola modul ajar, penilaian, refleksi, dan administrasi kelas dalam satu platform terintegrasi
             </p>
-            
-            <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4">
-                <a href="#kontak" class="bg-white text-blue-600 hover:bg-gray-100 px-6 py-3 rounded-lg font-semibold transition flex items-center justify-center">
-                    <i class="fas fa-comments mr-2"></i>Hubungi Kami
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="register.html" class="bg-white text-purple-600 px-8 py-4 rounded-xl font-semibold hover:bg-gray-100 transition shadow-lg text-lg">
+                    <i class="fas fa-user-plus mr-2"></i>Daftar Sekarang - Gratis
                 </a>
-                <a href="login.html" class="border-2 border-white text-white hover:bg-white hover:text-blue-600 px-6 py-3 rounded-lg font-semibold transition flex items-center justify-center">
+                <a href="login.html" class="bg-purple-800/50 text-white px-8 py-4 rounded-xl font-semibold hover:bg-purple-800/70 transition border-2 border-white/30 text-lg">
                     <i class="fas fa-sign-in-alt mr-2"></i>Login
                 </a>
             </div>
+            <p class="text-purple-200 text-sm mt-6">
+                <i class="fas fa-check-circle mr-1"></i> Email: @guru.belajar.sd.id
+                <span class="mx-3">•</span>
+                <i class="fas fa-check-circle mr-1"></i> Aman & Terisolasi
+            </p>
         </div>
     </section>
 
-    <!-- 🔹 LAYANAN Section -->
-    <section class="py-12 sm:py-16 bg-white" id="layanan">
+    <!-- Features Section -->
+    <section class="py-20 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-10 sm:mb-12">
-                <span class="bg-blue-100 text-blue-700 px-4 py-1 rounded-full text-sm font-medium">FITUR KAMI</span>
-                <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mt-4 mb-3">Layanan Sistem</h2>
-                <p class="text-gray-600 max-w-2xl mx-auto">Solusi lengkap untuk mendukung kegiatan administrasi dan pembelajaran di SDN 139 LAMANDA</p>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-                <div class="service-card bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <div class="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-users text-2xl text-blue-600"></i>
-                    </div>
-                    <h3 class="font-semibold text-gray-800 mb-2 text-center">Administrasi Kelas</h3>
-                    <p class="text-gray-600 text-sm text-center">Kelola data siswa, informasi kelas, dan profil pembelajaran secara terpusat</p>
-                </div>
-
-                <div class="service-card bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <div class="w-14 h-14 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-book-open text-2xl text-green-600"></i>
-                    </div>
-                    <h3 class="font-semibold text-gray-800 mb-2 text-center">Adm. Pembelajaran</h3>
-                    <p class="text-gray-600 text-sm text-center">Upload dan kelola RPP, modul ajar, serta materi pembelajaran digital</p>
-                </div>
-
-                <div class="service-card bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <div class="w-14 h-14 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-clipboard-check text-2xl text-purple-600"></i>
-                    </div>
-                    <h3 class="font-semibold text-gray-800 mb-2 text-center">Absensi Digital</h3>
-                    <p class="text-gray-600 text-sm text-center">Catat kehadiran siswa secara real-time dengan opsi download laporan</p>
-                </div>
-
-                <div class="service-card bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <div class="w-14 h-14 bg-yellow-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-chart-line text-2xl text-yellow-600"></i>
-                    </div>
-                    <h3 class="font-semibold text-gray-800 mb-2 text-center">Penilaian</h3>
-                    <p class="text-gray-600 text-sm text-center">Input nilai, analisis hasil belajar, dan generate laporan akademik</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- 🔹 KEUNGGULAN Section (UPDATED) -->
-    <section class="py-12 sm:py-16 bg-gray-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <!-- Judul Baru Pilihan Anda -->
-            <div class="mb-10">
-                <span class="bg-purple-100 text-purple-700 px-4 py-1 rounded-full text-sm font-medium">LEBIH DARI SEKADAR SISTEM</span>
-                <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mt-4 mb-3">Lebih Dari Sekadar Sistem Manajemen Administrasi Pendidikan</h2>
-                <p class="text-gray-600 max-w-2xl mx-auto">Solusi lengkap yang dirancang untuk mendukung transformasi digital sekolah Anda</p>
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">Fitur Lengkap</h2>
+                <p class="text-gray-600 text-lg max-w-2xl mx-auto">Semua yang Anda butuhkan untuk administrasi kelas dalam satu platform</p>
             </div>
             
-            <!-- 3 Card Keunggulan (TETAP SAMA) -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
-                <div class="bg-white p-6 rounded-lg shadow-sm">
-                    <i class="fas fa-lock text-3xl text-blue-600 mb-4"></i>
-                    <h3 class="font-semibold text-gray-800 mb-2">Aman & Terpercaya</h3>
-                    <p class="text-gray-600 text-sm">Data tersimpan di Firebase dengan enkripsi standar industri</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Feature 1 -->
+                <div class="feature-card bg-white p-6 rounded-xl shadow-md border border-gray-100">
+                    <div class="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fas fa-book-open text-blue-600 text-2xl"></i>
+                    </div>
+                    <h3 class="font-bold text-gray-800 mb-2 text-lg">Adm. Pembelajaran</h3>
+                    <p class="text-gray-600 text-sm">Modul Ajar, ATP, CP, Bank Soal, dan dokumen pembelajaran lainnya</p>
                 </div>
-                <div class="bg-white p-6 rounded-lg shadow-sm">
-                    <i class="fas fa-mobile-alt text-3xl text-green-600 mb-4"></i>
-                    <h3 class="font-semibold text-gray-800 mb-2">Akses Dimana Saja</h3>
-                    <p class="text-gray-600 text-sm">Dapat diakses via desktop, tablet, maupun smartphone, versi ofline-online sesuai request</p>
+                
+                <!-- Feature 2 -->
+                <div class="feature-card bg-white p-6 rounded-xl shadow-md border border-gray-100">
+                    <div class="w-14 h-14 bg-green-100 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fas fa-users text-green-600 text-2xl"></i>
+                    </div>
+                    <h3 class="font-bold text-gray-800 mb-2 text-lg">Adm. Kelas</h3>
+                    <p class="text-gray-600 text-sm">Data siswa, absensi digital, dan manajemen kelas harian</p>
                 </div>
-                <div class="bg-white p-6 rounded-lg shadow-sm">
-                    <i class="fas fa-sync-alt text-3xl text-purple-600 mb-4"></i>
-                    <h3 class="font-semibold text-gray-800 mb-2">Real-time Sync</h3>
-                    <p class="text-gray-600 text-sm">Perubahan data langsung tersinkronisasi ke semua perangkat</p>
+                
+                <!-- Feature 3 -->
+                <div class="feature-card bg-white p-6 rounded-xl shadow-md border border-gray-100">
+                    <div class="w-14 h-14 bg-purple-100 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fas fa-chart-bar text-purple-600 text-2xl"></i>
+                    </div>
+                    <h3 class="font-bold text-gray-800 mb-2 text-lg">Penilaian</h3>
+                    <p class="text-gray-600 text-sm">Penilaian harian, PTS, PAS, dan laporan pendidikan</p>
+                </div>
+                
+                <!-- Feature 4 -->
+                <div class="feature-card bg-white p-6 rounded-xl shadow-md border border-gray-100">
+                    <div class="w-14 h-14 bg-orange-100 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fas fa-clipboard-check text-orange-600 text-2xl"></i>
+                    </div>
+                    <h3 class="font-bold text-gray-800 mb-2 text-lg">Refleksi</h3>
+                    <p class="text-gray-600 text-sm">Jurnal refleksi pembelajaran untuk peningkatan kualitas mengajar</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- 🔹 KONTAK Section -->
-    <section class="py-12 sm:py-16 bg-white" id="kontak">
+    <!-- How It Works Section -->
+    <section class="py-20 bg-gray-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-10 sm:mb-12">
-                <span class="bg-green-100 text-green-700 px-4 py-1 rounded-full text-sm font-medium">HUBUNGI KAMI</span>
-                <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mt-4 mb-3">Kontak & Informasi</h2>
-                <p class="text-gray-600 max-w-2xl mx-auto">Tim kami siap membantu Anda. Silakan hubungi kami melalui saluran berikut:</p>
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">Cara Mendaftar</h2>
+                <p class="text-gray-600 text-lg max-w-2xl mx-auto">4 langkah mudah untuk mulai menggunakan platform</p>
             </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mb-12">
-                <!-- WhatsApp -->
-                <div class="contact-card bg-gray-50 p-6 rounded-xl shadow-sm border border-gray-100 text-center">
-                    <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fab fa-whatsapp text-3xl text-green-600"></i>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Step 1 -->
+                <div class="text-center">
+                    <div class="step-number w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-white text-2xl font-bold shadow-lg">
+                        1
                     </div>
-                    <h3 class="font-semibold text-gray-800 mb-2">WhatsApp</h3>
-                    <p class="text-gray-600 text-sm mb-3">Hubungi kami via WhatsApp</p>
-                    <a href="https://wa.me/6285396909069" target="_blank" class="inline-flex items-center text-green-600 hover:text-green-700 font-medium">
-                        <i class="fas fa-phone mr-2"></i>0853-9690-9069
-                    </a>
+                    <h3 class="font-bold text-gray-800 mb-2 text-lg">Daftar Akun</h3>
+                    <p class="text-gray-600">Klik tombol Daftar dan gunakan email @guru.belajar.sd.id</p>
                 </div>
-
-                <!-- Email -->
-                <div class="contact-card bg-gray-50 p-6 rounded-xl shadow-sm border border-gray-100 text-center">
-                    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-envelope text-2xl text-blue-600"></i>
+                
+                <!-- Step 2 -->
+                <div class="text-center">
+                    <div class="step-number w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-white text-2xl font-bold shadow-lg">
+                        2
                     </div>
-                    <h3 class="font-semibold text-gray-800 mb-2">Email</h3>
-                    <p class="text-gray-600 text-sm mb-3">Kirim email kepada kami</p>
-                    <a href="mailto:hasriandibasir80@guru.sd.belajar.id" class="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium text-sm break-all">
-                        <i class="fas fa-envelope mr-2"></i>hasriandibasir80@guru.sd.belajar.id
-                    </a>
+                    <h3 class="font-bold text-gray-800 mb-2 text-lg">Verifikasi Email</h3>
+                    <p class="text-gray-600">Klik link verifikasi yang dikirim ke email Anda</p>
                 </div>
-
-                <!-- Alamat -->
-                <div class="contact-card bg-gray-50 p-6 rounded-xl shadow-sm border border-gray-100 text-center">
-                    <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-map-marker-alt text-2xl text-red-600"></i>
+                
+                <!-- Step 3 -->
+                <div class="text-center">
+                    <div class="step-number w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-white text-2xl font-bold shadow-lg">
+                        3
                     </div>
-                    <h3 class="font-semibold text-gray-800 mb-2">Alamat</h3>
-                    <p class="text-gray-600 text-sm mb-3">Kunjungi sekolah kami</p>
-                    <p class="text-gray-700 text-sm">
-                        <i class="fas fa-map-pin mr-2 text-red-500"></i>
-                        Dusun Batu Assung
-                    </p>
+                    <h3 class="font-bold text-gray-800 mb-2 text-lg">Tunggu Persetujuan</h3>
+                    <p class="text-gray-600">Admin akan memverifikasi dan menyetujui akun Anda</p>
+                </div>
+                
+                <!-- Step 4 -->
+                <div class="text-center">
+                    <div class="step-number w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-white text-2xl font-bold shadow-lg">
+                        4
+                    </div>
+                    <h3 class="font-bold text-gray-800 mb-2 text-lg">Mulai Menggunakan</h3>
+                    <p class="text-gray-600">Login dan akses semua fitur administrasi kelas</p>
                 </div>
             </div>
+        </div>
+    </section>
 
-            <!-- Jam Operasional & Info -->
-            <div class="bg-gray-50 rounded-xl shadow-sm border border-gray-100 p-6 sm:p-8">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <h3 class="font-semibold text-gray-800 mb-4 flex items-center">
-                            <i class="fas fa-clock text-blue-600 mr-2"></i>
-                            Jam Operasional pendaftaran akun
-                        </h3>
-                        <div class="space-y-2 text-sm">
-                            <div class="flex justify-between py-2 border-b border-gray-200">
-                                <span class="text-gray-600">Senin - Jumat</span>
-                                <span class="font-medium text-gray-800">Jam istirahat sekolah / jam pulang sekolah</span>
+    <!-- Benefits Section -->
+    <section class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div>
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-6">Kenapa Platform Ini?</h2>
+                    <p class="text-gray-600 text-lg mb-8">Dirancang khusus untuk memudahkan pekerjaan administrasi guru SD dengan fitur yang lengkap dan mudah digunakan.</p>
+                    
+                    <ul class="space-y-4">
+                        <li class="flex items-start gap-3">
+                            <i class="fas fa-check-circle text-green-500 text-xl mt-1"></i>
+                            <div>
+                                <p class="font-semibold text-gray-800">Email Resmi Guru</p>
+                                <p class="text-gray-600 text-sm">Gunakan email @guru.belajar.sd.id untuk keamanan dan verifikasi</p>
                             </div>
-                            <div class="flex justify-between py-2 border-b border-gray-200">
-                                <span class="text-gray-600">Sabtu</span>
-                                <span class="font-medium text-gray-800">07:00 - 12:00</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fas fa-check-circle text-green-500 text-xl mt-1"></i>
+                            <div>
+                                <p class="font-semibold text-gray-800">Gratis untuk Semua Guru SDN</p>
+                                <p class="text-gray-600 text-sm">Tidak ada biaya berlangganan, sepenuhnya gratis</p>
                             </div>
-                            <div class="flex justify-between py-2">
-                                <span class="text-gray-600">Minggu</span>
-                                <span class="font-medium text-gray-400">Libur</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fas fa-check-circle text-green-500 text-xl mt-1"></i>
+                            <div>
+                                <p class="font-semibold text-gray-800">Data Aman & Terisolasi</p>
+                                <p class="text-gray-600 text-sm">Setiap guru hanya bisa akses data sendiri, admin bisa monitor semua</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fas fa-check-circle text-green-500 text-xl mt-1"></i>
+                            <div>
+                                <p class="font-semibold text-gray-800">Akses Multi-Device</p>
+                                <p class="text-gray-600 text-sm">Gunakan dari PC, laptop, tablet, atau HP kapan saja</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fas fa-check-circle text-green-500 text-xl mt-1"></i>
+                            <div>
+                                <p class="font-semibold text-gray-800">Tanpa Instalasi</p>
+                                <p class="text-gray-600 text-sm">Akses langsung via browser, tidak perlu install aplikasi</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="bg-gradient-to-br from-purple-50 to-blue-50 p-8 rounded-2xl shadow-lg">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-6">Informasi Pendaftaran</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-start gap-3">
+                            <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-envelope text-purple-600"></i>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-gray-800">Email Pendaftaran</p>
+                                <p class="text-gray-600 text-sm">nama@guru.belajar.sd.id</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-clock text-green-600"></i>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-gray-800">Proses Persetujuan</p>
+                                <p class="text-gray-600 text-sm">1-3 hari kerja setelah verifikasi email</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-shield-alt text-blue-600"></i>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-gray-800">Keamanan</p>
+                                <p class="text-gray-600 text-sm">Data terenkripsi, isolasi per user, backup otomatis</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-headset text-orange-600"></i>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-gray-800">Bantuan</p>
+                                <p class="text-gray-600 text-sm">Hubungi admin: andi@139batuassung.com</p>
                             </div>
                         </div>
                     </div>
-                    <div>
-                        <h3 class="font-semibold text-gray-800 mb-4 flex items-center">
-                            <i class="fas fa-info-circle text-green-600 mr-2"></i>
-                            Informasi Pendaftaran
-                        </h3>
-                        <ul class="space-y-2 text-sm text-gray-600">
-                            <li class="flex items-start">
-                                <i class="fas fa-check text-green-500 mr-2 mt-1"></i>
-                                <span>Guru dapat mendaftar melalui tombol "Daftar" di atas</span>
-                            </li>
-                            <li class="flex items-start">
-                                <i class="fas fa-check text-green-500 mr-2 mt-1"></i>
-                                <span>Orang tua dapat menghubungi admin untuk informasi lebih lanjut</span>
-                            </li>
-                            <li class="flex items-start">
-                                <i class="fas fa-check text-green-500 mr-2 mt-1"></i>
-                                <span>Verifikasi akun dilakukan oleh admin</span>
-                            </li>
-                        </ul>
-                    </div>
+                    
+                    <a href="register.html" class="block w-full bg-purple-600 hover:bg-purple-700 text-white text-center px-6 py-3 rounded-xl font-semibold mt-6 transition shadow-md">
+                        <i class="fas fa-user-plus mr-2"></i>Daftar Sekarang
+                    </a>
                 </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- CTA Section -->
-    <section class="py-12 sm:py-16 hero-gradient text-white">
-        <div class="max-w-4xl mx-auto px-4 text-center">
-            <h2 class="text-2xl sm:text-3xl font-bold mb-4">Punya Pertanyaan?</h2>
-            <p class="text-blue-100 mb-8 text-lg">Jangan ragu untuk menghubungi kami. Tim admin siap membantu Anda!</p>
-            <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <!-- WhatsApp CTA - Sudah disesuaikan dengan nomor kontak -->
-                <a href="https://wa.me/6285396909069" target="_blank" class="bg-green-500 hover:bg-green-600 text-white px-8 py-3 rounded-lg font-semibold transition flex items-center justify-center">
-                    <i class="fab fa-whatsapp mr-2"></i>Chat WhatsApp
-                </a>
-                <a href="login.html" class="border-2 border-white text-white hover:bg-white hover:text-blue-600 px-8 py-3 rounded-lg font-semibold transition flex items-center justify-center">
-                    <i class="fas fa-sign-in-alt mr-2"></i>Login Sekarang
-                </a>
             </div>
         </div>
     </section>
 
     <!-- Footer -->
-    <footer class="bg-gray-800 text-white py-8">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div class="flex items-center justify-center gap-3 mb-4">
-                <img src="logo-sekolah.jpeg" alt="Logo" class="h-6 w-6 object-contain bg-white rounded-full p-1">
-                <span class="font-bold">SDN 139 LAMANDA</span>
+    <footer class="bg-gray-800 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-school text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="font-bold text-lg">Administrasi Kelas</p>
+                            <p class="text-sm text-gray-400">Platform Guru SDN</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm">Platform administrasi kelas digital untuk meningkatkan kualitas pembelajaran di SDN se-Indonesia.</p>
+                </div>
+                
+                <div>
+                    <h4 class="font-bold text-lg mb-4">Menu</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="login.html" class="hover:text-white transition">Login</a></li>
+                        <li><a href="register.html" class="hover:text-white transition">Daftar</a></li>
+                        <li><a href="reset-password.html" class="hover:text-white transition">Reset Password</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-bold text-lg mb-4">Kontak</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li class="flex items-center gap-2">
+                            <i class="fas fa-envelope"></i>
+                            <span>andi@139batuassung.com</span>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i class="fas fa-school"></i>
+                            <span>SDN 139 LAMANDA</span>
+                        </li>
+                    </ul>
+                </div>
             </div>
-            <p class="text-gray-400 text-sm mb-2">Sistem Manajemen Kelas Digital</p>
-            <div class="flex justify-center gap-4 mb-4 text-sm">
-                <a href="#layanan" class="text-gray-300 hover:text-white transition">Layanan</a>
-                <span class="text-gray-600">|</span>
-                <a href="#kontak" class="text-gray-300 hover:text-white transition">Kontak</a>
-                <span class="text-gray-600">|</span>
-                <a href="login.html" class="text-gray-300 hover:text-white transition">Login</a>
+            
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400 text-sm">
+                <p>&copy; 2025 Platform Administrasi Kelas Digital. All rights reserved.</p>
+                <p class="mt-2">Dibuat untuk Guru SDN se-Indonesia</p>
             </div>
-            <p class="text-gray-500 text-xs">© 2025 SDN 139 LAMANDA. All rights reserved.</p>
         </div>
     </footer>
-
-    <!-- Mobile Menu Toggle Script -->
-    <script>
-        function toggleMobileMenu() {
-            const menu = document.getElementById('mobileMenu');
-            menu.classList.toggle('hidden');
-        }
-    </script>
-
 </body>
 </html>
