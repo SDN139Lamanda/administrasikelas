@@ -11,7 +11,7 @@ import {
 import { doc, setDoc } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
 
 // ✅ DOMAIN STANDAR UNTUK SEMUA GURU
-const ALLOWED_DOMAIN = 'guru.belajar.sd.id';
+const ALLOWED_DOMAIN = 'guru.sd.belajar.id';
 
 // ============================================
 // FUNGSI VALIDASI
