@@ -9,7 +9,7 @@ import {
     verifyPasswordResetCode 
 } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
 
-const ALLOWED_DOMAIN = 'guru.belajar.sd.id';
+const ALLOWED_DOMAIN = 'guru.sd.belajar.id';
 
 // ============================================
 // FUNGSI VALIDASI
@@ -27,10 +27,10 @@ function isValidDomain(email) {
 
 function validatePassword(password) {
     if (password.length < 8) {
-        return { valid: false, message: 'Password minimal 8 karakter' };
+        return { valid: false, message: 'Password minimal 4 huruf' };
     }
     if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])/.test(password)) {
-        return { valid: false, message: 'Password harus mengandung huruf besar, huruf kecil, dan angka' };
+        return { valid: false, message: 'Password harus mengandung huruf kecil };
     }
     return { valid: true };
 }
