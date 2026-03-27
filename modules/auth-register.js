@@ -29,10 +29,10 @@ function isValidDomain(email) {
 
 function validatePassword(password) {
     if (password.length < 8) {
-        return { valid: false, message: 'Password minimal 4 huruf' };
+        return { valid: false, message: 'Password minimal 8 karakter' };
     }
     if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])/.test(password)) {
-        return { valid: false, message: 'Password harus mengandung huruf ' };
+        return { valid: false, message: 'Password harus mengandung huruf besar, huruf kecil, dan angka' };
     }
     return { valid: true };
 }
@@ -45,7 +45,6 @@ export async function registerGuru({
     email,
     password,
     namaLengkap,
-    nip,
     noHp,
     sekolah
 }) {
@@ -56,7 +55,7 @@ export async function registerGuru({
         throw new Error('❌ Format email tidak valid');
     }
     
-    // ✅ VALIDASI 2: Domain harus @guru.belajar.sd.id
+    // ✅ VALIDASI 2: Domain harus @guru.sd.belajar.id
     if (!isValidDomain(email)) {
         throw new Error(`❌ Email harus menggunakan domain @${ALLOWED_DOMAIN}`);
     }
@@ -67,9 +66,9 @@ export async function registerGuru({
         throw new Error(`❌ ${passwordCheck.message}`);
     }
     
-    // ✅ VALIDASI 4: Data wajib lengkap
-    if (!namaLengkap || !nip || !sekolah) {
-        throw new Error('❌ Nama lengkap, no hp, dan sekolah wajib diisi');
+    // ✅ VALIDASI 4: Data wajib lengkap (tanpa nip)
+    if (!namaLengkap || !sekolah) {
+        throw new Error('❌ Nama lengkap dan sekolah wajib diisi');
     }
     
     try {
@@ -89,13 +88,12 @@ export async function registerGuru({
         console.log('📧 Sending verification email...');
         await sendEmailVerification(user);
         
-        // ✅ STEP 4: SIMPAN INFO USER di Firestore
+        // ✅ STEP 4: SIMPAN INFO USER di Firestore (tanpa nip)
         // Status: pending_verification (belum klik link email)
         await setDoc(doc(db, 'users', user.uid), {
             uid: user.uid,
             email: email,
             namaLengkap: namaLengkap,
-            nip: nip,
             noHp: noHp || '',
             sekolah: sekolah,
             role: 'guru',
@@ -131,7 +129,7 @@ export async function registerGuru({
         }
         
         if (error.code === 'auth/weak-password') {
-            throw new Error('❌  Gunakan password tepat.');
+            throw new Error('❌ Password terlalu lemah. Gunakan password yang lebih kuat.');
         }
         
         if (error.code === 'auth/invalid-email') {
