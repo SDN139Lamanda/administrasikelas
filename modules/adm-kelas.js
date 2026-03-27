@@ -3,7 +3,7 @@
 // SDN 139 LAMANDA
 
 import { db } from '../config-firebase.js';
-import { auth } from '../config-firebase.js';  // ✅ TAMBAH: Import auth untuk security
+import { auth } from '../config-firebase.js';
 import { 
     collection, 
     addDoc, 
@@ -18,7 +18,32 @@ import {
 
 const collectionName = "siswa";
 const absensiCollection = "absensi";
-const ADMIN_EMAIL = 'andi@139batuassung.com';  // ✅ TAMBAH: Email admin Anda
+const ADMIN_EMAIL = 'andi@139batuassung.com';
+
+// ============================================
+// FUNGSI HELPER: READ-ONLY MODE
+// ============================================
+function enableReadOnlyMode() {
+    // Tampilkan banner di dashboard (jika ada)
+    document.getElementById('pendingBanner')?.classList.remove('hidden');
+    
+    // Disable semua tombol action
+    document.querySelectorAll('button[type="submit"], .btn-save, .btn-edit, .btn-delete, .btn-add, .btn-primary, button[onclick*="simpan"], button[onclick*="hapus"], button[onclick*="edit"]')
+        .forEach(btn => {
+            btn.disabled = true;
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+            btn.title = 'Fitur aktif setelah akun disetujui admin';
+        });
+    
+    // Disable semua input form
+    document.querySelectorAll('input:not([type="checkbox"]), textarea, select')
+        .forEach(input => {
+            input.disabled = true;
+            input.classList.add('bg-gray-100', 'cursor-not-allowed');
+        });
+    
+    console.log('🔒 Read-only mode enabled: Akun pending approval');
+}
 
 // ============================================
 // FUNGSI RENDER - Menghasilkan HTML Module
@@ -306,6 +331,13 @@ export function render() {
 // FUNGSI INIT - Mengaktifkan Logic Module
 // ============================================
 async function initModule() {
+    // ✅ CHECK USER STATUS - Enable read-only mode if pending
+    const currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
+    if (currentUser?.status !== 'active') {
+        enableReadOnlyMode();
+        // Tetap load data untuk read-only view
+    }
+
     // DOM Elements - Data Siswa
     const modal = document.getElementById('modalSiswa');
     const formSiswa = document.getElementById('formSiswa');
@@ -331,6 +363,11 @@ async function initModule() {
     // FUNGSI MODAL SISWA
     // ============================================
     window.openModalSiswa = () => {
+        // ✅ Check status sebelum buka modal
+        if (currentUser?.status !== 'active') {
+            alert('⚠️ Fitur ini belum aktif. Akun Anda masih menunggu persetujuan admin.');
+            return;
+        }
         modal.classList.remove('hidden');
         modal.classList.add('flex');
     }
@@ -448,6 +485,12 @@ async function initModule() {
     formSiswa.addEventListener('submit', async (e) => {
         e.preventDefault();
         
+        // ✅ Check status sebelum submit
+        if (currentUser?.status !== 'active') {
+            alert('⚠️ Fitur ini belum aktif. Akun Anda masih menunggu persetujuan admin.');
+            return;
+        }
+        
         const id = document.getElementById('siswaId').value;
         const data = {
             nisn: document.getElementById('nisn').value,
@@ -481,6 +524,11 @@ async function initModule() {
     // DATA SISWA - EDIT
     // ============================================
     window.editSiswa = (id, nisn, nama, kelas, jenisKelamin, status) => {
+        // ✅ Check status sebelum edit
+        if (currentUser?.status !== 'active') {
+            alert('⚠️ Fitur ini belum aktif. Akun Anda masih menunggu persetujuan admin.');
+            return;
+        }
         document.getElementById('siswaId').value = id;
         document.getElementById('nisn').value = nisn;
         document.getElementById('nama').value = nama;
@@ -495,6 +543,11 @@ async function initModule() {
     // DATA SISWA - DELETE
     // ============================================
     window.deleteSiswa = async (id) => {
+        // ✅ Check status sebelum delete
+        if (currentUser?.status !== 'active') {
+            alert('⚠️ Fitur ini belum aktif. Akun Anda masih menunggu persetujuan admin.');
+            return;
+        }
         if (confirm('⚠️ Apakah Anda yakin ingin menghapus data siswa ini?')) {
             try {
                 await deleteDoc(doc(db, collectionName, id));
@@ -510,6 +563,12 @@ async function initModule() {
     // ABSENSI - LOAD SISWA UNTUK ABSEN (✅ UPDATED: Security Filter)
     // ============================================
     window.loadSiswaUntukAbsen = async () => {
+        // ✅ Check status sebelum load
+        if (currentUser?.status !== 'active') {
+            alert('⚠️ Fitur ini belum aktif. Akun Anda masih menunggu persetujuan admin.');
+            return;
+        }
+        
         const kelas = document.getElementById('absenKelas').value;
         
         if (!kelas) {
@@ -625,6 +684,12 @@ async function initModule() {
     // ABSENSI - SIMPAN (✅ UPDATED: Add userId)
     // ============================================
     window.simpanAbsensi = async () => {
+        // ✅ Check status sebelum simpan
+        if (currentUser?.status !== 'active') {
+            alert('⚠️ Fitur ini belum aktif. Akun Anda masih menunggu persetujuan admin.');
+            return;
+        }
+        
         const kelas = document.getElementById('absenKelas').value;
         const semester = document.getElementById('absenSemester').value;
         const tahun = document.getElementById('absenTahun').value;
