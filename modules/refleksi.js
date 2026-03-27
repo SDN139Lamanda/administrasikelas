@@ -1,10 +1,10 @@
 // modules/refleksi.js
 // Module Refleksi Pembelajaran - Jurnal Refleksi Guru
 // SDN 139 LAMANDA
-// ✅ UPDATED: Security (userId + admin bypass) + Navigasi Dashboard
+// ✅ UPDATED: Security (userId + admin bypass) + Navigasi Dashboard + Read-Only Mode
 
 import { db } from '../config-firebase.js';
-import { auth } from '../config-firebase.js';  // ✅ TAMBAH: Import auth untuk security
+import { auth } from '../config-firebase.js';
 import { 
     collection, 
     addDoc, 
@@ -18,7 +18,59 @@ import {
 } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
 const collectionName = "refleksi";
-const ADMIN_EMAIL = 'andi@139batuassung.com';  // ✅ TAMBAH: Email admin Anda
+const ADMIN_EMAIL = 'andi@139batuassung.com';  // ✅ KONSTANTA ADMIN
+
+// ============================================
+// FUNGSI HELPER: CHECK STATUS DENGAN ADMIN BYPASS
+// ============================================
+function checkAccessPermission() {
+    const currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
+    const userEmail = currentUser?.email;
+    const isAdmin = userEmail === ADMIN_EMAIL;
+    
+    // ✅ Admin selalu punya akses
+    if (isAdmin) {
+        return true;
+    }
+    
+    // User biasa: cek status
+    if (currentUser?.status !== 'active') {
+        alert('⚠️ Fitur ini belum aktif. Akun Anda masih menunggu persetujuan admin.');
+        return false;
+    }
+    
+    return true;
+}
+
+// ============================================
+// FUNGSI HELPER: ENABLE READ-ONLY VISUAL CUE
+// ============================================
+function enableReadOnlyVisual() {
+    // Disable tombol action utama
+    document.querySelector('button[onclick*="openModalRefleksi"]')?.classList.add('opacity-50', 'cursor-not-allowed');
+    document.querySelector('button[onclick*="openModalRefleksi"]')?.setAttribute('disabled', 'true');
+    document.querySelector('button[onclick*="openModalRefleksi"]')?.setAttribute('title', 'Fitur aktif setelah akun disetujui admin');
+    
+    // Disable input form di modal
+    document.querySelectorAll('#formRefleksi input, #formRefleksi textarea, #formRefleksi select, #formRefleksi button[type="submit"]')
+        .forEach(el => {
+            el.disabled = true;
+            el.classList.add('bg-gray-100', 'cursor-not-allowed');
+        });
+    
+    // Disable tombol edit/delete di cards
+    document.querySelectorAll('button[onclick*="editRefleksi"], button[onclick*="deleteRefleksi"]')
+        .forEach(btn => {
+            btn.disabled = true;
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+            btn.onclick = (e) => {
+                e.preventDefault();
+                alert('⚠️ Fitur ini belum aktif. Akun Anda masih menunggu persetujuan admin.');
+            };
+        });
+    
+    console.log('🔒 Read-only mode enabled: refleksi');
+}
 
 // ============================================
 // FUNGSI RENDER - Menghasilkan HTML Module
@@ -179,6 +231,18 @@ export function render() {
 // FUNGSI INIT - Mengaktifkan Logic Module
 // ============================================
 async function initModule() {
+    // ✅ CHECK USER STATUS - Enable read-only mode if pending (dengan Admin Bypass)
+    const currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
+    const userEmail = currentUser?.email;
+    const isAdmin = userEmail === ADMIN_EMAIL;
+    
+    console.log('🔍 refleksi initModule:', { email: userEmail, isAdmin: isAdmin, status: currentUser?.status });
+    
+    // ✅ Jika user pending (bukan admin), enable read-only visual
+    if (!isAdmin && currentUser?.status !== 'active') {
+        enableReadOnlyVisual();
+    }
+
     const modal = document.getElementById('modalRefleksi');
     const formRefleksi = document.getElementById('formRefleksi');
     const listRefleksi = document.getElementById('listRefleksi');
@@ -204,8 +268,12 @@ async function initModule() {
         }
     }
 
-    // --- FUNGSI MODAL ---
+    // --- FUNGSI MODAL (✅ DENGAN ADMIN BYPASS) ---
     window.openModalRefleksi = () => {
+        // ✅ Check status dengan admin bypass
+        if (!checkAccessPermission()) {
+            return;
+        }
         modal.classList.remove('hidden');
         modal.classList.add('flex');
     }
@@ -316,7 +384,7 @@ async function initModule() {
     }
 
     // ============================================
-    // READ: Load Data dari Firestore (✅ UPDATED: Security Filter)
+    // READ: Load Data dari Firestore (✅ Security Filter)
     // ============================================
     async function loadRefleksi() {
         try {
@@ -400,10 +468,15 @@ async function initModule() {
     }
 
     // ============================================
-    // CREATE & UPDATE: Submit Form (✅ UPDATED: Add userId)
+    // CREATE & UPDATE: Submit Form (✅ DENGAN ADMIN BYPASS)
     // ============================================
     formRefleksi.addEventListener('submit', async (e) => {
         e.preventDefault();
+        
+        // ✅ Check status dengan admin bypass
+        if (!checkAccessPermission()) {
+            return;
+        }
         
         const id = document.getElementById('refleksiId').value;
         const data = {
@@ -425,7 +498,7 @@ async function initModule() {
             } else {
                 // Create new with userId
                 data.createdAt = new Date();
-                data.userId = auth.currentUser?.uid;  // ✅ TAMBAH: Field userId
+                data.userId = auth.currentUser?.uid;
                 await addDoc(collection(db, collectionName), data);
                 alert('✅ Refleksi berhasil ditambahkan!');
             }
@@ -437,8 +510,13 @@ async function initModule() {
         }
     });
 
-    // --- EDIT: Isi Form dengan Data Existing ---
+    // --- EDIT: Isi Form dengan Data Existing (✅ DENGAN ADMIN BYPASS) ---
     window.editRefleksi = (id, data) => {
+        // ✅ Check status dengan admin bypass
+        if (!checkAccessPermission()) {
+            return;
+        }
+        
         const parsed = typeof data === 'string' ? JSON.parse(data.replace(/\\'/g, "'")) : data;
         
         document.getElementById('refleksiId').value = id;
@@ -454,8 +532,13 @@ async function initModule() {
         window.openModalRefleksi();
     }
 
-    // --- DELETE: Hapus Data ---
+    // --- DELETE: Hapus Data (✅ DENGAN ADMIN BYPASS) ---
     window.deleteRefleksi = async (id) => {
+        // ✅ Check status dengan admin bypass
+        if (!checkAccessPermission()) {
+            return;
+        }
+        
         if (confirm('⚠️ Apakah Anda yakin ingin menghapus refleksi ini?')) {
             try {
                 await deleteDoc(doc(db, collectionName, id));
