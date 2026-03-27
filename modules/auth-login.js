@@ -38,17 +38,8 @@ export async function loginUser(email, password) {
         const userData = userDoc.data();
         console.log('📋 User status:', userData.status);
         
-        // ✅ STEP 4: VALIDASI STATUS
-        if (userData.status === 'pending_verification') {
-            await signOut(auth);
-            throw new Error('⏳ Email belum diverifikasi. Silakan cek inbox/spam Anda.');
-        }
-        
-        if (userData.status === 'pending_approval') {
-            await signOut(auth);
-            throw new Error('⏳ Akun Anda masih menunggu persetujuan admin. Silakan hubungi admin.');
-        }
-        
+        // ✅ STEP 4: VALIDASI STATUS - Allow pending users to login (read-only mode)
+        // Hanya reject status yang benar-benar invalid
         if (userData.status === 'rejected') {
             await signOut(auth);
             const reason = userData.rejectedReason || 'Tidak ada alasan';
@@ -60,10 +51,8 @@ export async function loginUser(email, password) {
             throw new Error('❌ Akun Anda dinonaktifkan. Hubungi admin.');
         }
         
-        if (userData.status !== 'active') {
-            await signOut(auth);
-            throw new Error('❌ Status akun tidak valid. Hubungi admin.');
-        }
+        // ✅ Allow: 'active', 'pending_verification', 'pending_approval'
+        // UI akan handle read-only mode berdasarkan status
         
         // ✅ STEP 5: UPDATE LAST LOGIN
         await updateDoc(doc(db, 'users', user.uid), {
@@ -72,6 +61,7 @@ export async function loginUser(email, password) {
         
         console.log('✅ Login successful!');
         
+        // ✅ RETURN dengan status + isPending flag untuk UI check
         return {
             success: true,
             user: {
@@ -79,8 +69,10 @@ export async function loginUser(email, password) {
                 email: user.email,
                 namaLengkap: userData.namaLengkap,
                 sekolah: userData.sekolah,
-                role: userData.role
-            }
+                role: userData.role,
+                status: userData.status  // ← TAMBAH: Return status untuk UI check
+            },
+            isPending: userData.status !== 'active'  // ← TAMBAH: Flag untuk read-only mode
         };
         
     } catch (error) {
