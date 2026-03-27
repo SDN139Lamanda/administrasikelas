@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        /* CSS untuk tampilan cetak/Word */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 20px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h2 {
+            margin: 5px;
+            text-transform: uppercase;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: center;
+            font-size: 12px;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .text-left {
+            text-align: left;
+        }
+        .signature-wrapper {
+            margin-top: 50px;
+            width: 100%;
+        }
+        .signature-box {
+            float: right;
+            width: 200px;
+            text-align: center;
+        }
+        .space {
+            height: 70px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h2>Daftar Hadir Karyawan / Siswa</h2>
+        <p>Periode: ................................ 2026</p>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th width="5%">No</th>
+                <th width="35%">Nama Lengkap</th>
+                <th width="15%">Jabatan/Kelas</th>
+                <th width="15%">Waktu Datang</th>
+                <th width="30%">Tanda Tangan</th>
+            </tr>
+        </thead>
+        <tbody id="attendance-rows">
+            </tbody>
+    </table>
+
+    <div class="signature-wrapper">
+        <div class="signature-box">
+            <p>Mengetahui,</p>
+            <div class="space"></div>
+            <p><b>____________________</b></p>
+            <p>Kepala Instansi</p>
+        </div>
+    </div>
+
+    <script>
+        // JavaScript untuk membuat baris kosong secara otomatis
+        const tableBody = document.getElementById('attendance-rows');
+        const jumlahBaris = 15; // Ubah angka ini sesuai kebutuhan
+
+        for (let i = 1; i <= jumlahBaris; i++) {
+            let row = `<tr>
+                <td>${i}</td>
+                <td class="text-left"></td>
+                <td></td>
+                <td></td>
+                <td class="text-left">${i}.</td>
+            </tr>`;
+            tableBody.innerHTML += row;
+        }
+    </script>
+
+</body>
+</html>
