@@ -1,0 +1,387 @@
+/* ============================================ */
+/* FORM STYLES - forms.css                      */
+/* Platform Administrasi Kelas Digital          */
+/* ============================================ */
+
+/* ─────────────────────────────────────────── */
+/* 1. SECTION FORM                             */
+/* ─────────────────────────────────────────── */
+
+.section-form {
+    padding: 3rem 0;
+    min-height: calc(100vh - 200px);
+    display: flex;
+    align-items: center;
+}
+
+/* ─────────────────────────────────────────── */
+/* 2. FORM CARD                                */
+/* ─────────────────────────────────────────── */
+
+.form-card {
+    background-color: white;
+    border-radius: 1rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    max-width: 28rem;
+    margin: 0 auto;
+    overflow: hidden;
+}
+
+/* ─────────────────────────────────────────── */
+/* 3. FORM HEADER                              */
+/* ─────────────────────────────────────────── */
+
+.form-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 2rem;
+    text-align: center;
+    color: white;
+    position: relative;
+}
+
+.form-icon {
+    width: 4rem;
+    height: 4rem;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 9999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    backdrop-filter: blur(4px);
+}
+.form-icon i {
+    font-size: 2rem;
+    color: white;
+}
+
+.form-title {
+    font-size: clamp(1.25rem, 4vw, 1.5rem);
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.form-subtitle {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* ─────────────────────────────────────────── */
+/* 4. FORM BODY                                */
+/* ─────────────────────────────────────────── */
+
+.form-body {
+    padding: 2rem;
+}
+
+/* ─────────────────────────────────────────── */
+/* 5. FORM GROUP                               */
+/* ─────────────────────────────────────────── */
+
+.form-group {
+    margin-bottom: 1.25rem;
+}
+
+/* ─────────────────────────────────────────── */
+/* 6. FORM LABEL                               */
+/* ─────────────────────────────────────────── */
+
+.form-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+}
+
+/* ─────────────────────────────────────────── */
+/* 7. FORM INPUT                               */
+/* ─────────────────────────────────────────── */
+
+.form-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    color: #1f2937;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    background-color: white;
+}
+.form-input:focus {
+    outline: none;
+    border-color: #7c3aed;
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+}
+.form-input::placeholder {
+    color: #9ca3af;
+}
+.form-input:disabled {
+    background-color: #f3f4f6;
+    cursor: not-allowed;
+}
+.form-input.error {
+    border-color: #ef4444;
+}
+.form-input.success {
+    border-color: #16a34a;
+}
+
+/* ─────────────────────────────────────────── */
+/* 8. PASSWORD INPUT WRAPPER                   */
+/* ─────────────────────────────────────────── */
+
+.password-input-wrapper {
+    position: relative;
+}
+.password-toggle {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #6b7280;
+    cursor: pointer;
+    padding: 0.25rem;
+    display: flex;
+    align-items: center;
+    transition: color 0.2s ease;
+}
+.password-toggle:hover {
+    color: #7c3aed;
+}
+.password-toggle:focus-visible {
+    outline: 2px solid #7c3aed;
+    outline-offset: 2px;
+}
+
+/* ─────────────────────────────────────────── */
+/* 9. FORM HINT                                */
+/* ─────────────────────────────────────────── */
+
+.form-hint {
+    font-size: 0.75rem;
+    color: #6b7280;
+    margin-top: 0.25rem;
+}
+
+/* ─────────────────────────────────────────── */
+/* 10. FORM ERROR                              */
+/* ─────────────────────────────────────────── */
+
+.form-error {
+    font-size: 0.75rem;
+    color: #ef4444;
+    margin-top: 0.25rem;
+    display: none;
+}
+.form-error.visible {
+    display: block;
+}
+
+/* ─────────────────────────────────────────── */
+/* 11. FORM OPTIONS (Remember & Forgot)        */
+/* ─────────────────────────────────────────── */
+
+.form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.25rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+/* ─────────────────────────────────────────── */
+/* 12. CHECKBOX                                */
+/* ─────────────────────────────────────────── */
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    font-size: 0.875rem;
+    color: #4b5563;
+}
+.checkbox-label input[type="checkbox"] {
+    width: 1rem;
+    height: 1rem;
+    accent-color: #7c3aed;
+    cursor: pointer;
+}
+.checkbox-label input[type="checkbox"]:focus-visible {
+    outline: 2px solid #7c3aed;
+    outline-offset: 2px;
+}
+.checkbox-text {
+    color: #4b5563;
+}
+
+/* ─────────────────────────────────────────── */
+/* 13. FORGOT PASSWORD LINK                    */
+/* ─────────────────────────────────────────── */
+
+.forgot-link {
+    font-size: 0.875rem;
+    color: #7c3aed;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+.forgot-link:hover {
+    color: #6d28d9;
+    text-decoration: underline;
+}
+.forgot-link:focus-visible {
+    outline: 2px solid #7c3aed;
+    outline-offset: 2px;
+}
+
+/* ─────────────────────────────────────────── */
+/* 14. FORM FOOTER                             */
+/* ─────────────────────────────────────────── */
+
+.form-footer {
+    padding: 1.5rem 2rem;
+    background-color: #f9fafb;
+    text-align: center;
+    font-size: 0.875rem;
+    color: #4b5563;
+}
+.form-footer a {
+    color: #7c3aed;
+    text-decoration: none;
+}
+.form-footer a:hover {
+    text-decoration: underline;
+}
+.form-footer a:focus-visible {
+    outline: 2px solid #7c3aed;
+    outline-offset: 2px;
+}
+
+/* ─────────────────────────────────────────── */
+/* 15. ALERT BOX                               */
+/* ─────────────────────────────────────────── */
+
+.alert {
+    padding: 1rem 1.25rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    border-left: 4px solid;
+}
+.alert.hidden {
+    display: none;
+}
+.alert-success {
+    background-color: #f0fdf4;
+    color: #166534;
+    border-left-color: #22c55e;
+}
+.alert-error {
+    background-color: #fef2f2;
+    color: #991b1b;
+    border-left-color: #ef4444;
+}
+.alert-warning {
+    background-color: #fefce8;
+    color: #854d0e;
+    border-left-color: #eab308;
+}
+.alert-info {
+    background-color: #eff6ff;
+    color: #1e40af;
+    border-left-color: #3b82f6;
+}
+
+/* ─────────────────────────────────────────── */
+/* 16. RESPONSIVE BREAKPOINTS                  */
+/* ─────────────────────────────────────────── */
+
+/* Tablet: 768px+ */
+@media (min-width: 768px) {
+    .section-form {
+        padding: 4rem 0;
+    }
+    
+    .form-body {
+        padding: 2.5rem;
+    }
+}
+
+/* Mobile: 767px and below */
+@media (max-width: 767px) {
+    .section-form {
+        padding: 1.5rem 0;
+    }
+    
+    .form-card {
+        margin: 0 1rem;
+    }
+    
+    .form-body {
+        padding: 1.5rem;
+    }
+    
+    .form-header {
+        padding: 1.5rem 1rem;
+    }
+    
+    .form-footer {
+        padding: 1.25rem 1.5rem;
+    }
+    
+    .form-options {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    /* Ensure tap targets are at least 44px */
+    .form-input,
+    .btn,
+    .password-toggle {
+        min-height: 44px;
+    }
+    
+    /* Increase font size for readability */
+    .form-input {
+        font-size: 1rem;
+    }
+}
+
+/* ─────────────────────────────────────────── */
+/* 17. ACCESSIBILITY ENHANCEMENTS              */
+/* ─────────────────────────────────────────── */
+
+/* Focus visible for keyboard users */
+.form-input:focus-visible,
+.btn:focus-visible,
+.checkbox-label input:focus-visible {
+    outline: 2px solid #7c3aed;
+    outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .form-input {
+        border-width: 3px;
+    }
+    
+    .btn {
+        border: 2px solid currentColor;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .form-input,
+    .btn,
+    .password-toggle {
+        transition: none;
+    }
+}
