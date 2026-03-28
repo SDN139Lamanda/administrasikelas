@@ -17,7 +17,7 @@ import {
     count
 } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
-const ADMIN_EMAIL = 'andi@139batuassung.com';
+const ADMIN_EMAIL = 'radiah.tifarah@gmail..com';
 const collectionName = 'users';
 const logsCollection = 'approval_logs';
 
