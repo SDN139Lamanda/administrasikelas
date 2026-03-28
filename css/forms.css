@@ -384,4 +384,55 @@
     .password-toggle {
         transition: none;
     }
+}/* ─────────────────────────────────────────── */
+/* 18. BACK BUTTON (For Register Page)         */
+/* ─────────────────────────────────────────── */
+
+.btn-back-home {
+    position: absolute;
+    left: 1rem;
+    top: 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    text-decoration: none;
+    transition: background-color 0.2s ease;
 }
+.btn-back-home:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+    color: white;
+}
+.btn-back-home:focus-visible {
+    outline: 2px solid white;
+    outline-offset: 2px;
+}
+.btn-back-home i {
+    font-size: 0.875rem;
+}
+
+/* Responsive for Back Button */
+@media (max-width: 767px) {
+    .btn-back-home {
+        left: 0.75rem;
+        top: 0.75rem;
+        padding: 0.375rem 0.75rem;
+    }
+    
+    .btn-back-home span {
+        display: none !important;
+    }
+    
+    .btn-back-home {
+        min-height: 44px;
+        min-width: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
