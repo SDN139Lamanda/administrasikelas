@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Halaman Tidak Ditemukan</title>
+    <meta name="description" content="Halaman yang Anda cari tidak ditemukan. Kembali ke beranda untuk melanjutkan.">
+    
+    <!-- Tailwind CSS (CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Custom CSS (Load order matters!) -->
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/components.css">
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-50">
+
+    <!-- Skip Link for Accessibility -->
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-purple-600 text-white px-4 py-2 rounded z-50">
+        Lewati ke konten utama
+    </a>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar" role="navigation" aria-label="Navigasi Utama">
+        <div class="container">
+            <div class="nav-content">
+                <div class="nav-brand">
+                    <a href="index.html" class="flex items-center gap-3" aria-label="Kembali ke Beranda">
+                        <div class="nav-logo" aria-hidden="true">
+                            <i class="fas fa-school"></i>
+                        </div>
+                        <div>
+                            <h1 class="nav-title">Administrasi Kelas</h1>
+                            <p class="nav-subtitle">Platform Guru SD/SMP/SMA</p>
+                        </div>
+                    </a>
+                </div>
+                <div class="nav-actions">
+                    <a href="login.html" class="btn btn-ghost" aria-label="Login ke akun Anda">Login</a>
+                    <a href="register.html" class="btn btn-primary" aria-label="Daftar akun baru">
+                        <i class="fas fa-user-plus mr-2" aria-hidden="true"></i>Daftar
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Wrapper -->
+    <main id="main-content">
+        <!-- 404 Error Section -->
+        <section class="error-section" aria-labelledby="error-heading">
+            <div class="container">
+                <div class="error-content">
+                    <!-- Error Icon -->
+                    <div class="error-icon" aria-hidden="true">
+                        <i class="fas fa-exclamation-circle"></i>
+                    </div>
+                    
+                    <!-- Error Code -->
+                    <h1 id="error-heading" class="error-code">404</h1>
+                    
+                    <!-- Error Message -->
+                    <h2 class="error-title">Halaman Tidak Ditemukan</h2>
+                    <p class="error-desc">
+                        Maaf, halaman yang Anda cari tidak tersedia atau telah dipindahkan.
+                    </p>
+                    
+                    <!-- Possible Causes -->
+                    <div class="error-causes">
+                        <p class="font-semibold text-gray-700 mb-2">Kemungkinan penyebab:</p>
+                        <ul class="causes-list">
+                            <li>
+                                <i class="fas fa-times-circle" aria-hidden="true"></i>
+                                <span>URL yang Anda ketik salah atau tidak lengkap</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-times-circle" aria-hidden="true"></i>
+                                <span>Halaman telah dipindahkan atau dihapus</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-times-circle" aria-hidden="true"></i>
+                                <span>Link yang Anda klik sudah tidak aktif</span>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="error-actions">
+                        <a href="index.html" class="btn btn-primary btn-lg" aria-label="Kembali ke beranda">
+                            <i class="fas fa-home mr-2" aria-hidden="true"></i>Kembali ke Beranda
+                        </a>
+                        <a href="login.html" class="btn btn-outline-dark btn-lg" aria-label="Login ke akun Anda">
+                            <i class="fas fa-sign-in-alt mr-2" aria-hidden="true"></i>Login
+                        </a>
+                    </div>
+                    
+                    <!-- Contact Support -->
+                    <div class="error-support">
+                        <p class="text-gray-600 text-sm">
+                            <i class="fas fa-question-circle mr-1" aria-hidden="true"></i>
+                            Masih butuh bantuan?
+                            <a href="mailto:radiah.tifarahs@gmail.com" class="text-purple-600 hover:underline font-medium">
+                                Hubungi admin
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer" role="contentinfo">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <div class="footer-logo" aria-hidden="true">
+                        <i class="fas fa-school"></i>
+                    </div>
+                    <div>
+                        <p class="footer-title">Administrasi Kelas</p>
+                        <p class="footer-subtitle">Platform Guru SD/SMP/SMA (sederajat)</p>
+                    </div>
+                    <p class="footer-desc">Platform administrasi kelas digital untuk meningkatkan kualitas pembelajaran di tingkatan SD/SMP/SMA.</p>
+                </div>
+                
+                <nav class="footer-links" aria-label="Menu Footer">
+                    <h4 class="footer-heading">Menu</h4>
+                    <ul class="footer-list">
+                        <li><a href="login.html" class="footer-link">Login</a></li>
+                        <li><a href="register.html" class="footer-link">Daftar</a></li>
+                        <li><a href="index.html" class="footer-link">Beranda</a></li>
+                    </ul>
+                </nav>
+                
+                <address class="footer-contact" aria-label="Kontak Admin">
+                    <h4 class="footer-heading">Kontak</h4>
+                    <ul class="footer-list">
+                        <li class="footer-contact-item">
+                            <i class="fas fa-envelope" aria-hidden="true"></i>
+                            <a href="mailto:radiah.tifarahs@gmail.com" class="footer-link">radiah.tifarahs@gmail.com</a>
+                        </li>
+                        <li class="footer-contact-item">
+                            <i class="fas fa-school" aria-hidden="true"></i>
+                            <span>SDN 139 LAMANDA</span>
+                        </li>
+                    </ul>
+                </address>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2026 Platform Administrasi Kelas Digital. All rights reserved.</p>
+                <p class="mt-2">Dibuat untuk Guru SD/SMP/SMA (sederajat)</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Global JS -->
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>
