@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Platform Guru SD/SMP/SMA</title>
+    <meta name="description" content="Login ke akun Anda untuk mengakses Platform Administrasi Kelas Digital">
+    
+    <!-- Open Graph / Social Media Meta Tags -->
+    <meta property="og:title" content="Login - Platform Guru">
+    <meta property="og:description" content="Login ke akun Anda untuk mengakses platform">
+    <meta property="og:type" content="website">
+    
+    <!-- Tailwind CSS (CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Custom CSS (Load order matters!) -->
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/forms.css">
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-50">
+
+    <!-- Skip Link for Accessibility -->
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-purple-600 text-white px-4 py-2 rounded z-50">
+        Lewati ke konten utama
+    </a>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar" role="navigation" aria-label="Navigasi Utama">
+        <div class="container">
+            <div class="nav-content">
+                <div class="nav-brand">
+                    <a href="index.html" class="flex items-center gap-3" aria-label="Kembali ke Beranda">
+                        <div class="nav-logo" aria-hidden="true">
+                            <i class="fas fa-school"></i>
+                        </div>
+                        <div>
+                            <h1 class="nav-title">Administrasi Kelas</h1>
+                            <p class="nav-subtitle">Platform Guru SD/SMP/SMA</p>
+                        </div>
+                    </a>
+                </div>
+                <div class="nav-actions">
+                    <a href="register.html" class="btn btn-primary" aria-label="Daftar akun baru">
+                        <i class="fas fa-user-plus mr-2" aria-hidden="true"></i>Daftar
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Wrapper -->
+    <main id="main-content">
+        <!-- Login Form Section -->
+        <section class="section-form" aria-labelledby="login-heading">
+            <div class="container">
+                <div class="form-card">
+                    <!-- Header -->
+                    <div class="form-header">
+                        <div class="form-icon" aria-hidden="true">
+                            <i class="fas fa-sign-in-alt"></i>
+                        </div>
+                        <h1 id="login-heading" class="form-title">Selamat Datang Kembali</h1>
+                        <p class="form-subtitle">Login untuk mengakses dashboard Anda</p>
+                    </div>
+
+                    <!-- Form -->
+                    <form id="loginForm" class="form-body" novalidate>
+                        
+                        <!-- Alert Container (for errors/success) -->
+                        <div id="formAlert" class="alert hidden" role="alert" aria-live="polite"></div>
+
+                        <!-- Email -->
+                        <div class="form-group">
+                            <label for="email" class="form-label">
+                                <i class="fas fa-envelope mr-2" aria-hidden="true"></i>Email *
+                            </label>
+                            <input 
+                                type="email" 
+                                id="email" 
+                                name="email" 
+                                class="form-input" 
+                                placeholder="nama@gmail.com"
+                                required
+                                autocomplete="email"
+                                aria-required="true"
+                                aria-describedby="emailHint"
+                            >
+                            <p id="emailHint" class="form-hint">Gunakan email yang terdaftar</p>
+                            <p class="form-error" id="error-email" role="alert"></p>
+                        </div>
+
+                        <!-- Password -->
+                        <div class="form-group">
+                            <label for="password" class="form-label">
+                                <i class="fas fa-lock mr-2" aria-hidden="true"></i>Password *
+                            </label>
+                            <div class="password-input-wrapper">
+                                <input 
+                                    type="password" 
+                                    id="password" 
+                                    name="password" 
+                                    class="form-input" 
+                                    placeholder="Masukkan password"
+                                    required
+                                    autocomplete="current-password"
+                                    aria-required="true"
+                                >
+                                <button type="button" class="password-toggle" onclick="togglePassword('password')" aria-label="Tampilkan password">
+                                    <i class="fas fa-eye" id="togglePasswordIcon" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                            <p class="form-error" id="error-password" role="alert"></p>
+                        </div>
+
+                        <!-- Remember Me & Forgot Password -->
+                        <div class="form-options">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="remember" name="remember">
+                                <span class="checkbox-text">Ingat saya</span>
+                            </label>
+                            <a href="reset-password.html" class="forgot-link">Lupa password?</a>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button type="submit" class="btn btn-primary btn-block btn-lg" id="submitBtn">
+                            <i class="fas fa-sign-in-alt mr-2" aria-hidden="true"></i>Login
+                        </button>
+
+                        <!-- Loading State (Hidden by default) -->
+                        <button type="button" class="btn btn-primary btn-block btn-lg hidden" id="loadingBtn" disabled>
+                            <i class="fas fa-spinner fa-spin mr-2" aria-hidden="true"></i>Memproses...
+                        </button>
+                    </form>
+
+                    <!-- Footer -->
+                    <div class="form-footer">
+                        <p>Belum punya akun? <a href="register.html" class="text-purple-600 hover:underline font-semibold">Daftar di sini</a></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer" role="contentinfo">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2026 Platform Administrasi Kelas Digital. All rights reserved.</p>
+                <p class="mt-2">Dibuat untuk Guru SD/SMP/SMA (sederajat)</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Global JS -->
+    <script type="module" src="js/main.js"></script>
+    <script type="module" src="js/login.js"></script>
+</body>
+</html>
