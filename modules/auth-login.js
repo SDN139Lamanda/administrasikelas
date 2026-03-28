@@ -11,7 +11,7 @@ import {
 import { doc, getDoc, updateDoc, setDoc } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
 
 // ✅ ADMIN EMAIL KONSTANTA
-const ADMIN_EMAIL = 'andi@139batuassung.com';
+const ADMIN_EMAIL = 'radiah.tifarahs@gmail.com';
 
 export async function loginUser(email, password) {
     console.log('🔐 Login attempt for:', email);
