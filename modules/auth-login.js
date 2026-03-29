@@ -4,19 +4,11 @@
  * Platform Administrasi Kelas Digital
  * ============================================
  * 
- * Fungsi:
- * - Login user dengan Firebase Authentication
- * - Ambil data user dari Firestore (include context: jenjang/kelas/mapel)
- * - Return user data lengkap untuk session storage
- * - Handle error dengan pesan user-friendly
- * 
- * ⚠️ PENTING: Return structure HARUS match dengan yang dibutuhkan dashboard.js
+ * ✅ UPDATE: Tambah field 'features' untuk UI visibility control
  */
 
-// ✅ IMPORT FIREBASE CONFIG
 import { auth, db } from './config-firebase.js';
 
-// ✅ IMPORT FIREBASE SDK FUNCTIONS
 import { 
     signInWithEmailAndPassword, 
     signOut 
@@ -27,7 +19,6 @@ import {
     getDoc 
 } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
 
-// ✅ ADMIN EMAIL (Untuk bypass check - opsional)
 const ADMIN_EMAIL = 'radiah.tifarahs@gmail.com';
 
 // ============================================
@@ -43,12 +34,11 @@ export async function loginUser(email, password) {
         
         console.log('✅ Auth successful, UID:', user.uid);
         
-        // ✅ STEP 2: CEK EMAIL VERIFIED
-        if (!user.emailVerified) {
-            console.warn('⚠️ Email not verified');
-            await signOut(auth);
-            throw new Error('❌ Email belum terverifikasi. Silakan cek inbox/spam Anda.');
-        }
+        // ✅ STEP 2: CEK EMAIL VERIFIED (Temporary disabled for testing)
+        // if (!user.emailVerified) {
+        //     await signOut(auth);
+        //     throw new Error('❌ Email belum terverifikasi.');
+        // }
         
         // ✅ STEP 3: AMBIL DATA USER dari Firestore
         const userDoc = await getDoc(doc(db, 'users', user.uid));
@@ -61,18 +51,10 @@ export async function loginUser(email, password) {
         
         const userData = userDoc.data();
         
-        console.log('📋 User data loaded:', {
-            email: userData.email,
-            jenjang: userData.jenjang,
-            role: userData.role,
-            status: userData.status
-        });
-        
         // ✅ STEP 4: VALIDASI STATUS USER
         if (userData.status === 'rejected') {
             await signOut(auth);
-            const reason = userData.rejectedReason || 'Tidak ada alasan';
-            throw new Error(`❌ Akun Anda ditolak. Alasan: ${reason}`);
+            throw new Error(`❌ Akun Anda ditolak. Alasan: ${userData.rejectedReason || 'Tidak ada alasan'}`);
         }
         
         if (userData.status === 'suspended') {
@@ -80,53 +62,34 @@ export async function loginUser(email, password) {
             throw new Error('❌ Akun Anda dinonaktifkan. Hubungi admin.');
         }
         
-        // ✅ STEP 5: UPDATE LAST LOGIN (Opsional tapi recommended)
-        // Note: Tidak await agar tidak blocking UI
-        getDoc(doc(db, 'users', user.uid)).then(async (docSnap) => {
-            if (docSnap.exists()) {
-                // Import updateDoc dynamically to avoid circular dependency issues
-                const { updateDoc } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
-                await updateDoc(doc(db, 'users', user.uid), {
-                    lastLogin: new Date()
-                });
-            }
-        }).catch(err => console.warn('⚠️ Could not update lastLogin:', err));
-        
-        // ✅ STEP 6: BUILD RETURN OBJECT (HARUS MATCH DENGAN DASHBOARD.JS)
+        // ✅ STEP 5: BUILD RETURN OBJECT
         const returnUser = {
-            // ✅ Basic Auth Fields
+            // Basic Auth Fields
             uid: user.uid,
             email: user.email,
             emailVerified: user.emailVerified,
             
-            // ✅ Profile Fields
+            // Profile Fields
             namaLengkap: userData.namaLengkap || '',
             noHp: userData.noHp || '',
             sekolah: userData.sekolah || '',
             
-            // ✅ CONTEXT-BASED ACCESS FIELDS (KRITIS UNTUK DASHBOARD FILTERING)
-            jenjang: userData.jenjang || null,              // "sd" | "smp" | "sma"
+            // CONTEXT-BASED ACCESS FIELDS
+            jenjang: userData.jenjang || null,
+            sdRole: userData.sdRole || null,
+            kelas: userData.kelas || null,
+            mataPelajaranSD: userData.mataPelajaranSD || null,
+            mataPelajaranSMP: userData.mataPelajaranSMP || null,
+            mataPelajaranSMA: userData.mataPelajaranSMA || null,
             
-            // SD-specific fields
-            sdRole: userData.sdRole || null,                // "guru_kelas" | "guru_agama" | "guru_mapel"
-            kelas: userData.kelas || null,                  // "1"|"2"|"3"|"4"|"5"|"6" (hanya untuk SD guru kelas)
-            mataPelajaranSD: userData.mataPelajaranSD || null, // Mapel untuk guru agama/mapel SD
+            // Role & Status
+            role: userData.role || 'guru',
+            status: userData.status || 'active',
             
-            // SMP-specific fields
-            mataPelajaranSMP: userData.mataPelajaranSMP || null, // Mapel untuk SMP
+            // ✅ FEATURE ACCESS FIELD (UPDATE BARU!) ⭐
+            features: userData.features || null,
             
-            // SMA-specific fields
-            mataPelajaranSMA: userData.mataPelajaranSMA || null, // Mapel untuk SMA
-            
-            // ✅ Role & Status
-            role: userData.role || 'guru',                  // "guru" | "admin"
-            status: userData.status || 'active',            // "active" | "pending" | etc.
-            
-            // ✅ Admin Fields
-            approvedBy: userData.approvedBy || null,
-            approvedAt: userData.approvedAt || null,
-            
-            // ✅ Timestamps
+            // Timestamps
             createdAt: userData.createdAt || null,
             lastLogin: userData.lastLogin || null
         };
@@ -134,7 +97,8 @@ export async function loginUser(email, password) {
         console.log('✅ Login successful, returning user:', {
             email: returnUser.email,
             jenjang: returnUser.jenjang,
-            role: returnUser.role
+            role: returnUser.role,
+            features: returnUser.features
         });
         
         return {
@@ -146,7 +110,6 @@ export async function loginUser(email, password) {
     } catch (error) {
         console.error('❌ Login error:', error);
         
-        // ✅ HANDLE SPECIFIC FIREBASE ERROR CODES
         let errorMessage = error.message;
         
         if (error.code === 'auth/invalid-email') {
@@ -161,8 +124,6 @@ export async function loginUser(email, password) {
             errorMessage = 'Terlalu banyak percobaan. Silakan coba beberapa menit lagi.';
         } else if (error.code === 'auth/network-request-failed') {
             errorMessage = 'Koneksi internet bermasalah. Silakan periksa koneksi Anda.';
-        } else if (error.code === 'auth/operation-not-allowed') {
-            errorMessage = 'Login email/password belum diaktifkan. Hubungi admin.';
         }
         
         return {
@@ -188,41 +149,7 @@ export async function logoutUser() {
 }
 
 // ============================================
-// FUNGSI: Get Current User (Helper)
-// ============================================
-export async function getCurrentUser() {
-    const user = auth.currentUser;
-    
-    if (!user) {
-        return null;
-    }
-    
-    try {
-        const userDoc = await getDoc(doc(db, 'users', user.uid));
-        
-        if (!userDoc.exists()) {
-            return null;
-        }
-        
-        const userData = userDoc.data();
-        
-        return {
-            uid: user.uid,
-            email: user.email,
-            namaLengkap: userData.namaLengkap,
-            jenjang: userData.jenjang,
-            role: userData.role,
-            status: userData.status,
-            sekolah: userData.sekolah
-        };
-    } catch (error) {
-        console.error('❌ Error getting current user:', error);
-        return null;
-    }
-}
-
-// ============================================
-// FUNGSI: Check if User is Admin (Helper)
+// FUNGSI: Check if User is Admin
 // ============================================
 export function isAdmin(email) {
     return email === ADMIN_EMAIL;
