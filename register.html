@@ -77,45 +77,52 @@
                         <!-- Alert Container -->
                         <div id="formAlert" class="alert hidden" role="alert" aria-live="polite"></div>
 
-                        <!-- 1. NAMA LENGKAP -->
-                        <div class="form-group">
-                            <label for="namaLengkap" class="form-label">
-                                <i class="fas fa-user mr-2" aria-hidden="true"></i>Nama Lengkap *
-                            </label>
-                            <input 
-                                type="text" 
-                                id="namaLengkap" 
-                                name="namaLengkap" 
-                                class="form-input" 
-                                placeholder="Contoh: Budi Santoso, S.Pd"
-                                required
-                                autocomplete="name"
-                                aria-required="true"
-                            >
-                            <p class="form-error" id="error-namaLengkap" role="alert"></p>
+                        <!-- ============================================ -->
+                        <!-- 1. NAMA LENGKAP + EMAIL                      -->
+                        <!-- ============================================ -->
+                        <div class="form-row">
+                            <!-- Nama Lengkap -->
+                            <div class="form-group">
+                                <label for="namaLengkap" class="form-label">
+                                    <i class="fas fa-user mr-2" aria-hidden="true"></i>Nama Lengkap *
+                                </label>
+                                <input 
+                                    type="text" 
+                                    id="namaLengkap" 
+                                    name="namaLengkap" 
+                                    class="form-input" 
+                                    placeholder="Contoh: Budi Santoso, S.Pd"
+                                    required
+                                    autocomplete="name"
+                                    aria-required="true"
+                                >
+                                <p class="form-error" id="error-namaLengkap" role="alert"></p>
+                            </div>
+
+                            <!-- Email -->
+                            <div class="form-group">
+                                <label for="email" class="form-label">
+                                    <i class="fas fa-envelope mr-2" aria-hidden="true"></i>Email *
+                                </label>
+                                <input 
+                                    type="email" 
+                                    id="email" 
+                                    name="email" 
+                                    class="form-input" 
+                                    placeholder="nama@gmail.com"
+                                    required
+                                    autocomplete="email"
+                                    aria-required="true"
+                                    aria-describedby="emailHint"
+                                >
+                                <p id="emailHint" class="form-hint">Gunakan email aktif (Gmail/Yahoo/Outlook)</p>
+                                <p class="form-error" id="error-email" role="alert"></p>
+                            </div>
                         </div>
 
-                        <!-- 2. EMAIL -->
-                        <div class="form-group">
-                            <label for="email" class="form-label">
-                                <i class="fas fa-envelope mr-2" aria-hidden="true"></i>Email *
-                            </label>
-                            <input 
-                                type="email" 
-                                id="email" 
-                                name="email" 
-                                class="form-input" 
-                                placeholder="nama@gmail.com"
-                                required
-                                autocomplete="email"
-                                aria-required="true"
-                                aria-describedby="emailHint"
-                            >
-                            <p id="emailHint" class="form-hint">Gunakan email aktif (Gmail/Yahoo/Outlook)</p>
-                            <p class="form-error" id="error-email" role="alert"></p>
-                        </div>
-
-                        <!-- 3. NO HP -->
+                        <!-- ============================================ -->
+                        <!-- 2. NOMOR HP                                   -->
+                        <!-- ============================================ -->
                         <div class="form-group">
                             <label for="noHp" class="form-label">
                                 <i class="fas fa-phone mr-2" aria-hidden="true"></i>Nomor WhatsApp *
@@ -136,7 +143,9 @@
                             <p class="form-error" id="error-noHp" role="alert"></p>
                         </div>
 
-                        <!-- 4. JENJANG PENDIDIKAN -->
+                        <!-- ============================================ -->
+                        <!-- 3. JENJANG PENDIDIKAN                         -->
+                        <!-- ============================================ -->
                         <div class="form-group">
                             <label for="jenjang" class="form-label">
                                 <i class="fas fa-graduation-cap mr-2" aria-hidden="true"></i>Jenjang Pendidikan *
@@ -154,44 +163,42 @@
                                 <option value="smp">SMP / Sederajat (Sekolah Menengah Pertama)</option>
                                 <option value="sma">SMA / Sederajat (Sekolah Menengah Atas)</option>
                             </select>
-                            <p id="jenjangHint" class="form-hint">Pilihan ini menentukan peran dan konten yang akan Anda akses</p>
+                            <p id="jenjangHint" class="form-hint">Pilihan ini menentukan jenis akses Anda</p>
                             <p class="form-error" id="error-jenjang" role="alert"></p>
                         </div>
 
-                        <!-- 5. PERAN GURU (Conditional berdasarkan Jenjang) -->
+                        <!-- ============================================ -->
+                        <!-- 4. OPSI PILIHAN (Conditional berdasarkan Jenjang) -->
+                        <!-- ============================================ -->
                         
-                        <!-- 5A. PERAN GURU SD (Guru Kelas / Guru Agama / Guru Mapel) -->
-                        <div class="form-group hidden" id="peranSDGroup" data-context="sd">
-                            <label for="peranSD" class="form-label">
-                                <i class="fas fa-chalkboard-teacher mr-2" aria-hidden="true"></i>Peran Guru SD *
+                        <!-- 4A. OPSI UNTUK SD (Guru Kelas / Guru Agama / Guru Mapel) -->
+                        <div class="form-group hidden" id="sdRoleGroup" data-context="sd">
+                            <label for="sdRole" class="form-label">
+                                <i class="fas fa-chalkboard-teacher mr-2" aria-hidden="true"></i>Peran di SD *
                             </label>
                             <select 
-                                id="peranSD" 
-                                name="peranSD" 
+                                id="sdRole" 
+                                name="sdRole" 
                                 class="form-input"
                                 aria-required="false"
                             >
                                 <option value="">Pilih Peran</option>
-                                <option value="guru_kelas">Guru Kelas (Wali Kelas)</option>
-                                <option value="guru_agama">Guru Pendidikan Agama</option>
+                                <option value="guru_kelas">Guru Kelas</option>
+                                <option value="guru_agama">Guru Agama</option>
                                 <option value="guru_mapel">Guru Mata Pelajaran</option>
                             </select>
-                            <p class="form-hint">
-                                • Guru Kelas: Mengajar semua mapel di 1 kelas<br>
-                                • Guru Agama: Mengajar agama di beberapa kelas<br>
-                                • Guru Mapel: Mengajar mapel spesifik (PJOK, Seni, dll)
-                            </p>
-                            <p class="form-error" id="error-peranSD" role="alert"></p>
+                            <p class="form-hint">Pilih sesuai tugas mengajar Anda di SD</p>
+                            <p class="form-error" id="error-sdRole" role="alert"></p>
                         </div>
 
-                        <!-- 5B. KELAS YANG DIAMPU (Hanya untuk Guru Kelas SD) -->
-                        <div class="form-group hidden" id="kelasSDGroup" data-context="guru-kelas-sd">
-                            <label for="kelasSD" class="form-label">
+                        <!-- 4B. KELAS (Hanya untuk Guru Kelas SD) -->
+                        <div class="form-group hidden" id="kelasGroup" data-context="sd-guru-kelas">
+                            <label for="kelas" class="form-label">
                                 <i class="fas fa-layer-group mr-2" aria-hidden="true"></i>Kelas yang Diampu *
                             </label>
                             <select 
-                                id="kelasSD" 
-                                name="kelasSD" 
+                                id="kelas" 
+                                name="kelas" 
                                 class="form-input"
                                 aria-required="false"
                             >
@@ -204,28 +211,123 @@
                                 <option value="6">Kelas 6</option>
                             </select>
                             <p class="form-hint">Konten akan disesuaikan dengan kelas yang dipilih</p>
-                            <p class="form-error" id="error-kelasSD" role="alert"></p>
+                            <p class="form-error" id="error-kelas" role="alert"></p>
                         </div>
 
-                        <!-- 5C. MATA PELAJARAN (Untuk Guru Agama SD + Guru Mapel SMP/SMA) -->
-                        <div class="form-group hidden" id="mapelGroup" data-context="mapel">
-                            <label for="mataPelajaran" class="form-label">
-                                <i class="fas fa-book mr-2" aria-hidden="true"></i>Mata Pelajaran yang Diampu *
+                        <!-- 4C. MATA PELAJARAN SD (Untuk Guru Agama/Mapel SD) -->
+                        <div class="form-group hidden" id="mapelSDGroup" data-context="sd-guru-agama-mapel">
+                            <label for="mataPelajaranSD" class="form-label">
+                                <i class="fas fa-book mr-2" aria-hidden="true"></i>Mata Pelajaran *
                             </label>
                             <select 
-                                id="mataPelajaran" 
-                                name="mataPelajaran" 
+                                id="mataPelajaranSD" 
+                                name="mataPelajaranSD" 
                                 class="form-input"
                                 aria-required="false"
                             >
                                 <option value="">Pilih Mata Pelajaran</option>
-                                <!-- Options populated by JavaScript -->
+                                <option value="Pendidikan Agama Islam">Pendidikan Agama Islam</option>
+                                <option value="Pendidikan Agama Kristen">Pendidikan Agama Kristen</option>
+                                <option value="Pendidikan Agama Katolik">Pendidikan Agama Katolik</option>
+                                <option value="Pendidikan Agama Hindu">Pendidikan Agama Hindu</option>
+                                <option value="Pendidikan Agama Buddha">Pendidikan Agama Buddha</option>
+                                <option value="Pendidikan Agama Khonghucu">Pendidikan Agama Khonghucu</option>
+                                <option value="PJOK">PJOK (Pendidikan Jasmani, Olahraga, dan Kesehatan)</option>
+                                <option value="Seni Budaya">Seni Budaya</option>
+                                <option value="Bahasa Inggris">Bahasa Inggris</option>
+                                <option value="Muatan Lokal">Muatan Lokal</option>
                             </select>
-                            <p class="form-hint">Konten akan disesuaikan dengan mata pelajaran yang dipilih</p>
-                            <p class="form-error" id="error-mataPelajaran" role="alert"></p>
+                            <p class="form-hint">Pilih mata pelajaran yang Anda ampu</p>
+                            <p class="form-error" id="error-mataPelajaranSD" role="alert"></p>
                         </div>
 
-                        <!-- 6. NAMA SEKOLAH -->
+                        <!-- 4D. MATA PELAJARAN SMP (Semua Mapel Kurikulum Merdeka) -->
+                        <div class="form-group hidden" id="mapelSMPGroup" data-context="smp">
+                            <label for="mataPelajaranSMP" class="form-label">
+                                <i class="fas fa-book mr-2" aria-hidden="true"></i>Mata Pelajaran SMP *
+                            </label>
+                            <select 
+                                id="mataPelajaranSMP" 
+                                name="mataPelajaranSMP" 
+                                class="form-input"
+                                aria-required="false"
+                            >
+                                <option value="">Pilih Mata Pelajaran</option>
+                                <option value="Pendidikan Pancasila">Pendidikan Pancasila</option>
+                                <option value="Bahasa Indonesia">Bahasa Indonesia</option>
+                                <option value="Matematika">Matematika</option>
+                                <option value="IPA">IPA (Ilmu Pengetahuan Alam)</option>
+                                <option value="IPS">IPS (Ilmu Pengetahuan Sosial)</option>
+                                <option value="Bahasa Inggris">Bahasa Inggris</option>
+                                <option value="PJOK">PJOK</option>
+                                <option value="Seni Musik">Seni Musik</option>
+                                <option value="Seni Rupa">Seni Rupa</option>
+                                <option value="Seni Tari">Seni Tari</option>
+                                <option value="Seni Teater">Seni Teater</option>
+                                <option value="Prakarya">Prakarya</option>
+                                <option value="Informatika">Informatika</option>
+                                <option value="Bahasa Daerah">Bahasa Daerah</option>
+                                <option value="Pendidikan Agama Islam">Pendidikan Agama Islam</option>
+                                <option value="Pendidikan Agama Kristen">Pendidikan Agama Kristen</option>
+                                <option value="Pendidikan Agama Katolik">Pendidikan Agama Katolik</option>
+                                <option value="Pendidikan Agama Hindu">Pendidikan Agama Hindu</option>
+                                <option value="Pendidikan Agama Buddha">Pendidikan Agama Buddha</option>
+                                <option value="Pendidikan Agama Khonghucu">Pendidikan Agama Khonghucu</option>
+                            </select>
+                            <p class="form-hint">Pilih mata pelajaran yang Anda ampu di SMP</p>
+                            <p class="form-error" id="error-mataPelajaranSMP" role="alert"></p>
+                        </div>
+
+                        <!-- 4E. MATA PELAJARAN SMA (Semua Mapel Kurikulum Merdeka) -->
+                        <div class="form-group hidden" id="mapelSMAGroup" data-context="sma">
+                            <label for="mataPelajaranSMA" class="form-label">
+                                <i class="fas fa-book mr-2" aria-hidden="true"></i>Mata Pelajaran SMA *
+                            </label>
+                            <select 
+                                id="mataPelajaranSMA" 
+                                name="mataPelajaranSMA" 
+                                class="form-input"
+                                aria-required="false"
+                            >
+                                <option value="">Pilih Mata Pelajaran</option>
+                                <option value="Pendidikan Pancasila">Pendidikan Pancasila</option>
+                                <option value="Bahasa Indonesia">Bahasa Indonesia</option>
+                                <option value="Matematika">Matematika</option>
+                                <option value="Bahasa Inggris">Bahasa Inggris</option>
+                                <option value="PJOK">PJOK</option>
+                                <option value="Seni Musik">Seni Musik</option>
+                                <option value="Seni Rupa">Seni Rupa</option>
+                                <option value="Seni Tari">Seni Tari</option>
+                                <option value="Seni Teater">Seni Teater</option>
+                                <option value="Prakarya">Prakarya</option>
+                                <option value="Informatika">Informatika</option>
+                                <option value="Fisika">Fisika</option>
+                                <option value="Kimia">Kimia</option>
+                                <option value="Biologi">Biologi</option>
+                                <option value="Geografi">Geografi</option>
+                                <option value="Sejarah">Sejarah</option>
+                                <option value="Sosiologi">Sosiologi</option>
+                                <option value="Ekonomi">Ekonomi</option>
+                                <option value="Bahasa Jerman">Bahasa Jerman</option>
+                                <option value="Bahasa Prancis">Bahasa Prancis</option>
+                                <option value="Bahasa Arab">Bahasa Arab</option>
+                                <option value="Bahasa Jepang">Bahasa Jepang</option>
+                                <option value="Bahasa Korea">Bahasa Korea</option>
+                                <option value="Bahasa Mandarin">Bahasa Mandarin</option>
+                                <option value="Pendidikan Agama Islam">Pendidikan Agama Islam</option>
+                                <option value="Pendidikan Agama Kristen">Pendidikan Agama Kristen</option>
+                                <option value="Pendidikan Agama Katolik">Pendidikan Agama Katolik</option>
+                                <option value="Pendidikan Agama Hindu">Pendidikan Agama Hindu</option>
+                                <option value="Pendidikan Agama Buddha">Pendidikan Agama Buddha</option>
+                                <option value="Pendidikan Agama Khonghucu">Pendidikan Agama Khonghucu</option>
+                            </select>
+                            <p class="form-hint">Pilih mata pelajaran yang Anda ampu di SMA</p>
+                            <p class="form-error" id="error-mataPelajaranSMA" role="alert"></p>
+                        </div>
+
+                        <!-- ============================================ -->
+                        <!-- 5. NAMA SEKOLAH                               -->
+                        <!-- ============================================ -->
                         <div class="form-group">
                             <label for="sekolah" class="form-label">
                                 <i class="fas fa-school mr-2" aria-hidden="true"></i>Nama Sekolah *
@@ -243,7 +345,9 @@
                             <p class="form-error" id="error-sekolah" role="alert"></p>
                         </div>
 
-                        <!-- 7. PASSWORD -->
+                        <!-- ============================================ -->
+                        <!-- 6. PASSWORD                                   -->
+                        <!-- ============================================ -->
                         <div class="form-group">
                             <label for="password" class="form-label">
                                 <i class="fas fa-lock mr-2" aria-hidden="true"></i>Password *
@@ -268,7 +372,9 @@
                             <p class="form-error" id="error-password" role="alert"></p>
                         </div>
 
-                        <!-- 8. KONFIRMASI PASSWORD -->
+                        <!-- ============================================ -->
+                        <!-- 7. KONFIRMASI PASSWORD                        -->
+                        <!-- ============================================ -->
                         <div class="form-group">
                             <label for="confirmPassword" class="form-label">
                                 <i class="fas fa-lock mr-2" aria-hidden="true"></i>Konfirmasi Password *
@@ -291,7 +397,9 @@
                             <p class="form-error" id="error-confirmPassword" role="alert"></p>
                         </div>
 
-                        <!-- 9. SYARAT DAN KETENTUAN -->
+                        <!-- ============================================ -->
+                        <!-- 8. SYARAT & KETENTUAN                         -->
+                        <!-- ============================================ -->
                         <div class="form-group">
                             <label class="checkbox-label">
                                 <input type="checkbox" id="terms" name="terms" required aria-required="true">
@@ -303,7 +411,9 @@
                             <p class="form-error" id="error-terms" role="alert"></p>
                         </div>
 
-                        <!-- 10. TOMBOL DAFTAR -->
+                        <!-- ============================================ -->
+                        <!-- 9. TOMBOL DAFTAR                              -->
+                        <!-- ============================================ -->
                         <button type="submit" class="btn btn-primary btn-block btn-lg" id="submitBtn">
                             <i class="fas fa-user-plus mr-2" aria-hidden="true"></i><span class="hidden sm:inline">Daftar Sekarang</span><span class="sm:hidden">Daftar</span>
                         </button>
