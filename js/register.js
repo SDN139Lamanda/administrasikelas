@@ -8,69 +8,11 @@
 import { registerGuru } from '../modules/auth-register.js';
 
 // ============================================
-// MATA PELAJARAN KURIKULUM MERDEKA
-// ============================================
-const MATA_PELAJARAN = {
-    smp: [
-        'Pendidikan Pancasila',
-        'Bahasa Indonesia',
-        'Matematika',
-        'IPA (Ilmu Pengetahuan Alam)',
-        'IPS (Ilmu Pengetahuan Sosial)',
-        'Bahasa Inggris',
-        'PJOK (Pendidikan Jasmani, Olahraga, dan Kesehatan)',
-        'Seni Musik',
-        'Seni Rupa',
-        'Seni Tari',
-        'Seni Teater',
-        'Prakarya',
-        'Informatika',
-        'Bahasa Daerah',
-        'Pendidikan Agama Islam',
-        'Pendidikan Agama Kristen',
-        'Pendidikan Agama Katolik',
-        'Pendidikan Agama Hindu',
-        'Pendidikan Agama Buddha',
-        'Pendidikan Agama Khonghucu'
-    ],
-    sma: [
-        'Pendidikan Pancasila',
-        'Bahasa Indonesia',
-        'Matematika',
-        'Bahasa Inggris',
-        'PJOK',
-        'Seni Musik',
-        'Seni Rupa',
-        'Seni Tari',
-        'Seni Teater',
-        'Prakarya',
-        'Informatika',
-        'Fisika',
-        'Kimia',
-        'Biologi',
-        'Geografi',
-        'Sejarah',
-        'Sosiologi',
-        'Ekonomi',
-        'Bahasa Jerman',
-        'Bahasa Prancis',
-        'Bahasa Arab',
-        'Bahasa Jepang',
-        'Bahasa Korea',
-        'Bahasa Mandarin',
-        'Pendidikan Agama Islam',
-        'Pendidikan Agama Kristen',
-        'Pendidikan Agama Katolik',
-        'Pendidikan Agama Hindu',
-        'Pendidikan Agama Buddha',
-        'Pendidikan Agama Khonghucu'
-    ]
-};
-
-// ============================================
 // DOM ELEMENTS
 // ============================================
-let registerForm, jenjangSelect, kelasGroup, kelasSelect, mapelGroup, mapelSelect, submitBtn, loadingBtn, formAlert;
+let registerForm, jenjangSelect, sdRoleGroup, sdRoleSelect, kelasGroup, kelasSelect, 
+    mapelSDGroup, mapelSDSelect, mapelSMPGroup, mapelSMPSelect, mapelSMAGroup, mapelSMASelect,
+    submitBtn, loadingBtn, formAlert;
 
 // ============================================
 // INIT: Wait for DOM to be fully loaded
@@ -81,41 +23,41 @@ document.addEventListener('DOMContentLoaded', () => {
     // Get DOM elements
     registerForm = document.getElementById('registerForm');
     jenjangSelect = document.getElementById('jenjang');
+    sdRoleGroup = document.getElementById('sdRoleGroup');
+    sdRoleSelect = document.getElementById('sdRole');
     kelasGroup = document.getElementById('kelasGroup');
     kelasSelect = document.getElementById('kelas');
-    mapelGroup = document.getElementById('mapelGroup');
-    mapelSelect = document.getElementById('mataPelajaran');
+    mapelSDGroup = document.getElementById('mapelSDGroup');
+    mapelSDSelect = document.getElementById('mataPelajaranSD');
+    mapelSMPGroup = document.getElementById('mapelSMPGroup');
+    mapelSMPSelect = document.getElementById('mataPelajaranSMP');
+    mapelSMAGroup = document.getElementById('mapelSMAGroup');
+    mapelSMASelect = document.getElementById('mataPelajaranSMA');
     submitBtn = document.getElementById('submitBtn');
     loadingBtn = document.getElementById('loadingBtn');
     formAlert = document.getElementById('formAlert');
     
-    // Debug log
-    console.log('🔍 Elements:', {
-        registerForm: !!registerForm,
-        jenjangSelect: !!jenjangSelect,
-        kelasGroup: !!kelasGroup,
-        mapelGroup: !!mapelGroup
-    });
-    
     // Attach event listener for jenjang change
     if (jenjangSelect) {
         jenjangSelect.addEventListener('change', handleJenjangChange);
-        console.log('✅ Event listener attached to jenjangSelect');
+    }
+    
+    // Attach event listener for SD role change
+    if (sdRoleSelect) {
+        sdRoleSelect.addEventListener('change', handleSDRoleChange);
     }
     
     // Attach form submit handler
     if (registerForm) {
         registerForm.addEventListener('submit', handleRegisterSubmit);
-        console.log('✅ Form submit handler attached');
     }
     
-    // Real-time validation on input
+    // Real-time validation
     document.querySelectorAll('.form-input').forEach(input => {
         input?.addEventListener('input', () => clearError(input.id));
-        input?.addEventListener('blur', () => validateField(input.id));
     });
     
-    // Initial check: if page loads with pre-filled jenjang (browser back button)
+    // Initial check
     if (jenjangSelect?.value) {
         handleJenjangChange({ target: jenjangSelect });
     }
@@ -125,99 +67,103 @@ document.addEventListener('DOMContentLoaded', () => {
 // FUNGSI: Handle Jenjang Change
 // ============================================
 function handleJenjangChange(e) {
-    const jenjang = e.target?.value || e.value;
+    const jenjang = e.target?.value;
     
     console.log('🔄 Jenjang changed to:', jenjang);
     
-    // Reset both fields
-    if (kelasSelect) kelasSelect.value = '';
-    if (mapelSelect) mapelSelect.value = '';
-    clearError('kelas');
-    clearError('mataPelajaran');
-    
-    // Update aria-required based on jenjang
-    if (kelasSelect) kelasSelect.setAttribute('aria-required', 'false');
-    if (mapelSelect) mapelSelect.setAttribute('aria-required', 'false');
+    // Reset all conditional fields
+    resetConditionalFields();
     
     // Show/hide based on jenjang
     if (jenjang === 'sd') {
-        // ✅ SD: Show Kelas, Hide Mapel
-        if (kelasGroup) {
-            kelasGroup.classList.remove('hidden');
-            console.log('✅ kelasGroup shown for SD');
-        }
-        if (mapelGroup) {
-            mapelGroup.classList.add('hidden');
-            console.log('❌ mapelGroup hidden for SD');
-        }
-        if (kelasSelect) {
-            kelasSelect.setAttribute('aria-required', 'true');
-            kelasSelect.required = true;
-        }
-        if (mapelSelect) {
-            mapelSelect.setAttribute('aria-required', 'false');
-            mapelSelect.required = false;
-        }
-    } else if (jenjang === 'smp' || jenjang === 'sma') {
-        // ✅ SMP/SMA: Hide Kelas, Show Mapel
-        if (kelasGroup) {
-            kelasGroup.classList.add('hidden');
-            console.log('❌ kelasGroup hidden for SMP/SMA');
-        }
-        if (mapelGroup) {
-            mapelGroup.classList.remove('hidden');
-            console.log('✅ mapelGroup shown for', jenjang);
-        }
-        populateMataPelajaran(jenjang);
-        if (kelasSelect) {
-            kelasSelect.setAttribute('aria-required', 'false');
-            kelasSelect.required = false;
-        }
-        if (mapelSelect) {
-            mapelSelect.setAttribute('aria-required', 'true');
-            mapelSelect.required = true;
-        }
+        // ✅ SD: Show role selection
+        if (sdRoleGroup) sdRoleGroup.classList.remove('hidden');
+        if (sdRoleSelect) sdRoleSelect.setAttribute('aria-required', 'true');
+        if (sdRoleSelect) sdRoleSelect.required = true;
+    } else if (jenjang === 'smp') {
+        // ✅ SMP: Show mapel SMP
+        if (mapelSMPGroup) mapelSMPGroup.classList.remove('hidden');
+        if (mapelSMPSelect) mapelSMPSelect.setAttribute('aria-required', 'true');
+        if (mapelSMPSelect) mapelSMPSelect.required = true;
+    } else if (jenjang === 'sma') {
+        // ✅ SMA: Show mapel SMA
+        if (mapelSMAGroup) mapelSMAGroup.classList.remove('hidden');
+        if (mapelSMASelect) mapelSMASelect.setAttribute('aria-required', 'true');
+        if (mapelSMASelect) mapelSMASelect.required = true;
     } else {
         // No jenjang selected
-        if (kelasGroup) kelasGroup.classList.add('hidden');
-        if (mapelGroup) mapelGroup.classList.add('hidden');
-        if (kelasSelect) {
-            kelasSelect.setAttribute('aria-required', 'false');
-            kelasSelect.required = false;
-        }
-        if (mapelSelect) {
-            mapelSelect.setAttribute('aria-required', 'false');
-            mapelSelect.required = false;
-        }
+        if (sdRoleGroup) sdRoleGroup.classList.add('hidden');
+        if (mapelSMPGroup) mapelSMPGroup.classList.add('hidden');
+        if (mapelSMAGroup) mapelSMAGroup.classList.add('hidden');
     }
 }
 
 // ============================================
-// FUNGSI: Populate Mata Pelajaran Dropdown
+// FUNGSI: Handle SD Role Change
 // ============================================
-function populateMataPelajaran(jenjang) {
-    if (!mapelSelect) {
-        console.error('❌ mapelSelect element not found!');
-        return;
+function handleSDRoleChange(e) {
+    const sdRole = e.target?.value;
+    
+    console.log('🔄 SD Role changed to:', sdRole);
+    
+    // Reset kelas & mapel SD
+    if (kelasGroup) kelasGroup.classList.add('hidden');
+    if (mapelSDGroup) mapelSDGroup.classList.add('hidden');
+    if (kelasSelect) {
+        kelasSelect.value = '';
+        kelasSelect.required = false;
+        kelasSelect.setAttribute('aria-required', 'false');
+    }
+    if (mapelSDSelect) {
+        mapelSDSelect.value = '';
+        mapelSDSelect.required = false;
+        mapelSDSelect.setAttribute('aria-required', 'false');
     }
     
-    // Clear existing options (keep first option)
-    mapelSelect.innerHTML = '<option value="">Pilih Mata Pelajaran</option>';
+    // Show based on role
+    if (sdRole === 'guru_kelas') {
+        // Guru Kelas → Show kelas selection
+        if (kelasGroup) kelasGroup.classList.remove('hidden');
+        if (kelasSelect) kelasSelect.required = true;
+        if (kelasSelect) kelasSelect.setAttribute('aria-required', 'true');
+    } else if (sdRole === 'guru_agama' || sdRole === 'guru_mapel') {
+        // Guru Agama/Mapel → Show mapel SD
+        if (mapelSDGroup) mapelSDGroup.classList.remove('hidden');
+        if (mapelSDSelect) mapelSDSelect.required = true;
+        if (mapelSDSelect) mapelSDSelect.setAttribute('aria-required', 'true');
+    }
+}
+
+// ============================================
+// FUNGSI: Reset Conditional Fields
+// ============================================
+function resetConditionalFields() {
+    // Hide all groups
+    if (sdRoleGroup) sdRoleGroup.classList.add('hidden');
+    if (kelasGroup) kelasGroup.classList.add('hidden');
+    if (mapelSDGroup) mapelSDGroup.classList.add('hidden');
+    if (mapelSMPGroup) mapelSMPGroup.classList.add('hidden');
+    if (mapelSMAGroup) mapelSMAGroup.classList.add('hidden');
     
-    // Get subjects for selected jenjang
-    const subjects = MATA_PELAJARAN[jenjang] || [];
+    // Reset values
+    if (sdRoleSelect) sdRoleSelect.value = '';
+    if (kelasSelect) kelasSelect.value = '';
+    if (mapelSDSelect) mapelSDSelect.value = '';
+    if (mapelSMPSelect) mapelSMPSelect.value = '';
+    if (mapelSMASelect) mapelSMASelect.value = '';
     
-    console.log(`📚 Loading ${subjects.length} subjects for ${jenjang}`);
-    
-    // Add options
-    subjects.forEach((subject, index) => {
-        const option = document.createElement('option');
-        option.value = subject;
-        option.textContent = subject;
-        mapelSelect.appendChild(option);
+    // Reset required
+    [sdRoleSelect, kelasSelect, mapelSDSelect, mapelSMPSelect, mapelSMASelect].forEach(select => {
+        if (select) {
+            select.required = false;
+            select.setAttribute('aria-required', 'false');
+        }
     });
     
-    console.log('✅ Subjects populated');
+    // Clear errors
+    ['sdRole', 'kelas', 'mataPelajaranSD', 'mataPelajaranSMP', 'mataPelajaranSMA'].forEach(fieldId => {
+        clearError(fieldId);
+    });
 }
 
 // ============================================
@@ -342,69 +288,73 @@ function showAlert(type, message) {
     `;
     formAlert.classList.remove('hidden');
     
-    // Auto-hide success alerts after 5 seconds
     if (type === 'success') {
-        setTimeout(() => {
-            formAlert.classList.add('hidden');
-        }, 5000);
+        setTimeout(() => formAlert.classList.add('hidden'), 5000);
     }
 }
 
 function hideAlert() {
-    if (formAlert) {
-        formAlert.classList.add('hidden');
-    }
+    if (formAlert) formAlert.classList.add('hidden');
 }
 
 function validateForm() {
     let isValid = true;
+    const jenjang = jenjangSelect?.value;
     
     // Nama Lengkap
     const namaLengkap = document.getElementById('namaLengkap')?.value.trim();
     if (!namaLengkap) {
         showError('namaLengkap', 'Nama lengkap wajib diisi');
         isValid = false;
-    } else {
-        clearError('namaLengkap');
-    }
+    } else clearError('namaLengkap');
     
     // Email
-    const email = document.getElementById('email')?.value.trim();
     if (!validateField('email')) isValid = false;
     
     // No HP
-    const noHp = document.getElementById('noHp')?.value.trim();
     if (!validateField('noHp')) isValid = false;
     
     // Jenjang
-    const jenjang = jenjangSelect?.value;
     if (!jenjang) {
         showError('jenjang', 'Jenjang pendidikan wajib dipilih');
         isValid = false;
-    } else {
-        clearError('jenjang');
-    }
+    } else clearError('jenjang');
     
-    // Kelas (jika SD)
+    // Conditional validation based on jenjang
     if (jenjang === 'sd') {
-        const kelas = kelasSelect?.value;
-        if (!kelas) {
-            showError('kelas', 'Kelas yang diampu wajib dipilih');
+        const sdRole = sdRoleSelect?.value;
+        if (!sdRole) {
+            showError('sdRole', 'Peran di SD wajib dipilih');
             isValid = false;
         } else {
-            clearError('kelas');
+            clearError('sdRole');
+            
+            if (sdRole === 'guru_kelas') {
+                const kelas = kelasSelect?.value;
+                if (!kelas) {
+                    showError('kelas', 'Kelas wajib dipilih');
+                    isValid = false;
+                } else clearError('kelas');
+            } else if (sdRole === 'guru_agama' || sdRole === 'guru_mapel') {
+                const mapel = mapelSDSelect?.value;
+                if (!mapel) {
+                    showError('mataPelajaranSD', 'Mata pelajaran wajib dipilih');
+                    isValid = false;
+                } else clearError('mataPelajaranSD');
+            }
         }
-    }
-    
-    // Mata Pelajaran (jika SMP/SMA)
-    if (jenjang === 'smp' || jenjang === 'sma') {
-        const mataPelajaran = mapelSelect?.value;
-        if (!mataPelajaran) {
-            showError('mataPelajaran', 'Mata pelajaran wajib dipilih');
+    } else if (jenjang === 'smp') {
+        const mapel = mapelSMPSelect?.value;
+        if (!mapel) {
+            showError('mataPelajaranSMP', 'Mata pelajaran wajib dipilih');
             isValid = false;
-        } else {
-            clearError('mataPelajaran');
-        }
+        } else clearError('mataPelajaranSMP');
+    } else if (jenjang === 'sma') {
+        const mapel = mapelSMASelect?.value;
+        if (!mapel) {
+            showError('mataPelajaranSMA', 'Mata pelajaran wajib dipilih');
+            isValid = false;
+        } else clearError('mataPelajaranSMA');
     }
     
     // Sekolah
@@ -412,9 +362,7 @@ function validateForm() {
     if (!sekolah) {
         showError('sekolah', 'Nama sekolah wajib diisi');
         isValid = false;
-    } else {
-        clearError('sekolah');
-    }
+    } else clearError('sekolah');
     
     // Password
     if (!validateField('password')) isValid = false;
@@ -427,9 +375,7 @@ function validateForm() {
     if (!terms) {
         showError('terms', 'Anda harus menyetujui syarat & ketentuan');
         isValid = false;
-    } else {
-        clearError('terms');
-    }
+    } else clearError('terms');
     
     return isValid;
 }
@@ -439,76 +385,60 @@ function validateForm() {
 // ============================================
 async function handleRegisterSubmit(e) {
     e.preventDefault();
-    
-    console.log('📝 Register submit triggered');
-    
-    // Hide previous alerts
     hideAlert();
     
-    // Validate form
     if (!validateForm()) {
-        console.log('❌ Validation failed');
         showAlert('error', 'Mohon periksa kembali semua field yang wajib diisi');
-        
-        // Focus first error field
         const firstError = document.querySelector('.form-input.error');
-        if (firstError) {
-            firstError.focus();
-        }
+        if (firstError) firstError.focus();
         return;
     }
     
-    console.log('✅ Validation passed');
-    
-    // Show loading state
+    // Show loading
     if (submitBtn) submitBtn.classList.add('hidden');
     if (loadingBtn) loadingBtn.classList.remove('hidden');
     
-    // Get form data
+    // Collect form data
     const jenjang = jenjangSelect?.value;
+    const sdRole = sdRoleSelect?.value;
+    
     const formData = {
         namaLengkap: document.getElementById('namaLengkap')?.value.trim(),
         email: document.getElementById('email')?.value.trim(),
         noHp: document.getElementById('noHp')?.value.trim(),
         jenjang: jenjang,
-        kelas: jenjang === 'sd' ? kelasSelect?.value || null : null,
-        mataPelajaran: (jenjang === 'smp' || jenjang === 'sma') ? mapelSelect?.value || null : null,
         sekolah: document.getElementById('sekolah')?.value.trim(),
-        password: document.getElementById('password')?.value
+        password: document.getElementById('password')?.value,
+        
+        // Context-based fields
+        sdRole: jenjang === 'sd' ? sdRole || null : null,
+        kelas: jenjang === 'sd' && sdRole === 'guru_kelas' ? kelasSelect?.value || null : null,
+        mataPelajaranSD: jenjang === 'sd' && (sdRole === 'guru_agama' || sdRole === 'guru_mapel') ? mapelSDSelect?.value || null : null,
+        mataPelajaranSMP: jenjang === 'smp' ? mapelSMPSelect?.value || null : null,
+        mataPelajaranSMA: jenjang === 'sma' ? mapelSMASelect?.value || null : null
     };
     
-    console.log('📦 Register data:', { ...formData, password: '[REDACTED]' });
+    console.log('📦 Register ', { ...formData, password: '[REDACTED]' });
     
     try {
         const result = await registerGuru(formData);
         
         if (result.success) {
-            console.log('✅ Registration successful');
-            showAlert('success', `${result.message} Silakan cek email Anda untuk verifikasi.`);
-            
-            // Redirect to login after short delay
+            showAlert('success', `${result.message} Silakan cek email untuk verifikasi.`);
             setTimeout(() => {
                 window.location.href = 'login.html';
             }, 2000);
         } else {
-            console.error('❌ Registration failed:', result.error);
-            showAlert('error', result.error || 'Registrasi gagal. Silakan coba lagi.');
-            
-            // Reset button state
+            showAlert('error', result.error || 'Registrasi gagal.');
             if (submitBtn) submitBtn.classList.remove('hidden');
             if (loadingBtn) loadingBtn.classList.add('hidden');
         }
     } catch (error) {
-        console.error('❌ Registration error:', error);
-        showAlert('error', error.message || 'Terjadi kesalahan. Silakan coba lagi.');
-        
-        // Reset button state
+        showAlert('error', error.message || 'Terjadi kesalahan.');
         if (submitBtn) submitBtn.classList.remove('hidden');
         if (loadingBtn) loadingBtn.classList.add('hidden');
     }
 }
 
-// ============================================
-// EXPORT FOR GLOBAL ACCESS
-// ============================================
+// Export
 window.togglePassword = togglePassword;
