@@ -4,11 +4,7 @@
  * Platform Administrasi Kelas Digital
  * ============================================
  * 
- * Fungsi:
- * - Load user context from sessionStorage
- * - Filter rooms based on jenjang (SD/SMP/SMA)
- * - Navigate between rooms (sections)
- * - Back to dashboard functionality
+ * ✅ UPDATE: Tambah feature-level access control
  */
 
 console.log('📦 dashboard.js loaded');
@@ -18,12 +14,7 @@ console.log('📦 dashboard.js loaded');
 // ============================================
 document.addEventListener('DOMContentLoaded', () => {
     console.log('✅ Dashboard DOM Ready');
-    
-    // Load user context
     loadUserContext();
-    
-    // Setup navigation
-    setupNavigation();
 });
 
 // ============================================
@@ -51,6 +42,9 @@ function loadUserContext() {
         
         // Filter rooms based on jenjang
         filterRooms(currentUser.jenjang);
+        
+        // ✅ NEW: Filter rooms based on features ⭐
+        filterRoomsByFeatures(currentUser);
         
     } catch (error) {
         console.error('❌ Error loading user context:', error);
@@ -108,7 +102,7 @@ function filterRooms(jenjang) {
         });
     }
     
-    // Admin sees all (if role === 'admin')
+    // Admin sees all
     const currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
     if (currentUser?.role === 'admin') {
         document.querySelectorAll('.room-sd, .room-smp, .room-sma').forEach(room => {
@@ -118,64 +112,60 @@ function filterRooms(jenjang) {
 }
 
 // ============================================
-// FUNGSI: Setup Navigation
+// ✅ FUNGSI BARU: Check Feature Access ⭐
 // ============================================
-function setupNavigation() {
-    // Handle room clicks
-    document.querySelectorAll('.room-link').forEach(link => {
-        link.addEventListener('click', (e) => {
-            const href = link.getAttribute('href');
-            if (href.startsWith('#')) {
-                e.preventDefault();
-                navigateToSection(href.substring(1));
-            }
-        });
-    });
+function hasFeatureAccess(featureName, user) {
+    console.log('🔍 Check feature access:', featureName, user.features);
     
-    // Handle kelas clicks
-    document.querySelectorAll('.kelas-link').forEach(link => {
-        link.addEventListener('click', (e) => {
-            const href = link.getAttribute('href');
-            if (href.startsWith('#')) {
-                e.preventDefault();
-                navigateToMapel(href.substring(1));
-            }
-        });
-    });
+    // ✅ Admin akses semua fitur
+    if (user.role === 'admin') {
+        console.log('✅ Admin - full access');
+        return true;
+    }
+    
+    // ✅ Jika user TIDAK punya features field → akses semua
+    if (!user.features || user.features === 'all') {
+        console.log('✅ No features field - full access');
+        return true;
+    }
+    
+    // ✅ Jika user punya features array → check access
+    if (Array.isArray(user.features)) {
+        const hasAccess = user.features.includes(featureName);
+        console.log(hasAccess ? `✅ Has access: ${featureName}` : `❌ No access: ${featureName}`);
+        return hasAccess;
+    }
+    
+    // ✅ Default: akses semua
+    return true;
 }
 
 // ============================================
-// FUNGSI: Navigate to Section
+// ✅ FUNGSI BARU: Filter Rooms By Features ⭐
 // ============================================
-function navigateToSection(sectionId) {
-    console.log('🔗 Navigate to:', sectionId);
+function filterRoomsByFeatures(user) {
+    console.log('🔍 Filtering rooms by features...');
     
-    // Hide dashboard hero
-    document.querySelector('.dashboard-hero').classList.add('hidden');
+    const featureMapping = [
+        { selector: '.room-adm-kelas', feature: 'adm-kelas' },
+        { selector: '.room-adm-pembelajaran', feature: 'adm-pembelajaran' },
+        { selector: '.room-penilaian', feature: 'penilaian' },
+        { selector: '.room-refleksi', feature: 'refleksi' },
+        { selector: '.room-generator-modul', feature: 'generator-modul' }
+    ];
     
-    // Hide all sections
-    document.querySelectorAll('.section').forEach(section => {
-        if (!section.classList.contains('bg-gray-50')) { // Keep module container
-            section.classList.add('hidden');
+    featureMapping.forEach(mapping => {
+        const element = document.querySelector(mapping.selector);
+        if (element) {
+            if (hasFeatureAccess(mapping.feature, user)) {
+                element.classList.remove('hidden');
+                console.log(`✅ Show: ${mapping.selector}`);
+            } else {
+                element.classList.add('hidden');
+                console.log(`❌ Hide: ${mapping.selector}`);
+            }
         }
     });
-    
-    // Show target section
-    const target = document.getElementById(sectionId);
-    if (target) {
-        target.classList.remove('hidden');
-        target.classList.add('active');
-        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-}
-
-// ============================================
-// FUNGSI: Navigate to Mata Pelajaran
-// ============================================
-function navigateToMapel(mapelId) {
-    console.log('🔗 Navigate to mapel:', mapelId);
-    // Future: Load mata pelajaran content
-    alert('Fitur Mata Pelajaran akan segera hadir!');
 }
 
 // ============================================
@@ -184,17 +174,13 @@ function navigateToMapel(mapelId) {
 window.backToDashboard = () => {
     console.log('🏠 Back to dashboard');
     
-    // Hide all sections
     document.querySelectorAll('.section').forEach(section => {
         if (!section.classList.contains('bg-gray-50')) {
             section.classList.add('hidden');
         }
     });
     
-    // Show dashboard hero
     document.querySelector('.dashboard-hero').classList.remove('hidden');
-    
-    // Scroll to top
     window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
@@ -204,10 +190,7 @@ window.backToDashboard = () => {
 window.logout = async () => {
     if (confirm('Apakah Anda yakin ingin keluar?')) {
         try {
-            // Clear session
             sessionStorage.removeItem('currentUser');
-            
-            // Redirect to login
             window.location.href = 'login.html';
         } catch (error) {
             console.error('❌ Logout error:', error);
