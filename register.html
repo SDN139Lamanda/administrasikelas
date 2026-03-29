@@ -77,7 +77,7 @@
                         <!-- Alert Container -->
                         <div id="formAlert" class="alert hidden" role="alert" aria-live="polite"></div>
 
-                        <!-- Nama Lengkap -->
+                        <!-- 1. NAMA LENGKAP -->
                         <div class="form-group">
                             <label for="namaLengkap" class="form-label">
                                 <i class="fas fa-user mr-2" aria-hidden="true"></i>Nama Lengkap *
@@ -95,7 +95,7 @@
                             <p class="form-error" id="error-namaLengkap" role="alert"></p>
                         </div>
 
-                        <!-- Email -->
+                        <!-- 2. EMAIL -->
                         <div class="form-group">
                             <label for="email" class="form-label">
                                 <i class="fas fa-envelope mr-2" aria-hidden="true"></i>Email *
@@ -115,7 +115,7 @@
                             <p class="form-error" id="error-email" role="alert"></p>
                         </div>
 
-                        <!-- No HP -->
+                        <!-- 3. NO HP -->
                         <div class="form-group">
                             <label for="noHp" class="form-label">
                                 <i class="fas fa-phone mr-2" aria-hidden="true"></i>Nomor WhatsApp *
@@ -136,7 +136,7 @@
                             <p class="form-error" id="error-noHp" role="alert"></p>
                         </div>
 
-                        <!-- ✅ JENJANG PENDIDIKAN (KUNCI CONTEXT-BASED ACCESS) -->
+                        <!-- 4. JENJANG PENDIDIKAN -->
                         <div class="form-group">
                             <label for="jenjang" class="form-label">
                                 <i class="fas fa-graduation-cap mr-2" aria-hidden="true"></i>Jenjang Pendidikan *
@@ -154,18 +154,44 @@
                                 <option value="smp">SMP / Sederajat (Sekolah Menengah Pertama)</option>
                                 <option value="sma">SMA / Sederajat (Sekolah Menengah Atas)</option>
                             </select>
-                            <p id="jenjangHint" class="form-hint">Pilihan ini menentukan konten yang akan Anda akses</p>
+                            <p id="jenjangHint" class="form-hint">Pilihan ini menentukan peran dan konten yang akan Anda akses</p>
                             <p class="form-error" id="error-jenjang" role="alert"></p>
                         </div>
 
-                        <!-- ✅ FIELD KELAS (Hanya untuk SD - Conditional) -->
-                        <div class="form-group hidden" id="kelasGroup" data-context="sd">
-                            <label for="kelas" class="form-label">
+                        <!-- 5. PERAN GURU (Conditional berdasarkan Jenjang) -->
+                        
+                        <!-- 5A. PERAN GURU SD (Guru Kelas / Guru Agama / Guru Mapel) -->
+                        <div class="form-group hidden" id="peranSDGroup" data-context="sd">
+                            <label for="peranSD" class="form-label">
+                                <i class="fas fa-chalkboard-teacher mr-2" aria-hidden="true"></i>Peran Guru SD *
+                            </label>
+                            <select 
+                                id="peranSD" 
+                                name="peranSD" 
+                                class="form-input"
+                                aria-required="false"
+                            >
+                                <option value="">Pilih Peran</option>
+                                <option value="guru_kelas">Guru Kelas (Wali Kelas)</option>
+                                <option value="guru_agama">Guru Pendidikan Agama</option>
+                                <option value="guru_mapel">Guru Mata Pelajaran</option>
+                            </select>
+                            <p class="form-hint">
+                                • Guru Kelas: Mengajar semua mapel di 1 kelas<br>
+                                • Guru Agama: Mengajar agama di beberapa kelas<br>
+                                • Guru Mapel: Mengajar mapel spesifik (PJOK, Seni, dll)
+                            </p>
+                            <p class="form-error" id="error-peranSD" role="alert"></p>
+                        </div>
+
+                        <!-- 5B. KELAS YANG DIAMPU (Hanya untuk Guru Kelas SD) -->
+                        <div class="form-group hidden" id="kelasSDGroup" data-context="guru-kelas-sd">
+                            <label for="kelasSD" class="form-label">
                                 <i class="fas fa-layer-group mr-2" aria-hidden="true"></i>Kelas yang Diampu *
                             </label>
                             <select 
-                                id="kelas" 
-                                name="kelas" 
+                                id="kelasSD" 
+                                name="kelasSD" 
                                 class="form-input"
                                 aria-required="false"
                             >
@@ -178,11 +204,11 @@
                                 <option value="6">Kelas 6</option>
                             </select>
                             <p class="form-hint">Konten akan disesuaikan dengan kelas yang dipilih</p>
-                            <p class="form-error" id="error-kelas" role="alert"></p>
+                            <p class="form-error" id="error-kelasSD" role="alert"></p>
                         </div>
 
-                        <!-- ✅ FIELD MATA PELAJARAN (Hanya untuk SMP/SMA - Conditional) -->
-                        <div class="form-group hidden" id="mapelGroup" data-context="smp-sma">
+                        <!-- 5C. MATA PELAJARAN (Untuk Guru Agama SD + Guru Mapel SMP/SMA) -->
+                        <div class="form-group hidden" id="mapelGroup" data-context="mapel">
                             <label for="mataPelajaran" class="form-label">
                                 <i class="fas fa-book mr-2" aria-hidden="true"></i>Mata Pelajaran yang Diampu *
                             </label>
@@ -199,7 +225,7 @@
                             <p class="form-error" id="error-mataPelajaran" role="alert"></p>
                         </div>
 
-                        <!-- Sekolah -->
+                        <!-- 6. NAMA SEKOLAH -->
                         <div class="form-group">
                             <label for="sekolah" class="form-label">
                                 <i class="fas fa-school mr-2" aria-hidden="true"></i>Nama Sekolah *
@@ -217,7 +243,7 @@
                             <p class="form-error" id="error-sekolah" role="alert"></p>
                         </div>
 
-                        <!-- Password -->
+                        <!-- 7. PASSWORD -->
                         <div class="form-group">
                             <label for="password" class="form-label">
                                 <i class="fas fa-lock mr-2" aria-hidden="true"></i>Password *
@@ -242,7 +268,7 @@
                             <p class="form-error" id="error-password" role="alert"></p>
                         </div>
 
-                        <!-- Confirm Password -->
+                        <!-- 8. KONFIRMASI PASSWORD -->
                         <div class="form-group">
                             <label for="confirmPassword" class="form-label">
                                 <i class="fas fa-lock mr-2" aria-hidden="true"></i>Konfirmasi Password *
@@ -265,7 +291,7 @@
                             <p class="form-error" id="error-confirmPassword" role="alert"></p>
                         </div>
 
-                        <!-- Terms & Conditions -->
+                        <!-- 9. SYARAT DAN KETENTUAN -->
                         <div class="form-group">
                             <label class="checkbox-label">
                                 <input type="checkbox" id="terms" name="terms" required aria-required="true">
@@ -277,7 +303,7 @@
                             <p class="form-error" id="error-terms" role="alert"></p>
                         </div>
 
-                        <!-- Submit Button -->
+                        <!-- 10. TOMBOL DAFTAR -->
                         <button type="submit" class="btn btn-primary btn-block btn-lg" id="submitBtn">
                             <i class="fas fa-user-plus mr-2" aria-hidden="true"></i><span class="hidden sm:inline">Daftar Sekarang</span><span class="sm:hidden">Daftar</span>
                         </button>
