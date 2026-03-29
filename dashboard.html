@@ -55,7 +55,7 @@
     <!-- Main Content Wrapper -->
     <main id="main-content">
         
-        <!-- Welcome Section (Hero) -->
+        <!-- Welcome Section -->
         <section class="hero dashboard-hero" aria-labelledby="welcome-heading">
             <div class="container">
                 <h1 id="welcome-heading" class="hero-title text-white">
@@ -71,7 +71,7 @@
             </div>
         </section>
 
-        <!-- 8 RUANG UTAMA -->
+        <!-- 8 RUANG UTAMA (Main Navigation) -->
         <section class="section" aria-labelledby="rooms-heading">
             <div class="container">
                 <h2 id="rooms-heading" class="section-title text-center mb-8">
@@ -79,9 +79,9 @@
                 </h2>
                 
                 <div class="rooms-grid">
-                    <!-- RUANG 1: SD -->
+                    <!-- RUANG 1: SD (Conditional) -->
                     <article class="room-card room-sd hidden" data-jenjang="sd" data-feature="sd">
-                        <a href="#sma-section" class="room-link">
+                        <a href="#sd-section" class="room-link">
                             <div class="room-icon bg-blue" aria-hidden="true">
                                 <i class="fas fa-elementary"></i>
                             </div>
@@ -90,7 +90,7 @@
                         </a>
                     </article>
                     
-                    <!-- RUANG 2: SMP -->
+                    <!-- RUANG 2: SMP (Conditional) -->
                     <article class="room-card room-smp hidden" data-jenjang="smp" data-feature="smp">
                         <a href="#smp-section" class="room-link">
                             <div class="room-icon bg-green" aria-hidden="true">
@@ -101,7 +101,7 @@
                         </a>
                     </article>
                     
-                    <!-- RUANG 3: SMA -->
+                    <!-- RUANG 3: SMA (Conditional) -->
                     <article class="room-card room-sma hidden" data-jenjang="sma" data-feature="sma">
                         <a href="#sma-section" class="room-link">
                             <div class="room-icon bg-purple" aria-hidden="true">
@@ -112,9 +112,9 @@
                         </a>
                     </article>
                     
-                    <!-- RUANG 4: Adm. Kelas -->
+                    <!-- RUANG 4: Adm. Kelas (All Users) -->
                     <article class="room-card room-adm-kelas" data-feature="adm-kelas">
-                        <a href="#adm-kelas-section" class="room-link">
+                        <a href="#adm-kelas" class="room-link">
                             <div class="room-icon bg-orange" aria-hidden="true">
                                 <i class="fas fa-users"></i>
                             </div>
@@ -123,9 +123,9 @@
                         </a>
                     </article>
                     
-                    <!-- RUANG 5: Adm. Pembelajaran -->
+                    <!-- RUANG 5: Adm. Pembelajaran (All Users) -->
                     <article class="room-card room-adm-pembelajaran" data-feature="adm-pembelajaran">
-                        <a href="#adm-pembelajaran-section" class="room-link">
+                        <a href="#adm-pembelajaran" class="room-link">
                             <div class="room-icon bg-blue" aria-hidden="true">
                                 <i class="fas fa-book-open"></i>
                             </div>
@@ -134,9 +134,9 @@
                         </a>
                     </article>
                     
-                    <!-- RUANG 6: Penilaian -->
+                    <!-- RUANG 6: Penilaian (All Users) -->
                     <article class="room-card room-penilaian" data-feature="penilaian">
-                        <a href="#penilaian-section" class="room-link">
+                        <a href="#penilaian" class="room-link">
                             <div class="room-icon bg-green" aria-hidden="true">
                                 <i class="fas fa-chart-bar"></i>
                             </div>
@@ -145,9 +145,9 @@
                         </a>
                     </article>
                     
-                    <!-- RUANG 7: Refleksi -->
+                    <!-- RUANG 7: Refleksi (All Users) -->
                     <article class="room-card room-refleksi" data-feature="refleksi">
-                        <a href="#refleksi-section" class="room-link">
+                        <a href="#refleksi" class="room-link">
                             <div class="room-icon bg-purple" aria-hidden="true">
                                 <i class="fas fa-mirror"></i>
                             </div>
@@ -156,9 +156,9 @@
                         </a>
                     </article>
                     
-                    <!-- RUANG 8: Generator Modul -->
+                    <!-- RUANG 8: Generator Modul (All Users) -->
                     <article class="room-card room-generator-modul" data-feature="generator-modul">
-                        <a href="#generator-modul-section" class="room-link">
+                        <a href="#generator-modul" class="room-link">
                             <div class="room-icon bg-pink" aria-hidden="true">
                                 <i class="fas fa-wand-magic-sparkles"></i>
                             </div>
@@ -170,15 +170,13 @@
             </div>
         </section>
 
-        <!-- ============================================ -->
-        <!-- SECTIONS FOR EACH JENJANG (TARGET NAVIGATION) -->
-        <!-- ============================================ -->
+        <!-- SECTIONS FOR EACH JENJANG (KAMAR-KAMAR) -->
         
-        <!-- SD SECTION -->
-        <section id="sd-section" class="section bg-white hidden" data-jenjang="sd">
+        <!-- SD SECTION (Kelas 1-6) -->
+        <section id="sd-section" class="section bg-white hidden" data-jenjang="sd" aria-labelledby="sd-heading">
             <div class="container">
                 <div class="section-header">
-                    <h2 class="section-title">
+                    <h2 id="sd-heading" class="section-title">
                         <i class="fas fa-elementary mr-2" aria-hidden="true"></i>SD - Kamar Kelas
                     </h2>
                     <p class="section-subtitle">Pilih kelas yang Anda ampu</p>
@@ -189,44 +187,56 @@
                 
                 <div class="kelas-grid">
                     <article class="kelas-card" data-kelas="1">
-                        <div class="kelas-number">1</div>
-                        <h3 class="kelas-title">Kelas 1</h3>
-                        <p class="kelas-desc">6 Mata Pelajaran</p>
+                        <a href="#mapel-sd-1" class="kelas-link">
+                            <div class="kelas-number">1</div>
+                            <h3 class="kelas-title">Kelas 1</h3>
+                            <p class="kelas-desc">6 Mata Pelajaran</p>
+                        </a>
                     </article>
                     <article class="kelas-card" data-kelas="2">
-                        <div class="kelas-number">2</div>
-                        <h3 class="kelas-title">Kelas 2</h3>
-                        <p class="kelas-desc">6 Mata Pelajaran</p>
+                        <a href="#mapel-sd-2" class="kelas-link">
+                            <div class="kelas-number">2</div>
+                            <h3 class="kelas-title">Kelas 2</h3>
+                            <p class="kelas-desc">6 Mata Pelajaran</p>
+                        </a>
                     </article>
                     <article class="kelas-card" data-kelas="3">
-                        <div class="kelas-number">3</div>
-                        <h3 class="kelas-title">Kelas 3</h3>
-                        <p class="kelas-desc">6 Mata Pelajaran</p>
+                        <a href="#mapel-sd-3" class="kelas-link">
+                            <div class="kelas-number">3</div>
+                            <h3 class="kelas-title">Kelas 3</h3>
+                            <p class="kelas-desc">6 Mata Pelajaran</p>
+                        </a>
                     </article>
                     <article class="kelas-card" data-kelas="4">
-                        <div class="kelas-number">4</div>
-                        <h3 class="kelas-title">Kelas 4</h3>
-                        <p class="kelas-desc">8 Mata Pelajaran</p>
+                        <a href="#mapel-sd-4" class="kelas-link">
+                            <div class="kelas-number">4</div>
+                            <h3 class="kelas-title">Kelas 4</h3>
+                            <p class="kelas-desc">8 Mata Pelajaran</p>
+                        </a>
                     </article>
                     <article class="kelas-card" data-kelas="5">
-                        <div class="kelas-number">5</div>
-                        <h3 class="kelas-title">Kelas 5</h3>
-                        <p class="kelas-desc">8 Mata Pelajaran</p>
+                        <a href="#mapel-sd-5" class="kelas-link">
+                            <div class="kelas-number">5</div>
+                            <h3 class="kelas-title">Kelas 5</h3>
+                            <p class="kelas-desc">8 Mata Pelajaran</p>
+                        </a>
                     </article>
                     <article class="kelas-card" data-kelas="6">
-                        <div class="kelas-number">6</div>
-                        <h3 class="kelas-title">Kelas 6</h3>
-                        <p class="kelas-desc">8 Mata Pelajaran</p>
+                        <a href="#mapel-sd-6" class="kelas-link">
+                            <div class="kelas-number">6</div>
+                            <h3 class="kelas-title">Kelas 6</h3>
+                            <p class="kelas-desc">8 Mata Pelajaran</p>
+                        </a>
                     </article>
                 </div>
             </div>
         </section>
 
-        <!-- SMP SECTION -->
-        <section id="smp-section" class="section bg-white hidden" data-jenjang="smp">
+        <!-- SMP SECTION (Kelas 7-9) -->
+        <section id="smp-section" class="section bg-white hidden" data-jenjang="smp" aria-labelledby="smp-heading">
             <div class="container">
                 <div class="section-header">
-                    <h2 class="section-title">
+                    <h2 id="smp-heading" class="section-title">
                         <i class="fas fa-school mr-2" aria-hidden="true"></i>SMP - Kamar Kelas
                     </h2>
                     <p class="section-subtitle">Pilih kelas yang Anda ampu</p>
@@ -237,29 +247,35 @@
                 
                 <div class="kelas-grid">
                     <article class="kelas-card" data-kelas="7">
-                        <div class="kelas-number">7</div>
-                        <h3 class="kelas-title">Kelas 7</h3>
-                        <p class="kelas-desc">14 Mata Pelajaran</p>
+                        <a href="#mapel-smp-7" class="kelas-link">
+                            <div class="kelas-number">7</div>
+                            <h3 class="kelas-title">Kelas 7</h3>
+                            <p class="kelas-desc">14 Mata Pelajaran</p>
+                        </a>
                     </article>
                     <article class="kelas-card" data-kelas="8">
-                        <div class="kelas-number">8</div>
-                        <h3 class="kelas-title">Kelas 8</h3>
-                        <p class="kelas-desc">14 Mata Pelajaran</p>
+                        <a href="#mapel-smp-8" class="kelas-link">
+                            <div class="kelas-number">8</div>
+                            <h3 class="kelas-title">Kelas 8</h3>
+                            <p class="kelas-desc">14 Mata Pelajaran</p>
+                        </a>
                     </article>
                     <article class="kelas-card" data-kelas="9">
-                        <div class="kelas-number">9</div>
-                        <h3 class="kelas-title">Kelas 9</h3>
-                        <p class="kelas-desc">14 Mata Pelajaran</p>
+                        <a href="#mapel-smp-9" class="kelas-link">
+                            <div class="kelas-number">9</div>
+                            <h3 class="kelas-title">Kelas 9</h3>
+                            <p class="kelas-desc">14 Mata Pelajaran</p>
+                        </a>
                     </article>
                 </div>
             </div>
         </section>
 
-        <!-- SMA SECTION -->
-        <section id="sma-section" class="section bg-white hidden" data-jenjang="sma">
+        <!-- SMA SECTION (Kelas 10-12) -->
+        <section id="sma-section" class="section bg-white hidden" data-jenjang="sma" aria-labelledby="sma-heading">
             <div class="container">
                 <div class="section-header">
-                    <h2 class="section-title">
+                    <h2 id="sma-heading" class="section-title">
                         <i class="fas fa-graduation-cap mr-2" aria-hidden="true"></i>SMA - Kamar Kelas
                     </h2>
                     <p class="section-subtitle">Pilih kelas yang Anda ampu</p>
@@ -270,21 +286,34 @@
                 
                 <div class="kelas-grid">
                     <article class="kelas-card" data-kelas="10">
-                        <div class="kelas-number">10</div>
-                        <h3 class="kelas-title">Kelas 10</h3>
-                        <p class="kelas-desc">12 Mata Pelajaran</p>
+                        <a href="#mapel-sma-10" class="kelas-link">
+                            <div class="kelas-number">10</div>
+                            <h3 class="kelas-title">Kelas 10</h3>
+                            <p class="kelas-desc">12 Mata Pelajaran</p>
+                        </a>
                     </article>
                     <article class="kelas-card" data-kelas="11">
-                        <div class="kelas-number">11</div>
-                        <h3 class="kelas-title">Kelas 11</h3>
-                        <p class="kelas-desc">12 Mata Pelajaran</p>
+                        <a href="#mapel-sma-11" class="kelas-link">
+                            <div class="kelas-number">11</div>
+                            <h3 class="kelas-title">Kelas 11</h3>
+                            <p class="kelas-desc">12 Mata Pelajaran</p>
+                        </a>
                     </article>
                     <article class="kelas-card" data-kelas="12">
-                        <div class="kelas-number">12</div>
-                        <h3 class="kelas-title">Kelas 12</h3>
-                        <p class="kelas-desc">12 Mata Pelajaran</p>
+                        <a href="#mapel-sma-12" class="kelas-link">
+                            <div class="kelas-number">12</div>
+                            <h3 class="kelas-title">Kelas 12</h3>
+                            <p class="kelas-desc">12 Mata Pelajaran</p>
+                        </a>
                     </article>
                 </div>
+            </div>
+        </section>
+
+        <!-- MODULE CONTAINERS (Will be loaded dynamically) -->
+        <section id="module-container" class="section bg-gray-50">
+            <div class="container">
+                <!-- Dynamic content will be loaded here -->
             </div>
         </section>
 
