@@ -435,4 +435,20 @@
         justify-content: center;
     }
 }
+/* ─────────────────────────────────────────── */
+/* 19. FORM ROW (For Name + Email)             */
+/* ─────────────────────────────────────────── */
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    margin-bottom: 0;
+}
+
+@media (min-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr 1fr;
+    }
+}
 
