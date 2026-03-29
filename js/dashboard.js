@@ -4,7 +4,7 @@
  * Platform Administrasi Kelas Digital
  * ============================================
  * 
- * ✅ UPDATE: Fix navigation handler for room links
+ * ✅ UPDATE: Tambah feature-level access control (minimal changes)
  */
 
 console.log('📦 dashboard.js loaded');
@@ -14,63 +14,13 @@ console.log('📦 dashboard.js loaded');
 // ============================================
 document.addEventListener('DOMContentLoaded', () => {
     console.log('✅ Dashboard DOM Ready');
+    
+    // Load user context
     loadUserContext();
-    setupNavigation();  // ✅ Setup room click handlers
+    
+    // Setup navigation
+    setupNavigation();
 });
-
-// ============================================
-// ✅ FUNGSI BARU: Setup Navigation Handler ⭐
-// ============================================
-function setupNavigation() {
-    console.log('🔧 Setting up navigation handlers...');
-    
-    // Handle all room links
-    document.querySelectorAll('.room-link').forEach(link => {
-        link.addEventListener('click', (e) => {
-            const href = link.getAttribute('href');
-            
-            // Check if it's a section link (starts with #)
-            if (href && href.startsWith('#')) {
-                e.preventDefault();
-                const sectionId = href.substring(1);
-                console.log('🔗 Navigate to section:', sectionId);
-                navigateToSection(sectionId);
-            }
-        });
-    });
-}
-
-// ============================================
-// ✅ FUNGSI BARU: Navigate to Section ⭐
-// ============================================
-function navigateToSection(sectionId) {
-    console.log('🔗 Navigating to:', sectionId);
-    
-    // Hide dashboard hero
-    const hero = document.querySelector('.dashboard-hero');
-    if (hero) {
-        hero.classList.add('hidden');
-    }
-    
-    // Hide all sections first
-    document.querySelectorAll('.section').forEach(section => {
-        // Don't hide the rooms section (container)
-        if (!section.querySelector('.rooms-grid')) {
-            section.classList.add('hidden');
-        }
-    });
-    
-    // Show target section
-    const target = document.getElementById(sectionId);
-    if (target) {
-        target.classList.remove('hidden');
-        target.classList.add('active');
-        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        console.log('✅ Section shown:', sectionId);
-    } else {
-        console.warn('⚠️ Section not found:', sectionId);
-    }
-}
 
 // ============================================
 // FUNGSI: Load User Context from Session
@@ -98,7 +48,7 @@ function loadUserContext() {
         // Filter rooms based on jenjang
         filterRooms(currentUser.jenjang);
         
-        // ✅ NEW: Filter rooms based on features
+        // ✅ NEW: Filter rooms based on features ⭐
         filterRoomsByFeatures(currentUser);
         
     } catch (error) {
@@ -111,7 +61,7 @@ function loadUserContext() {
 // FUNGSI: Get User Context Text
 // ============================================
 function getUserContextText(user) {
-    const { jenjang, kelas, sdRole, mataPelajaranSD, mataPelajaranSMP, mataPelajaranSMA } = user;
+    const { jenjang, kelas, mataPelajaran, sdRole, mataPelajaranSD, mataPelajaranSMP, mataPelajaranSMA } = user;
     
     if (jenjang === 'sd') {
         if (sdRole === 'guru_kelas') {
@@ -157,7 +107,7 @@ function filterRooms(jenjang) {
         });
     }
     
-    // Admin sees all
+    // Admin sees all (if role === 'admin')
     const currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
     if (currentUser?.role === 'admin') {
         document.querySelectorAll('.room-sd, .room-smp, .room-sma').forEach(room => {
@@ -167,7 +117,7 @@ function filterRooms(jenjang) {
 }
 
 // ============================================
-// FUNGSI: Check Feature Access
+// ✅ FUNGSI BARU: Check Feature Access ⭐
 // ============================================
 function hasFeatureAccess(featureName, user) {
     console.log('🔍 Check feature access:', featureName, user.features);
@@ -178,7 +128,7 @@ function hasFeatureAccess(featureName, user) {
         return true;
     }
     
-    // ✅ Jika user TIDAK punya features field → akses semua
+    // ✅ Jika user TIDAK punya features field → akses semua (backward compatible)
     if (!user.features || user.features === 'all') {
         console.log('✅ No features field - full access');
         return true;
@@ -196,7 +146,7 @@ function hasFeatureAccess(featureName, user) {
 }
 
 // ============================================
-// FUNGSI: Filter Rooms By Features
+// ✅ FUNGSI BARU: Filter Rooms By Features ⭐
 // ============================================
 function filterRoomsByFeatures(user) {
     console.log('🔍 Filtering rooms by features...');
@@ -224,23 +174,81 @@ function filterRoomsByFeatures(user) {
 }
 
 // ============================================
+// FUNGSI: Setup Navigation
+// ============================================
+function setupNavigation() {
+    // Handle room clicks
+    document.querySelectorAll('.room-link').forEach(link => {
+        link.addEventListener('click', (e) => {
+            const href = link.getAttribute('href');
+            if (href.startsWith('#')) {
+                e.preventDefault();
+                navigateToSection(href.substring(1));
+            }
+        });
+    });
+    
+    // Handle kelas clicks
+    document.querySelectorAll('.kelas-link').forEach(link => {
+        link.addEventListener('click', (e) => {
+            const href = link.getAttribute('href');
+            if (href.startsWith('#')) {
+                e.preventDefault();
+                navigateToMapel(href.substring(1));
+            }
+        });
+    });
+}
+
+// ============================================
+// FUNGSI: Navigate to Section
+// ============================================
+function navigateToSection(sectionId) {
+    console.log('🔗 Navigate to:', sectionId);
+    
+    // Hide dashboard hero
+    document.querySelector('.dashboard-hero').classList.add('hidden');
+    
+    // Hide all sections
+    document.querySelectorAll('.section').forEach(section => {
+        if (!section.classList.contains('bg-gray-50')) { // Keep module container
+            section.classList.add('hidden');
+        }
+    });
+    
+    // Show target section
+    const target = document.getElementById(sectionId);
+    if (target) {
+        target.classList.remove('hidden');
+        target.classList.add('active');
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+}
+
+// ============================================
+// FUNGSI: Navigate to Mata Pelajaran
+// ============================================
+function navigateToMapel(mapelId) {
+    console.log('🔗 Navigate to mapel:', mapelId);
+    // Future: Load mata pelajaran content
+    alert('Fitur Mata Pelajaran akan segera hadir!');
+}
+
+// ============================================
 // FUNGSI: Back to Dashboard
 // ============================================
 window.backToDashboard = () => {
     console.log('🏠 Back to dashboard');
     
-    // Show dashboard hero
-    const hero = document.querySelector('.dashboard-hero');
-    if (hero) {
-        hero.classList.remove('hidden');
-    }
-    
     // Hide all sections
     document.querySelectorAll('.section').forEach(section => {
-        if (!section.querySelector('.rooms-grid')) {
+        if (!section.classList.contains('bg-gray-50')) {
             section.classList.add('hidden');
         }
     });
+    
+    // Show dashboard hero
+    document.querySelector('.dashboard-hero').classList.remove('hidden');
     
     // Scroll to top
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -252,7 +260,10 @@ window.backToDashboard = () => {
 window.logout = async () => {
     if (confirm('Apakah Anda yakin ingin keluar?')) {
         try {
+            // Clear session
             sessionStorage.removeItem('currentUser');
+            
+            // Redirect to login
             window.location.href = 'login.html';
         } catch (error) {
             console.error('❌ Logout error:', error);
