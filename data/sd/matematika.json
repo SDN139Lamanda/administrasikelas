@@ -1,0 +1,51 @@
+{
+  "metadata": {
+    "mapel": "Matematika",
+    "jenjang": "SD",
+    "kurikulum": "Kurikulum Merdeka",
+    "lastUpdated": "2026-01-15",
+    "version": "1.0"
+  },
+  "kelas": {
+    "1": {
+      "fase": "A",
+      "topics": [
+        {
+          "id": "bilangan-1-20",
+          "title": "Bilangan Cacah 1-20",
+          "cp": "Peserta didik dapat menunjukkan pemahaman dan intuisi bilangan (number sense) pada bilangan cacah sampai 20.",
+          "tp": "Peserta didik dapat membaca, menulis, menentukan nilai tempat, membandingkan, mengurutkan, dan melakukan komposisi/dekomposisi bilangan cacah sampai 20.",
+          "atp": [
+            "Mengenal dan membaca bilangan 1-20",
+            "Menulis lambang bilangan 1-20",
+            "Menentukan nilai tempat (puluhan dan satuan)",
+            "Membandingkan bilangan (lebih besar/lebih kecil)",
+            "Mengurutkan bilangan dari terkecil ke terbesar",
+            "Komposisi dan dekomposisi bilangan (contoh: 15 = 10 + 5)"
+          ],
+          "materi": [
+            "Lambang bilangan 1-20",
+            "Nilai tempat: puluhan dan satuan",
+            "Garis bilangan 1-20",
+            "Perbandingan: >, <, =",
+            "Pengelompokan benda berdasarkan jumlah"
+          ],
+          "penilaian": [
+            "Tes lisan: menyebutkan bilangan secara acak",
+            "Tes tertulis: menulis lambang bilangan",
+            "Observasi: kemampuan mengelompokkan benda",
+            "Unjuk kerja: mengurutkan kartu bilangan",
+            "Portofolio: lembar kerja siswa"
+          ],
+          "alokasi": "6 JP (6 x 35 menit)",
+          "media": "Kartu bilangan, manik-manik, garis bilangan, aplikasi hitung interaktif"
+        }
+      ]
+    },
+    "2": { "fase": "A", "topics": [] },
+    "3": { "fase": "B", "topics": [] },
+    "4": { "fase": "B", "topics": [] },
+    "5": { "fase": "C", "topics": [] },
+    "6": { "fase": "C", "topics": [] }
+  }
+}
