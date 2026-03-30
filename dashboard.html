@@ -156,9 +156,9 @@
                         </a>
                     </article>
                     
-                    <!-- RUANG 8: Generator Modul (All Users) -->
+                    <!-- ✅ UPDATE: RUANG 8: Generator Modul - Tambah onclick + fix href -->
                     <article class="room-card room-generator-modul" data-feature="generator-modul">
-                        <a href="#generator-modul" class="room-link">
+                        <a href="javascript:void(0)" class="room-link" onclick="renderGeneratorModule(); return false;">
                             <div class="room-icon bg-pink" aria-hidden="true">
                                 <i class="fas fa-wand-magic-sparkles"></i>
                             </div>
@@ -340,5 +340,7 @@
     <script type="module" src="js/dashboard.js"></script>
     <!-- ✅ FIX: Script path corrected (js/modules → modules) -->
     <script type="module" src="modules/sd-classes.js"></script>
+    <!-- ✅ TAMBAHKAN: Script tag untuk Asisten Modul AI -->
+    <script type="module" src="modules/asisten-modul.js"></script>
 </body>
 </html>
