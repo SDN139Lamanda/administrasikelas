@@ -1,31 +1,26 @@
 /**
  * ============================================
- * MODULE: SD CLASSES (TRUE MODULAR)
+ * MODULE: SD CLASSES
  * Platform Administrasi Kelas Digital
  * ============================================
  * 
- * ✅ ZERO CHANGE ke dashboard.html & dashboard.js
- * ✅ Module handle semua logic sendiri
- * ✅ Self-contained & independent
- * 
  * Flow:
  * 1. User klik Kelas 1-6 di SD Section
- * 2. Module intercept click event
- * 3. Module render mata pelajaran di module-container
- * 4. User bisa kembali ke SD Section
+ * 2. Module tampilkan mata pelajaran (Kurikulum Merdeka)
+ * 3. User bisa kembali ke SD Section
+ * 
+ * ✅ Semua fungsi di window object (untuk onclick HTML)
+ * ✅ Zero dependency ke dashboard.js
+ * ✅ True modular architecture
  */
 
-// ✅ IMPORT SHARED DEPENDENCIES
-import { db, auth } from './config-firebase.js';
-import { 
-    collection, 
-    getDocs, 
-    query, 
-    where 
-} from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+console.log('🔴 [SD Module] Script START');
 
-// ✅ MATA PELAJARAN SD (KURIKULUM MERDEKA)
+// ============================================
+// MATA PELAJARAN SD (KURIKULUM MERDEKA)
+// ============================================
 const MAPEL_SD = {
+    // Fase A (Kelas 1-2) - 6 Mapel
     '1': [
         { id: 'bahasa-indonesia', name: 'Bahasa Indonesia', icon: 'fa-book', color: 'from-red-500 to-red-600' },
         { id: 'matematika', name: 'Matematika', icon: 'fa-calculator', color: 'from-blue-500 to-blue-600' },
@@ -42,6 +37,7 @@ const MAPEL_SD = {
         { id: 'seni-budaya', name: 'Seni & Budaya', icon: 'fa-palette', color: 'from-purple-500 to-purple-600' },
         { id: 'pjok', name: 'PJOK', icon: 'fa-running', color: 'from-orange-500 to-orange-600' }
     ],
+    // Fase B (Kelas 3-4) - 8 Mapel
     '3': [
         { id: 'bahasa-indonesia', name: 'Bahasa Indonesia', icon: 'fa-book', color: 'from-red-500 to-red-600' },
         { id: 'matematika', name: 'Matematika', icon: 'fa-calculator', color: 'from-blue-500 to-blue-600' },
@@ -62,6 +58,7 @@ const MAPEL_SD = {
         { id: 'bahasa-inggris', name: 'Bahasa Inggris', icon: 'fa-language', color: 'from-pink-500 to-pink-600' },
         { id: 'informatika', name: 'Informatika', icon: 'fa-laptop', color: 'from-gray-500 to-gray-600' }
     ],
+    // Fase C (Kelas 5-6) - 8 Mapel
     '5': [
         { id: 'bahasa-indonesia', name: 'Bahasa Indonesia', icon: 'fa-book', color: 'from-red-500 to-red-600' },
         { id: 'matematika', name: 'Matematika', icon: 'fa-calculator', color: 'from-blue-500 to-blue-600' },
@@ -85,136 +82,121 @@ const MAPEL_SD = {
 };
 
 // ============================================
-// FUNGSI: Load SD Mapel Section
+// FUNGSI 1: Load Mata Pelajaran (GLOBAL)
 // ============================================
-window.loadSDMapel = (kelasId) => {
-    console.log('📚 [SD Module] Load Mapel for Kelas:', kelasId);
+window.loadSDMapel = function(kelasId) {
+    console.log('📚 [SD] Load Mapel untuk Kelas:', kelasId);
     
-    // Hide all sections (except module-container)
+    // Sembunyikan semua section kecuali module-container
     document.querySelectorAll('.section').forEach(section => {
         if (section.id !== 'module-container') {
             section.classList.add('hidden');
         }
     });
     
-    // Get mapel data for this kelas
+    // Ambil data mapel untuk kelas ini
     const mapelList = MAPEL_SD[kelasId] || [];
     
     if (mapelList.length === 0) {
-        console.warn('⚠️ [SD Module] No mapel data for kelas:', kelasId);
+        console.warn('⚠️ [SD] Tidak ada mapel untuk kelas:', kelasId);
+        alert('Maaf, data mata pelajaran untuk kelas ini belum tersedia.');
         return;
     }
     
-    // Get module container (SUDAH ADA di dashboard.html!)
+    // Ambil container
     const container = document.getElementById('module-container');
     
-    if (container) {
-        // Render mapel section
-        container.innerHTML = `
-            <div class="container py-8">
-                <div class="mapel-section bg-white p-6 rounded-lg shadow-lg">
-                    <div class="section-header mb-6 border-b pb-4">
-                        <h2 class="text-2xl font-bold text-gray-800">
-                            <i class="fas fa-book-open mr-2 text-purple-600"></i>
-                            Kelas ${kelasId} - Mata Pelajaran
-                        </h2>
-                        <p class="text-gray-600 mt-2">${mapelList.length} Mata Pelajaran</p>
-                        <button onclick="backToSDClasses()" class="btn btn-ghost btn-sm mt-4">
-                            <i class="fas fa-arrow-left mr-2"></i>Kembali ke SD
-                        </button>
-                    </div>
-                    
-                    <div class="mapel-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                        ${mapelList.map(mapel => `
-                            <article class="mapel-card bg-gradient-to-br ${mapel.color} to-white p-6 rounded-lg shadow hover:shadow-xl transition-all cursor-pointer transform hover:-translate-y-1" 
-                                     data-mapel="${mapel.id}"
-                                     onclick="openSDMapelDetail('${mapel.id}', '${kelasId}')">
-                                <div class="mapel-icon bg-white bg-opacity-30 text-white w-14 h-14 rounded-lg flex items-center justify-center mb-4">
-                                    <i class="fas ${mapel.icon} text-2xl"></i>
-                                </div>
-                                <h3 class="font-bold text-gray-800 mb-2">${mapel.name}</h3>
-                                <p class="text-sm text-gray-600">6 Modul Ajar</p>
-                            </article>
-                        `).join('')}
-                    </div>
+    if (!container) {
+        console.error('❌ [SD] Module container tidak ditemukan!');
+        return;
+    }
+    
+    // Render mata pelajaran
+    container.innerHTML = `
+        <div class="container py-8">
+            <div class="mapel-section bg-white p-6 rounded-lg shadow-lg">
+                <div class="section-header mb-6 border-b pb-4">
+                    <h2 class="text-2xl font-bold text-gray-800">
+                        <i class="fas fa-book-open mr-2 text-purple-600"></i>
+                        Kelas ${kelasId} - Mata Pelajaran
+                    </h2>
+                    <p class="text-gray-600 mt-2">${mapelList.length} Mata Pelajaran (Kurikulum Merdeka)</p>
+                    <button onclick="backToSDClasses()" class="btn btn-ghost btn-sm mt-4">
+                        <i class="fas fa-arrow-left mr-2"></i>Kembali ke SD
+                    </button>
+                </div>
+                
+                <div class="mapel-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    ${mapelList.map(mapel => `
+                        <article class="mapel-card bg-gradient-to-br ${mapel.color} to-white p-6 rounded-lg shadow hover:shadow-xl transition-all cursor-pointer transform hover:-translate-y-1" 
+                                 onclick="openSDMapelDetail('${mapel.id}', '${kelasId}')">
+                            <div class="mapel-icon bg-white bg-opacity-30 text-white w-14 h-14 rounded-lg flex items-center justify-center mb-4">
+                                <i class="fas ${mapel.icon} text-2xl"></i>
+                            </div>
+                            <h3 class="font-bold text-gray-800 mb-2">${mapel.name}</h3>
+                            <p class="text-sm text-gray-600">6 Modul Ajar</p>
+                        </article>
+                    `).join('')}
                 </div>
             </div>
-        `;
-        
-        container.classList.remove('hidden');
-        console.log('✅ [SD Module] Mapel rendered for Kelas:', kelasId);
-    }
+        </div>
+    `;
+    
+    container.classList.remove('hidden');
+    console.log('✅ [SD] Mapel berhasil ditampilkan untuk Kelas:', kelasId);
 };
 
 // ============================================
-// FUNGSI: Back to SD Classes
+// FUNGSI 2: Kembali ke SD Section (GLOBAL)
 // ============================================
-window.backToSDClasses = () => {
-    console.log('🏠 [SD Module] Back to SD Classes');
+window.backToSDClasses = function() {
+    console.log('🏠 [SD] Kembali ke SD Classes');
     
-    // Hide module container
+    // Sembunyikan module container
     const container = document.getElementById('module-container');
     if (container) {
         container.classList.add('hidden');
         container.innerHTML = '';
     }
     
-    // Show SD section
+    // Tampilkan SD section
     const sdSection = document.getElementById('sd-section');
     if (sdSection) {
         sdSection.classList.remove('hidden');
     }
     
+    // Scroll ke atas
     window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
 // ============================================
-// FUNGSI: Open Mapel Detail
+// FUNGSI 3: Buka Detail Mapel (GLOBAL)
 // ============================================
-window.openSDMapelDetail = (mapelId, kelasId) => {
-    console.log('📖 [SD Module] Open Mapel Detail:', mapelId, 'Kelas:', kelasId);
+window.openSDMapelDetail = function(mapelId, kelasId) {
+    console.log('📖 [SD] Buka Detail Mapel:', mapelId, 'Kelas:', kelasId);
     
-    // Future: Navigate to modul ajar section
-    // For now, show placeholder
+    // Cari nama mapel
     const mapelName = MAPEL_SD[kelasId]?.find(m => m.id === mapelId)?.name || mapelId;
     
-    alert(`📚 ${mapelName} - Kelas ${kelasId}\n\nFitur detail akan segera hadir:\n• Modul Ajar\n• ATP (Alur Tujuan Pembelajaran)\n• CP (Capaian Pembelajaran)\n• Bahan Ajar\n• Asesmen`);
+    // Tampilkan detail (placeholder untuk sekarang)
+    alert(`📚 ${mapelName} - Kelas ${kelasId}\n\n✅ Fitur yang akan tersedia:\n• Modul Ajar\n• ATP (Alur Tujuan Pembelajaran)\n• CP (Capaian Pembelajaran)\n• Bahan Ajar Digital\n• Asesmen & Rubrik\n• Video Pembelajaran`);
 };
 
 // ============================================
-// INIT: Setup Kelas Card Handlers
+// CONFIRM: Functions Registered di Window
 // ============================================
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('📦 [SD Module] sd-classes.js loaded');
-    
-    // Wait for dashboard.js to finish loading
-    setTimeout(() => {
-        // Attach click handlers to kelas cards (DIRECT DOM QUERY!)
-        const kelasCards = document.querySelectorAll('.kelas-card');
-        console.log('🔍 [SD Module] Found kelas cards:', kelasCards.length);
-        
-        kelasCards.forEach(card => {
-            const kelasLink = card.querySelector('.kelas-link');
-            const kelasId = card.getAttribute('data-kelas');
-            
-            if (kelasLink && kelasId) {
-                // Intercept click on kelas-link
-                kelasLink.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    console.log('🖱️ [SD Module] Kelas card clicked:', kelasId);
-                    loadSDMapel(kelasId);
-                });
-                
-                console.log('✅ [SD Module] Handler attached for Kelas:', kelasId);
-            }
-        });
-        
-        console.log('✅ [SD Module] All event handlers attached');
-    }, 200); // Delay to ensure DOM is fully ready
-});
+console.log('🟢 [SD] window.loadSDMapel:', typeof window.loadSDMapel);
+console.log('🟢 [SD] window.backToSDClasses:', typeof window.backToSDClasses);
+console.log('🟢 [SD] window.openSDMapelDetail:', typeof window.openSDMapelDetail);
 
 // ============================================
-// EXPORT (Optional - untuk module lain jika perlu)
+// TEST COMMAND (Bisa dipanggil dari console)
 // ============================================
-export { loadSDMapel, MAPEL_SD };
+console.log('💡 [SD] TEST: Ketik "window.loadSDMapel(\'1\')" di console untuk test');
+
+console.log('🟢 [SD] Script FINISHED');
+
+// ============================================
+// EXPORT (Optional - untuk module lain)
+// ============================================
+export { MAPEL_SD };
