@@ -186,43 +186,49 @@
                 </div>
                 
                 <div class="kelas-grid">
+                    <!-- ✅ UPDATE: Kelas 1 - Tambah onclick + fix href -->
                     <article class="kelas-card" data-kelas="1">
-                        <a href="#mapel-sd-1" class="kelas-link">
+                        <a href="javascript:void(0)" class="kelas-link" onclick="loadSDMapel('1'); return false;">
                             <div class="kelas-number">1</div>
                             <h3 class="kelas-title">Kelas 1</h3>
                             <p class="kelas-desc">6 Mata Pelajaran</p>
                         </a>
                     </article>
+                    <!-- ✅ UPDATE: Kelas 2 - Tambah onclick + fix href -->
                     <article class="kelas-card" data-kelas="2">
-                        <a href="#mapel-sd-2" class="kelas-link">
+                        <a href="javascript:void(0)" class="kelas-link" onclick="loadSDMapel('2'); return false;">
                             <div class="kelas-number">2</div>
                             <h3 class="kelas-title">Kelas 2</h3>
                             <p class="kelas-desc">6 Mata Pelajaran</p>
                         </a>
                     </article>
+                    <!-- ✅ UPDATE: Kelas 3 - Tambah onclick + fix href -->
                     <article class="kelas-card" data-kelas="3">
-                        <a href="#mapel-sd-3" class="kelas-link">
+                        <a href="javascript:void(0)" class="kelas-link" onclick="loadSDMapel('3'); return false;">
                             <div class="kelas-number">3</div>
                             <h3 class="kelas-title">Kelas 3</h3>
                             <p class="kelas-desc">6 Mata Pelajaran</p>
                         </a>
                     </article>
+                    <!-- ✅ UPDATE: Kelas 4 - Tambah onclick + fix href -->
                     <article class="kelas-card" data-kelas="4">
-                        <a href="#mapel-sd-4" class="kelas-link">
+                        <a href="javascript:void(0)" class="kelas-link" onclick="loadSDMapel('4'); return false;">
                             <div class="kelas-number">4</div>
                             <h3 class="kelas-title">Kelas 4</h3>
                             <p class="kelas-desc">8 Mata Pelajaran</p>
                         </a>
                     </article>
+                    <!-- ✅ UPDATE: Kelas 5 - Tambah onclick + fix href -->
                     <article class="kelas-card" data-kelas="5">
-                        <a href="#mapel-sd-5" class="kelas-link">
+                        <a href="javascript:void(0)" class="kelas-link" onclick="loadSDMapel('5'); return false;">
                             <div class="kelas-number">5</div>
                             <h3 class="kelas-title">Kelas 5</h3>
                             <p class="kelas-desc">8 Mata Pelajaran</p>
                         </a>
                     </article>
+                    <!-- ✅ UPDATE: Kelas 6 - Tambah onclick + fix href -->
                     <article class="kelas-card" data-kelas="6">
-                        <a href="#mapel-sd-6" class="kelas-link">
+                        <a href="javascript:void(0)" class="kelas-link" onclick="loadSDMapel('6'); return false;">
                             <div class="kelas-number">6</div>
                             <h3 class="kelas-title">Kelas 6</h3>
                             <p class="kelas-desc">8 Mata Pelajaran</p>
@@ -332,6 +338,7 @@
     <!-- Global JS -->
     <script type="module" src="js/main.js"></script>
     <script type="module" src="js/dashboard.js"></script>
-    <script type="module" src="js/modules/sd-classes.js"></script>
+    <!-- ✅ FIX: Script path corrected (js/modules → modules) -->
+    <script type="module" src="modules/sd-classes.js"></script>
 </body>
 </html>
