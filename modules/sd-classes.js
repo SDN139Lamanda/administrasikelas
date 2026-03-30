@@ -23,7 +23,8 @@ const MAPEL_SD = {
     // Fase A (Kelas 1-2) - 6 Mapel
     '1': [
         { id: 'bahasa-indonesia', name: 'Bahasa Indonesia', icon: 'fa-book', color: 'from-red-500 to-red-600' },
-        { id: 'matematika', name: 'Matematika', icon: 'fa-calculator', color: 'from-blue-500 to-blue-600' },
+        { id: 'PAIBD', name: 'paibd', icon: 'fa-mosque', color: 'from-blue-500 to-blue-600' },
+         { id: 'matematika', name: 'Matematika', icon: 'fa-calculator', color: 'from-blue-500 to-blue-600' },
         { id: 'ppkn', name: 'PPKn', icon: 'fa-flag', color: 'from-yellow-500 to-yellow-600' },
         { id: 'ipas', name: 'IPAS', icon: 'fa-flask', color: 'from-green-500 to-green-600' },
         { id: 'seni-budaya', name: 'Seni & Budaya', icon: 'fa-palette', color: 'from-purple-500 to-purple-600' },
