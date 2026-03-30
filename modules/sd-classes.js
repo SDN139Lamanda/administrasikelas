@@ -171,12 +171,24 @@ window.backToSDClasses = function() {
 };
 
 // ============================================
-// FUNGSI 3: Buka Detail Mapel (GLOBAL)
+// ✅ FUNGSI 3: Buka Detail Mapel (UPDATED) ⭐
 // ============================================
 window.openSDMapelDetail = function(mapelId, kelasId) {
     console.log('📖 [SD] Buka Detail Mapel:', mapelId, 'Kelas:', kelasId);
     
-    // Cari nama mapel
+    // ✅ Jika mapel adalah Matematika, panggil module khusus
+    if (mapelId === 'matematika') {
+        if (typeof window.renderSDMatematika === 'function') {
+            console.log('🧮 [SD] Calling renderSDMatematika...');
+            window.renderSDMatematika(kelasId);
+        } else {
+            console.warn('⚠️ Module sd-matematika.js belum load');
+            alert('⚠️ Module Matematika belum siap. Silakan refresh halaman.');
+        }
+        return; // ← PENTING! Stop disini, jangan lanjut ke alert
+    }
+    
+    // Untuk mapel lain, tampilkan placeholder
     const mapelName = MAPEL_SD[kelasId]?.find(m => m.id === mapelId)?.name || mapelId;
     
     // Tampilkan detail (placeholder untuk sekarang)
