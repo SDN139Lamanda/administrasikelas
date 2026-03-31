@@ -1,1 +1,115 @@
-
+{
+  "metadata": {
+    "mapel": "Matematika",
+    "jenjang": "SD",
+    "kelas": "6",
+    "fase": "C",
+    "kurikulum": "Kurikulum Merdeka",
+    "lastUpdated": "2026-01-15",
+    "version": "1.0"
+  },
+  "semester": {
+    "1": {
+      "topics": [
+        {
+          "id": "operasi-pecahan-lanjut",
+          "title": "Operasi Pecahan Lanjut",
+          "cp": "Peserta didik dapat melakukan operasi hitung penjumlahan, pengurangan, perkalian, dan pembagian pada pecahan.",
+          "tp": "Peserta didik dapat menyelesaikan masalah sehari-hari yang melibatkan operasi hitung pecahan.",
+          "atp": [
+            "Menjumlahkan dan mengurangkan pecahan dengan penyebut berbeda",
+            "Mengalikan pecahan dengan pecahan/bilangan bulat",
+            "Membagi pecahan dengan pecahan/bilangan bulat",
+            "Menyederhanakan hasil operasi pecahan",
+            "Operasi hitung campuran dengan pecahan",
+            "Menyelesaikan soal cerita multi-langkah dengan pecahan"
+          ],
+          "materi": [
+            "KPK untuk menyamakan penyebut",
+            "Perkalian pecahan: (a/b) × (c/d) = (a×c)/(b×d)",
+            "Pembagian pecahan: kalikan dengan kebalikan",
+            "Penyederhanaan: FPB pembilang dan penyebut",
+            "Urutan operasi dengan pecahan",
+            "Strategi: estimasi, mengecek dengan desimal"
+          ],
+          "penilaian": [
+            "Tes formatif: operasi dasar pecahan",
+            "Tes sumatif: soal cerita kompleks",
+            "Proyek: 'Resep Masakan' dengan konversi takaran",
+            "Peer assessment: saling mengoreksi langkah penyelesaian",
+            "Refleksi: strategi mengatasi kesulitan hitung pecahan"
+          ],
+          "alokasi": "12 JP",
+          "media": "Kartu pecahan, aplikasi visualisasi operasi, video tutorial langkah demi langkah"
+        },
+        {
+          "id": "perbandingan-skala",
+          "title": "Perbandingan dan Skala",
+          "cp": "Peserta didik dapat memahami konsep perbandingan dan skala serta menerapkannya dalam pemecahan masalah.",
+          "tp": "Peserta didik dapat menyelesaikan masalah yang melibatkan perbandingan senilai dan skala pada peta/denah.",
+          "atp": [
+            "Memahami perbandingan sebagai hubungan dua besaran",
+            "Perbandingan senilai: jika satu naik, yang lain naik",
+            "Menyelesaikan masalah perbandingan dengan tabel",
+            "Memahami skala sebagai perbandingan jarak peta dan sebenarnya",
+            "Menghitung jarak sebenarnya dari jarak pada peta",
+            "Menggambar denah sederhana dengan skala tertentu"
+          ],
+          "materi": [
+            "Konsep perbandingan: a : b atau a/b",
+            "Perbandingan senilai: contoh resep, kecepatan",
+            "Tabel perbandingan untuk menyelesaikan masalah",
+            "Konsep skala: 1 : 100.000 berarti 1 cm = 1 km",
+            "Rumus: Jarak sebenarnya = Jarak peta × Skala",
+            "Aplikasi: denah sekolah, peta wisata, maket"
+          ],
+          "penilaian": [
+            "Tes tertulis: menyelesaikan masalah perbandingan",
+            "Praktik: mengukur dan menghitung jarak pada peta",
+            "Proyek: membuat denah kelas dengan skala 1:50",
+            "Observasi: ketepatan perhitungan skala",
+            "Presentasi: menjelaskan denah/peta buatan sendiri"
+          ],
+          "alokasi": "10 JP",
+          "media": "Peta daerah, denah sekolah, kertas berpetak, aplikasi skala interaktif"
+        }
+      ]
+    },
+    "2": {
+      "topics": [
+        {
+          "id": "koordinat-luas-lingkaran",
+          "title": "Sistem Koordinat dan Lingkaran",
+          "cp": "Peserta didik dapat menggunakan sistem koordinat Kartesius dan memahami sifat-sifat lingkaran.",
+          "tp": "Peserta didik dapat menentukan posisi benda pada koordinat dan menghitung keliling serta luas lingkaran.",
+          "atp": [
+            "Mengenal sistem koordinat Kartesius (sumbu X dan Y)",
+            "Menentukan koordinat titik dan sebaliknya",
+            "Menggambar bangun pada bidang koordinat",
+            "Mengenal unsur lingkaran: pusat, jari-jari, diameter, tali busur",
+            "Rumus keliling lingkaran: K = π × d atau K = 2 × π × r",
+            "Rumus luas lingkaran: L = π × r²"
+          ],
+          "materi": [
+            "Sumbu X (horizontal) dan Y (vertikal)",
+            "Koordinat titik: (x, y) dengan x horizontal, y vertikal",
+            "Menggambar bangun: persegi, segitiga pada koordinat",
+            "Unsur lingkaran dan hubungannya",
+            "Nilai π (phi) ≈ 3,14 atau 22/7",
+            "Rumus keliling dan luas lingkaran dengan contoh",
+            "Aplikasi: roda, piring, lapangan bundar"
+          ],
+          "penilaian": [
+            "Tes tertulis: menentukan koordinat dan menghitung lingkaran",
+            "Praktik: menggambar bangun pada kertas berpetak",
+            "Proyek: mendesain logo dengan unsur lingkaran",
+            "Observasi: ketepatan penggunaan rumus π",
+            "Presentasi: menjelaskan aplikasi lingkaran dalam kehidupan"
+          ],
+          "alokasi": "10 JP",
+          "media": "Kertas berpetak, jangka, penggaris, aplikasi koordinat interaktif, benda berbentuk lingkaran"
+        }
+      ]
+    }
+  }
+}
