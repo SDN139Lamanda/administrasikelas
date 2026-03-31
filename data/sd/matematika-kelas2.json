@@ -4,105 +4,210 @@
     "jenjang": "SD",
     "kelas": "2",
     "fase": "A",
-    "kurikulum": "Kurikulum Merdeka",
+    "kurikulum": "Kurikulum Merdeka (Revisi 2024)",
     "lastUpdated": "2026-01-15",
-    "version": "1.0"
+    "version": "3.0",
+    "keterangan": "Semester 1 & 2 memiliki topik BERBEDA sesuai progresi Kurikulum Merdeka Fase A"
   },
   "semester": {
     "1": {
+      "nama": "Semester Ganjil",
+      "tema": "Fondasi Bilangan Besar dan Penjumlahan",
       "topics": [
         {
-          "id": "bilangan-1-100",
-          "title": "Bilangan Cacah 1-100",
-          "cp": "Peserta didik dapat menunjukkan pemahaman dan intuisi bilangan pada bilangan cacah sampai 100.",
-          "tp": "Peserta didik dapat membaca, menulis, menentukan nilai tempat, membandingkan, mengurutkan bilangan cacah sampai 100.",
+          "id": "bilangan-cacah-1-100",
+          "title": "Mengenal Bilangan Cacah (Sampai 100)",
+          "cp": "Peserta didik dapat menunjukkan pemahaman dan intuisi bilangan (number sense) pada bilangan cacah sampai 100. Mereka dapat membaca, menulis, menentukan nilai tempat, membandingkan, dan mengurutkan bilangan.",
+          "tp": "Peserta didik dapat membaca, menulis, membandingkan, dan mengurutkan bilangan cacah 1-100 dengan memahami nilai tempat ratusan, puluhan, dan satuan.",
           "atp": [
-            "Membaca dan menulis bilangan 1-100",
-            "Menentukan nilai tempat (ratusan, puluhan, satuan)",
+            "Membaca dan menulis lambang bilangan 1-100",
+            "Menentukan nilai tempat: ratusan, puluhan, satuan",
             "Membandingkan bilangan menggunakan >, <, =",
-            "Mengurutkan bilangan dari terkecil ke terbesar",
+            "Mengurutkan bilangan dari terkecil ke terbesar dan sebaliknya",
             "Melompati bilangan (skip counting) 2, 5, 10",
             "Komposisi dan dekomposisi bilangan sampai 100"
           ],
           "materi": [
             "Lambang bilangan 1-100",
-            "Nilai tempat: ratusan, puluhan, satuan",
+            "Nilai tempat: ratusan (100), puluhan (10), satuan (1)",
             "Garis bilangan 1-100",
-            "Pola bilangan: ganjil-genap, kelipatan",
-            "Pengelompokan bilangan"
+            "Pola bilangan: ganjil-genap, kelipatan 2/5/10",
+            "Pengelompokan bilangan berdasarkan nilai tempat",
+            "Contoh: 47 = 4 puluhan + 7 satuan"
           ],
           "penilaian": [
-            "Tes tertulis: menulis dan membandingkan bilangan",
+            "Tes tertulis: menulis dan membandingkan bilangan 1-100",
             "Kuis lisan: menyebutkan bilangan secara acak",
             "Proyek: membuat poster bilangan 1-100",
             "Observasi: kemampuan skip counting",
-            "Portofolio: kumpulan lembar kerja"
+            "Portofolio: kumpulan lembar kerja nilai tempat"
           ],
-          "alokasi": "7 JP",
-          "media": "Kartu bilangan, papan ratusan, aplikasi interaktif, video pembelajaran"
+          "alokasi": "14 JP (14 x 35 menit)",
+          "media": "Kartu bilangan 1-100, papan ratusan, sedotan (ikat 10 untuk puluhan), aplikasi interaktif, video pembelajaran"
         },
         {
-          "id": "operasi-hitung-campuran",
-          "title": "Operasi Hitung Campuran",
-          "cp": "Peserta didik dapat melakukan operasi penjumlahan dan pengurangan yang melibatkan bilangan cacah sampai 100.",
-          "tp": "Peserta didik dapat menyelesaikan masalah sehari-hari dengan operasi hitung campuran penjumlahan dan pengurangan.",
+          "id": "penjumlahan-2-angka",
+          "title": "Penjumlahan Bilangan Dua Angka",
+          "cp": "Peserta didik dapat melakukan operasi penjumlahan yang melibatkan bilangan cacah dua angka. Mereka memahami penjumlahan sebagai penggabungan dengan teknik menyimpan.",
+          "tp": "Peserta didik dapat menyelesaikan masalah penjumlahan dua bilangan dua angka dengan hasil sampai 100 menggunakan benda konkret dan simbol matematika.",
           "atp": [
             "Menjumlahkan bilangan dua angka tanpa menyimpan",
-            "Mengurangkan bilangan dua angka tanpa meminjam",
-            "Menjumlahkan dengan teknik menyimpan",
-            "Mengurangkan dengan teknik meminjam",
-            "Operasi hitung campuran (+ dan -) dalam satu soal",
-            "Menyelesaikan soal cerita dua langkah"
+            "Menjumlahkan bilangan dua angka dengan teknik menyimpan",
+            "Menuliskan kalimat matematika penjumlahan bersusun",
+            "Mengenal simbol '+' (tambah) dan '=' (sama dengan) dalam konteks bilangan besar",
+            "Sifat komutatif penjumlahan pada bilangan dua angka",
+            "Menyelesaikan soal cerita penjumlahan dua angka"
           ],
           "materi": [
-            "Penjumlahan bersusun pendek dan panjang",
-            "Pengurangan bersusun dengan meminjam",
-            "Urutan operasi: dari kiri ke kanan",
-            "Strategi menghitung: membulatkan, memecah bilangan",
-            "Soal cerita: transaksi jual beli sederhana"
+            "Penjumlahan bersusun pendek (tanpa menyimpan): 23 + 14 = 37",
+            "Penjumlahan bersusun panjang (dengan menyimpan): 38 + 25 = 63",
+            "Teknik menyimpan: satuan lebih dari 9 → simpan ke puluhan",
+            "Sifat komutatif: 25 + 34 = 34 + 25",
+            "Soal cerita: 'Ada 27 kelereng, ditambah 15, berapa total?'",
+            "Estimasi: membulatkan untuk mengecek jawaban"
           ],
           "penilaian": [
-            "Tes formatif: operasi hitung dasar",
-            "Tes sumatif: soal cerita kompleks",
+            "Tes formatif: penjumlahan tanpa menyimpan",
+            "Tes sumatif: penjumlahan dengan menyimpan",
             "Unjuk kerja: presentasi strategi menghitung",
-            "Peer assessment: saling mengoreksi jawaban",
-            "Refleksi: catatan kesulitan dan pencapaian"
+            "Peer assessment: saling mengoreksi jawaban teman",
+            "Proyek mini: membuat soal cerita penjumlahan sendiri"
           ],
-          "alokasi": "10 JP",
-          "media": "Blok dienes, kartu soal bertingkat, aplikasi matematika, video tutorial"
+          "alokasi": "16 JP (16 x 35 menit)",
+          "media": "Blok dienes, kartu soal bertingkat, aplikasi matematika, video tutorial penjumlahan bersusun, lembar kerja"
+        },
+        {
+          "id": "pola-bilangan-sederhana",
+          "title": "Mengenal Pola Bilangan Sederhana",
+          "cp": "Peserta didik dapat mengenal dan melanjutkan pola bilangan sederhana. Mereka memahami bahwa bilangan dapat disusun dalam pola tertentu.",
+          "tp": "Peserta didik dapat mengenali, menyalin, dan melanjutkan pola bilangan sederhana seperti loncat 2, 5, 10.",
+          "atp": [
+            "Mengenal pola bilangan naik berurutan (1-2-3-4-5)",
+            "Mengenal pola bilangan loncat 2 (2-4-6-8-10)",
+            "Mengenal pola bilangan loncat 5 (5-10-15-20)",
+            "Mengenal pola bilangan loncat 10 (10-20-30-40)",
+            "Menyalin dan melanjutkan pola yang diberikan",
+            "Membuat pola bilangan sendiri"
+          ],
+          "materi": [
+            "Pola naik berurutan: 1, 2, 3, 4, 5, ...",
+            "Pola loncat 2: 2, 4, 6, 8, 10, ... (bilangan genap)",
+            "Pola loncat 5: 5, 10, 15, 20, 25, ...",
+            "Pola loncat 10: 10, 20, 30, 40, 50, ...",
+            "Mengenali aturan pola dari contoh",
+            "Membuat pola dengan benda konkret"
+          ],
+          "penilaian": [
+            "Tes tertulis: melanjutkan pola bilangan",
+            "Observasi: kemampuan mengenali aturan pola",
+            "Praktik: membuat pola dengan manik-manik berwarna",
+            "Unjuk kerja: menjelaskan aturan pola yang dibuat",
+            "Portofolio: kumpulan pola bilangan yang dibuat siswa"
+          ],
+          "alokasi": "8 JP (8 x 35 menit)",
+          "media": "Manik-manik berwarna, kartu bilangan, pola gambar, aplikasi pola interaktif, lembar kerja pola"
         }
       ]
     },
     "2": {
+      "nama": "Semester Genap",
+      "tema": "Pengurangan, Pengukuran, dan Aplikasi Sehari-hari",
       "topics": [
         {
-          "id": "pengukuran-berat-waktu",
-          "title": "Pengukuran Berat dan Waktu",
-          "cp": "Peserta didik dapat membandingkan dan mengukur berat benda serta mengenal satuan waktu.",
-          "tp": "Peserta didik dapat membandingkan berat benda dan membaca jam sederhana.",
+          "id": "pengurangan-2-angka",
+          "title": "Pengurangan Bilangan Dua Angka",
+          "cp": "Peserta didik dapat melakukan operasi pengurangan yang melibatkan bilangan cacah dua angka. Mereka memahami pengurangan sebagai pengambilan atau selisih dengan teknik meminjam.",
+          "tp": "Peserta didik dapat menyelesaikan masalah pengurangan dua bilangan dua angka dengan hasil positif menggunakan benda konkret dan simbol matematika.",
           "atp": [
-            "Membandingkan berat benda (lebih berat/ringan)",
-            "Mengukur berat dengan satuan tidak baku",
-            "Mengenal jam analog: jarum pendek (jam), jarum panjang (menit)",
-            "Membaca jam tepat (pukul 1, 2, 3, dst.)",
-            "Mengenal satuan waktu: hari, minggu, bulan"
+            "Mengurangkan bilangan dua angka tanpa meminjam",
+            "Mengurangkan bilangan dua angka dengan teknik meminjam",
+            "Menuliskan kalimat matematika pengurangan bersusun",
+            "Mengenal simbol '-' (kurang) dalam konteks bilangan besar",
+            "Hubungan penjumlahan dan pengurangan (operasi invers)",
+            "Menyelesaikan soal cerita pengurangan dua angka"
           ],
           "materi": [
-            "Konsep berat: lebih berat, lebih ringan, sama berat",
-            "Satuan tidak baku: kelereng, klip, buku",
-            "Bagian jam: angka 1-12, jarum jam dan menit",
-            "Membaca jam tepat",
-            "Kalender sederhana: hari dalam seminggu"
+            "Pengurangan bersusun tanpa meminjam: 47 - 23 = 24",
+            "Pengurangan bersusun dengan meminjam: 52 - 18 = 34",
+            "Teknik meminjam: satuan kurang → pinjam dari puluhan",
+            "Hubungan invers: 25 + 13 = 38 → 38 - 13 = 25",
+            "Soal cerita: 'Ada 45 permen, dimakan 18, berapa sisa?'",
+            "Cek jawaban dengan penjumlahan"
           ],
           "penilaian": [
-            "Praktik: menimbang benda dengan timbangan sederhana",
-            "Tes tertulis: membaca jam analog",
-            "Observasi: ketepatan membandingkan berat",
-            "Proyek: membuat jam analog dari kertas",
-            "Portofolio: lembar kerja pengukuran"
+            "Tes formatif: pengurangan tanpa meminjam",
+            "Tes sumatif: pengurangan dengan meminjam",
+            "Observasi: penggunaan benda konkret untuk menghitung",
+            "Peer assessment: saling mengoreksi langkah penyelesaian",
+            "Proyek mini: membuat soal cerita pengurangan sendiri"
           ],
-          "alokasi": "6 JP",
-          "media": "Timbangan sederhana, jam analog model, kartu jam, kalender"
+          "alokasi": "16 JP (16 x 35 menit)",
+          "media": "Blok dienes, kartu soal bertingkat, aplikasi matematika, video tutorial pengurangan bersusun, lembar kerja"
+        },
+        {
+          "id": "pengukuran-panjang-berat",
+          "title": "Pengukuran Panjang dan Berat",
+          "cp": "Peserta didik dapat membandingkan dan mengukur panjang serta berat benda dengan satuan baku (cm, m, kg, g). Mereka memahami konsep pengukuran dalam kehidupan sehari-hari.",
+          "tp": "Peserta didik dapat mengukur panjang dengan penggaris (cm) dan membandingkan berat benda dengan timbangan sederhana.",
+          "atp": [
+            "Mengenal satuan baku panjang: cm (sentimeter) dan m (meter)",
+            "Menggunakan penggaris untuk mengukur panjang benda",
+            "Mencatat hasil pengukuran dalam tabel",
+            "Membandingkan panjang: lebih panjang, lebih pendek, sama",
+            "Mengenal satuan berat: kg (kilogram) dan g (gram)",
+            "Membandingkan berat benda dengan timbangan sederhana"
+          ],
+          "materi": [
+            "Satuan panjang: 1 m = 100 cm",
+            "Cara menggunakan penggaris: mulai dari angka 0",
+            "Membaca hasil pengukuran: 15 cm, 1 m 20 cm",
+            "Perbandingan panjang: pensil 15 cm, buku 25 cm → buku lebih panjang",
+            "Satuan berat: 1 kg = 1000 g",
+            "Timbangan sederhana: neraca dua lengan",
+            "Perbandingan berat: apel 200 g, jeruk 150 g → apel lebih berat"
+          ],
+          "penilaian": [
+            "Praktik: mengukur panjang benda di kelas dengan penggaris",
+            "Lembar kerja: mencatat dan membandingkan hasil pengukuran",
+            "Observasi: ketepatan teknik pengukuran",
+            "Praktik: membandingkan berat benda dengan timbangan",
+            "Presentasi: melaporkan hasil pengukuran kelompok"
+          ],
+          "alokasi": "12 JP (12 x 35 menit)",
+          "media": "Penggaris 30 cm, meteran kain, timbangan sederhana, benda untuk diukur (pensil, buku, penghapus), lembar kerja pengukuran"
+        },
+        {
+          "id": "waktu-dan-uang",
+          "title": "Mengenal Waktu dan Nilai Uang",
+          "cp": "Peserta didik dapat mengenal konsep waktu sederhana dan nilai uang dalam kehidupan sehari-hari. Mereka dapat membaca jam tepat dan mengenal uang kertas/logam.",
+          "tp": "Peserta didik dapat membaca jam analog tepat dan mengenal nilai uang Rp1.000 sampai Rp10.000.",
+          "atp": [
+            "Mengenal jam analog: jarum pendek (jam), jarum panjang (menit)",
+            "Membaca jam tepat: pukul 1.00, 2.00, 3.00, dst.",
+            "Mengenal bagian hari: pagi, siang, sore, malam",
+            "Mengenal hari dalam seminggu",
+            "Mengenal uang kertas: Rp1.000, Rp2.000, Rp5.000, Rp10.000",
+            "Mengenal uang logam: Rp100, Rp200, Rp500, Rp1.000",
+            "Simulasi transaksi sederhana: bayar dan kembalian"
+          ],
+          "materi": [
+            "Jam analog: 12 angka, jarum pendek (jam), jarum panjang (menit)",
+            "Membaca jam tepat: jarum panjang di angka 12",
+            "Bagian hari: pagi (06.00-12.00), siang (12.00-15.00), sore (15.00-18.00), malam (18.00-06.00)",
+            "Hari dalam seminggu: Senin, Selasa, Rabu, Kamis, Jumat, Sabtu, Minggu",
+            "Uang kertas: gambar, warna, nominal Rp1.000-Rp10.000",
+            "Uang logam: ukuran, warna, nominal Rp100-Rp1.000",
+            "Transaksi sederhana: harga Rp3.000, bayar Rp5.000 → kembalian Rp2.000"
+          ],
+          "penilaian": [
+            "Praktik: membaca jam analog model",
+            "Tes tertulis: menulis jam dari gambar",
+            "Observasi: mengenal uang kertas dan logam",
+            "Simulasi: transaksi jual beli dengan uang mainan",
+            "Portofolio: lembar kerja waktu dan uang"
+          ],
+          "alokasi": "10 JP (10 x 35 menit)",
+          "media": "Jam analog model, kartu jam, kalender, uang mainan (kertas & logam), lembar kerja transaksi"
         }
       ]
     }
