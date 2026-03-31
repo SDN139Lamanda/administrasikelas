@@ -1,0 +1,134 @@
+{
+  "metadata": {
+    "mapel": "Matematika",
+    "jenjang": "SD",
+    "kelas": "1",
+    "fase": "A",
+    "kurikulum": "Kurikulum Merdeka",
+    "lastUpdated": "2026-01-15",
+    "version": "1.0"
+  },
+  "semester": {
+    "1": {
+      "topics": [
+        {
+          "id": "bilangan-1-20",
+          "title": "Bilangan Cacah 1-20",
+          "cp": "Peserta didik dapat menunjukkan pemahaman dan intuisi bilangan (number sense) pada bilangan cacah sampai 20.",
+          "tp": "Peserta didik dapat membaca, menulis, menentukan nilai tempat, membandingkan, mengurutkan, dan melakukan komposisi/dekomposisi bilangan cacah sampai 20.",
+          "atp": [
+            "Mengenal dan membaca bilangan 1-20",
+            "Menulis lambang bilangan 1-20",
+            "Menentukan nilai tempat (puluhan dan satuan)",
+            "Membandingkan bilangan (lebih besar/lebih kecil)",
+            "Mengurutkan bilangan dari terkecil ke terbesar",
+            "Komposisi dan dekomposisi bilangan (contoh: 15 = 10 + 5)"
+          ],
+          "materi": [
+            "Lambang bilangan 1-20",
+            "Nilai tempat: puluhan dan satuan",
+            "Garis bilangan 1-20",
+            "Perbandingan: >, <, =",
+            "Pengelompokan benda berdasarkan jumlah"
+          ],
+          "penilaian": [
+            "Tes lisan: menyebutkan bilangan secara acak",
+            "Tes tertulis: menulis lambang bilangan",
+            "Observasi: kemampuan mengelompokkan benda",
+            "Unjuk kerja: mengurutkan kartu bilangan",
+            "Portofolio: lembar kerja siswa"
+          ],
+          "alokasi": "6 JP (6 x 35 menit)",
+          "media": "Kartu bilangan, manik-manik, garis bilangan, aplikasi hitung interaktif"
+        },
+        {
+          "id": "penjumlahan-pengurangan",
+          "title": "Penjumlahan & Pengurangan",
+          "cp": "Peserta didik dapat melakukan operasi penjumlahan dan pengurangan yang melibatkan bilangan cacah sampai 20.",
+          "tp": "Peserta didik dapat menyelesaikan masalah sehari-hari yang berkaitan dengan penjumlahan dan pengurangan bilangan cacah sampai 20.",
+          "atp": [
+            "Memahami konsep penjumlahan sebagai penggabungan",
+            "Memahami konsep pengurangan sebagai pengambilan",
+            "Menghitung penjumlahan bilangan 1-20 dengan benda konkret",
+            "Menghitung pengurangan bilangan 1-20 dengan benda konkret",
+            "Menyelesaikan soal cerita sederhana",
+            "Mengenal sifat komutatif penjumlahan (a+b = b+a)"
+          ],
+          "materi": [
+            "Konsep penjumlahan (+) dan pengurangan (-)",
+            "Fakta dasar penjumlahan 1-20",
+            "Fakta dasar pengurangan 1-20",
+            "Soal cerita: tambah dan kurang",
+            "Hubungan penjumlahan dan pengurangan"
+          ],
+          "penilaian": [
+            "Kuis cepat: fakta dasar hitung",
+            "Tes tertulis: operasi hitung campuran",
+            "Observasi: penggunaan strategi menghitung",
+            "Proyek mini: membuat soal cerita sendiri",
+            "Self-assessment: refleksi kesulitan belajar"
+          ],
+          "alokasi": "8 JP (8 x 35 menit)",
+          "media": "Blok dienes, kartu soal, aplikasi matematika dasar, video animasi"
+        }
+      ]
+    },
+    "2": {
+      "topics": [
+        {
+          "id": "pengukuran-panjang",
+          "title": "Pengukuran Panjang",
+          "cp": "Peserta didik dapat membandingkan dan mengukur panjang benda dengan satuan tidak baku.",
+          "tp": "Peserta didik dapat membandingkan panjang dua benda atau lebih dan mengukurnya dengan satuan tidak baku.",
+          "atp": [
+            "Membandingkan panjang benda secara langsung (panjang/pendek)",
+            "Mengukur panjang dengan satuan tidak baku (jengkal, langkah, klip)",
+            "Mencatat hasil pengukuran",
+            "Membandingkan hasil pengukuran dengan teman",
+            "Menyelesaikan masalah sederhana tentang panjang"
+          ],
+          "materi": [
+            "Konsep panjang: lebih panjang, lebih pendek, sama panjang",
+            "Satuan tidak baku: jengkal, kaki, langkah, klip kertas",
+            "Teknik pengukuran yang benar",
+            "Membaca dan mencatat hasil pengukuran"
+          ],
+          "penilaian": [
+            "Praktik: mengukur benda di kelas",
+            "Lembar kerja: membandingkan panjang gambar",
+            "Observasi: ketepatan teknik pengukuran",
+            "Presentasi: melaporkan hasil pengukuran kelompok"
+          ],
+          "alokasi": "4 JP (4 x 35 menit)",
+          "media": "Benda konkret (pensil, buku, meja), klip kertas, tali, lembar kerja"
+        },
+        {
+          "id": "bangun-datar-sederhana",
+          "title": "Bangun Datar Sederhana",
+          "cp": "Peserta didik dapat mengenal dan mengidentifikasi bangun datar sederhana.",
+          "tp": "Peserta didik dapat mengidentifikasi persegi, segitiga, dan lingkaran dalam lingkungan sekitar.",
+          "atp": [
+            "Mengenal bentuk persegi, segitiga, lingkaran",
+            "Mengidentifikasi benda berbentuk bangun datar",
+            "Menggambar bangun datar sederhana",
+            "Mengelompokkan benda berdasarkan bentuk"
+          ],
+          "materi": [
+            "Persegi: 4 sisi sama panjang",
+            "Segitiga: 3 sisi, 3 sudut",
+            "Lingkaran: tidak memiliki sudut",
+            "Benda sekitar berbentuk bangun datar"
+          ],
+          "penilaian": [
+            "Observasi: mengidentifikasi bentuk benda",
+            "Praktik: menggambar bangun datar",
+            "Tes lisan: menyebutkan ciri-ciri bangun",
+            "Portofolio: kumpulan gambar bangun datar"
+          ],
+          "alokasi": "5 JP (5 x 35 menit)",
+          "media": "Kertas berpetak, pensil, penggaris, benda konkret berbentuk bangun datar"
+        }
+      ]
+    }
+  }
+}
