@@ -4,106 +4,133 @@
     "jenjang": "SD",
     "kelas": "4",
     "fase": "B",
-    "kurikulum": "Kurikulum Merdeka (Revisi 2024)",
+    "kurikulum": "Kurikulum Merdeka (Revisi 2024) - SDN 139 Lamanda",
     "lastUpdated": "2026-01-15",
-    "version": "3.0",
-    "keterangan": "Semester 1 & 2 memiliki topik BERBEDA sesuai progresi Kurikulum Merdeka Fase B"
+    "version": "4.0",
+    "keterangan": "Konten Semester 1 & 2 BERBEDA - Berdasarkan kurikulum sekolah yang diberikan"
   },
   "semester": {
     "1": {
       "nama": "Semester Ganjil",
-      "tema": "Bilangan Besar, Faktor Kelipatan, dan Pengukuran Sudut",
+      "tema": "Bilangan Besar, Pembagian, dan Pengukuran Sudut",
       "topics": [
         {
-          "id": "operasi-bilangan-bulat",
-          "title": "Operasi Bilangan Bulat Besar",
-          "cp": "Peserta didik dapat melakukan operasi hitung penjumlahan, pengurangan, perkalian, dan pembagian pada bilangan cacah besar (sampai 10.000).",
-          "tp": "Peserta didik dapat menyelesaikan masalah yang melibatkan operasi hitung campuran pada bilangan cacah sampai 10.000 dengan benar.",
+          "id": "bilangan-cacah-besar",
+          "title": "Bilangan Cacah Besar",
+          "cp": "Peserta didik dapat menunjukkan pemahaman bilangan cacah besar hingga ratusan juta. Mereka dapat membaca, menulis, menentukan nilai tempat, membandingkan, dan mengurutkan bilangan.",
+          "tp": "Peserta didik dapat membaca, menulis, membandingkan, dan mengurutkan bilangan cacah hingga ratusan juta dengan memahami nilai tempat.",
           "atp": [
-            "Menjumlahkan bilangan sampai 4 angka dengan teknik menyimpan",
-            "Mengurangkan bilangan sampai 4 angka dengan teknik meminjam",
-            "Mengalikan bilangan 2-3 angka dengan 1-2 angka",
-            "Membagi bilangan 3-4 angka dengan 1 angka (tanpa sisa)",
-            "Operasi hitung campuran dengan aturan urutan (kali/bagi dahulu)",
-            "Menyelesaikan soal cerita multi-langkah",
-            "Estimasi: membulatkan untuk mengecek jawaban"
+            "Membaca dan menulis angka hingga ratusan juta",
+            "Memahami nilai tempat: satuan, puluhan, ratusan, ribuan, puluh ribuan, ratus ribuan, jutaan, puluh jutaan",
+            "Menentukan nilai tempat setiap angka dalam bilangan besar",
+            "Membandingkan dua bilangan besar menggunakan >, <, =",
+            "Mengurutkan bilangan besar dari terkecil ke terbesar dan sebaliknya",
+            "Menulis bilangan dalam bentuk panjang (contoh: 12.345.678 = 10.000.000 + 2.000.000 + ...)"
           ],
           "materi": [
-            "Nilai tempat: ribuan, ratusan, puluhan, satuan",
-            "Penjumlahan bersusun panjang dengan menyimpan",
-            "Pengurangan bersusun dengan meminjam",
-            "Perkalian bersusun: metode standar",
-            "Pembagian bersusun pendek (porogapit)",
-            "Aturan operasi: kali/bagi dahulu, lalu tambah/kurang",
-            "Soal cerita kontekstual: belanja, produksi, jarak"
+            "Nilai tempat: satuan, puluhan, ratusan, ribuan, puluh ribuan, ratus ribuan, jutaan, puluh jutaan",
+            "Cara membaca bilangan besar dengan benar",
+            "Menulis lambang bilangan dari ucapan",
+            "Membandingkan: lihat angka dari kiri, yang lebih besar nilainya lebih besar",
+            "Mengurutkan: buat garis bilangan atau bandingkan langsung",
+            "Bentuk panjang: menguraikan bilangan berdasarkan nilai tempat"
           ],
           "penilaian": [
-            "Tes formatif: operasi dasar bertingkat",
-            "Tes sumatif: soal cerita kompleks",
-            "Proyek: membuat 'Toko Kelas' dengan transaksi hitung",
-            "Peer teaching: siswa mengajarkan strategi ke teman",
-            "Portofolio: kumpulan soal dan solusi terbaik"
-          ],
-          "alokasi": "18 JP (18 x 35 menit)",
-          "media": "Kartu soal bertingkat, aplikasi kalkulator edukasi, video tutorial langkah demi langkah, lembar kerja"
-        },
-        {
-          "id": "faktor-dan-kelipatan",
-          "title": "Faktor dan Kelipatan (FPB & KPK)",
-          "cp": "Peserta didik dapat memahami konsep faktor dan kelipatan bilangan. Mereka dapat menentukan FPB dan KPK dari dua bilangan.",
-          "tp": "Peserta didik dapat menentukan faktor, kelipatan, FPB, dan KPK dari dua bilangan serta menerapkannya dalam masalah sehari-hari.",
-          "atp": [
-            "Mengenal konsep faktor: bilangan yang membagi habis",
-            "Menentukan faktor dari bilangan 1-100",
-            "Mengenal konsep kelipatan: hasil perkalian berurutan",
-            "Menentukan kelipatan dari bilangan 1-20",
-            "Mengenal FPB (Faktor Persekutuan Terbesar)",
-            "Mengenal KPK (Kelipatan Persekutuan Terkecil)",
-            "Menentukan FPB dan KPK dengan cara mendaftar",
-            "Aplikasi: menyederhanakan pecahan, menjumlahkan pecahan"
-          ],
-          "materi": [
-            "Faktor bilangan: contoh faktor dari 12 = 1, 2, 3, 4, 6, 12",
-            "Kelipatan bilangan: contoh kelipatan 3 = 3, 6, 9, 12, ...",
-            "Faktor persekutuan: faktor yang sama dari dua bilangan",
-            "Kelipatan persekutuan: kelipatan yang sama dari dua bilangan",
-            "FPB: faktor persekutuan yang terbesar",
-            "KPK: kelipatan persekutuan yang terkecil",
-            "Pohon faktor untuk mencari FPB dan KPK",
-            "Aplikasi: jadwal bersama, pembagian kelompok, pecahan"
-          ],
-          "penilaian": [
-            "Tes tertulis: menentukan faktor dan kelipatan",
-            "Kuis cepat: FPB dan KPK sederhana",
-            "Proyek: membuat 'pohon faktor' bilangan",
-            "Observasi: pemahaman konsep faktor/kelipatan",
-            "Portofolio: lembar kerja FPB/KPK"
+            "Tes tertulis: menulis dan membaca bilangan besar",
+            "Kuis lisan: menyebutkan nilai tempat",
+            "Observasi: kemampuan membandingkan bilangan",
+            "Portofolio: lembar kerja bilangan besar",
+            "Proyek: membuat poster bilangan besar"
           ],
           "alokasi": "14 JP (14 x 35 menit)",
-          "media": "Kartu bilangan, diagram pohon faktor, aplikasi interaktif FPB/KPK, video tutorial, lembar kerja"
+          "media": "Kartu bilangan, tabel nilai tempat, aplikasi interaktif, video pembelajaran, lembar kerja"
         },
         {
-          "id": "pengukuran-sudut",
-          "title": "Pengukuran Sudut",
-          "cp": "Peserta didik dapat mengenal dan mengukur sudut siku-siku, sudut lancip, dan sudut tumpul. Mereka dapat menggunakan busur derajat untuk mengukur sudut.",
-          "tp": "Peserta didik dapat mengidentifikasi jenis sudut dan mengukur besar sudut menggunakan busur derajat.",
+          "id": "pembagian",
+          "title": "Pembagian",
+          "cp": "Peserta didik dapat melakukan operasi pembagian bilangan cacah. Mereka memahami pembagian sebagai pengurangan berulang atau kebalikan dari perkalian.",
+          "tp": "Peserta didik dapat membagi bilangan dengan bilangan satu angka dan dua angka serta menyelesaikan masalah pembagian.",
           "atp": [
-            "Mengenal konsep sudut sebagai pertemuan dua garis",
-            "Mengenal sudut siku-siku (90°)",
-            "Mengenal sudut lancip (kurang dari 90°)",
-            "Mengenal sudut tumpul (lebih dari 90°)",
-            "Menggunakan busur derajat untuk mengukur sudut",
-            "Menggambar sudut dengan besar tertentu",
-            "Mengidentifikasi sudut pada bangun datar"
+            "Pembagian dengan bilangan satu angka (contoh: 144 ÷ 6)",
+            "Pembagian dengan bilangan dua angka (contoh: 125 ÷ 25)",
+            "Memahami pembagian sebagai pengurangan berulang",
+            "Memahami hubungan perkalian dan pembagian (invers)",
+            "Aturan pembagian dan pembagian berkelompok",
+            "Menyelesaikan soal cerita pembagian",
+            "Pembagian dengan sisa"
+          ],
+          "materi": [
+            "Konsep pembagian: a ÷ b = berapa kali b muat dalam a",
+            "Pembagian 1 angka: 144 ÷ 6 = 24",
+            "Pembagian 2 angka: 125 ÷ 25 = 5",
+            "Teknik porogapit (pembagian bersusun pendek)",
+            "Hubungan invers: jika 6 × 24 = 144, maka 144 ÷ 6 = 24",
+            "Pembagian berkelompok: membagi benda ke dalam kelompok sama banyak",
+            "Pembagian dengan sisa: 17 ÷ 5 = 3 sisa 2"
+          ],
+          "penilaian": [
+            "Tes formatif: pembagian 1 angka",
+            "Tes sumatif: pembagian 2 angka",
+            "Observasi: penggunaan teknik porogapit",
+            "Proyek mini: membuat soal cerita pembagian",
+            "Portofolio: lembar kerja pembagian"
+          ],
+          "alokasi": "16 JP (16 x 35 menit)",
+          "media": "Kartu soal, aplikasi matematika, video tutorial porogapit, benda konkret, lembar kerja"
+        },
+        {
+          "id": "operasi-campuran",
+          "title": "Berpikir tentang Cara Berhitung (Operasi Campuran)",
+          "cp": "Peserta didik dapat menyelesaikan soal cerita menggunakan operasi hitung campuran. Mereka memahami aturan urutan operasi dan penggunaan tanda kurung.",
+          "tp": "Peserta didik dapat menyelesaikan masalah operasi campuran dengan benar menggunakan aturan urutan dan tanda kurung.",
+          "atp": [
+            "Menyelesaikan soal cerita menggunakan operasi campuran",
+            "Memahami aturan urutan operasi: kali/bagi dahulu, lalu tambah/kurang",
+            "Menggunakan tanda kurung () dalam perhitungan",
+            "Menentukan operasi yang dikerjakan lebih dahulu",
+            "Menyelesaikan soal cerita multi-langkah",
+            "Mengecek kebenaran hasil perhitungan"
+          ],
+          "materi": [
+            "Aturan urutan operasi: 1) Tanda kurung, 2) Kali/Bagi, 3) Tambah/Kurang",
+            "Contoh: 5 + 3 × 2 = 5 + 6 = 11 (bukan 8 × 2 = 16)",
+            "Tanda kurung: (5 + 3) × 2 = 8 × 2 = 16",
+            "Soal cerita: 'Ibu beli 5 kg apel @Rp10.000, bayar Rp100.000, berapa kembalian?'",
+            "Strategi: baca soal, tentukan operasi, hitung, cek jawaban",
+            "Estimasi: membulatkan untuk mengecek apakah jawaban masuk akal"
+          ],
+          "penilaian": [
+            "Tes tertulis: operasi campuran dengan tanda kurung",
+            "Tes sumatif: soal cerita multi-langkah",
+            "Observasi: strategi penyelesaian masalah",
+            "Peer assessment: saling mengoreksi langkah",
+            "Portofolio: kumpulan soal cerita dan solusi"
+          ],
+          "alokasi": "12 JP (12 x 35 menit)",
+          "media": "Kartu soal bertingkat, aplikasi kalkulator edukasi, video tutorial, lembar kerja"
+        },
+        {
+          "id": "sudut",
+          "title": "Sudut",
+          "cp": "Peserta didik dapat mengukur dan menggambar sudut menggunakan busur derajat. Mereka memahami jenis-jenis sudut berdasarkan besarannya.",
+          "tp": "Peserta didik dapat mengukur besar sudut, menggambar sudut dengan ukuran tertentu, dan mengidentifikasi jenis sudut.",
+          "atp": [
+            "Mengukur besar sudut menggunakan busur derajat",
+            "Menggambar sudut dengan ukuran tertentu (30°, 45°, 60°, 90°, dll.)",
+            "Memahami jenis-jenis sudut: siku-siku, lancip, tumpul",
+            "Mengidentifikasi sudut siku-siku (90°)",
+            "Mengidentifikasi sudut lancip (kurang dari 90°)",
+            "Mengidentifikasi sudut tumpul (lebih dari 90°)",
+            "Menemukan sudut dalam kehidupan sehari-hari"
           ],
           "materi": [
             "Konsep sudut: pertemuan dua garis/sinar",
-            "Jenis sudut: lancip (<90°), siku-siku (90°), tumpul (>90°)",
             "Alat ukur: busur derajat",
-            "Cara menggunakan busur derajat dengan benar",
-            "Menggambar sudut: 30°, 45°, 60°, 90°, 120°",
-            "Sudut pada bangun datar: persegi, segitiga, dll.",
-            "Sudut dalam kehidupan: jarum jam, pintu, jendela"
+            "Cara menggunakan busur derajat: pusat di titik sudut, alas sejajar garis",
+            "Sudut siku-siku: tepat 90° (seperti sudut persegi)",
+            "Sudut lancip: kurang dari 90° (tajam)",
+            "Sudut tumpul: lebih dari 90° (tumpul)",
+            "Sudut dalam kehidupan: jarum jam, pintu, jendela, atap rumah"
           ],
           "penilaian": [
             "Praktik: mengukur sudut dengan busur derajat",
@@ -114,180 +141,184 @@
           ],
           "alokasi": "10 JP (10 x 35 menit)",
           "media": "Busur derajat, penggaris, jam model, benda dengan sudut, aplikasi geometri, lembar kerja"
-        },
-        {
-          "id": "bilangan-romawi",
-          "title": "Bilangan Romawi",
-          "cp": "Peserta didik dapat mengenal dan menulis bilangan Romawi sederhana. Mereka memahami penggunaan bilangan Romawi dalam kehidupan sehari-hari.",
-          "tp": "Peserta didik dapat membaca, menulis, dan mengonversi bilangan Romawi sampai 100.",
-          "atp": [
-            "Mengenal lambang bilangan Romawi: I, V, X, L, C",
-            "Memahami nilai: I=1, V=5, X=10, L=50, C=100",
-            "Aturan penulisan: penjumlahan dan pengurangan",
-            "Menulis bilangan Romawi 1-50",
-            "Menulis bilangan Romawi 51-100",
-            "Mengonversi bilangan Romawi ke bilangan cacah",
-            "Mengenal penggunaan bilangan Romawi: jam, bab buku, tahun"
-          ],
-          "materi": [
-            "Lambang dasar: I=1, V=5, X=10, L=50, C=100",
-            "Aturan penjumlahan: VI = 5+1 = 6",
-            "Aturan pengurangan: IV = 5-1 = 4",
-            "Bilangan Romawi 1-10: I, II, III, IV, V, VI, VII, VIII, IX, X",
-            "Bilangan Romawi 10-100: X, XX, XXX, XL, L, LX, LXX, LXXX, XC, C",
-            "Penggunaan: jam dinding, nomor bab, tahun pembangunan",
-            "Keterbatasan: tidak ada nol, tidak untuk kalkulasi"
-          ],
-          "penilaian": [
-            "Tes tertulis: mengonversi bilangan Romawi",
-            "Kuis cepat: membaca lambang Romawi",
-            "Observasi: menemukan bilangan Romawi di sekitar",
-            "Proyek: membuat jam dengan angka Romawi",
-            "Portofolio: lembar kerja bilangan Romawi"
-          ],
-          "alokasi": "6 JP (6 x 35 menit)",
-          "media": "Kartu bilangan Romawi, jam model, gambar bangunan bersejarah, aplikasi interaktif, lembar kerja"
         }
       ]
     },
     "2": {
       "nama": "Semester Genap",
-      "tema": "Pecahan Lanjut, Geometri, dan Pengolahan Data",
+      "tema": "Geometri, Bilangan Desimal, dan Pengolahan Data",
       "topics": [
         {
-          "id": "operasi-pecahan",
-          "title": "Operasi Hitung Pecahan",
-          "cp": "Peserta didik dapat melakukan operasi penjumlahan dan pengurangan pada pecahan dengan penyebut berbeda. Mereka dapat menyelesaikan masalah kontekstual terkait pecahan.",
-          "tp": "Peserta didik dapat menjumlahkan dan mengurangkan pecahan dengan penyebut berbeda serta menyederhanakan hasilnya.",
+          "id": "luas-daerah",
+          "title": "Luas Daerah",
+          "cp": "Peserta didik dapat memahami konsep luas daerah dan menghitung luas persegi serta persegi panjang. Mereka mengenal satuan luas dalam konteks sehari-hari.",
+          "tp": "Peserta didik dapat menghitung luas persegi dan persegi panjang serta mengonversi satuan luas.",
           "atp": [
-            "Menjumlahkan pecahan dengan penyebut sama",
-            "Menjumlahkan pecahan dengan penyebut berbeda (samakan penyebut)",
-            "Mengurangkan pecahan dengan penyebut sama",
-            "Mengurangkan pecahan dengan penyebut berbeda",
-            "Menyederhanakan hasil operasi pecahan",
-            "Mengenal pecahan campuran",
-            "Menyelesaikan soal cerita dengan pecahan"
+            "Memahami konsep luas daerah: banyaknya persegi satuan yang menutupi daerah",
+            "Menghitung luas persegi: L = s × s",
+            "Menghitung luas persegi panjang: L = p × l",
+            "Mengenal satuan luas: cm², m²",
+            "Mengenal satuan luas besar: a (are), ha (hektar), km²",
+            "Konversi satuan luas: 1 m² = 10.000 cm², 1 ha = 10.000 m²",
+            "Menyelesaikan masalah kontekstual tentang luas"
           ],
           "materi": [
-            "Penjumlahan pecahan: samakan penyebut dulu (KPK)",
-            "Pengurangan pecahan: konsep sama dengan penjumlahan",
-            "KPK untuk menyamakan penyebut",
-            "Penyederhanaan: FPB pembilang dan penyebut",
-            "Pecahan campuran: mengubah ke pecahan biasa",
-            "Soal cerita: membagi kue, mengukur bahan, waktu",
-            "Estimasi: mengecek apakah jawaban masuk akal"
+            "Konsep luas: menghitung kotak satuan yang menutupi bangun",
+            "Rumus luas persegi: L = s × s (sisi kali sisi)",
+            "Rumus luas persegi panjang: L = p × l (panjang kali lebar)",
+            "Satuan luas kecil: cm² (sentimeter persegi), m² (meter persegi)",
+            "Satuan luas besar: a (are = 100 m²), ha (hektar = 10.000 m²), km² (kilometer persegi)",
+            "Konversi: 1 m² = 10.000 cm², 1 ha = 10.000 m², 1 km² = 100 ha",
+            "Aplikasi: luas ruangan, luas tanah, luas kebun"
           ],
           "penilaian": [
-            "Tes formatif: operasi dasar pecahan",
-            "Tes sumatif: soal cerita kompleks",
-            "Proyek: 'Resep Masakan' dengan konversi takaran",
-            "Peer assessment: saling mengoreksi langkah penyelesaian",
-            "Refleksi: strategi mengatasi kesulitan hitung pecahan"
+            "Praktik: mengukur dan menghitung luas benda di sekitar",
+            "Tes tertulis: menghitung luas dari dimensi",
+            "Observasi: ketepatan penggunaan rumus",
+            "Proyek: mendesain denah ruangan dengan luas tertentu",
+            "Portofolio: lembar kerja luas dan satuan"
           ],
-          "alokasi": "16 JP (16 x 35 menit)",
-          "media": "Kartu pecahan, aplikasi visualisasi operasi, video tutorial langkah demi langkah, lembar kerja"
+          "alokasi": "14 JP (14 x 35 menit)",
+          "media": "Kertas berpetak, penggaris, meteran, aplikasi geometri, video animasi, lembar kerja"
         },
         {
-          "id": "bangun-datar-sifat-sifat",
-          "title": "Sifat-Sifat Bangun Datar",
-          "cp": "Peserta didik dapat memahami sifat-sifat bangun datar (persegi, persegi panjang, segitiga, jajar genjang, trapesium, layang-layang, belah ketupat).",
-          "tp": "Peserta didik dapat mengidentifikasi dan menjelaskan sifat-sifat bangun datar serta mengelompokkannya berdasarkan sifat.",
+          "id": "bilangan-desimal",
+          "title": "Bilangan Desimal",
+          "cp": "Peserta didik dapat mengenal bilangan desimal sebagai pecahan persepuluhan dan perseratusan. Mereka dapat melakukan operasi penjumlahan dan pengurangan pada bilangan desimal.",
+          "tp": "Peserta didik dapat membaca, menulis, membandingkan, dan melakukan operasi hitung pada bilangan desimal.",
           "atp": [
-            "Mengenal sifat persegi: 4 sisi sama, 4 sudut siku-siku",
-            "Mengenal sifat persegi panjang: sisi berhadapan sama",
-            "Mengenal sifat segitiga: 3 sisi, 3 sudut",
-            "Mengenal sifat jajar genjang: sisi berhadapan sejajar",
-            "Mengenal sifat trapesium: 1 pasang sisi sejajar",
-            "Mengenal sifat layang-layang: 2 pasang sisi sama",
-            "Mengenal sifat belah ketupat: 4 sisi sama, diagonal berpotongan tegak",
-            "Mengelompokkan bangun berdasarkan sifat"
+            "Mengenal angka di belakang koma: persepuluhan, perseratusan",
+            "Membaca dan menulis bilangan desimal",
+            "Nilai tempat desimal: persepuluhan (0,1), perseratusan (0,01)",
+            "Penjumlahan bilangan desimal",
+            "Pengurangan bilangan desimal",
+            "Mengubah pecahan sederhana menjadi desimal (½ = 0,5; ¼ = 0,25)",
+            "Mengubah desimal menjadi pecahan",
+            "Menyelesaikan masalah kontekstual dengan desimal"
           ],
           "materi": [
-            "Persegi: 4 sisi sama panjang, 4 sudut siku-siku, 4 simetri",
-            "Persegi panjang: 2 pasang sisi sama, 4 sudut siku-siku",
-            "Segitiga: berdasarkan sisi (sama sisi, sama kaki, sembarang)",
-            "Segitiga: berdasarkan sudut (lancip, siku-siku, tumpul)",
-            "Jajar genjang: sisi berhadapan sejajar dan sama",
-            "Trapesium: 1 pasang sisi sejajar",
-            "Layang-layang: 2 pasang sisi sama, 1 simetri",
-            "Belah ketupat: 4 sisi sama, diagonal tegak lurus"
+            "Konsep desimal: angka di belakang koma",
+            "Nilai tempat: 0,1 (persepuluhan), 0,01 (perseratusan), 0,001 (perseribuan)",
+            "Membaca: 0,5 = nol koma lima = lima persepuluhan",
+            "Penjumlahan: luruskan tanda koma dulu (1,25 + 0,5 = 1,75)",
+            "Pengurangan: sama dengan penjumlahan (2,5 - 1,25 = 1,25)",
+            "Pecahan ke desimal: ½ = 0,5; ¼ = 0,25; ¾ = 0,75",
+            "Desimal ke pecahan: 0,5 = 5/10 = ½; 0,25 = 25/100 = ¼",
+            "Aplikasi: uang, pengukuran, harga"
           ],
           "penilaian": [
-            "Observasi: mengidentifikasi bangun di lingkungan",
-            "Tes tertulis: menjelaskan sifat-sifat bangun",
-            "Praktik: menggambar bangun dengan sifat tertentu",
-            "Proyek: membuat kolase bangun datar",
-            "Portofolio: tabel sifat-sifat bangun datar"
+            "Tes formatif: membaca dan menulis desimal",
+            "Tes sumatif: operasi penjumlahan dan pengurangan",
+            "Observasi: ketepatan meluruskan tanda koma",
+            "Proyek: 'Belanja di Pasar' dengan harga desimal",
+            "Portofolio: lembar kerja bilangan desimal"
           ],
-          "alokasi": "12 JP (12 x 35 menit)",
-          "media": "Kertas berpetak, penggaris, busur derajat, aplikasi geometri, benda konkret, lembar kerja"
+          "alokasi": "14 JP (14 x 35 menit)",
+          "media": "Kartu bilangan desimal, uang mainan, aplikasi interaktif, video tutorial, lembar kerja"
         },
         {
-          "id": "transformasi-geometri",
-          "title": "Transformasi Geometri Sederhana",
-          "cp": "Peserta didik dapat mengenal konsep translasi (pergeseran), refleksi (pencerminan), dan rotasi (perputaran) pada bangun datar.",
-          "tp": "Peserta didik dapat melakukan translasi, refleksi, dan rotasi sederhana pada bangun datar di bidang koordinat.",
-          "atp": [
-            "Mengenal konsep translasi: pergeseran bangun",
-            "Melakukan translasi pada bidang koordinat",
-            "Mengenal konsep refleksi: pencerminan bangun",
-            "Menentukan hasil refleksi terhadap sumbu X atau Y",
-            "Mengenal konsep rotasi: perputaran bangun",
-            "Melakukan rotasi 90°, 180°, 270° sederhana",
-            "Mengidentifikasi bangun hasil transformasi"
-          ],
-          "materi": [
-            "Translasi: geser kanan/kiri, atas/bawah",
-            "Koordinat translasi: (x+a, y+b)",
-            "Refleksi: cermin terhadap sumbu X atau Y",
-            "Sifat refleksi: bentuk sama, posisi berlawanan",
-            "Rotasi: putar searah/berlawanan jarum jam",
-            "Pusat rotasi: titik putar",
-            "Aplikasi: motif batik, desain, seni"
-          ],
-          "penilaian": [
-            "Praktik: menggambar hasil translasi/refleksi",
-            "Tes tertulis: menentukan koordinat hasil transformasi",
-            "Observasi: ketepatan menggambar bangun",
-            "Proyek: membuat motif simetris dengan transformasi",
-            "Portofolio: gambar hasil transformasi"
-          ],
-          "alokasi": "10 JP (10 x 35 menit)",
-          "media": "Kertas berpetak, cermin kecil, aplikasi geometri interaktif, video animasi, lembar kerja"
-        },
-        {
-          "id": "pengolahan-data-diagram",
-          "title": "Pengolahan Data dan Diagram",
-          "cp": "Peserta didik dapat mengumpulkan, mengolah, dan menyajikan data dalam bentuk tabel dan diagram batang. Mereka dapat menafsirkan data yang disajikan.",
-          "tp": "Peserta didik dapat membuat dan membaca tabel, diagram batang, dan diagram garis serta menafsirkan data untuk menyelesaikan masalah.",
+          "id": "penyusunan-data",
+          "title": "Penyusunan Data (Statistik Sederhana)",
+          "cp": "Peserta didik dapat mengumpulkan, menyajikan, dan mengolah data sederhana dalam bentuk tabel dan diagram garis. Mereka dapat membaca dan menafsirkan data.",
+          "tp": "Peserta didik dapat mengumpulkan data, menyajikannya dalam tabel dan diagram garis, serta menafsirkan hasil olahan data.",
           "atp": [
             "Mengumpulkan data dengan teknik sederhana",
-            "Menyusun data dalam tabel frekuensi",
-            "Menyajikan data dalam diagram batang",
-            "Menyajikan data dalam diagram garis",
-            "Membaca dan menafsirkan data dari diagram",
-            "Menentukan nilai tertinggi, terendah, rata-rata sederhana",
+            "Mencatat data dalam tabel frekuensi",
+            "Menyajikan data dalam bentuk tabel",
+            "Membuat diagram garis dari data yang dikumpulkan",
+            "Membaca dan menafsirkan diagram garis",
+            "Menentukan nilai tertinggi, terendah, tren data",
             "Menjawab pertanyaan berdasarkan data",
             "Membuat kesimpulan dari data"
           ],
           "materi": [
-            "Teknik pengumpulan data: observasi, angket",
+            "Teknik pengumpulan data: observasi, angket sederhana, pencatatan",
             "Tabel frekuensi: kategori dan banyak data",
-            "Diagram batang: sumbu kategori dan frekuensi",
-            "Diagram garis: tren data dari waktu ke waktu",
-            "Membaca diagram: nilai, perbandingan, tren",
-            "Rata-rata sederhana: jumlah data ÷ banyak data",
+            "Cara menyusun tabel yang rapi dan jelas",
+            "Diagram garis: sumbu horizontal (waktu/kategori), vertikal (frekuensi/nilai)",
+            "Menghubungkan titik-titik data dengan garis",
+            "Membaca diagram: nilai tertinggi, terendah, naik/turun",
+            "Tren data: meningkat, menurun, stabil",
             "Kesimpulan: interpretasi hasil olahan data"
           ],
           "penilaian": [
-            "Proyek: pengumpulan data tema bebas",
-            "Tes tertulis: membaca dan menafsirkan diagram",
+            "Proyek: pengumpulan data tema bebas (suhu, tinggi badan, nilai)",
+            "Tes tertulis: membaca dan menafsirkan diagram garis",
             "Presentasi: menampilkan hasil pengolahan data",
             "Observasi: ketepatan penyajian data",
-            "Portofolio: tabel dan diagram yang dibuat"
+            "Portofolio: tabel dan diagram yang dibuat siswa"
           ],
           "alokasi": "10 JP (10 x 35 menit)",
           "media": "Kertas berpetak, pensil warna, aplikasi diagram, video tutorial, lembar kerja data"
+        },
+        {
+          "id": "balok-dan-kubus",
+          "title": "Balok dan Kubus (Bangun Ruang)",
+          "cp": "Peserta didik dapat mengenal ciri-ciri balok dan kubus. Mereka dapat membuat jaring-jaring dan memahami posisi serta hubungan antar rusuk.",
+          "tp": "Peserta didik dapat mengidentifikasi ciri-ciri balok dan kubus, membuat jaring-jaring, dan memahami hubungan antar rusuk.",
+          "atp": [
+            "Mengenal ciri-ciri balok: 6 sisi, 12 rusuk, 8 titik sudut",
+            "Mengenal ciri-ciri kubus: 6 sisi sama besar, 12 rusuk sama panjang, 8 titik sudut",
+            "Membedakan balok dan kubus",
+            "Membuat jaring-jaring balok",
+            "Membuat jaring-jaring kubus",
+            "Memahami posisi rusuk: sejajar dan tegak lurus",
+            "Mengidentifikasi rusuk sejajar pada balok/kubus",
+            "Mengidentifikasi rusuk tegak lurus pada balok/kubus"
+          ],
+          "materi": [
+            "Balok: 6 sisi (persegipanjang), 12 rusuk, 8 titik sudut",
+            "Kubus: 6 sisi (persegi sama besar), 12 rusuk (sama panjang), 8 titik sudut",
+            "Perbedaan: kubus semua sisi sama, balok ada yang berbeda",
+            "Jaring-jaring: pola bangun ruang jika dibuka/dibentangkan",
+            "Banyak jaring-jaring kubus: 11 pola berbeda",
+            "Rusuk sejajar: tidak pernah bertemu (contoh: AB sejajar DC)",
+            "Rusuk tegak lurus: bertemu membentuk sudut 90°",
+            "Aplikasi: kotak kemasan, bangunan, benda sehari-hari"
+          ],
+          "penilaian": [
+            "Praktik: membuat jaring-jaring kubus dan balok dari kertas",
+            "Tes tertulis: mengidentifikasi ciri-ciri bangun ruang",
+            "Observasi: ketepatan membuat jaring-jaring",
+            "Proyek: membuat model kubus/balok dari karton",
+            "Portofolio: gambar jaring-jaring dan bangun ruang"
+          ],
+          "alokasi": "12 JP (12 x 35 menit)",
+          "media": "Karton, gunting, lem, model kubus/balok, aplikasi 3D geometry, video animasi, lembar kerja"
+        },
+        {
+          "id": "pecahan-senilai",
+          "title": "Pecahan (Senilai dan Operasi)",
+          "cp": "Peserta didik dapat memahami pecahan senilai dan membandingkan besaran pecahan. Mereka dapat melakukan penjumlahan dan pengurangan pecahan dengan penyebut sama.",
+          "tp": "Peserta didik dapat menentukan pecahan senilai, membandingkan pecahan, dan melakukan operasi penjumlahan dan pengurangan dengan penyebut sama.",
+          "atp": [
+            "Memahami pecahan senilai: pecahan yang nilainya sama",
+            "Menentukan pecahan senilai (contoh: ½ = 2/4 = 3/6)",
+            "Membandingkan besaran pecahan",
+            "Mengurutkan pecahan dari terkecil ke terbesar",
+            "Penjumlahan pecahan dengan penyebut sama",
+            "Pengurangan pecahan dengan penyebut sama",
+            "Menyederhanakan pecahan",
+            "Menyelesaikan soal cerita dengan pecahan"
+          ],
+          "materi": [
+            "Pecahan senilai: ½ = 2/4 = 3/6 = 4/8 (nilai sama, bentuk berbeda)",
+            "Cara menentukan pecahan senilai: kali/pembagi pembilang dan penyebut dengan angka sama",
+            "Membandingkan pecahan: samakan penyebut dulu atau gunakan gambar",
+            "Penjumlahan penyebut sama: jumlahkan pembilang, penyebut tetap (1/5 + 2/5 = 3/5)",
+            "Pengurangan penyebut sama: kurangkan pembilang, penyebut tetap (4/7 - 2/7 = 2/7)",
+            "Penyederhanaan: bagi pembilang dan penyebut dengan FPB",
+            "Soal cerita: membagi kue, mengukur bahan, waktu"
+          ],
+          "penilaian": [
+            "Tes formatif: menentukan pecahan senilai",
+            "Tes sumatif: operasi penjumlahan dan pengurangan",
+            "Observasi: pemahaman konsep pecahan senilai",
+            "Proyek: 'Resep Masakan' dengan takaran pecahan",
+            "Portofolio: lembar kerja pecahan"
+          ],
+          "alokasi": "12 JP (12 x 35 menit)",
+          "media": "Kartu pecahan, kertas lipat, aplikasi visualisasi pecahan, video tutorial, lembar kerja"
         }
       ]
     }
