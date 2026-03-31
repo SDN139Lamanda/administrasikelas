@@ -4,107 +4,273 @@
     "jenjang": "SD",
     "kelas": "3",
     "fase": "B",
-    "kurikulum": "Kurikulum Merdeka",
+    "kurikulum": "Kurikulum Merdeka (Revisi 2024)",
     "lastUpdated": "2026-01-15",
-    "version": "1.0"
+    "version": "3.0",
+    "keterangan": "Semester 1 & 2 memiliki topik BERBEDA sesuai progresi Kurikulum Merdeka Fase B"
   },
   "semester": {
     "1": {
+      "nama": "Semester Ganjil",
+      "tema": "Operasi Hitung Perkalian, Pembagian, dan Pecahan",
       "topics": [
         {
-          "id": "perkalian-pembagian",
-          "title": "Perkalian & Pembagian Dasar",
-          "cp": "Peserta didik dapat menunjukkan pemahaman tentang perkalian dan pembagian sebagai operasi invers.",
-          "tp": "Peserta didik dapat melakukan operasi perkalian dan pembagian bilangan cacah sampai 100.",
+          "id": "perkalian-dasar-1-10",
+          "title": "Perkalian Dasar (1-10)",
+          "cp": "Peserta didik dapat menunjukkan pemahaman tentang perkalian sebagai penjumlahan berulang. Mereka dapat melakukan operasi perkalian bilangan cacah dengan hasil sampai 100.",
+          "tp": "Peserta didik dapat mengalikan dua bilangan cacah 1-10 dan menyelesaikan masalah perkalian dalam kehidupan sehari-hari.",
           "atp": [
-            "Memahami perkalian sebagai penjumlahan berulang",
+            "Memahami perkalian sebagai penjumlahan berulang (3 × 4 = 4 + 4 + 4)",
             "Menghafal fakta dasar perkalian 1-10",
-            "Memahami pembagian sebagai pengurangan berulang",
-            "Menghubungkan perkalian dan pembagian (invers)",
-            "Menyelesaikan soal cerita perkalian dan pembagian",
-            "Mengenal sifat komutatif perkalian"
+            "Menggunakan sifat komutatif perkalian (a × b = b × a)",
+            "Mengalikan bilangan dengan 0 dan 1",
+            "Menyelesaikan soal cerita perkalian sederhana",
+            "Mengenal perkalian sebagai pengelompokan benda"
           ],
           "materi": [
             "Konsep perkalian: a × b = a + a + ... (b kali)",
             "Tabel perkalian 1-10",
-            "Konsep pembagian: a ÷ b = berapa kali b muat dalam a",
-            "Hubungan: jika a × b = c, maka c ÷ b = a",
-            "Soal cerita: pengelompokan dan pembagian rata"
+            "Sifat komutatif: 3 × 5 = 5 × 3 = 15",
+            "Perkalian dengan 0: a × 0 = 0",
+            "Perkalian dengan 1: a × 1 = a",
+            "Soal cerita: 'Ada 4 kotak, masing-masing isi 6 pensil, berapa total?'"
           ],
           "penilaian": [
-            "Kuis hafalan: tabel perkalian",
-            "Tes tertulis: operasi campuran",
+            "Kuis hafalan: tabel perkalian 1-10",
+            "Tes tertulis: operasi perkalian dasar",
             "Proyek: membuat permainan kartu perkalian",
-            "Observasi: pemahaman konsep invers",
-            "Portofolio: kumpulan soal buatan siswa"
+            "Observasi: pemahaman konsep penjumlahan berulang",
+            "Portofolio: kumpulan soal cerita perkalian"
           ],
-          "alokasi": "12 JP",
-          "media": "Kartu perkalian, aplikasi drill, video animasi konsep, benda konkret untuk pengelompokan"
+          "alokasi": "16 JP (16 x 35 menit)",
+          "media": "Kartu perkalian, aplikasi drill, video animasi konsep, benda konkret untuk pengelompokan, lembar kerja"
+        },
+        {
+          "id": "pembagian-dasar",
+          "title": "Pembagian Dasar",
+          "cp": "Peserta didik dapat menunjukkan pemahaman tentang pembagian sebagai pengurangan berulang atau kebalikan dari perkalian. Mereka dapat melakukan operasi pembagian bilangan cacah.",
+          "tp": "Peserta didik dapat membagi bilangan cacah dengan hasil bagi dan sisa yang tepat, serta menyelesaikan masalah pembagian sederhana.",
+          "atp": [
+            "Memahami pembagian sebagai pengurangan berulang",
+            "Memahami pembagian sebagai kebalikan perkalian (invers)",
+            "Membagi bilangan dengan 1 dan dengan dirinya sendiri",
+            "Mengenal konsep sisa dalam pembagian",
+            "Menyelesaikan soal cerita pembagian sederhana",
+            "Menghubungkan perkalian dan pembagian"
+          ],
+          "materi": [
+            "Konsep pembagian: a ÷ b = berapa kali b muat dalam a",
+            "Hubungan invers: jika 4 × 5 = 20, maka 20 ÷ 5 = 4",
+            "Pembagian dengan 1: a ÷ 1 = a",
+            "Pembagian dengan dirinya sendiri: a ÷ a = 1",
+            "Pembagian bersisa: 17 ÷ 5 = 3 sisa 2",
+            "Soal cerita: '20 permen dibagi 4 anak, berapa masing-masing?'"
+          ],
+          "penilaian": [
+            "Kuis cepat: fakta dasar pembagian",
+            "Tes tertulis: operasi pembagian dengan sisa",
+            "Observasi: pemahaman konsep invers dengan perkalian",
+            "Proyek mini: membuat soal cerita pembagian",
+            "Peer assessment: saling mengoreksi jawaban"
+          ],
+          "alokasi": "14 JP (14 x 35 menit)",
+          "media": "Kartu soal pembagian, aplikasi matematika, video tutorial, benda konkret untuk berbagi rata, lembar kerja"
         },
         {
           "id": "pecahan-sederhana",
           "title": "Pecahan Sederhana",
-          "cp": "Peserta didik dapat mengenal dan menyatakan pecahan sederhana (½, ⅓, ¼) sebagai bagian dari keseluruhan.",
-          "tp": "Peserta didik dapat membandingkan dan mengurutkan pecahan sederhana dengan penyebut sama.",
+          "cp": "Peserta didik dapat mengenal dan menyatakan pecahan sederhana (½, ⅓, ¼, ⅕) sebagai bagian dari keseluruhan. Mereka dapat membandingkan pecahan dengan penyebut sama.",
+          "tp": "Peserta didik dapat menulis, membaca, menggambar, dan membandingkan pecahan sederhana dengan penyebut sama.",
           "atp": [
             "Mengenal pecahan sebagai bagian dari benda utuh",
-            "Menulis dan membaca lambang pecahan ½, ⅓, ¼",
-            "Menggambar pecahan dengan arsiran",
+            "Menulis dan membaca lambang pecahan ½, ⅓, ¼, ⅕",
+            "Menggambar pecahan dengan arsiran pada bangun datar",
             "Membandingkan pecahan dengan penyebut sama",
             "Mengurutkan pecahan dari terkecil ke terbesar",
             "Menyelesaikan masalah sehari-hari tentang pecahan"
           ],
           "materi": [
-            "Konsep pecahan: pembilang dan penyebut",
-            "Pecahan ½, ⅓, ¼, ⅕ dengan model area",
+            "Konsep pecahan: pembilang (atas) dan penyebut (bawah)",
+            "Pecahan ½ (setengah), ⅓ (sepertiga), ¼ (seperempat), ⅕ (seperlima)",
+            "Pecahan pada model area: lingkaran, persegi, persegipanjang",
             "Pecahan pada garis bilangan 0-1",
             "Perbandingan: ½ > ⅓ karena bagian lebih besar",
-            "Aplikasi: membagi kue, pizza, coklat"
+            "Aplikasi: membagi kue, pizza, coklat, buah"
           ],
           "penilaian": [
             "Praktik: membagi benda konkret menjadi pecahan",
             "Tes tertulis: menggambar dan membandingkan pecahan",
             "Proyek: membuat poster 'Pecahan dalam Kehidupan'",
             "Observasi: pemahaman konsep bagian-keseluruhan",
-            "Self-assessment: refleksi pemahaman pecahan"
+            "Portofolio: kumpulan gambar pecahan"
           ],
-          "alokasi": "6 JP",
-          "media": "Kertas lipat, kue/pizza model, aplikasi pecahan interaktif, video demonstrasi"
+          "alokasi": "12 JP (12 x 35 menit)",
+          "media": "Kertas lipat, kue/pizza model, aplikasi pecahan interaktif, video demonstrasi, lembar kerja pecahan"
+        },
+        {
+          "id": "bilangan-sampai-1000",
+          "title": "Bilangan Cacah Sampai 1.000",
+          "cp": "Peserta didik dapat menunjukkan pemahaman bilangan cacah sampai 1.000. Mereka dapat membaca, menulis, membandingkan, dan mengurutkan bilangan.",
+          "tp": "Peserta didik dapat membaca, menulis, membandingkan, dan mengurutkan bilangan cacah sampai 1.000 dengan memahami nilai tempat.",
+          "atp": [
+            "Membaca dan menulis lambang bilangan 1-1.000",
+            "Menentukan nilai tempat: ribuan, ratusan, puluhan, satuan",
+            "Membandingkan bilangan menggunakan >, <, =",
+            "Mengurutkan bilangan dari terkecil ke terbesar dan sebaliknya",
+            "Melompati bilangan (skip counting) 10, 50, 100",
+            "Komposisi dan dekomposisi bilangan sampai 1.000"
+          ],
+          "materi": [
+            "Lambang bilangan 1-1.000",
+            "Nilai tempat: ribuan (1.000), ratusan (100), puluhan (10), satuan (1)",
+            "Garis bilangan 1-1.000",
+            "Pola bilangan: ganjil-genap, kelipatan 10/50/100",
+            "Contoh: 457 = 4 ratusan + 5 puluhan + 7 satuan",
+            "Perbandingan: 345 < 435 karena ratusan lebih kecil"
+          ],
+          "penilaian": [
+            "Tes tertulis: menulis dan membandingkan bilangan",
+            "Kuis lisan: menyebutkan nilai tempat",
+            "Proyek: membuat poster bilangan 1-1.000",
+            "Observasi: kemampuan skip counting",
+            "Portofolio: lembar kerja nilai tempat"
+          ],
+          "alokasi": "10 JP (10 x 35 menit)",
+          "media": "Kartu bilangan, kubus satuan (1.000 blok), aplikasi interaktif, video pembelajaran"
         }
       ]
     },
     "2": {
+      "nama": "Semester Genap",
+      "tema": "Geometri, Pengukuran, dan Pengolahan Data",
       "topics": [
         {
-          "id": "uang-satuan-panjang",
-          "title": "Uang dan Satuan Panjang",
-          "cp": "Peserta didik dapat mengenal nilai uang dan melakukan pengukuran panjang dengan satuan baku.",
-          "tp": "Peserta didik dapat menyelesaikan masalah terkait nilai uang dan mengukur panjang dengan cm/m.",
+          "id": "luas-keliling-persegi-persegipanjang",
+          "title": "Luas dan Keliling Persegi & Persegi Panjang",
+          "cp": "Peserta didik dapat memahami sifat-sifat bangun datar persegi dan persegi panjang serta menghitung keliling dan luasnya.",
+          "tp": "Peserta didik dapat menghitung keliling dan luas persegi dan persegi panjang serta menyelesaikan masalah kontekstual terkait.",
           "atp": [
-            "Mengenal uang kertas dan logam (Rp100, Rp500, Rp1.000, Rp2.000, Rp5.000, Rp10.000)",
-            "Menjumlahkan dan mengurangkan nilai uang",
-            "Simulasi transaksi jual beli sederhana",
-            "Mengukur panjang dengan penggaris (satuan cm)",
-            "Mengonversi cm ke m dan sebaliknya",
-            "Menyelesaikan soal cerita tentang uang dan panjang"
+            "Mengenal sifat persegi: 4 sisi sama panjang, 4 sudut siku-siku",
+            "Mengenal sifat persegi panjang: sisi berhadapan sama panjang",
+            "Memahami konsep keliling sebagai panjang tepi bangun",
+            "Rumus keliling persegi: K = 4 × s",
+            "Rumus keliling persegi panjang: K = 2 × (p + l)",
+            "Memahami konsep luas sebagai daerah yang ditempati",
+            "Rumus luas persegi: L = s × s",
+            "Rumus luas persegi panjang: L = p × l"
           ],
           "materi": [
-            "Nilai uang: gambar, warna, nominal",
-            "Operasi hitung uang: tambah, kurang",
-            "Transaksi: bayar, kembalian",
-            "Alat ukur panjang: penggaris, meteran",
-            "Satuan baku: cm, m",
-            "Konversi: 100 cm = 1 m"
+            "Sifat persegi: 4 sisi sama, 4 sudut siku-siku",
+            "Sifat persegi panjang: 2 pasang sisi sama, 4 sudut siku-siku",
+            "Konsep keliling: mengukur tepi bangun",
+            "Rumus keliling: K persegi = 4s, K persegipanjang = 2(p+l)",
+            "Konsep luas: menghitung kotak satuan",
+            "Rumus luas: L persegi = s², L persegipanjang = p × l",
+            "Aplikasi: pagar kebun, ubin lantai, bingkai foto"
           ],
           "penilaian": [
-            "Praktik: simulasi transaksi dengan uang mainan",
-            "Tes tertulis: operasi hitung uang",
-            "Praktik: mengukur benda dengan penggaris",
-            "Proyek: membuat 'toko kelas' dengan harga",
-            "Portofolio: lembar kerja uang dan pengukuran"
+            "Praktik: mengukur keliling dan luas benda di sekitar",
+            "Tes tertulis: menghitung dari dimensi yang diberikan",
+            "Proyek: mendesain taman mini dengan keliling/luas tertentu",
+            "Observasi: ketepatan penggunaan rumus",
+            "Presentasi: solusi masalah kontekstual"
           ],
-          "alokasi": "8 JP",
-          "media": "Uang mainan, penggaris, meteran, benda untuk diukur, lembar kerja transaksi"
+          "alokasi": "14 JP (14 x 35 menit)",
+          "media": "Penggaris, kertas berpetak, benda konkret (buku, meja), aplikasi geometri, video animasi"
+        },
+        {
+          "id": "pengukuran-panjang-berat-volume",
+          "title": "Pengukuran Panjang, Berat, dan Volume",
+          "cp": "Peserta didik dapat melakukan pengukuran panjang, berat, dan volume menggunakan satuan baku. Mereka dapat mengonversi satuan dalam konteks sehari-hari.",
+          "tp": "Peserta didik dapat mengukur dan mengonversi satuan panjang (m, cm), berat (kg, g), dan volume (L, mL) dalam masalah kontekstual.",
+          "atp": [
+            "Mengenal satuan baku panjang: m (meter) dan cm (sentimeter)",
+            "Konversi panjang: 1 m = 100 cm",
+            "Mengenal satuan baku berat: kg (kilogram) dan g (gram)",
+            "Konversi berat: 1 kg = 1.000 g",
+            "Mengenal satuan baku volume: L (liter) dan mL (mililiter)",
+            "Konversi volume: 1 L = 1.000 mL",
+            "Menyelesaikan masalah pengukuran dalam kehidupan sehari-hari"
+          ],
+          "materi": [
+            "Satuan panjang: m, cm; konversi 1 m = 100 cm",
+            "Satuan berat: kg, g; konversi 1 kg = 1.000 g",
+            "Satuan volume: L, mL; konversi 1 L = 1.000 mL",
+            "Alat ukur: penggaris, meteran, timbangan, gelas ukur",
+            "Teknik pengukuran yang benar",
+            "Soal cerita: belanja, memasak, konstruksi sederhana"
+          ],
+          "penilaian": [
+            "Praktik: mengukur benda dengan alat ukur yang tepat",
+            "Tes tertulis: konversi satuan",
+            "Observasi: ketepatan teknik pengukuran",
+            "Proyek: 'Pasar Kelas' dengan transaksi pengukuran",
+            "Portofolio: lembar kerja pengukuran dan konversi"
+          ],
+          "alokasi": "12 JP (12 x 35 menit)",
+          "media": "Penggaris, meteran, timbangan digital, gelas ukur, benda untuk diukur, lembar kerja"
+        },
+        {
+          "id": "penyajian-data-sederhana",
+          "title": "Penyajian Data Sederhana",
+          "cp": "Peserta didik dapat mengumpulkan, mengolah, dan menyajikan data sederhana dalam bentuk tabel, diagram gambar, dan diagram batang.",
+          "tp": "Peserta didik dapat membuat dan membaca tabel, diagram gambar (piktograf), dan diagram batang sederhana dari data yang dikumpulkan.",
+          "atp": [
+            "Mengumpulkan data sederhana dari lingkungan sekitar",
+            "Mencatat data dalam tabel frekuensi",
+            "Menyajikan data dalam diagram gambar (piktograf)",
+            "Menyajikan data dalam diagram batang sederhana",
+            "Membaca dan menafsirkan data dari tabel/diagram",
+            "Menjawab pertanyaan berdasarkan data yang disajikan"
+          ],
+          "materi": [
+            "Teknik pengumpulan data: observasi, angket sederhana",
+            "Tabel frekuensi: mencatat banyak data per kategori",
+            "Piktograf: diagram dengan gambar sebagai simbol",
+            "Diagram batang: sumbu horizontal (kategori), vertikal (frekuensi)",
+            "Membaca data: nilai tertinggi, terendah, total",
+            "Menafsirkan: perbandingan, tren sederhana"
+          ],
+          "penilaian": [
+            "Proyek: pengumpulan data tema bebas (warna favorit, makanan, dll)",
+            "Tes tertulis: membaca dan menafsirkan diagram",
+            "Presentasi: menampilkan hasil pengolahan data",
+            "Observasi: ketepatan penyajian data",
+            "Portofolio: tabel dan diagram yang dibuat siswa"
+          ],
+          "alokasi": "10 JP (10 x 35 menit)",
+          "media": "Kertas berpetak, pensil warna, stiker, aplikasi diagram sederhana, lembar kerja data"
+        },
+        {
+          "id": "simetri-cermin-bangun-datar",
+          "title": "Simetri dan Cermin Bangun Datar",
+          "cp": "Peserta didik dapat mengenal konsep simetri lipat dan simetri putar pada bangun datar sederhana.",
+          "tp": "Peserta didik dapat menentukan sumbu simetri lipat dan mengenali simetri putar pada bangun datar.",
+          "atp": [
+            "Mengenal konsep simetri lipat (simetri cermin)",
+            "Menentukan sumbu simetri pada persegi, persegipanjang, segitiga",
+            "Mengenal konsep simetri putar",
+            "Menentukan banyak simetri putar pada bangun datar",
+            "Menggambar bangun simetri",
+            "Mengidentifikasi benda simetris di lingkungan sekitar"
+          ],
+          "materi": [
+            "Simetri lipat: bangun dapat dilipat menjadi 2 bagian sama",
+            "Sumbu simetri: garis lipat yang membagi bangun sama",
+            "Simetri putar: bangun dapat diputar dan tetap sama",
+            "Banyak simetri: persegi (4), persegipanjang (2), segitiga sama sisi (3)",
+            "Benda simetris: kupu-kupu, daun, bangunan",
+            "Menggambar setengah bangun simetri"
+          ],
+          "penilaian": [
+            "Praktik: melipat kertas untuk menemukan sumbu simetri",
+            "Tes tertulis: menentukan banyak simetri",
+            "Observasi: mengidentifikasi benda simetris",
+            "Proyek: membuat karya seni simetris",
+            "Portofolio: gambar bangun dengan sumbu simetri"
+          ],
+          "alokasi": "8 JP (8 x 35 menit)",
+          "media": "Kertas lipat, cermin kecil, aplikasi geometri interaktif, benda simetris, lembar kerja"
         }
       ]
     }
