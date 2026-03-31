@@ -1,14 +1,35 @@
-
-// config-firebase.js
-// Konfigurasi Firebase - Auth + Firestore
-// Versi: Diperbaiki & Lengkap
+// modules/firebase-config.js
+// Konfigurasi Firebase - Auth + Firestore (LENGKAP)
+// Versi: Updated for Reflection Module
 
 // ✅ Import Firebase SDK (dari CDN)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
-// ✅ Firebase Config (DIPERBAIKI - tanpa spasi di databaseURL)
+// ✅ Import Auth functions
+import { 
+  getAuth, 
+  signInWithEmailAndPassword, 
+  signOut,
+  onAuthStateChanged 
+} from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+
+// ✅ Import Firestore functions (TAMBAHKAN INI!)
+import { 
+  getFirestore,
+  collection,
+  addDoc,
+  getDocs,
+  updateDoc,
+  deleteDoc,
+  doc,
+  query,
+  orderBy,
+  onSnapshot,
+  serverTimestamp,
+  where
+} from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+
+// ✅ Firebase Config (Data Asli - Sudah Benar)
 const firebaseConfig = {
   apiKey: "AIzaSyCYoUcSKj8aAZTaNgKtrn0bYHPmedVHAE4",
   authDomain: "sdn139lamanda-a67a8.firebaseapp.com",
@@ -27,5 +48,29 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// ✅ Export untuk digunakan di file lain
-export { auth, signInWithEmailAndPassword, signOut, db };
+// ✅ EXPORT SEMUA YANG DIPERLUKAN (INI KUNCINYA!)
+export { 
+  // Auth
+  auth, 
+  signInWithEmailAndPassword, 
+  signOut,
+  onAuthStateChanged,
+  
+  // Firestore Core
+  db,
+  
+  // Firestore Functions (DITAMBAHKAN!)
+  collection,
+  addDoc,
+  getDocs,
+  updateDoc,
+  deleteDoc,
+  doc,
+  query,
+  orderBy,
+  onSnapshot,
+  serverTimestamp,
+  where
+};
+
+console.log('✅ Firebase initialized & all exports ready');
