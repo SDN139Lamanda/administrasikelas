@@ -1,1 +1,112 @@
-
+{
+  "metadata": {
+    "mapel": "Matematika",
+    "jenjang": "SD",
+    "kelas": "5",
+    "fase": "C",
+    "kurikulum": "Kurikulum Merdeka",
+    "lastUpdated": "2026-01-15",
+    "version": "1.0"
+  },
+  "semester": {
+    "1": {
+      "topics": [
+        {
+          "id": "pecahan-desimal-persen",
+          "title": "Pecahan, Desimal, dan Persen",
+          "cp": "Peserta didik dapat memahami hubungan antara pecahan, desimal, dan persen serta melakukan operasi hitungnya.",
+          "tp": "Peserta didik dapat mengubah bentuk pecahan, desimal, dan persen serta menyelesaikan masalah yang melibatkan ketiganya.",
+          "atp": [
+            "Mengenal pecahan desimal (persepuluhan, perseratusan)",
+            "Mengubah pecahan biasa ke desimal dan sebaliknya",
+            "Mengenal persen sebagai pecahan per 100",
+            "Mengubah desimal/pecahan ke persen dan sebaliknya",
+            "Membandingkan dan mengurutkan pecahan/desimal/persen",
+            "Menyelesaikan masalah diskon, pajak, dan proporsi sederhana"
+          ],
+          "materi": [
+            "Pecahan desimal: 0,1 = ¹⁄₁₀, 0,25 = ²⁵⁄₁₀₀",
+            "Konversi: ½ = 0,5 = 50%, ¼ = 0,25 = 25%",
+            "Garis bilangan desimal 0-1",
+            "Perbandingan: 0,3 > 0,25 karena 30 > 25 per 100",
+            "Aplikasi: diskon 20%, pajak 10%, proporsi resep"
+          ],
+          "penilaian": [
+            "Kuis konversi: pecahan ↔ desimal ↔ persen",
+            "Tes tertulis: operasi dan perbandingan",
+            "Proyek: 'Belanja Cerdas' dengan hitungan diskon",
+            "Observasi: pemahaman hubungan ketiga bentuk",
+            "Portofolio: kumpulan masalah kontekstual"
+          ],
+          "alokasi": "10 JP",
+          "media": "Kartu konversi, aplikasi kalkulator persen, video belanja realistis, lembar kerja kontekstual"
+        },
+        {
+          "id": "operasi-pecahan",
+          "title": "Operasi Hitung Pecahan",
+          "cp": "Peserta didik dapat melakukan operasi penjumlahan dan pengurangan pada pecahan dengan penyebut berbeda.",
+          "tp": "Peserta didik dapat menyelesaikan masalah sehari-hari yang melibatkan operasi hitung pecahan.",
+          "atp": [
+            "Menjumlahkan pecahan dengan penyebut sama",
+            "Menjumlahkan pecahan dengan penyebut berbeda (samakan penyebut)",
+            "Mengurangkan pecahan dengan penyebut sama",
+            "Mengurangkan pecahan dengan penyebut berbeda",
+            "Menyederhanakan hasil operasi pecahan",
+            "Menyelesaikan soal cerita dengan pecahan"
+          ],
+          "materi": [
+            "Penjumlahan pecahan: samakan penyebut dulu",
+            "Pengurangan pecahan: konsep sama dengan penjumlahan",
+            "KPK untuk menyamakan penyebut",
+            "Penyederhanaan: FPB pembilang dan penyebut",
+            "Pecahan campuran: mengubah ke pecahan biasa",
+            "Soal cerita: membagi kue, mengukur bahan"
+          ],
+          "penilaian": [
+            "Tes formatif: operasi dasar pecahan",
+            "Tes sumatif: soal cerita kompleks",
+            "Proyek: 'Resep Masakan' dengan konversi takaran",
+            "Peer assessment: saling mengoreksi langkah penyelesaian",
+            "Refleksi: strategi mengatasi kesulitan hitung pecahan"
+          ],
+          "alokasi": "12 JP",
+          "media": "Kartu pecahan, aplikasi visualisasi operasi, video tutorial langkah demi langkah"
+        }
+      ]
+    },
+    "2": {
+      "topics": [
+        {
+          "id": "volume-bangun-ruang",
+          "title": "Volume Kubus dan Balok",
+          "cp": "Peserta didik dapat memahami konsep volume bangun ruang dan menghitung volume kubus dan balok.",
+          "tp": "Peserta didik dapat menghitung volume kubus dan balok serta menyelesaikan masalah terkait volume.",
+          "atp": [
+            "Memahami volume sebagai isi/banyaknya ruang",
+            "Mengenal satuan volume: cm³, m³, liter",
+            "Rumus volume kubus: V = s³",
+            "Rumus volume balok: V = p × l × t",
+            "Menghitung volume dengan satuan berbeda",
+            "Menyelesaikan masalah: isi bak mandi, kotak penyimpanan"
+          ],
+          "materi": [
+            "Konsep volume: kubus satuan sebagai acuan",
+            "Hubungan: 1 liter = 1.000 cm³",
+            "Rumus dan penerapannya",
+            "Konversi satuan volume",
+            "Aplikasi: menghitung isi wadah, kebutuhan material"
+          ],
+          "penilaian": [
+            "Praktik: mengukur volume benda dengan air",
+            "Tes tertulis: menghitung volume dari dimensi",
+            "Proyek: mendesain kotak dengan volume tertentu",
+            "Observasi: ketepatan penggunaan rumus dan satuan",
+            "Presentasi: solusi masalah volume kontekstual"
+          ],
+          "alokasi": "8 JP",
+          "media": "Kubus satuan, wadah transparan, air, aplikasi 3D geometry, video demonstrasi"
+        }
+      ]
+    }
+  }
+}
