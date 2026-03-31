@@ -1,0 +1,112 @@
+{
+  "metadata": {
+    "mapel": "Matematika",
+    "jenjang": "SD",
+    "kelas": "3",
+    "fase": "B",
+    "kurikulum": "Kurikulum Merdeka",
+    "lastUpdated": "2026-01-15",
+    "version": "1.0"
+  },
+  "semester": {
+    "1": {
+      "topics": [
+        {
+          "id": "perkalian-pembagian",
+          "title": "Perkalian & Pembagian Dasar",
+          "cp": "Peserta didik dapat menunjukkan pemahaman tentang perkalian dan pembagian sebagai operasi invers.",
+          "tp": "Peserta didik dapat melakukan operasi perkalian dan pembagian bilangan cacah sampai 100.",
+          "atp": [
+            "Memahami perkalian sebagai penjumlahan berulang",
+            "Menghafal fakta dasar perkalian 1-10",
+            "Memahami pembagian sebagai pengurangan berulang",
+            "Menghubungkan perkalian dan pembagian (invers)",
+            "Menyelesaikan soal cerita perkalian dan pembagian",
+            "Mengenal sifat komutatif perkalian"
+          ],
+          "materi": [
+            "Konsep perkalian: a × b = a + a + ... (b kali)",
+            "Tabel perkalian 1-10",
+            "Konsep pembagian: a ÷ b = berapa kali b muat dalam a",
+            "Hubungan: jika a × b = c, maka c ÷ b = a",
+            "Soal cerita: pengelompokan dan pembagian rata"
+          ],
+          "penilaian": [
+            "Kuis hafalan: tabel perkalian",
+            "Tes tertulis: operasi campuran",
+            "Proyek: membuat permainan kartu perkalian",
+            "Observasi: pemahaman konsep invers",
+            "Portofolio: kumpulan soal buatan siswa"
+          ],
+          "alokasi": "12 JP",
+          "media": "Kartu perkalian, aplikasi drill, video animasi konsep, benda konkret untuk pengelompokan"
+        },
+        {
+          "id": "pecahan-sederhana",
+          "title": "Pecahan Sederhana",
+          "cp": "Peserta didik dapat mengenal dan menyatakan pecahan sederhana (½, ⅓, ¼) sebagai bagian dari keseluruhan.",
+          "tp": "Peserta didik dapat membandingkan dan mengurutkan pecahan sederhana dengan penyebut sama.",
+          "atp": [
+            "Mengenal pecahan sebagai bagian dari benda utuh",
+            "Menulis dan membaca lambang pecahan ½, ⅓, ¼",
+            "Menggambar pecahan dengan arsiran",
+            "Membandingkan pecahan dengan penyebut sama",
+            "Mengurutkan pecahan dari terkecil ke terbesar",
+            "Menyelesaikan masalah sehari-hari tentang pecahan"
+          ],
+          "materi": [
+            "Konsep pecahan: pembilang dan penyebut",
+            "Pecahan ½, ⅓, ¼, ⅕ dengan model area",
+            "Pecahan pada garis bilangan 0-1",
+            "Perbandingan: ½ > ⅓ karena bagian lebih besar",
+            "Aplikasi: membagi kue, pizza, coklat"
+          ],
+          "penilaian": [
+            "Praktik: membagi benda konkret menjadi pecahan",
+            "Tes tertulis: menggambar dan membandingkan pecahan",
+            "Proyek: membuat poster 'Pecahan dalam Kehidupan'",
+            "Observasi: pemahaman konsep bagian-keseluruhan",
+            "Self-assessment: refleksi pemahaman pecahan"
+          ],
+          "alokasi": "6 JP",
+          "media": "Kertas lipat, kue/pizza model, aplikasi pecahan interaktif, video demonstrasi"
+        }
+      ]
+    },
+    "2": {
+      "topics": [
+        {
+          "id": "uang-satuan-panjang",
+          "title": "Uang dan Satuan Panjang",
+          "cp": "Peserta didik dapat mengenal nilai uang dan melakukan pengukuran panjang dengan satuan baku.",
+          "tp": "Peserta didik dapat menyelesaikan masalah terkait nilai uang dan mengukur panjang dengan cm/m.",
+          "atp": [
+            "Mengenal uang kertas dan logam (Rp100, Rp500, Rp1.000, Rp2.000, Rp5.000, Rp10.000)",
+            "Menjumlahkan dan mengurangkan nilai uang",
+            "Simulasi transaksi jual beli sederhana",
+            "Mengukur panjang dengan penggaris (satuan cm)",
+            "Mengonversi cm ke m dan sebaliknya",
+            "Menyelesaikan soal cerita tentang uang dan panjang"
+          ],
+          "materi": [
+            "Nilai uang: gambar, warna, nominal",
+            "Operasi hitung uang: tambah, kurang",
+            "Transaksi: bayar, kembalian",
+            "Alat ukur panjang: penggaris, meteran",
+            "Satuan baku: cm, m",
+            "Konversi: 100 cm = 1 m"
+          ],
+          "penilaian": [
+            "Praktik: simulasi transaksi dengan uang mainan",
+            "Tes tertulis: operasi hitung uang",
+            "Praktik: mengukur benda dengan penggaris",
+            "Proyek: membuat 'toko kelas' dengan harga",
+            "Portofolio: lembar kerja uang dan pengukuran"
+          ],
+          "alokasi": "8 JP",
+          "media": "Uang mainan, penggaris, meteran, benda untuk diukur, lembar kerja transaksi"
+        }
+      ]
+    }
+  }
+}
