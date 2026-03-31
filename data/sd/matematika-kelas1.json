@@ -4,129 +4,248 @@
     "jenjang": "SD",
     "kelas": "1",
     "fase": "A",
-    "kurikulum": "Kurikulum Merdeka",
+    "kurikulum": "Kurikulum Merdeka (Revisi 2024)",
     "lastUpdated": "2026-01-15",
-    "version": "1.0"
+    "version": "3.0",
+    "keterangan": "Konten Semester 1 & 2 BERBEDA - Berdasarkan kurikulum sekolah"
   },
   "semester": {
     "1": {
+      "nama": "Semester Ganjil",
+      "tema": "Fondasi Bilangan, Operasi Dasar, dan Geometri",
       "topics": [
         {
-          "id": "bilangan-1-20",
-          "title": "Bilangan Cacah 1-20",
-          "cp": "Peserta didik dapat menunjukkan pemahaman dan intuisi bilangan (number sense) pada bilangan cacah sampai 20.",
-          "tp": "Peserta didik dapat membaca, menulis, menentukan nilai tempat, membandingkan, mengurutkan, dan melakukan komposisi/dekomposisi bilangan cacah sampai 20.",
+          "id": "bilangan-cacah-1-10",
+          "title": "Mengenal Bilangan Cacah (Sampai 10)",
+          "cp": "Peserta didik dapat menunjukkan pemahaman dan intuisi bilangan (number sense) pada bilangan cacah sampai 10. Mereka dapat membaca, menulis, menentukan nilai, membandingkan, dan mengurutkan bilangan.",
+          "tp": "Peserta didik dapat membilang, membaca, menulis, membandingkan, dan mengurutkan bilangan cacah 1-10 dengan benar.",
           "atp": [
-            "Mengenal dan membaca bilangan 1-20",
-            "Menulis lambang bilangan 1-20",
-            "Menentukan nilai tempat (puluhan dan satuan)",
-            "Membandingkan bilangan (lebih besar/lebih kecil)",
-            "Mengurutkan bilangan dari terkecil ke terbesar",
-            "Komposisi dan dekomposisi bilangan (contoh: 15 = 10 + 5)"
+            "Membilang banyak benda: Menghitung jumlah benda 1-10",
+            "Membaca dan menulis lambang bilangan: Menghubungkan jumlah benda dengan simbol angka",
+            "Membandingkan bilangan: Mengenal konsep 'lebih banyak', 'lebih sedikit', atau 'sama dengan'",
+            "Mengurutkan bilangan: Belajar urutan dari yang terkecil ke terbesar dan sebaliknya"
           ],
           "materi": [
-            "Lambang bilangan 1-20",
-            "Nilai tempat: puluhan dan satuan",
-            "Garis bilangan 1-20",
-            "Perbandingan: >, <, =",
-            "Pengelompokan benda berdasarkan jumlah"
+            "Membilang benda konkret (kelereng, pensil, buku)",
+            "Lambang bilangan 1, 2, 3, 4, 5, 6, 7, 8, 9, 10",
+            "Membandingkan: lebih banyak (>), lebih sedikit (<), sama dengan (=)",
+            "Mengurutkan: terkecil → terbesar dan terbesar → terkecil",
+            "Garis bilangan 1-10"
           ],
           "penilaian": [
-            "Tes lisan: menyebutkan bilangan secara acak",
-            "Tes tertulis: menulis lambang bilangan",
-            "Observasi: kemampuan mengelompokkan benda",
-            "Unjuk kerja: mengurutkan kartu bilangan",
-            "Portofolio: lembar kerja siswa"
+            "Tes lisan: Menyebutkan bilangan secara acak",
+            "Tes tertulis: Menulis lambang bilangan 1-10",
+            "Observasi: Kemampuan menghitung benda konkret",
+            "Unjuk kerja: Mengurutkan kartu bilangan",
+            "Portofolio: Lembar kerja siswa bilangan 1-10"
           ],
-          "alokasi": "6 JP (6 x 35 menit)",
-          "media": "Kartu bilangan, manik-manik, garis bilangan, aplikasi hitung interaktif"
+          "alokasi": "12 JP (12 x 35 menit)",
+          "media": "Kartu bilangan, manik-manik, kubus satuan, garis bilangan, benda konkret di kelas"
         },
         {
-          "id": "penjumlahan-pengurangan",
-          "title": "Penjumlahan & Pengurangan",
-          "cp": "Peserta didik dapat melakukan operasi penjumlahan dan pengurangan yang melibatkan bilangan cacah sampai 20.",
-          "tp": "Peserta didik dapat menyelesaikan masalah sehari-hari yang berkaitan dengan penjumlahan dan pengurangan bilangan cacah sampai 20.",
+          "id": "komposisi-dekomposisi",
+          "title": "Menguraikan dan Menyusun Bilangan",
+          "cp": "Peserta didik dapat menguraikan dan menyusun bilangan cacah sampai 10. Mereka memahami bahwa satu bilangan dapat dibentuk dari kombinasi bilangan lain.",
+          "tp": "Peserta didik dapat menentukan pasangan bilangan yang membentuk satu bilangan tertentu (komposisi & dekomposisi).",
           "atp": [
-            "Memahami konsep penjumlahan sebagai penggabungan",
-            "Memahami konsep pengurangan sebagai pengambilan",
-            "Menghitung penjumlahan bilangan 1-20 dengan benda konkret",
-            "Menghitung pengurangan bilangan 1-20 dengan benda konkret",
-            "Menyelesaikan soal cerita sederhana",
-            "Mengenal sifat komutatif penjumlahan (a+b = b+a)"
+            "Memahami konsep komposisi: menyusun bilangan dari dua bilangan lain",
+            "Memahami konsep dekomposisi: menguraikan bilangan menjadi dua bilangan lain",
+            "Menentukan pasangan bilangan: Mempelajari kombinasi angka yang membentuk satu bilangan tertentu",
+            "Praktik dengan benda konkret: Menggunakan kubus atau manik-manik untuk komposisi/dekomposisi",
+            "Mencatat hasil dalam tabel sederhana"
           ],
           "materi": [
-            "Konsep penjumlahan (+) dan pengurangan (-)",
-            "Fakta dasar penjumlahan 1-20",
-            "Fakta dasar pengurangan 1-20",
-            "Soal cerita: tambah dan kurang",
-            "Hubungan penjumlahan dan pengurangan"
+            "Komposisi: 5 = 2 + 3, 5 = 1 + 4, 5 = 0 + 5",
+            "Dekomposisi: 7 dapat diuraikan menjadi 3 + 4, 2 + 5, 1 + 6",
+            "Pasangan bilangan sampai 10",
+            "Menggunakan benda konkret untuk visualisasi",
+            "Tabel komposisi bilangan"
           ],
           "penilaian": [
-            "Kuis cepat: fakta dasar hitung",
-            "Tes tertulis: operasi hitung campuran",
-            "Observasi: penggunaan strategi menghitung",
-            "Proyek mini: membuat soal cerita sendiri",
-            "Self-assessment: refleksi kesulitan belajar"
+            "Tes tertulis: Melengkapi pasangan bilangan",
+            "Praktik: Menggunakan benda konkret untuk komposisi",
+            "Observasi: Pemahaman konsep bagian-keseluruhan",
+            "Portofolio: Lembar kerja komposisi/dekomposisi",
+            "Kuis cepat: Pasangan bilangan"
           ],
           "alokasi": "8 JP (8 x 35 menit)",
-          "media": "Blok dienes, kartu soal, aplikasi matematika dasar, video animasi"
+          "media": "Kubus satuan, manik-manik, kartu bilangan, tabel komposisi, aplikasi interaktif"
+        },
+        {
+          "id": "penjumlahan-1-10",
+          "title": "Operasi Hitung: Penjumlahan (Sampai 10)",
+          "cp": "Peserta didik dapat melakukan operasi penjumlahan yang melibatkan bilangan cacah sampai 10. Mereka memahami penjumlahan sebagai penggabungan dua kumpulan benda.",
+          "tp": "Peserta didik dapat menyelesaikan masalah penjumlahan dua bilangan dengan hasil sampai 10 menggunakan benda konkret dan simbol matematika.",
+          "atp": [
+            "Konsep penjumlahan: Menggunakan kata kunci 'digabung', 'menjadi', atau 'ditambah'",
+            "Simbol matematika: Mulai mengenal penggunaan tanda plus (+) dan sama dengan (=)",
+            "Menjumlahkan dengan benda konkret",
+            "Menuliskan kalimat matematika penjumlahan",
+            "Soal cerita sederhana: Menghitung jumlah apel di keranjang A dan keranjang B"
+          ],
+          "materi": [
+            "Konsep penjumlahan: menggabungkan dua kelompok benda",
+            "Simbol: + (tambah/plus), = (sama dengan)",
+            "Fakta dasar penjumlahan 1-10",
+            "Sifat komutatif: a + b = b + a",
+            "Penjumlahan dengan nol: a + 0 = a",
+            "Soal cerita konteks sehari-hari"
+          ],
+          "penilaian": [
+            "Kuis cepat: Fakta dasar penjumlahan 1-10",
+            "Tes tertulis: Menyelesaikan soal penjumlahan",
+            "Observasi: Penggunaan benda konkret",
+            "Proyek mini: Membuat soal cerita penjumlahan",
+            "Self-assessment: Refleksi kesulitan belajar"
+          ],
+          "alokasi": "14 JP (14 x 35 menit)",
+          "media": "Blok dienes, kartu soal, aplikasi matematika, video animasi, benda konkret"
+        },
+        {
+          "id": "pengurangan-1-10",
+          "title": "Operasi Hitung: Pengurangan (Sampai 10)",
+          "cp": "Peserta didik dapat melakukan operasi pengurangan yang melibatkan bilangan cacah sampai 10. Mereka memahami pengurangan sebagai pengambilan atau sisa.",
+          "tp": "Peserta didik dapat menyelesaikan masalah pengurangan dua bilangan dengan hasil sampai 10 menggunakan benda konkret dan simbol matematika.",
+          "atp": [
+            "Konsep pengurangan: Memahami konsep 'sisa', 'diambil', atau 'pecah'",
+            "Simbol matematika: Mengenal tanda kurang (-)",
+            "Mengurangkan dengan benda konkret",
+            "Menuliskan kalimat matematika pengurangan",
+            "Hubungan penjumlahan dan pengurangan: Menyadari bahwa pengurangan adalah kebalikan dari penjumlahan",
+            "Soal cerita pengurangan sederhana"
+          ],
+          "materi": [
+            "Konsep pengurangan: mengambil sebagian dari kumpulan",
+            "Simbol: - (kurang/min), = (sama dengan)",
+            "Fakta dasar pengurangan 1-10",
+            "Hubungan invers: 3 + 2 = 5 → 5 - 2 = 3",
+            "Pengurangan dengan nol: a - 0 = a",
+            "Soal cerita konteks sehari-hari"
+          ],
+          "penilaian": [
+            "Kuis cepat: Fakta dasar pengurangan 1-10",
+            "Tes tertulis: Menyelesaikan soal pengurangan",
+            "Observasi: Penggunaan benda konkret",
+            "Peer assessment: Saling mengoreksi jawaban",
+            "Proyek mini: Membuat soal cerita pengurangan"
+          ],
+          "alokasi": "14 JP (14 x 35 menit)",
+          "media": "Blok dienes, kartu soal, aplikasi matematika, video animasi, benda konkret"
+        },
+        {
+          "id": "bentuk-bangun-geometri",
+          "title": "Bentuk Bangun (Geometri Dasar)",
+          "cp": "Peserta didik dapat mengenal dan mengidentifikasi bangun ruang dan bangun datar sederhana dalam kehidupan sehari-hari.",
+          "tp": "Peserta didik dapat mengidentifikasi bola, tabung, balok, kubus, lingkaran, segitiga, dan segiempat pada benda-benda di sekitar mereka.",
+          "atp": [
+            "Mengenal bangun ruang: Bola, tabung, balok, dan kubus (menggunakan benda nyata seperti kotak susu atau bola kasti)",
+            "Mengenal bangun datar: Lingkaran, segitiga, dan segiempat",
+            "Mengelompokkan benda: Memilah benda berdasarkan bentuknya",
+            "Menggambar bangun datar sederhana",
+            "Mengidentifikasi benda di kelas berdasarkan bentuk"
+          ],
+          "materi": [
+            "Bangun Ruang: Bola (bulat), Tabung (seperti kaleng), Balok (seperti kotak susu), Kubus (seperti dadu)",
+            "Bangun Datar: Lingkaran (bulat), Segitiga (3 sisi), Segiempat (4 sisi)",
+            "Ciri-ciri setiap bentuk",
+            "Benda sekitar yang berbentuk bangun ruang/datar",
+            "Mengelompokkan berdasarkan bentuk"
+          ],
+          "penilaian": [
+            "Observasi: Mengidentifikasi bentuk benda di kelas",
+            "Praktik: Mengelompokkan benda berdasarkan bentuk",
+            "Tes lisan: Menyebutkan ciri-ciri bangun",
+            "Portofolio: Kumpulan gambar bangun",
+            "Unjuk kerja: Mencari benda berbentuk tertentu di kelas"
+          ],
+          "alokasi": "8 JP (8 x 35 menit)",
+          "media": "Benda konkret (kotak susu, bola, kaleng), flashcard bangun, kertas berpetak, video pengenalan bentuk"
         }
       ]
     },
     "2": {
+      "nama": "Semester Genap",
+      "tema": "Pengembangan Bilangan, Pengukuran, dan Data",
       "topics": [
+        {
+          "id": "bilangan-cacah-11-20",
+          "title": "Mengenal Bilangan Cacah (11-20)",
+          "cp": "Peserta didik dapat menunjukkan pemahaman bilangan pada bilangan cacah sampai 20. Mereka dapat membaca, menulis, dan membandingkan bilangan 11-20.",
+          "tp": "Peserta didik dapat membaca, menulis, mengurutkan, dan membandingkan bilangan cacah 11-20 dengan memahami nilai tempat.",
+          "atp": [
+            "Mengenal lambang bilangan 11-20",
+            "Memahami nilai tempat: puluhan dan satuan",
+            "Mengurutkan bilangan 11-20",
+            "Membandingkan bilangan menggunakan >, <, ="
+          ],
+          "materi": ["Lambang bilangan 11-20", "Nilai tempat puluhan-satuan", "Garis bilangan 11-20", "Perbandingan bilangan"],
+          "penilaian": ["Tes lisan", "Tes tertulis", "Observasi nilai tempat", "Portofolio"],
+          "alokasi": "10 JP",
+          "media": "Kartu bilangan, sedotan (ikat 10), garis bilangan"
+        },
         {
           "id": "pengukuran-panjang",
           "title": "Pengukuran Panjang",
           "cp": "Peserta didik dapat membandingkan dan mengukur panjang benda dengan satuan tidak baku.",
-          "tp": "Peserta didik dapat membandingkan panjang dua benda atau lebih dan mengukurnya dengan satuan tidak baku.",
+          "tp": "Peserta didik dapat mengukur panjang menggunakan jengkal, langkah, atau klip kertas.",
           "atp": [
-            "Membandingkan panjang benda secara langsung (panjang/pendek)",
-            "Mengukur panjang dengan satuan tidak baku (jengkal, langkah, klip)",
+            "Membandingkan panjang: lebih panjang, lebih pendek",
+            "Mengukur dengan satuan tidak baku",
             "Mencatat hasil pengukuran",
-            "Membandingkan hasil pengukuran dengan teman",
-            "Menyelesaikan masalah sederhana tentang panjang"
+            "Membandingkan hasil dengan teman"
           ],
-          "materi": [
-            "Konsep panjang: lebih panjang, lebih pendek, sama panjang",
-            "Satuan tidak baku: jengkal, kaki, langkah, klip kertas",
-            "Teknik pengukuran yang benar",
-            "Membaca dan mencatat hasil pengukuran"
-          ],
-          "penilaian": [
-            "Praktik: mengukur benda di kelas",
-            "Lembar kerja: membandingkan panjang gambar",
-            "Observasi: ketepatan teknik pengukuran",
-            "Presentasi: melaporkan hasil pengukuran kelompok"
-          ],
-          "alokasi": "4 JP (4 x 35 menit)",
-          "media": "Benda konkret (pensil, buku, meja), klip kertas, tali, lembar kerja"
+          "materi": ["Konsep panjang", "Satuan tidak baku: jengkal, langkah, klip", "Teknik pengukuran", "Mencatat hasil"],
+          "penilaian": ["Praktik mengukur", "Lembar kerja", "Observasi", "Presentasi"],
+          "alokasi": "8 JP",
+          "media": "Benda konkret, klip kertas, tali, lembar kerja"
         },
         {
-          "id": "bangun-datar-sederhana",
-          "title": "Bangun Datar Sederhana",
-          "cp": "Peserta didik dapat mengenal dan mengidentifikasi bangun datar sederhana.",
-          "tp": "Peserta didik dapat mengidentifikasi persegi, segitiga, dan lingkaran dalam lingkungan sekitar.",
+          "id": "pengukuran-berat",
+          "title": "Pengukuran Berat",
+          "cp": "Peserta didik dapat membandingkan berat benda dengan satuan tidak baku.",
+          "tp": "Peserta didik dapat membandingkan berat menggunakan timbangan sederhana.",
           "atp": [
-            "Mengenal bentuk persegi, segitiga, lingkaran",
-            "Mengidentifikasi benda berbentuk bangun datar",
-            "Menggambar bangun datar sederhana",
-            "Mengelompokkan benda berdasarkan bentuk"
+            "Membandingkan berat: lebih berat, lebih ringan",
+            "Mengukur dengan satuan tidak baku (kelereng, klip)",
+            "Menggunakan timbangan sederhana",
+            "Mencatat hasil perbandingan"
           ],
-          "materi": [
-            "Persegi: 4 sisi sama panjang",
-            "Segitiga: 3 sisi, 3 sudut",
-            "Lingkaran: tidak memiliki sudut",
-            "Benda sekitar berbentuk bangun datar"
+          "materi": ["Konsep berat", "Satuan tidak baku", "Timbangan sederhana", "Perbandingan berat"],
+          "penilaian": ["Praktik menimbang", "Tes tertulis", "Observasi", "Portofolio"],
+          "alokasi": "6 JP",
+          "media": "Timbangan sederhana, kelereng, benda untuk ditimbang"
+        },
+        {
+          "id": "waktu-waktu",
+          "title": "Mengenal Waktu",
+          "cp": "Peserta didik dapat mengenal konsep waktu sederhana dalam kehidupan sehari-hari.",
+          "tp": "Peserta didik dapat membaca jam tepat dan mengenal hari dalam seminggu.",
+          "atp": [
+            "Mengenal jam analog: jarum pendek dan panjang",
+            "Membaca jam tepat (pukul 1, 2, 3, dst.)",
+            "Mengenal hari dalam seminggu",
+            "Mengenal bagian hari: pagi, siang, sore, malam"
           ],
-          "penilaian": [
-            "Observasi: mengidentifikasi bentuk benda",
-            "Praktik: menggambar bangun datar",
-            "Tes lisan: menyebutkan ciri-ciri bangun",
-            "Portofolio: kumpulan gambar bangun datar"
+          "materi": ["Jam analog", "Membaca jam tepat", "Hari dalam seminggu", "Bagian hari"],
+          "penilaian": ["Praktik membaca jam", "Tes tertulis", "Observasi", "Proyek membuat jam"],
+          "alokasi": "8 JP",
+          "media": "Jam model, kartu hari, kalender"
+        },
+        {
+          "id": "pengenalan-data",
+          "title": "Pengolahan Data Sederhana",
+          "cp": "Peserta didik dapat mengumpulkan dan menyajikan data sederhana dalam bentuk tabel atau grafik gambar.",
+          "tp": "Peserta didik dapat membuat tabel sederhana dan grafik gambar dari data yang dikumpulkan.",
+          "atp": [
+            "Mengumpulkan data sederhana (contoh: warna favorit)",
+            "Menyajikan data dalam tabel",
+            "Membuat grafik gambar (piktograf)",
+            "Membaca dan menafsirkan data sederhana"
           ],
-          "alokasi": "5 JP (5 x 35 menit)",
-          "media": "Kertas berpetak, pensil, penggaris, benda konkret berbentuk bangun datar"
+          "materi": ["Mengumpulkan data", "Tabel sederhana", "Grafik gambar/piktograf", "Membaca data"],
+          "penilaian": ["Proyek pengumpulan data", "Membuat tabel/grafik", "Presentasi", "Portofolio"],
+          "alokasi": "6 JP",
+          "media": "Kertas berpetak, pensil warna, stiker, lembar kerja"
         }
       ]
     }
