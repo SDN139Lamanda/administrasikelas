@@ -1,0 +1,115 @@
+{
+  "metadata": {
+    "mapel": "Matematika",
+    "jenjang": "SD",
+    "kelas": "4",
+    "fase": "B",
+    "kurikulum": "Kurikulum Merdeka",
+    "lastUpdated": "2026-01-15",
+    "version": "1.0"
+  },
+  "semester": {
+    "1": {
+      "topics": [
+        {
+          "id": "bilangan-bulat-operasi",
+          "title": "Operasi Bilangan Bulat",
+          "cp": "Peserta didik dapat melakukan operasi hitung penjumlahan, pengurangan, perkalian, dan pembagian pada bilangan cacah besar.",
+          "tp": "Peserta didik dapat menyelesaikan masalah yang melibatkan operasi hitung campuran pada bilangan cacah sampai 10.000.",
+          "atp": [
+            "Menjumlahkan bilangan sampai 4 angka dengan teknik menyimpan",
+            "Mengurangkan bilangan sampai 4 angka dengan teknik meminjam",
+            "Mengalikan bilangan 2 angka dengan 1 angka",
+            "Membagi bilangan 3-4 angka dengan 1 angka (tanpa sisa)",
+            "Operasi hitung campuran dengan aturan urutan",
+            "Menyelesaikan soal cerita multi-langkah"
+          ],
+          "materi": [
+            "Nilai tempat: ribuan, ratusan, puluhan, satuan",
+            "Penjumlahan dan pengurangan bersusun panjang",
+            "Perkalian bersusun: metode standar",
+            "Pembagian bersusun pendek (porogapit)",
+            "Aturan operasi: kali/bagi dahulu, lalu tambah/kurang",
+            "Estimasi: membulatkan untuk mengecek jawaban"
+          ],
+          "penilaian": [
+            "Tes formatif: operasi dasar bertingkat",
+            "Tes sumatif: soal cerita kompleks",
+            "Proyek: membuat 'Toko Kelas' dengan transaksi hitung",
+            "Peer teaching: siswa mengajarkan strategi ke teman",
+            "Portofolio: kumpulan soal dan solusi terbaik"
+          ],
+          "alokasi": "14 JP",
+          "media": "Kartu soal bertingkat, aplikasi kalkulator edukasi, video tutorial langkah demi langkah"
+        },
+        {
+          "id": "faktor-kelipatan",
+          "title": "Faktor dan Kelipatan",
+          "cp": "Peserta didik dapat memahami konsep faktor dan kelipatan bilangan.",
+          "tp": "Peserta didik dapat menentukan faktor dan kelipatan bilangan serta FPB dan KPK sederhana.",
+          "atp": [
+            "Mengenal konsep faktor: bilangan yang membagi habis",
+            "Menentukan faktor dari bilangan 1-50",
+            "Mengenal konsep kelipatan: hasil perkalian berurutan",
+            "Menentukan kelipatan dari bilangan 1-10",
+            "Mengenal FPB (Faktor Persekutuan Terbesar) sederhana",
+            "Mengenal KPK (Kelipatan Persekutuan Terkecil) sederhana"
+          ],
+          "materi": [
+            "Faktor bilangan: contoh faktor dari 12 = 1, 2, 3, 4, 6, 12",
+            "Kelipatan bilangan: contoh kelipatan 3 = 3, 6, 9, 12, ...",
+            "Faktor persekutuan: faktor yang sama dari dua bilangan",
+            "Kelipatan persekutuan: kelipatan yang sama dari dua bilangan",
+            "FPB dan KPK dengan cara mendaftar",
+            "Aplikasi: menyederhanakan pecahan, menjumlahkan pecahan"
+          ],
+          "penilaian": [
+            "Tes tertulis: menentukan faktor dan kelipatan",
+            "Kuis cepat: FPB dan KPK sederhana",
+            "Proyek: membuat 'pohon faktor' bilangan",
+            "Observasi: pemahaman konsep faktor/kelipatan",
+            "Portofolio: lembar kerja FPB/KPK"
+          ],
+          "alokasi": "8 JP",
+          "media": "Kartu bilangan, diagram pohon faktor, aplikasi interaktif FPB/KPK"
+        }
+      ]
+    },
+    "2": {
+      "topics": [
+        {
+          "id": "bangun-datar-keliling-luas",
+          "title": "Bangun Datar: Keliling dan Luas",
+          "cp": "Peserta didik dapat memahami sifat-sifat bangun datar dan menghitung keliling serta luasnya.",
+          "tp": "Peserta didik dapat mengidentifikasi bangun datar dan menghitung keliling serta luas persegi dan persegi panjang.",
+          "atp": [
+            "Mengenal sifat persegi, persegi panjang, segitiga, lingkaran",
+            "Mengidentifikasi sisi, sudut, dan simetri bangun datar",
+            "Memahami konsep keliling sebagai panjang tepi",
+            "Rumus keliling: K = 4×s (persegi), K = 2×(p+l) (persegi panjang)",
+            "Memahami konsep luas sebagai daerah yang ditempati",
+            "Rumus luas: L = s×s (persegi), L = p×l (persegi panjang)"
+          ],
+          "materi": [
+            "Jenis bangun datar dan sifat-sifatnya",
+            "Sisi, sudut, dan simetri lipat",
+            "Konsep keliling: mengukur tepi benda",
+            "Rumus keliling persegi dan persegi panjang",
+            "Konsep luas: menghitung kotak satuan",
+            "Rumus luas persegi dan persegi panjang",
+            "Aplikasi: pagar kebun, ubin lantai, bingkai foto"
+          ],
+          "penilaian": [
+            "Praktik: mengukur keliling dan luas benda di sekitar",
+            "Tes tertulis: menghitung keliling dan luas dari gambar",
+            "Proyek: mendesain taman mini dengan keliling/luas tertentu",
+            "Observasi: ketepatan penggunaan rumus",
+            "Presentasi: menjelaskan solusi masalah kontekstual"
+          ],
+          "alokasi": "10 JP",
+          "media": "Benda konkret (buku, meja), tali pengukur, kertas berpetak, aplikasi geometri"
+        }
+      ]
+    }
+  }
+}
