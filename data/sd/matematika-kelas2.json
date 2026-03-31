@@ -1,0 +1,110 @@
+{
+  "metadata": {
+    "mapel": "Matematika",
+    "jenjang": "SD",
+    "kelas": "2",
+    "fase": "A",
+    "kurikulum": "Kurikulum Merdeka",
+    "lastUpdated": "2026-01-15",
+    "version": "1.0"
+  },
+  "semester": {
+    "1": {
+      "topics": [
+        {
+          "id": "bilangan-1-100",
+          "title": "Bilangan Cacah 1-100",
+          "cp": "Peserta didik dapat menunjukkan pemahaman dan intuisi bilangan pada bilangan cacah sampai 100.",
+          "tp": "Peserta didik dapat membaca, menulis, menentukan nilai tempat, membandingkan, mengurutkan bilangan cacah sampai 100.",
+          "atp": [
+            "Membaca dan menulis bilangan 1-100",
+            "Menentukan nilai tempat (ratusan, puluhan, satuan)",
+            "Membandingkan bilangan menggunakan >, <, =",
+            "Mengurutkan bilangan dari terkecil ke terbesar",
+            "Melompati bilangan (skip counting) 2, 5, 10",
+            "Komposisi dan dekomposisi bilangan sampai 100"
+          ],
+          "materi": [
+            "Lambang bilangan 1-100",
+            "Nilai tempat: ratusan, puluhan, satuan",
+            "Garis bilangan 1-100",
+            "Pola bilangan: ganjil-genap, kelipatan",
+            "Pengelompokan bilangan"
+          ],
+          "penilaian": [
+            "Tes tertulis: menulis dan membandingkan bilangan",
+            "Kuis lisan: menyebutkan bilangan secara acak",
+            "Proyek: membuat poster bilangan 1-100",
+            "Observasi: kemampuan skip counting",
+            "Portofolio: kumpulan lembar kerja"
+          ],
+          "alokasi": "7 JP",
+          "media": "Kartu bilangan, papan ratusan, aplikasi interaktif, video pembelajaran"
+        },
+        {
+          "id": "operasi-hitung-campuran",
+          "title": "Operasi Hitung Campuran",
+          "cp": "Peserta didik dapat melakukan operasi penjumlahan dan pengurangan yang melibatkan bilangan cacah sampai 100.",
+          "tp": "Peserta didik dapat menyelesaikan masalah sehari-hari dengan operasi hitung campuran penjumlahan dan pengurangan.",
+          "atp": [
+            "Menjumlahkan bilangan dua angka tanpa menyimpan",
+            "Mengurangkan bilangan dua angka tanpa meminjam",
+            "Menjumlahkan dengan teknik menyimpan",
+            "Mengurangkan dengan teknik meminjam",
+            "Operasi hitung campuran (+ dan -) dalam satu soal",
+            "Menyelesaikan soal cerita dua langkah"
+          ],
+          "materi": [
+            "Penjumlahan bersusun pendek dan panjang",
+            "Pengurangan bersusun dengan meminjam",
+            "Urutan operasi: dari kiri ke kanan",
+            "Strategi menghitung: membulatkan, memecah bilangan",
+            "Soal cerita: transaksi jual beli sederhana"
+          ],
+          "penilaian": [
+            "Tes formatif: operasi hitung dasar",
+            "Tes sumatif: soal cerita kompleks",
+            "Unjuk kerja: presentasi strategi menghitung",
+            "Peer assessment: saling mengoreksi jawaban",
+            "Refleksi: catatan kesulitan dan pencapaian"
+          ],
+          "alokasi": "10 JP",
+          "media": "Blok dienes, kartu soal bertingkat, aplikasi matematika, video tutorial"
+        }
+      ]
+    },
+    "2": {
+      "topics": [
+        {
+          "id": "pengukuran-berat-waktu",
+          "title": "Pengukuran Berat dan Waktu",
+          "cp": "Peserta didik dapat membandingkan dan mengukur berat benda serta mengenal satuan waktu.",
+          "tp": "Peserta didik dapat membandingkan berat benda dan membaca jam sederhana.",
+          "atp": [
+            "Membandingkan berat benda (lebih berat/ringan)",
+            "Mengukur berat dengan satuan tidak baku",
+            "Mengenal jam analog: jarum pendek (jam), jarum panjang (menit)",
+            "Membaca jam tepat (pukul 1, 2, 3, dst.)",
+            "Mengenal satuan waktu: hari, minggu, bulan"
+          ],
+          "materi": [
+            "Konsep berat: lebih berat, lebih ringan, sama berat",
+            "Satuan tidak baku: kelereng, klip, buku",
+            "Bagian jam: angka 1-12, jarum jam dan menit",
+            "Membaca jam tepat",
+            "Kalender sederhana: hari dalam seminggu"
+          ],
+          "penilaian": [
+            "Praktik: menimbang benda dengan timbangan sederhana",
+            "Tes tertulis: membaca jam analog",
+            "Observasi: ketepatan membandingkan berat",
+            "Proyek: membuat jam analog dari kertas",
+            "Portofolio: lembar kerja pengukuran"
+          ],
+          "alokasi": "6 JP",
+          "media": "Timbangan sederhana, jam analog model, kartu jam, kalender"
+        }
+      ]
+    }
+  }
+}
