@@ -145,11 +145,11 @@
                         </a>
                     </article>
                     
-                    <!-- RUANG 7: Refleksi (All Users) -->
+                    <!-- ✅ UPDATE: RUANG 7: Refleksi - Tambah onclick untuk module -->
                     <article class="room-card room-refleksi" data-feature="refleksi">
-                        <a href="#refleksi" class="room-link">
+                        <a href="javascript:void(0)" class="room-link" onclick="renderRefleksiForm(); return false;">
                             <div class="room-icon bg-purple" aria-hidden="true">
-                                <i class="fas fa-mirror"></i>
+                                <i class="fas fa-pen-fancy"></i>
                             </div>
                             <h3 class="room-title">Refleksi</h3>
                             <p class="room-desc">Jurnal pembelajaran</p>
@@ -329,6 +329,11 @@
             </div>
         </section>
 
+        <!-- ✅ UPDATE: REFLEKSI CONTAINER (Untuk Firebase realtime content) -->
+        <section id="refleksi-container" class="section bg-gray-50 hidden">
+            <!-- Dynamic content will be loaded here by modules/refleksi.js -->
+        </section>
+
     </main>
 
     <!-- Footer -->
@@ -349,5 +354,9 @@
     <!-- ✅ TAMBAHKAN: Script tag untuk Asisten Modul AI -->
     <script type="module" src="modules/asisten-modul.js"></script>
     <script type="module" src="modules/sd-matematika.js"></script>
+    
+    <!-- ✅ UPDATE: Firebase Config & Refleksi Module -->
+    <script type="module" src="js/firebase-config.js"></script>
+    <script type="module" src="modules/refleksi.js"></script>
 </body>
 </html>
