@@ -1,7 +1,7 @@
 /**
  * ============================================
  * DASHBOARD LOGIC - Platform Administrasi Kelas
- * VERSI: BULLETPROOF (Pasti Berfungsi!)
+ * VERSI: BULLETPROOF + GRANULAR VISIBILITY
  * ============================================
  */
 
@@ -38,6 +38,13 @@ window.showSection = function(sectionId) {
         if (targetSection) {
             targetSection.classList.remove('hidden');
             targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            
+            // ✅ NEW: Filter class cards based on user's assigned kelas
+            const jenjang = sectionId.replace('-section', ''); // "sd", "smp", "sma"
+            if (typeof window.initKelasCards === 'function' && ['sd', 'smp', 'sma'].includes(jenjang)) {
+                window.initKelasCards(jenjang);
+            }
+            
             console.log('✅✅✅ SECTION DITAMPILKAN:', sectionId);
         } else {
             console.error('❌❌❌ SECTION TIDAK DITEMUKAN:', sectionId);
@@ -74,6 +81,11 @@ window.backToDashboard = function() {
         if (moduleContainer) moduleContainer.classList.add('hidden');
         if (refleksiContainer) refleksiContainer.classList.add('hidden');
         
+        // ✅ NEW: Reset class cards visibility when returning to dashboard
+        document.querySelectorAll('.kelas-card').forEach(card => {
+            card.classList.remove('hidden');
+        });
+        
         // Scroll to top
         window.scrollTo({ top: 0, behavior: 'smooth' });
         
@@ -104,11 +116,42 @@ window.logout = async function() {
     }
 };
 
+// ✅ NEW FUNCTION: Filter class cards by user's assigned kelas
+window.initKelasCards = function(jenjang) {
+    console.log('🔍 [Dashboard] initKelasCards() called for:', jenjang);
+    
+    const userKelas = window.currentUserKelas;
+    
+    // If no restriction, show all classes
+    if (!userKelas || userKelas.length === 0) {
+        console.log('✅ [Dashboard] No kelas restriction, showing all');
+        document.querySelectorAll(`#${jenjang}-section .kelas-card`).forEach(card => {
+            card.classList.remove('hidden');
+        });
+        return;
+    }
+    
+    // Filter: Show only classes in userKelas array
+    console.log('🎯 [Dashboard] Filtering classes:', userKelas);
+    
+    document.querySelectorAll(`#${jenjang}-section .kelas-card`).forEach(card => {
+        const kelasNum = card.dataset.kelas; // "1", "2", "4", etc.
+        if (userKelas.includes(kelasNum)) {
+            card.classList.remove('hidden');
+            console.log(`✅ [Dashboard] Shown: Kelas ${kelasNum}`);
+        } else {
+            card.classList.add('hidden');
+            console.log(`❌ [Dashboard] Hidden: Kelas ${kelasNum}`);
+        }
+    });
+};
+
 console.log('🟢 [Dashboard] Global functions registered:');
 console.log('   - window.showSection:', typeof window.showSection);
 console.log('   - window.backToDashboard:', typeof window.backToDashboard);
 console.log('   - window.loadSemester:', typeof window.loadSemester);
 console.log('   - window.logout:', typeof window.logout);
+console.log('   - window.initKelasCards:', typeof window.initKelasCards);
 
 // ============================================
 // DOM READY INITIALIZATION
@@ -121,7 +164,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     await checkAuthStatus();
     
     // Initialize room card visibility
-    initRoomCards();
+    await initRoomCards();
     
     // Initialize smooth scroll
     initSmoothScroll();
@@ -143,12 +186,41 @@ async function checkAuthStatus() {
     try {
         const { auth, onAuthStateChanged } = await import('../modules/firebase-config.js');
         
-        onAuthStateChanged(auth, (user) => {
+        onAuthStateChanged(auth, async (user) => {
             if (user) {
                 document.getElementById('userEmail').textContent = user.email;
                 document.getElementById('userAvatar').src = user.photoURL || `https://ui-avatars.com/api/?name=${user.displayName || 'User'}&background=7c3aed&color=fff`;
                 document.getElementById('userContextText').textContent = user.displayName || user.email;
                 console.log('✅ [Dashboard] User logged in:', user.email);
+                
+                // ✅ NEW: Fetch user data from Firestore for role-based visibility
+                try {
+                    const { db, doc, getDoc } = await import('../modules/firebase-config.js');
+                    const userDoc = await getDoc(doc(db, 'users', user.uid));
+                    
+                    if (userDoc.exists()) {
+                        const userData = userDoc.data();
+                        window.currentUserRole = userData.role || 'guru';
+                        window.currentUserJenjang = userData.jenjang || null;
+                        window.currentUserKelas = userData.kelas || null;
+                        console.log('✅ [Dashboard] User profile loaded:', { 
+                            role: window.currentUserRole, 
+                            jenjang: window.currentUserJenjang, 
+                            kelas: window.currentUserKelas 
+                        });
+                    } else {
+                        console.warn('⚠️ [Dashboard] User doc not found, using defaults');
+                        window.currentUserRole = 'guru';
+                        window.currentUserJenjang = null;
+                        window.currentUserKelas = null;
+                    }
+                } catch (e) {
+                    console.error('❌ [Dashboard] Failed to fetch user profile:', e);
+                    // Fallback values
+                    window.currentUserRole = 'guru';
+                    window.currentUserJenjang = null;
+                    window.currentUserKelas = null;
+                }
             } else {
                 console.warn('⚠️ [Dashboard] User not logged in, redirecting...');
                 window.location.href = 'index.html';
@@ -162,19 +234,74 @@ async function checkAuthStatus() {
 }
 
 // ============================================
-// ROOM CARD VISIBILITY
+// ROOM CARD VISIBILITY (Based on User Role, Jenjang & Kelas)
 // ============================================
 
-function initRoomCards() {
-    const userRole = 'guru'; // Default role
+async function initRoomCards() {
+    console.log('🔍 [Dashboard] initRoomCards() called');
     
-    if (userRole === 'guru') {
-        document.querySelectorAll('.room-card').forEach(card => {
-            card.classList.remove('hidden');
-        });
+    try {
+        // Wait a bit for auth to populate user data
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        const userRole = window.currentUserRole || 'guru';
+        const userJenjang = window.currentUserJenjang || null;
+        
+        console.log('🎯 [Dashboard] Applying visibility:', { role: userRole, jenjang: userJenjang });
+        
+        if (userRole === 'guru' && !userJenjang) {
+            // Guru without jenjang restriction → show ALL
+            console.log('👨‍🏫 [Dashboard] Showing all rooms (no jenjang restriction)');
+            showAllRooms();
+        } else if (userJenjang) {
+            // Filter by jenjang
+            console.log(`🎯 [Dashboard] Showing ${userJenjang.toUpperCase()} rooms only`);
+            showRoomsByJenjang(userJenjang);
+        } else {
+            // Fallback
+            console.log('⚠️ [Dashboard] Fallback: Showing all rooms');
+            showAllRooms();
+        }
+        
+    } catch (error) {
+        console.error('❌ [Dashboard] initRoomCards error:', error);
+        showAllRooms(); // Fallback
     }
     
     console.log('✅ [Dashboard] Room cards initialized');
+}
+
+// ✅ Helper: Show ALL rooms
+function showAllRooms() {
+    document.querySelectorAll('.room-card').forEach(card => {
+        card.classList.remove('hidden');
+    });
+    console.log('✅ [Dashboard] All rooms shown');
+}
+
+// ✅ Helper: Show rooms by jenjang ONLY
+function showRoomsByJenjang(jenjang) {
+    // Hide ALL room cards first
+    document.querySelectorAll('.room-card').forEach(card => {
+        card.classList.add('hidden');
+    });
+    
+    // Show only the matching jenjang room
+    const targetRoom = document.querySelector(`.room-${jenjang}`);
+    if (targetRoom) {
+        targetRoom.classList.remove('hidden');
+        console.log(`✅ [Dashboard] Shown: room-${jenjang}`);
+    }
+    
+    // ALWAYS show these rooms for all users:
+    const alwaysVisible = ['adm-kelas', 'adm-pembelajaran', 'penilaian', 'refleksi', 'generator-modul'];
+    alwaysVisible.forEach(feature => {
+        const room = document.querySelector(`.room-${feature}`);
+        if (room) {
+            room.classList.remove('hidden');
+            console.log(`✅ [Dashboard] Always visible: room-${feature}`);
+        }
+    });
 }
 
 // ============================================
@@ -208,4 +335,5 @@ console.log('   • showSection(sectionId)');
 console.log('   • backToDashboard()');
 console.log('   • loadSemester(jenjang, kelas)');
 console.log('   • logout()');
+console.log('   • initKelasCards(jenjang) ← NEW!');
 console.log('🚀 READY TO USE!');
