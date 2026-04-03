@@ -1,16 +1,20 @@
 // modules/firebase-config.js
-// Konfigurasi Firebase - Auth + Firestore (LENGKAP)
-// Versi: Updated for Reflection Module
+// Konfigurasi Firebase - Auth + Firestore (LENGKAP + Google Sign-In)
+
 // ✅ Import Firebase SDK (dari CDN)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-// ✅ Import Auth functions
+
+// ✅ Import Auth functions (LENGKAP termasuk Google Sign-In)
 import { 
   getAuth, 
   signInWithEmailAndPassword, 
+  signInWithPopup,      // ← TAMBAHAN: Untuk Google login
+  GoogleAuthProvider,   // ← TAMBAHAN: Provider Google
   signOut,
   onAuthStateChanged 
 } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-// ✅ Import Firestore functions (TAMBAHKAN INI!)
+
+// ✅ Import Firestore functions
 import { 
   getFirestore,
   collection,
@@ -26,7 +30,7 @@ import {
   where
 } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
-// ✅ Firebase Config (Data Asli - Sudah Benar)
+// ✅ Firebase Config (Data Asli)
 const firebaseConfig = {
   apiKey: "AIzaSyCYoUcSKj8aAZTaNgKtrn0bYHPmedVHAE4",
   authDomain: "sdn139lamanda-a67a8.firebaseapp.com",
@@ -44,19 +48,22 @@ const app = initializeApp(firebaseConfig);
 // ✅ Initialize Services
 const auth = getAuth(app);
 const db = getFirestore(app);
+const googleProvider = new GoogleAuthProvider(); // ← Provider untuk Google login
 
-// ✅ EXPORT SEMUA YANG DIPERLUKAN (INI KUNCINYA!)
+// ✅ EXPORT SEMUA YANG DIPERLUKAN
 export { 
   // Auth
   auth, 
+  googleProvider,           // ← TAMBAHAN: Export provider Google
   signInWithEmailAndPassword, 
+  signInWithPopup,          // ← TAMBAHAN: Export function Google login
   signOut,
   onAuthStateChanged,
   
   // Firestore Core
   db,
   
-  // Firestore Functions (DITAMBAHKAN!)
+  // Firestore Functions
   collection,
   addDoc,
   getDocs,
