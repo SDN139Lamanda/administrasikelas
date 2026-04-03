@@ -1,0 +1,214 @@
+/* ============================================ */
+/* DASHBOARD STYLES - dashboard.css             */
+/* Platform Administrasi Kelas Digital          */
+/* ============================================ */
+
+/* ─────────────────────────────────────────── */
+/* 1. DASHBOARD HERO                           */
+/* ─────────────────────────────────────────── */
+
+.dashboard-hero {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 3rem 0;
+    text-align: center;
+}
+
+.user-context-badge {
+    display: inline-flex;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.2);
+    padding: 0.75rem 1.5rem;
+    border-radius: 9999px;
+    color: white;
+    font-size: 0.875rem;
+    margin-top: 1rem;
+    backdrop-filter: blur(4px);
+}
+
+/* ─────────────────────────────────────────── */
+/* 2. 8 RUANG UTAMA (Rooms Grid)              */
+/* ─────────────────────────────────────────── */
+
+.rooms-grid {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    gap: 1.5rem;
+}
+
+.room-card {
+    background-color: white;
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.room-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.room-link {
+    display: block;
+    padding: 1.5rem;
+    text-align: center;
+    text-decoration: none;
+    color: inherit;
+}
+
+.room-icon {
+    width: 4rem;
+    height: 4rem;
+    border-radius: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+}
+.room-icon i {
+    font-size: 2rem;
+    color: white;
+}
+.room-icon.bg-blue { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+.room-icon.bg-green { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
+.room-icon.bg-purple { background: linear-gradient(135deg, #833ab4 0%, #fd1d1d 100%); }
+.room-icon.bg-orange { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+.room-icon.bg-pink { background: linear-gradient(135deg, #fc4a1a 0%, #f7b733 100%); }
+
+.room-title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+}
+
+.room-desc {
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+/* ─────────────────────────────────────────── */
+/* 3. KELAS GRID (Kamars)                     */
+/* ─────────────────────────────────────────── */
+
+.kelas-grid {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    gap: 1.5rem;
+}
+
+.kelas-card {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    text-align: center;
+    transition: transform 0.2s ease;
+}
+
+.kelas-card:hover {
+    transform: scale(1.05);
+}
+
+.kelas-link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+}
+
+.kelas-number {
+    width: 3rem;
+    height: 3rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 9999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.kelas-title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+}
+
+.kelas-desc {
+    font-size: 0.875rem;
+    color: #4b5563;
+}
+
+/* ─────────────────────────────────────────── */
+/* 4. RESPONSIVE BREAKPOINTS                  */
+/* ─────────────────────────────────────────── */
+
+/* Tablet: 768px+ */
+@media (min-width: 768px) {
+    .rooms-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .kelas-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Laptop: 1024px+ */
+@media (min-width: 1024px) {
+    .rooms-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+    
+    .kelas-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* Mobile: 767px and below */
+@media (max-width: 767px) {
+    .dashboard-hero {
+        padding: 2rem 0;
+    }
+    
+    .room-card,
+    .kelas-card {
+        padding: 1rem;
+    }
+    
+    /* Ensure tap targets are at least 44px */
+    .room-link,
+    .kelas-link {
+        min-height: 44px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+/* ─────────────────────────────────────────── */
+/* 5. SECTION VISIBILITY (For Navigation)     */
+/* ─────────────────────────────────────────── */
+
+.section.hidden {
+    display: none;
+}
+
+.section.active {
+    display: block;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
