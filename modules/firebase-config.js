@@ -14,12 +14,13 @@ import {
   onAuthStateChanged 
 } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
-// ✅ Import Firestore functions
+// ✅ Import Firestore functions (TAMBAH getDoc!)
 import { 
   getFirestore,
   collection,
   addDoc,
   getDocs,
+  getDoc,              // ← ✅ DITAMBAHKAN: Untuk fetch single document!
   updateDoc,
   deleteDoc,
   doc,
@@ -50,7 +51,7 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const googleProvider = new GoogleAuthProvider(); // ← Provider untuk Google login
 
-// ✅ EXPORT SEMUA YANG DIPERLUKAN
+// ✅ EXPORT SEMUA YANG DIPERLUKAN (TAMBAH getDoc!)
 export { 
   // Auth
   auth, 
@@ -63,10 +64,11 @@ export {
   // Firestore Core
   db,
   
-  // Firestore Functions
+  // Firestore Functions (TAMBAH getDoc!)
   collection,
   addDoc,
   getDocs,
+  getDoc,                  // ← ✅ DITAMBAHKAN: Untuk fetch single document!
   updateDoc,
   deleteDoc,
   doc,
