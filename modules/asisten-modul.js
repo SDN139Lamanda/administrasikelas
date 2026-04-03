@@ -13,7 +13,7 @@
 console.log('🔴 [Generator AI] Script START');
 
 // ✅ FIX: Import path corrected (modules folder)
-import { db, auth } from './config-firebase.js';
+import { db, auth } from './firebase-config.js';
 import { 
     collection, 
     addDoc, 
