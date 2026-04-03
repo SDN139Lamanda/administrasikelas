@@ -46,6 +46,7 @@ window.renderAdmKelas = async function() {
   const dateInput = document.getElementById('inputTgl');
   if (dateInput) dateInput.valueAsDate = new Date();
   
+  // ✅ CALL methods from window.admKelas object
   window.admKelas.renderClassesGrid();
   window.admKelas.populateClassSelects();
   window.admKelas.setupEventListeners();
@@ -246,22 +247,17 @@ window.admKelas = {
     console.log('🔴 [AdmKelas] navigateToAttendance() DIPANGGIL');
     
     try {
-      // ✅ 1. Reload data from storage
-      console.log('🔄 [AdmKelas] Reloading classes from storage...');
       classes = await storage.loadClasses();
       console.log('✅ [AdmKelas] Classes loaded:', classes.length, 'classes');
       
-      // ✅ 2. Check if classes exist
       if (!classes || classes.length === 0) {
         console.warn('⚠️ [AdmKelas] No classes found');
         return alert('Buat kelas dulu!');
       }
       
-      // ✅ 3. Populate select dropdown
       console.log('🔄 [AdmKelas] Calling populateClassSelects()');
       this.populateClassSelects();
       
-      // ✅ 4. Check and set active class
       console.log('🎯 [AdmKelas] activeClassIndex:', activeClassIndex);
       
       if (activeClassIndex === null || activeClassIndex >= classes.length) {
@@ -269,7 +265,6 @@ window.admKelas = {
         activeClassIndex = 0;
       }
       
-      // ✅ 5. Set select value
       const selectEl = document.getElementById('selectKelasAbsen');
       console.log('🔍 [AdmKelas] selectKelasAbsen element:', selectEl);
       
@@ -278,11 +273,9 @@ window.admKelas = {
         console.log('✅ [AdmKelas] Set select value to:', classes[activeClassIndex].id);
       }
       
-      // ✅ 6. Render attendance table
       console.log('📋 [AdmKelas] Calling renderAttendanceTable()');
-      this.renderAttendanceTable();  // ✅ PAKAI this.renderAttendanceTable()
+      this.renderAttendanceTable();
       
-      // ✅ 7. Show presensi view
       console.log('👁️ [AdmKelas] Calling showView("viewPresensi")');
       this.showView('viewPresensi');
       
@@ -546,21 +539,9 @@ window.admKelas = {
       console.error('SheetJS load error:', e);
       alert('Gagal load library Excel. Periksa koneksi internet.');
     }
-  }
-};
-
-// ============================================
-// ✅ CONFIRM MODULE LOADED
-// ============================================
-console.log('🟢 [AdmKelas] window.renderAdmKelas:', typeof window.renderAdmKelas);
-console.log('🟢 [AdmKelas] window.admKelas:', typeof window.admKelas);
-console.log('🟢 [AdmKelas] window.admKelas.navigateToAttendance:', typeof window.admKelas?.navigateToAttendance);
-console.log('🟢 [AdmKelas] window.admKelas.renderAttendanceTable:', typeof window.admKelas?.renderAttendanceTable);
-console.log('🟢 [AdmKelas] Module FINISHED - Ready to use!');
-
-window.admKelas = {
+  },
   
-  // ✅ TAMBAHKAN fungsi backToDashboard
+  // ✅ BACK TO DASHBOARD
   backToDashboard: function() {
     console.log('🏠 [AdmKelas] backToDashboard() called');
     
@@ -571,30 +552,34 @@ window.admKelas = {
       console.log('✅ [AdmKelas] Module container hidden');
     }
     
-    // Show welcome section (dashboard home)
     const welcomeSection = document.querySelector('.dashboard-hero')?.closest('section');
     if (welcomeSection) {
       welcomeSection.classList.remove('hidden');
       console.log('✅ [AdmKelas] Welcome section shown');
     }
     
-    // Show 8 Ruang Utama section
     const roomsSection = document.querySelector('[aria-labelledby="rooms-heading"]');
     if (roomsSection) {
       roomsSection.classList.remove('hidden');
       console.log('✅ [AdmKelas] Rooms section shown');
     }
     
-    // Hide jenjang sections
     document.querySelectorAll('#sd-section, #smp-section, #sma-section').forEach(section => {
       section.classList.add('hidden');
     });
     
-    // Scroll to top
     window.scrollTo({ top: 0, behavior: 'smooth' });
     
     console.log('🟢 [AdmKelas] backToDashboard() SELESAI');
-  },
-  
-  // ... rest of existing functions ...
+  }
 };
+
+// ============================================
+// ✅ CONFIRM MODULE LOADED
+// ============================================
+console.log('🟢 [AdmKelas] window.renderAdmKelas:', typeof window.renderAdmKelas);
+console.log('🟢 [AdmKelas] window.admKelas:', typeof window.admKelas);
+console.log('🟢 [AdmKelas] window.admKelas.renderClassesGrid:', typeof window.admKelas?.renderClassesGrid);
+console.log('🟢 [AdmKelas] window.admKelas.saveClass:', typeof window.admKelas?.saveClass);
+console.log('🟢 [AdmKelas] window.admKelas.backToDashboard:', typeof window.admKelas?.backToDashboard);
+console.log('🟢 [AdmKelas] Module FINISHED - Ready to use!');
