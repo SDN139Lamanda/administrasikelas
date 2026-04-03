@@ -1,10 +1,8 @@
 // modules/firebase-config.js
 // Konfigurasi Firebase - Auth + Firestore (LENGKAP)
 // Versi: Updated for Reflection Module
-
 // ✅ Import Firebase SDK (dari CDN)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-
 // ✅ Import Auth functions
 import { 
   getAuth, 
@@ -12,7 +10,6 @@ import {
   signOut,
   onAuthStateChanged 
 } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-
 // ✅ Import Firestore functions (TAMBAHKAN INI!)
 import { 
   getFirestore,
