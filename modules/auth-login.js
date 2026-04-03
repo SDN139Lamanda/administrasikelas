@@ -7,7 +7,7 @@
  * ✅ UPDATE: Tambah field 'features' untuk UI visibility control
  */
 
-import { auth, db } from './config-firebase.js';
+import { auth, db } from './firebase-config.js';
 
 import { 
     signInWithEmailAndPassword, 
