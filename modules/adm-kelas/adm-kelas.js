@@ -18,326 +18,9 @@ let activeClassIndex = null;
 let currentUser = null;
 
 // ============================================
-// ✅ GLOBAL FUNCTION: Render Module to Container
+// ✅ HELPER FUNCTIONS (DEFINISIKAN SEBELUM window.admKelas!)
 // ============================================
-window.renderAdmKelas = async function() {
-  console.log('📦 [AdmKelas] renderAdmKelas() called');
-  
-  const container = document.getElementById('module-container');
-  if (!container) {
-    console.error('❌ Container #module-container not found');
-    return;
-  }
-  
-  // Get current user from auth (if available)
-  try {
-    const { auth } = await import('../firebase-config.js');
-    currentUser = auth.currentUser;
-  } catch (e) {
-    console.log('⚠️ Auth not available, using LocalStorage mode');
-  }
-  
-  // Initialize storage with user ID
-  storage.userId = currentUser?.uid || null;
-  
-  // Load data
-  classes = await storage.loadClasses();
-  console.log('✅ [AdmKelas] Classes loaded:', classes.length);
-  
-  // Render UI
-  container.innerHTML = getMainTemplate();
-  container.classList.remove('hidden');
-  
-  // Set today's date for attendance
-  const dateInput = document.getElementById('inputTgl');
-  if (dateInput) dateInput.valueAsDate = new Date();
-  
-  // Render initial view
-  renderClassesGrid();
-  populateClassSelects();
-  
-  // Setup event listeners
-  setupEventListeners();
-  
-  console.log('✅ [AdmKelas] Module rendered successfully');
-};
 
-// ============================================
-// ✅ VIEW NAVIGATION
-// ============================================
-window.admKelas = {
-  showView: function(viewId) {
-    console.log('👁️ [AdmKelas] showView called with:', viewId);
-    
-    document.querySelectorAll('.view-section').forEach(v => v.classList.add('hidden'));
-    document.getElementById(viewId)?.classList.remove('hidden');
-    
-    console.log('✅ [AdmKelas] View displayed:', viewId);
-  },
-  
-  navigateToAttendance: async function() {
-    console.log('🔴 [AdmKelas] navigateToAttendance() DIPANGGIL');
-    
-    try {
-      // ✅ 1. Reload data from storage (PENTING!)
-      console.log('🔄 [AdmKelas] Reloading classes from storage...');
-      classes = await storage.loadClasses();
-      console.log('✅ [AdmKelas] Classes loaded:', classes.length, 'classes');
-      
-      // ✅ 2. Check if classes exist
-      if (!classes || classes.length === 0) {
-        console.warn('⚠️ [AdmKelas] No classes found');
-        return alert('Buat kelas dulu!');
-      }
-      
-      // ✅ 3. Populate select dropdown
-      console.log('🔄 [AdmKelas] Calling populateClassSelects()');
-      populateClassSelects();
-      
-      // ✅ 4. Check and set active class
-      console.log('🎯 [AdmKelas] activeClassIndex:', activeClassIndex);
-      
-      // If activeClassIndex is null but classes exist, select the first one
-      if (activeClassIndex === null || activeClassIndex >= classes.length) {
-        console.log('⚠️ [AdmKelas] activeClassIndex invalid, setting to 0');
-        activeClassIndex = 0;
-      }
-      
-      // ✅ 5. Set select value
-      const selectEl = document.getElementById('selectKelasAbsen');
-      console.log('🔍 [AdmKelas] selectKelasAbsen element:', selectEl);
-      
-      if (selectEl && classes[activeClassIndex]) {
-        selectEl.value = classes[activeClassIndex].id;
-        console.log('✅ [AdmKelas] Set select value to:', classes[activeClassIndex].id);
-      } else {
-        console.error('❌ [AdmKelas] Cannot set select value');
-      }
-      
-      // ✅ 6. Render attendance table
-      console.log('📋 [AdmKelas] Calling renderAttendanceTable()');
-      renderAttendanceTable();
-      
-      // ✅ 7. Show presensi view
-      console.log('👁️ [AdmKelas] Calling showView("viewPresensi")');
-      this.showView('viewPresensi');
-      
-      console.log('🟢 [AdmKelas] navigateToAttendance() SELESAI');
-      
-    } catch (error) {
-      console.error('❌ [AdmKelas] navigateToAttendance ERROR:', error);
-      alert('Error membuka presensi: ' + error.message);
-    }
-  },
-  
-  navigateToRecap: async function() {
-    console.log('📊 [AdmKelas] navigateToRecap() called');
-    
-    if (!classes || classes.length === 0) {
-      return alert('Belum ada data!');
-    }
-    
-    populateClassSelects();
-    
-    if (activeClassIndex !== null && classes[activeClassIndex]) {
-      const selectEl = document.getElementById('selectKelasRekap');
-      if (selectEl) {
-        selectEl.value = classes[activeClassIndex].id;
-      }
-    }
-    
-    toggleFilterView();
-    this.showView('viewRekap');
-  },
-  
-  // Modal functions
-  openClassModal: function() {
-    document.getElementById('editClassIdx').value = '';
-    document.getElementById('namaKelas').value = '';
-    document.getElementById('modalKelas').classList.replace('hidden', 'flex');
-  },
-  
-  openStudentModal: function() {
-    document.getElementById('modalSiswa').classList.replace('hidden', 'flex');
-  },
-  
-  closeModal: function(modalId) {
-    document.getElementById(modalId)?.classList.replace('flex', 'hidden');
-  },
-  
-  // Class CRUD
-  saveClass: async function() {
-    const nama = document.getElementById('namaKelas').value.trim();
-    const editIdx = document.getElementById('editClassIdx').value;
-    
-    if (!nama) return alert('Nama kelas wajib diisi!');
-    
-    if (editIdx === '') {
-      // Add new
-      await storage.addClass({ nama });
-    } else {
-      // Update existing
-      const classId = classes[editIdx].id;
-      await storage.updateClass(classId, { nama });
-    }
-    
-    this.closeModal('modalKelas');
-    classes = await storage.loadClasses();
-    renderClassesGrid();
-    populateClassSelects();
-    alert('✅ Kelas berhasil disimpan!');
-  },
-  
-  editClass: function(index) {
-    document.getElementById('editClassIdx').value = index;
-    document.getElementById('namaKelas').value = classes[index].nama;
-    this.openClassModal();
-  },
-  
-  deleteClass: async function(index) {
-    if (!confirm('Hapus kelas ini beserta semua data siswa dan absensi?')) return;
-    
-    const classId = classes[index].id;
-    await storage.deleteClass(classId);
-    
-    classes = await storage.loadClasses();
-    if (activeClassIndex === index) activeClassIndex = null;
-    
-    renderClassesGrid();
-    populateClassSelects();
-    alert('✅ Kelas dihapus!');
-  },
-  
-  openClassDetail: function(index) {
-    activeClassIndex = index;
-    document.getElementById('judulKelasSiswa').innerText = classes[index].nama;
-    updateRealtimeCounter();
-    renderStudentTable();
-    this.showView('viewSiswa');
-  },
-  
-  // Student CRUD
-  saveStudent: async function() {
-    const nama = document.getElementById('namaSiswa').value.trim();
-    const gender = document.getElementById('genderSiswa').value;
-    
-    if (!nama || activeClassIndex === null) return alert('Lengkapi data!');
-    
-    const classId = classes[activeClassIndex].id;
-    await storage.addStudent(classId, { nama, gender });
-    
-    document.getElementById('namaSiswa').value = '';
-    classes = await storage.loadClasses();
-    updateRealtimeCounter();
-    renderStudentTable();
-    this.closeModal('modalSiswa');
-  },
-  
-  deleteStudent: async function(studentIndex) {
-    if (!confirm('Hapus siswa ini?')) return;
-    
-    const classId = classes[activeClassIndex].id;
-    const studentId = classes[activeClassIndex].siswa[studentIndex].id;
-    
-    await storage.deleteStudent(classId, studentId);
-    
-    classes = await storage.loadClasses();
-    updateRealtimeCounter();
-    renderStudentTable();
-  },
-  
-  // Attendance functions
-  changeAttendanceClass: function(classId) {
-    activeClassIndex = classes.findIndex(c => c.id === classId);
-    console.log('🎯 [AdmKelas] Active class changed to index:', activeClassIndex);
-    renderAttendanceTable();
-  },
-  
-  renderAttendanceTable: function() {
-    const tbody = document.getElementById('tabelPresensi');
-    if (!tbody || activeClassIndex === null) return;
-    
-    const siswa = classes[activeClassIndex].siswa;
-    tbody.innerHTML = siswa.map((s, i) => renderAttendanceRow(s, i)).join('');
-  },
-  
-  markAllPresent: function() {
-    if (activeClassIndex === null) return;
-    const siswa = classes[activeClassIndex].siswa;
-    siswa.forEach((_, i) => {
-      const radio = document.getElementById(`H_${i}`);
-      if (radio) radio.checked = true;
-    });
-  },
-  
-  saveAttendance: async function() {
-    if (activeClassIndex === null) return alert('Pilih kelas!');
-    
-    const tanggal = document.getElementById('inputTgl').value;
-    const siswa = classes[activeClassIndex].siswa;
-    const attendanceData = [];
-    
-    siswa.forEach((s, i) => {
-      const radio = document.querySelector(`input[name="abs_${i}"]:checked`);
-      attendanceData.push({
-        studentId: s.id,
-        nama: s.nama,
-        status: radio?.value || 'H'
-      });
-    });
-    
-    const classId = classes[activeClassIndex].id;
-    await storage.saveAttendance(classId, tanggal, attendanceData);
-    
-    alert('✨ Absensi berhasil disimpan!');
-    this.showView('viewKelas');
-  },
-  
-  // Recap functions
-  changeRecapClass: function(classId) {
-    activeClassIndex = classes.findIndex(c => c.id === classId);
-    generateRecap();
-  },
-  
-  toggleFilterView: function() {
-    const tipe = document.getElementById('tipeRekap').value;
-    const container = document.getElementById('filterInputs');
-    container.innerHTML = '';
-    
-    const today = new Date();
-    if (tipe === 'hari') {
-      container.innerHTML = `<input type="date" id="fHari" class="bg-slate-100 px-4 py-2 rounded-xl outline-none" value="${today.toISOString().split('T')[0]}">`;
-    } else if (tipe === 'bulan') {
-      const ym = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}`;
-      container.innerHTML = `<input type="month" id="fBulan" class="bg-slate-100 px-4 py-2 rounded-xl outline-none" value="${ym}">`;
-    } else {
-      container.innerHTML = `
-        <select id="fSmt" class="bg-slate-100 px-4 py-2 rounded-xl outline-none">
-          <option value="ganjil">Ganjil (Jul-Des)</option>
-          <option value="genap">Genap (Jan-Jun)</option>
-        </select>
-        <input type="number" id="fThn" class="bg-slate-100 px-4 py-2 rounded-xl w-20" value="${today.getFullYear()}">
-      `;
-    }
-  },
-  
-  deleteAllData: async function() {
-    if (!confirm('⚠️ HAPUS SEMUA DATA? Tindakan ini tidak bisa dibatalkan!')) return;
-    if (!confirm('Apakah Anda BENAR-BENAR yakin?')) return;
-    
-    await storage.saveClasses([]);
-    classes = [];
-    activeClassIndex = null;
-    renderClassesGrid();
-    populateClassSelects();
-    alert('✅ Semua data telah dihapus!');
-    window.location.reload();
-  }
-};
-
-// ============================================
-// ✅ RENDER FUNCTIONS
-// ============================================
 function renderClassesGrid() {
   const grid = document.getElementById('gridKelas');
   if (!grid) return;
@@ -385,9 +68,34 @@ function renderStudentTable() {
   tbody.innerHTML = siswa.map((s, i) => renderStudentRow(s, i)).join('');
 }
 
-// ============================================
-// ✅ RECAP GENERATION
-// ============================================
+function renderAttendanceTable() {
+  console.log('📋 [AdmKelas] renderAttendanceTable() called');
+  console.log('🎯 [AdmKelas] activeClassIndex:', activeClassIndex);
+  
+  const tbody = document.getElementById('tabelPresensi');
+  if (!tbody) {
+    console.error('❌ [AdmKelas] tabelPresensi not found!');
+    return;
+  }
+  
+  if (activeClassIndex === null || !classes[activeClassIndex]) {
+    console.error('❌ [AdmKelas] No active class selected');
+    tbody.innerHTML = '<tr><td colspan="2" class="p-4 text-center text-red-500">Pilih kelas dulu!</td></tr>';
+    return;
+  }
+  
+  const siswa = classes[activeClassIndex].siswa;
+  console.log('👥 [AdmKelas] Siswa count:', siswa?.length);
+  
+  if (!siswa || siswa.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="2" class="p-4 text-center text-gray-500">Belum ada siswa di kelas ini</td></tr>';
+    return;
+  }
+  
+  tbody.innerHTML = siswa.map((s, i) => renderAttendanceRow(s, i)).join('');
+  console.log('✅ [AdmKelas] Attendance table rendered');
+}
+
 function generateRecap() {
   if (activeClassIndex === null) return alert('Pilih kelas dulu!');
   
@@ -447,7 +155,6 @@ function generateRecap() {
     tbody.innerHTML += renderRecapRow(s, stats, totalPertemuan);
   });
   
-  // Render stats cards
   document.getElementById('rekapStats').innerHTML = `
     <div class="p-4 bg-emerald-50 rounded-xl text-center"><p class="text-[10px] font-medium text-emerald-600">HADIR</p><p class="text-xl font-bold">${tH}</p></div>
     <div class="p-4 bg-blue-50 rounded-xl text-center"><p class="text-[10px] font-medium text-blue-600">IZIN</p><p class="text-xl font-bold">${tI}</p></div>
@@ -457,107 +164,385 @@ function generateRecap() {
   `;
 }
 
-// ============================================
-// ✅ PDF EXPORT (jsPDF)
-// ============================================
-window.admKelas.downloadPDF = async function() {
-  try {
-    const { jsPDF } = await import('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
-    await import('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js');
-    
-    const doc = new jsPDF('l', 'mm', 'a4');
-    const className = classes[activeClassIndex]?.nama || 'Kelas';
-    const periode = document.getElementById('infoPeriode')?.innerText || '';
-    
-    doc.setFontSize(14);
-    doc.text(`REKAP ABSENSI - ${className}`, 14, 15);
-    doc.setFontSize(10);
-    doc.text(periode, 14, 22);
-    
-    doc.autoTable({
-      startY: 30,
-      html: '#tableToPDF',
-      theme: 'grid',
-      styles: { fontSize: 8, cellPadding: 3 },
-      headStyles: { fillColor: [30, 41, 59] }
-    });
-    
-    doc.save(`Laporan_${className.replace(/\s+/g, '_')}.pdf`);
-  } catch (e) {
-    console.error('❌ PDF export error:', e);
-    alert('Gagal export PDF. Pastikan koneksi internet untuk load library.');
-  }
-};
-
-// ============================================
-// ✅ EXCEL IMPORT (SheetJS)
-// ============================================
-window.admKelas.processExcel = async function(input) {
-  const file = input.files[0];
-  if (!file) return;
+function toggleFilterView() {
+  const tipe = document.getElementById('tipeRekap').value;
+  const container = document.getElementById('filterInputs');
+  container.innerHTML = '';
   
-  try {
-    const { read, utils } = await import('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js');
-    
-    const reader = new FileReader();
-    reader.onload = async function(e) {
-      try {
-        const data = new Uint8Array(e.target.result);
-        const workbook = read(data, { type: 'array' });
-        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-        const jsonData = utils.sheet_to_json(worksheet);
-        
-        if (jsonData.length === 0) return alert('Excel kosong!');
-        
-        let added = 0;
-        const classId = classes[activeClassIndex].id;
-        
-        for (const row of jsonData) {
-          const nama = row.Nama || row.nama || row.NAMA;
-          const gender = parseGender(row.Gender || row.gender || row.GENDER);
-          
-          if (nama) {
-            await storage.addStudent(classId, {
-              nama: nama.toString().trim(),
-              gender
-            });
-            added++;
-          }
-        }
-        
-        classes = await storage.loadClasses();
-        updateRealtimeCounter();
-        renderStudentTable();
-        renderClassesGrid();
-        
-        alert(`✅ Berhasil mengimpor ${added} siswa!`);
-        input.value = '';
-      } catch (err) {
-        console.error('Excel parse error:', err);
-        alert('Gagal membaca file. Pastikan format .xlsx');
-      }
-    };
-    reader.readAsArrayBuffer(file);
-  } catch (e) {
-    console.error('SheetJS load error:', e);
-    alert('Gagal load library Excel. Periksa koneksi internet.');
+  const today = new Date();
+  if (tipe === 'hari') {
+    container.innerHTML = `<input type="date" id="fHari" class="bg-slate-100 px-4 py-2 rounded-xl outline-none" value="${today.toISOString().split('T')[0]}">`;
+  } else if (tipe === 'bulan') {
+    const ym = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}`;
+    container.innerHTML = `<input type="month" id="fBulan" class="bg-slate-100 px-4 py-2 rounded-xl outline-none" value="${ym}">`;
+  } else {
+    container.innerHTML = `
+      <select id="fSmt" class="bg-slate-100 px-4 py-2 rounded-xl outline-none">
+        <option value="ganjil">Ganjil (Jul-Des)</option>
+        <option value="genap">Genap (Jan-Jun)</option>
+      </select>
+      <input type="number" id="fThn" class="bg-slate-100 px-4 py-2 rounded-xl w-20" value="${today.getFullYear()}">
+    `;
   }
-};
+}
 
-// ============================================
-// ✅ EVENT LISTENERS SETUP
-// ============================================
 function setupEventListeners() {
-  // Date input default
   const dateInput = document.getElementById('inputTgl');
   if (dateInput) dateInput.valueAsDate = new Date();
   
-  // Filter change handler
   const tipeRekap = document.getElementById('tipeRekap');
   if (tipeRekap) {
-    tipeRekap.addEventListener('change', window.admKelas.toggleFilterView);
+    tipeRekap.addEventListener('change', toggleFilterView);
   }
 }
+
+// ============================================
+// ✅ GLOBAL FUNCTION: Render Module to Container
+// ============================================
+window.renderAdmKelas = async function() {
+  console.log('📦 [AdmKelas] renderAdmKelas() called');
+  
+  const container = document.getElementById('module-container');
+  if (!container) {
+    console.error('❌ Container #module-container not found');
+    return;
+  }
+  
+  try {
+    const { auth } = await import('../firebase-config.js');
+    currentUser = auth.currentUser;
+  } catch (e) {
+    console.log('⚠️ Auth not available, using LocalStorage mode');
+  }
+  
+  storage.userId = currentUser?.uid || null;
+  classes = await storage.loadClasses();
+  console.log('✅ [AdmKelas] Classes loaded:', classes.length);
+  
+  container.innerHTML = getMainTemplate();
+  container.classList.remove('hidden');
+  
+  const dateInput = document.getElementById('inputTgl');
+  if (dateInput) dateInput.valueAsDate = new Date();
+  
+  renderClassesGrid();
+  populateClassSelects();
+  setupEventListeners();
+  
+  console.log('✅ [AdmKelas] Module rendered successfully');
+};
+
+// ============================================
+// ✅ MAIN OBJECT: window.admKelas
+// ============================================
+window.admKelas = {
+  showView: function(viewId) {
+    console.log('👁️ [AdmKelas] showView called with:', viewId);
+    document.querySelectorAll('.view-section').forEach(v => v.classList.add('hidden'));
+    document.getElementById(viewId)?.classList.remove('hidden');
+    console.log('✅ [AdmKelas] View displayed:', viewId);
+  },
+  
+  navigateToAttendance: async function() {
+    console.log('🔴 [AdmKelas] navigateToAttendance() DIPANGGIL');
+    
+    try {
+      // ✅ 1. Reload data from storage
+      console.log('🔄 [AdmKelas] Reloading classes from storage...');
+      classes = await storage.loadClasses();
+      console.log('✅ [AdmKelas] Classes loaded:', classes.length, 'classes');
+      
+      // ✅ 2. Check if classes exist
+      if (!classes || classes.length === 0) {
+        console.warn('⚠️ [AdmKelas] No classes found');
+        return alert('Buat kelas dulu!');
+      }
+      
+      // ✅ 3. Populate select dropdown
+      console.log('🔄 [AdmKelas] Calling populateClassSelects()');
+      populateClassSelects();
+      
+      // ✅ 4. Check and set active class
+      console.log('🎯 [AdmKelas] activeClassIndex:', activeClassIndex);
+      
+      if (activeClassIndex === null || activeClassIndex >= classes.length) {
+        console.log('⚠️ [AdmKelas] activeClassIndex invalid, setting to 0');
+        activeClassIndex = 0;
+      }
+      
+      // ✅ 5. Set select value
+      const selectEl = document.getElementById('selectKelasAbsen');
+      console.log('🔍 [AdmKelas] selectKelasAbsen element:', selectEl);
+      
+      if (selectEl && classes[activeClassIndex]) {
+        selectEl.value = classes[activeClassIndex].id;
+        console.log('✅ [AdmKelas] Set select value to:', classes[activeClassIndex].id);
+      }
+      
+      // ✅ 6. Render attendance table
+      console.log('📋 [AdmKelas] Calling renderAttendanceTable()');
+      renderAttendanceTable();
+      
+      // ✅ 7. Show presensi view
+      console.log('👁️ [AdmKelas] Calling showView("viewPresensi")');
+      this.showView('viewPresensi');
+      
+      console.log('🟢 [AdmKelas] navigateToAttendance() SELESAI');
+      
+    } catch (error) {
+      console.error('❌ [AdmKelas] navigateToAttendance ERROR:', error);
+      alert('Error membuka presensi: ' + error.message);
+    }
+  },
+  
+  navigateToRecap: async function() {
+    console.log('📊 [AdmKelas] navigateToRecap() called');
+    
+    if (!classes || classes.length === 0) {
+      return alert('Belum ada data!');
+    }
+    
+    populateClassSelects();
+    
+    if (activeClassIndex !== null && classes[activeClassIndex]) {
+      const selectEl = document.getElementById('selectKelasRekap');
+      if (selectEl) {
+        selectEl.value = classes[activeClassIndex].id;
+      }
+    }
+    
+    toggleFilterView();
+    this.showView('viewRekap');
+  },
+  
+  openClassModal: function() {
+    document.getElementById('editClassIdx').value = '';
+    document.getElementById('namaKelas').value = '';
+    document.getElementById('modalKelas').classList.replace('hidden', 'flex');
+  },
+  
+  openStudentModal: function() {
+    document.getElementById('modalSiswa').classList.replace('hidden', 'flex');
+  },
+  
+  closeModal: function(modalId) {
+    document.getElementById(modalId)?.classList.replace('flex', 'hidden');
+  },
+  
+  saveClass: async function() {
+    const nama = document.getElementById('namaKelas').value.trim();
+    const editIdx = document.getElementById('editClassIdx').value;
+    
+    if (!nama) return alert('Nama kelas wajib diisi!');
+    
+    if (editIdx === '') {
+      await storage.addClass({ nama });
+    } else {
+      const classId = classes[editIdx].id;
+      await storage.updateClass(classId, { nama });
+    }
+    
+    this.closeModal('modalKelas');
+    classes = await storage.loadClasses();
+    renderClassesGrid();
+    populateClassSelects();
+    alert('✅ Kelas berhasil disimpan!');
+  },
+  
+  editClass: function(index) {
+    document.getElementById('editClassIdx').value = index;
+    document.getElementById('namaKelas').value = classes[index].nama;
+    this.openClassModal();
+  },
+  
+  deleteClass: async function(index) {
+    if (!confirm('Hapus kelas ini beserta semua data siswa dan absensi?')) return;
+    
+    const classId = classes[index].id;
+    await storage.deleteClass(classId);
+    
+    classes = await storage.loadClasses();
+    if (activeClassIndex === index) activeClassIndex = null;
+    
+    renderClassesGrid();
+    populateClassSelects();
+    alert('✅ Kelas dihapus!');
+  },
+  
+  openClassDetail: function(index) {
+    activeClassIndex = index;
+    document.getElementById('judulKelasSiswa').innerText = classes[index].nama;
+    updateRealtimeCounter();
+    renderStudentTable();
+    this.showView('viewSiswa');
+  },
+  
+  saveStudent: async function() {
+    const nama = document.getElementById('namaSiswa').value.trim();
+    const gender = document.getElementById('genderSiswa').value;
+    
+    if (!nama || activeClassIndex === null) return alert('Lengkapi data!');
+    
+    const classId = classes[activeClassIndex].id;
+    await storage.addStudent(classId, { nama, gender });
+    
+    document.getElementById('namaSiswa').value = '';
+    classes = await storage.loadClasses();
+    updateRealtimeCounter();
+    renderStudentTable();
+    this.closeModal('modalSiswa');
+  },
+  
+  deleteStudent: async function(studentIndex) {
+    if (!confirm('Hapus siswa ini?')) return;
+    
+    const classId = classes[activeClassIndex].id;
+    const studentId = classes[activeClassIndex].siswa[studentIndex].id;
+    
+    await storage.deleteStudent(classId, studentId);
+    
+    classes = await storage.loadClasses();
+    updateRealtimeCounter();
+    renderStudentTable();
+  },
+  
+  changeAttendanceClass: function(classId) {
+    activeClassIndex = classes.findIndex(c => c.id === classId);
+    console.log('🎯 [AdmKelas] Active class changed to index:', activeClassIndex);
+    renderAttendanceTable();
+  },
+  
+  markAllPresent: function() {
+    if (activeClassIndex === null) return;
+    const siswa = classes[activeClassIndex].siswa;
+    siswa.forEach((_, i) => {
+      const radio = document.getElementById(`H_${i}`);
+      if (radio) radio.checked = true;
+    });
+  },
+  
+  saveAttendance: async function() {
+    if (activeClassIndex === null) return alert('Pilih kelas!');
+    
+    const tanggal = document.getElementById('inputTgl').value;
+    const siswa = classes[activeClassIndex].siswa;
+    const attendanceData = [];
+    
+    siswa.forEach((s, i) => {
+      const radio = document.querySelector(`input[name="abs_${i}"]:checked`);
+      attendanceData.push({
+        studentId: s.id,
+        nama: s.nama,
+        status: radio?.value || 'H'
+      });
+    });
+    
+    const classId = classes[activeClassIndex].id;
+    await storage.saveAttendance(classId, tanggal, attendanceData);
+    
+    alert('✨ Absensi berhasil disimpan!');
+    this.showView('viewKelas');
+  },
+  
+  changeRecapClass: function(classId) {
+    activeClassIndex = classes.findIndex(c => c.id === classId);
+    generateRecap();
+  },
+  
+  deleteAllData: async function() {
+    if (!confirm('⚠️ HAPUS SEMUA DATA? Tindakan ini tidak bisa dibatalkan!')) return;
+    if (!confirm('Apakah Anda BENAR-BENAR yakin?')) return;
+    
+    await storage.saveClasses([]);
+    classes = [];
+    activeClassIndex = null;
+    renderClassesGrid();
+    populateClassSelects();
+    alert('✅ Semua data telah dihapus!');
+    window.location.reload();
+  },
+  
+  downloadPDF: async function() {
+    try {
+      const { jsPDF } = await import('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+      await import('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js');
+      
+      const doc = new jsPDF('l', 'mm', 'a4');
+      const className = classes[activeClassIndex]?.nama || 'Kelas';
+      const periode = document.getElementById('infoPeriode')?.innerText || '';
+      
+      doc.setFontSize(14);
+      doc.text(`REKAP ABSENSI - ${className}`, 14, 15);
+      doc.setFontSize(10);
+      doc.text(periode, 14, 22);
+      
+      doc.autoTable({
+        startY: 30,
+        html: '#tableToPDF',
+        theme: 'grid',
+        styles: { fontSize: 8, cellPadding: 3 },
+        headStyles: { fillColor: [30, 41, 59] }
+      });
+      
+      doc.save(`Laporan_${className.replace(/\s+/g, '_')}.pdf`);
+    } catch (e) {
+      console.error('❌ PDF export error:', e);
+      alert('Gagal export PDF. Pastikan koneksi internet untuk load library.');
+    }
+  },
+  
+  processExcel: async function(input) {
+    const file = input.files[0];
+    if (!file) return;
+    
+    try {
+      const { read, utils } = await import('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js');
+      
+      const reader = new FileReader();
+      reader.onload = async function(e) {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = read(data, { type: 'array' });
+          const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+          const jsonData = utils.sheet_to_json(worksheet);
+          
+          if (jsonData.length === 0) return alert('Excel kosong!');
+          
+          let added = 0;
+          const classId = classes[activeClassIndex].id;
+          
+          for (const row of jsonData) {
+            const nama = row.Nama || row.nama || row.NAMA;
+            const gender = parseGender(row.Gender || row.gender || row.GENDER);
+            
+            if (nama) {
+              await storage.addStudent(classId, {
+                nama: nama.toString().trim(),
+                gender
+              });
+              added++;
+            }
+          }
+          
+          classes = await storage.loadClasses();
+          updateRealtimeCounter();
+          renderStudentTable();
+          renderClassesGrid();
+          
+          alert(`✅ Berhasil mengimpor ${added} siswa!`);
+          input.value = '';
+        } catch (err) {
+          console.error('Excel parse error:', err);
+          alert('Gagal membaca file. Pastikan format .xlsx');
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    } catch (e) {
+      console.error('SheetJS load error:', e);
+      alert('Gagal load library Excel. Periksa koneksi internet.');
+    }
+  }
+};
 
 // ============================================
 // ✅ CONFIRM MODULE LOADED
@@ -565,4 +550,5 @@ function setupEventListeners() {
 console.log('🟢 [AdmKelas] window.renderAdmKelas:', typeof window.renderAdmKelas);
 console.log('🟢 [AdmKelas] window.admKelas:', typeof window.admKelas);
 console.log('🟢 [AdmKelas] window.admKelas.navigateToAttendance:', typeof window.admKelas?.navigateToAttendance);
+console.log('🟢 [AdmKelas] renderAttendanceTable:', typeof renderAttendanceTable);
 console.log('🟢 [AdmKelas] Module FINISHED - Ready to use!');
