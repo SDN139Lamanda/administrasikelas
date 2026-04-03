@@ -346,12 +346,13 @@ window.formatRupiah = (amount) => {
 // EXPORT FOR MODULE USAGE (If Needed)
 // ============================================
 
+// ✅ UPDATE: confirmAction dikomentari karena sudah tersedia via window.confirmAction
 export {
     initAccessibility,
     initSmoothScroll,
     initFadeInAnimations,
     showAlert,
-    confirmAction,
+    // confirmAction,  // ✅ Dikommentari: sudah tersedia via window.confirmAction
     copyToClipboard,
     formatDate,
     formatRupiah
