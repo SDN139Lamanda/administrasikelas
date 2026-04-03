@@ -18,185 +18,6 @@ let activeClassIndex = null;
 let currentUser = null;
 
 // ============================================
-// ✅ HELPER FUNCTIONS (DEFINISIKAN SEBELUM window.admKelas!)
-// ============================================
-
-function renderClassesGrid() {
-  const grid = document.getElementById('gridKelas');
-  if (!grid) return;
-  
-  if (classes.length === 0) {
-    grid.innerHTML = `<div class="col-span-full text-center py-12 text-slate-400">
-      <i class="fas fa-inbox text-4xl mb-4"></i><p>Belum ada kelas. Buat kelas baru!</p>
-    </div>`;
-    return;
-  }
-  
-  grid.innerHTML = classes.map((k, i) => renderClassCard(k, i)).join('');
-}
-
-function populateClassSelects() {
-  const selects = ['selectKelasAbsen', 'selectKelasRekap'];
-  selects.forEach(id => {
-    const select = document.getElementById(id);
-    if (!select) return;
-    
-    select.innerHTML = '<option value="">-- Pilih Kelas --</option>';
-    classes.forEach((k, i) => {
-      select.innerHTML += `<option value="${k.id}">${escapeHtml(k.nama)}</option>`;
-    });
-  });
-}
-
-function updateRealtimeCounter() {
-  if (activeClassIndex === null) return;
-  const count = classes[activeClassIndex]?.siswa?.length || 0;
-  const el = document.getElementById('countRealtime');
-  if (el) el.innerText = `${count} Murid Terdaftar`;
-}
-
-function renderStudentTable() {
-  const tbody = document.getElementById('tabelSiswa');
-  if (!tbody || activeClassIndex === null) return;
-  
-  const siswa = classes[activeClassIndex].siswa;
-  if (siswa.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="4" class="px-4 py-8 text-center text-slate-400">Belum ada siswa</td></tr>`;
-    return;
-  }
-  
-  tbody.innerHTML = siswa.map((s, i) => renderStudentRow(s, i)).join('');
-}
-
-function renderAttendanceTable() {
-  console.log('📋 [AdmKelas] renderAttendanceTable() called');
-  console.log('🎯 [AdmKelas] activeClassIndex:', activeClassIndex);
-  
-  const tbody = document.getElementById('tabelPresensi');
-  if (!tbody) {
-    console.error('❌ [AdmKelas] tabelPresensi not found!');
-    return;
-  }
-  
-  if (activeClassIndex === null || !classes[activeClassIndex]) {
-    console.error('❌ [AdmKelas] No active class selected');
-    tbody.innerHTML = '<tr><td colspan="2" class="p-4 text-center text-red-500">Pilih kelas dulu!</td></tr>';
-    return;
-  }
-  
-  const siswa = classes[activeClassIndex].siswa;
-  console.log('👥 [AdmKelas] Siswa count:', siswa?.length);
-  
-  if (!siswa || siswa.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="2" class="p-4 text-center text-gray-500">Belum ada siswa di kelas ini</td></tr>';
-    return;
-  }
-  
-  tbody.innerHTML = siswa.map((s, i) => renderAttendanceRow(s, i)).join('');
-  console.log('✅ [AdmKelas] Attendance table rendered');
-}
-
-function generateRecap() {
-  if (activeClassIndex === null) return alert('Pilih kelas dulu!');
-  
-  const tipe = document.getElementById('tipeRekap').value;
-  const tbody = document.getElementById('tabelRekap');
-  const info = document.getElementById('infoPeriode');
-  
-  let filteredAbsen = [];
-  let detailWaktu = '';
-  
-  if (tipe === 'hari') {
-    const val = document.getElementById('fHari')?.value;
-    filteredAbsen = classes[activeClassIndex].absen?.filter(a => a.tanggal === val) || [];
-    detailWaktu = 'Harian: ' + formatDate(val);
-  } else if (tipe === 'bulan') {
-    const val = document.getElementById('fBulan')?.value;
-    filteredAbsen = classes[activeClassIndex].absen?.filter(a => a.tanggal?.startsWith(val)) || [];
-    if (val) {
-      const [y, m] = val.split('-');
-      detailWaktu = `Bulan: ${new Date(y, m-1).toLocaleString('id-ID', { month: 'long' })} ${y}`;
-    }
-  } else {
-    const smt = document.getElementById('fSmt')?.value;
-    const thn = document.getElementById('fThn')?.value;
-    filteredAbsen = classes[activeClassIndex].absen?.filter(a => {
-      if (!a.tanggal?.startsWith(thn)) return false;
-      const bln = parseInt(a.tanggal.split('-')[1]);
-      return smt === 'ganjil' ? bln >= 7 : bln <= 6;
-    }) || [];
-    detailWaktu = `Semester ${smt?.toUpperCase()} ${thn}`;
-  }
-  
-  info.innerText = detailWaktu;
-  tbody.innerHTML = '';
-  
-  const totalPertemuan = filteredAbsen.length;
-  let tH=0, tI=0, tS=0, tA=0, tB=0;
-  
-  classes[activeClassIndex].siswa.forEach(s => {
-    let stats = { H:0, I:0, S:0, A:0, B:0, total:0, logI:[], logS:[], logA:[], logB:[] };
-    
-    filteredAbsen.forEach(log => {
-      const record = log.data?.find(r => r.studentId === s.id || r.nama === s.nama);
-      if (record) {
-        const tglShort = log.tanggal?.split('-')?.reverse()?.join('/')?.substring(0,5) || '';
-        if (record.status === 'H') stats.H++;
-        else if (record.status === 'I') { stats.I++; stats.logI.push(tglShort); }
-        else if (record.status === 'S') { stats.S++; stats.logS.push(tglShort); }
-        else if (record.status === 'A') { stats.A++; stats.logA.push(tglShort); }
-        else if (record.status === 'B') { stats.B++; stats.logB.push(tglShort); }
-      }
-    });
-    
-    stats.total = stats.H + stats.I + stats.S + stats.A + stats.B;
-    tH += stats.H; tI += stats.I; tS += stats.S; tA += stats.A; tB += stats.B;
-    
-    tbody.innerHTML += renderRecapRow(s, stats, totalPertemuan);
-  });
-  
-  document.getElementById('rekapStats').innerHTML = `
-    <div class="p-4 bg-emerald-50 rounded-xl text-center"><p class="text-[10px] font-medium text-emerald-600">HADIR</p><p class="text-xl font-bold">${tH}</p></div>
-    <div class="p-4 bg-blue-50 rounded-xl text-center"><p class="text-[10px] font-medium text-blue-600">IZIN</p><p class="text-xl font-bold">${tI}</p></div>
-    <div class="p-4 bg-amber-50 rounded-xl text-center"><p class="text-[10px] font-medium text-amber-600">SAKIT</p><p class="text-xl font-bold">${tS}</p></div>
-    <div class="p-4 bg-rose-50 rounded-xl text-center"><p class="text-[10px] font-medium text-rose-600">ALPA</p><p class="text-xl font-bold">${tA}</p></div>
-    <div class="p-4 bg-slate-900 rounded-xl text-center"><p class="text-[10px] font-medium text-slate-400">BOLOS</p><p class="text-xl font-bold text-white">${tB}</p></div>
-  `;
-}
-
-function toggleFilterView() {
-  const tipe = document.getElementById('tipeRekap').value;
-  const container = document.getElementById('filterInputs');
-  container.innerHTML = '';
-  
-  const today = new Date();
-  if (tipe === 'hari') {
-    container.innerHTML = `<input type="date" id="fHari" class="bg-slate-100 px-4 py-2 rounded-xl outline-none" value="${today.toISOString().split('T')[0]}">`;
-  } else if (tipe === 'bulan') {
-    const ym = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}`;
-    container.innerHTML = `<input type="month" id="fBulan" class="bg-slate-100 px-4 py-2 rounded-xl outline-none" value="${ym}">`;
-  } else {
-    container.innerHTML = `
-      <select id="fSmt" class="bg-slate-100 px-4 py-2 rounded-xl outline-none">
-        <option value="ganjil">Ganjil (Jul-Des)</option>
-        <option value="genap">Genap (Jan-Jun)</option>
-      </select>
-      <input type="number" id="fThn" class="bg-slate-100 px-4 py-2 rounded-xl w-20" value="${today.getFullYear()}">
-    `;
-  }
-}
-
-function setupEventListeners() {
-  const dateInput = document.getElementById('inputTgl');
-  if (dateInput) dateInput.valueAsDate = new Date();
-  
-  const tipeRekap = document.getElementById('tipeRekap');
-  if (tipeRekap) {
-    tipeRekap.addEventListener('change', toggleFilterView);
-  }
-}
-
-// ============================================
 // ✅ GLOBAL FUNCTION: Render Module to Container
 // ============================================
 window.renderAdmKelas = async function() {
@@ -225,17 +46,195 @@ window.renderAdmKelas = async function() {
   const dateInput = document.getElementById('inputTgl');
   if (dateInput) dateInput.valueAsDate = new Date();
   
-  renderClassesGrid();
-  populateClassSelects();
-  setupEventListeners();
+  window.admKelas.renderClassesGrid();
+  window.admKelas.populateClassSelects();
+  window.admKelas.setupEventListeners();
   
   console.log('✅ [AdmKelas] Module rendered successfully');
 };
 
 // ============================================
-// ✅ MAIN OBJECT: window.admKelas
+// ✅ MAIN OBJECT: window.admKelas (SEMUA FUNGSI DI SINI!)
 // ============================================
 window.admKelas = {
+  
+  // ✅ RENDER FUNCTIONS
+  renderClassesGrid: function() {
+    const grid = document.getElementById('gridKelas');
+    if (!grid) return;
+    
+    if (classes.length === 0) {
+      grid.innerHTML = `<div class="col-span-full text-center py-12 text-slate-400">
+        <i class="fas fa-inbox text-4xl mb-4"></i><p>Belum ada kelas. Buat kelas baru!</p>
+      </div>`;
+      return;
+    }
+    
+    grid.innerHTML = classes.map((k, i) => renderClassCard(k, i)).join('');
+  },
+  
+  populateClassSelects: function() {
+    const selects = ['selectKelasAbsen', 'selectKelasRekap'];
+    selects.forEach(id => {
+      const select = document.getElementById(id);
+      if (!select) return;
+      
+      select.innerHTML = '<option value="">-- Pilih Kelas --</option>';
+      classes.forEach((k, i) => {
+        select.innerHTML += `<option value="${k.id}">${escapeHtml(k.nama)}</option>`;
+      });
+    });
+  },
+  
+  updateRealtimeCounter: function() {
+    if (activeClassIndex === null) return;
+    const count = classes[activeClassIndex]?.siswa?.length || 0;
+    const el = document.getElementById('countRealtime');
+    if (el) el.innerText = `${count} Murid Terdaftar`;
+  },
+  
+  renderStudentTable: function() {
+    const tbody = document.getElementById('tabelSiswa');
+    if (!tbody || activeClassIndex === null) return;
+    
+    const siswa = classes[activeClassIndex].siswa;
+    if (siswa.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="4" class="px-4 py-8 text-center text-slate-400">Belum ada siswa</td></tr>`;
+      return;
+    }
+    
+    tbody.innerHTML = siswa.map((s, i) => renderStudentRow(s, i)).join('');
+  },
+  
+  renderAttendanceTable: function() {
+    console.log('📋 [AdmKelas] renderAttendanceTable() called');
+    console.log('🎯 [AdmKelas] activeClassIndex:', activeClassIndex);
+    
+    const tbody = document.getElementById('tabelPresensi');
+    if (!tbody) {
+      console.error('❌ [AdmKelas] tabelPresensi not found!');
+      return;
+    }
+    
+    if (activeClassIndex === null || !classes[activeClassIndex]) {
+      console.error('❌ [AdmKelas] No active class selected');
+      tbody.innerHTML = '<tr><td colspan="2" class="p-4 text-center text-red-500">Pilih kelas dulu!</td></tr>';
+      return;
+    }
+    
+    const siswa = classes[activeClassIndex].siswa;
+    console.log('👥 [AdmKelas] Siswa count:', siswa?.length);
+    
+    if (!siswa || siswa.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="2" class="p-4 text-center text-gray-500">Belum ada siswa di kelas ini</td></tr>';
+      return;
+    }
+    
+    tbody.innerHTML = siswa.map((s, i) => renderAttendanceRow(s, i)).join('');
+    console.log('✅ [AdmKelas] Attendance table rendered');
+  },
+  
+  renderRecap: function() {
+    if (activeClassIndex === null) return alert('Pilih kelas dulu!');
+    
+    const tipe = document.getElementById('tipeRekap').value;
+    const tbody = document.getElementById('tabelRekap');
+    const info = document.getElementById('infoPeriode');
+    
+    let filteredAbsen = [];
+    let detailWaktu = '';
+    
+    if (tipe === 'hari') {
+      const val = document.getElementById('fHari')?.value;
+      filteredAbsen = classes[activeClassIndex].absen?.filter(a => a.tanggal === val) || [];
+      detailWaktu = 'Harian: ' + formatDate(val);
+    } else if (tipe === 'bulan') {
+      const val = document.getElementById('fBulan')?.value;
+      filteredAbsen = classes[activeClassIndex].absen?.filter(a => a.tanggal?.startsWith(val)) || [];
+      if (val) {
+        const [y, m] = val.split('-');
+        detailWaktu = `Bulan: ${new Date(y, m-1).toLocaleString('id-ID', { month: 'long' })} ${y}`;
+      }
+    } else {
+      const smt = document.getElementById('fSmt')?.value;
+      const thn = document.getElementById('fThn')?.value;
+      filteredAbsen = classes[activeClassIndex].absen?.filter(a => {
+        if (!a.tanggal?.startsWith(thn)) return false;
+        const bln = parseInt(a.tanggal.split('-')[1]);
+        return smt === 'ganjil' ? bln >= 7 : bln <= 6;
+      }) || [];
+      detailWaktu = `Semester ${smt?.toUpperCase()} ${thn}`;
+    }
+    
+    info.innerText = detailWaktu;
+    tbody.innerHTML = '';
+    
+    const totalPertemuan = filteredAbsen.length;
+    let tH=0, tI=0, tS=0, tA=0, tB=0;
+    
+    classes[activeClassIndex].siswa.forEach(s => {
+      let stats = { H:0, I:0, S:0, A:0, B:0, total:0, logI:[], logS:[], logA:[], logB:[] };
+      
+      filteredAbsen.forEach(log => {
+        const record = log.data?.find(r => r.studentId === s.id || r.nama === s.nama);
+        if (record) {
+          const tglShort = log.tanggal?.split('-')?.reverse()?.join('/')?.substring(0,5) || '';
+          if (record.status === 'H') stats.H++;
+          else if (record.status === 'I') { stats.I++; stats.logI.push(tglShort); }
+          else if (record.status === 'S') { stats.S++; stats.logS.push(tglShort); }
+          else if (record.status === 'A') { stats.A++; stats.logA.push(tglShort); }
+          else if (record.status === 'B') { stats.B++; stats.logB.push(tglShort); }
+        }
+      });
+      
+      stats.total = stats.H + stats.I + stats.S + stats.A + stats.B;
+      tH += stats.H; tI += stats.I; tS += stats.S; tA += stats.A; tB += stats.B;
+      
+      tbody.innerHTML += renderRecapRow(s, stats, totalPertemuan);
+    });
+    
+    document.getElementById('rekapStats').innerHTML = `
+      <div class="p-4 bg-emerald-50 rounded-xl text-center"><p class="text-[10px] font-medium text-emerald-600">HADIR</p><p class="text-xl font-bold">${tH}</p></div>
+      <div class="p-4 bg-blue-50 rounded-xl text-center"><p class="text-[10px] font-medium text-blue-600">IZIN</p><p class="text-xl font-bold">${tI}</p></div>
+      <div class="p-4 bg-amber-50 rounded-xl text-center"><p class="text-[10px] font-medium text-amber-600">SAKIT</p><p class="text-xl font-bold">${tS}</p></div>
+      <div class="p-4 bg-rose-50 rounded-xl text-center"><p class="text-[10px] font-medium text-rose-600">ALPA</p><p class="text-xl font-bold">${tA}</p></div>
+      <div class="p-4 bg-slate-900 rounded-xl text-center"><p class="text-[10px] font-medium text-slate-400">BOLOS</p><p class="text-xl font-bold text-white">${tB}</p></div>
+    `;
+  },
+  
+  toggleFilterView: function() {
+    const tipe = document.getElementById('tipeRekap').value;
+    const container = document.getElementById('filterInputs');
+    container.innerHTML = '';
+    
+    const today = new Date();
+    if (tipe === 'hari') {
+      container.innerHTML = `<input type="date" id="fHari" class="bg-slate-100 px-4 py-2 rounded-xl outline-none" value="${today.toISOString().split('T')[0]}">`;
+    } else if (tipe === 'bulan') {
+      const ym = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}`;
+      container.innerHTML = `<input type="month" id="fBulan" class="bg-slate-100 px-4 py-2 rounded-xl outline-none" value="${ym}">`;
+    } else {
+      container.innerHTML = `
+        <select id="fSmt" class="bg-slate-100 px-4 py-2 rounded-xl outline-none">
+          <option value="ganjil">Ganjil (Jul-Des)</option>
+          <option value="genap">Genap (Jan-Jun)</option>
+        </select>
+        <input type="number" id="fThn" class="bg-slate-100 px-4 py-2 rounded-xl w-20" value="${today.getFullYear()}">
+      `;
+    }
+  },
+  
+  setupEventListeners: function() {
+    const dateInput = document.getElementById('inputTgl');
+    if (dateInput) dateInput.valueAsDate = new Date();
+    
+    const tipeRekap = document.getElementById('tipeRekap');
+    if (tipeRekap) {
+      tipeRekap.addEventListener('change', () => this.toggleFilterView());
+    }
+  },
+  
+  // ✅ VIEW NAVIGATION
   showView: function(viewId) {
     console.log('👁️ [AdmKelas] showView called with:', viewId);
     document.querySelectorAll('.view-section').forEach(v => v.classList.add('hidden'));
@@ -260,7 +259,7 @@ window.admKelas = {
       
       // ✅ 3. Populate select dropdown
       console.log('🔄 [AdmKelas] Calling populateClassSelects()');
-      populateClassSelects();
+      this.populateClassSelects();
       
       // ✅ 4. Check and set active class
       console.log('🎯 [AdmKelas] activeClassIndex:', activeClassIndex);
@@ -281,7 +280,7 @@ window.admKelas = {
       
       // ✅ 6. Render attendance table
       console.log('📋 [AdmKelas] Calling renderAttendanceTable()');
-      renderAttendanceTable();
+      this.renderAttendanceTable();  // ✅ PAKAI this.renderAttendanceTable()
       
       // ✅ 7. Show presensi view
       console.log('👁️ [AdmKelas] Calling showView("viewPresensi")');
@@ -302,7 +301,7 @@ window.admKelas = {
       return alert('Belum ada data!');
     }
     
-    populateClassSelects();
+    this.populateClassSelects();
     
     if (activeClassIndex !== null && classes[activeClassIndex]) {
       const selectEl = document.getElementById('selectKelasRekap');
@@ -311,10 +310,11 @@ window.admKelas = {
       }
     }
     
-    toggleFilterView();
+    this.toggleFilterView();
     this.showView('viewRekap');
   },
   
+  // ✅ MODAL FUNCTIONS
   openClassModal: function() {
     document.getElementById('editClassIdx').value = '';
     document.getElementById('namaKelas').value = '';
@@ -329,6 +329,7 @@ window.admKelas = {
     document.getElementById(modalId)?.classList.replace('flex', 'hidden');
   },
   
+  // ✅ CLASS CRUD
   saveClass: async function() {
     const nama = document.getElementById('namaKelas').value.trim();
     const editIdx = document.getElementById('editClassIdx').value;
@@ -344,8 +345,8 @@ window.admKelas = {
     
     this.closeModal('modalKelas');
     classes = await storage.loadClasses();
-    renderClassesGrid();
-    populateClassSelects();
+    this.renderClassesGrid();
+    this.populateClassSelects();
     alert('✅ Kelas berhasil disimpan!');
   },
   
@@ -364,19 +365,20 @@ window.admKelas = {
     classes = await storage.loadClasses();
     if (activeClassIndex === index) activeClassIndex = null;
     
-    renderClassesGrid();
-    populateClassSelects();
+    this.renderClassesGrid();
+    this.populateClassSelects();
     alert('✅ Kelas dihapus!');
   },
   
   openClassDetail: function(index) {
     activeClassIndex = index;
     document.getElementById('judulKelasSiswa').innerText = classes[index].nama;
-    updateRealtimeCounter();
-    renderStudentTable();
+    this.updateRealtimeCounter();
+    this.renderStudentTable();
     this.showView('viewSiswa');
   },
   
+  // ✅ STUDENT CRUD
   saveStudent: async function() {
     const nama = document.getElementById('namaSiswa').value.trim();
     const gender = document.getElementById('genderSiswa').value;
@@ -388,8 +390,8 @@ window.admKelas = {
     
     document.getElementById('namaSiswa').value = '';
     classes = await storage.loadClasses();
-    updateRealtimeCounter();
-    renderStudentTable();
+    this.updateRealtimeCounter();
+    this.renderStudentTable();
     this.closeModal('modalSiswa');
   },
   
@@ -402,14 +404,15 @@ window.admKelas = {
     await storage.deleteStudent(classId, studentId);
     
     classes = await storage.loadClasses();
-    updateRealtimeCounter();
-    renderStudentTable();
+    this.updateRealtimeCounter();
+    this.renderStudentTable();
   },
   
+  // ✅ ATTENDANCE FUNCTIONS
   changeAttendanceClass: function(classId) {
     activeClassIndex = classes.findIndex(c => c.id === classId);
     console.log('🎯 [AdmKelas] Active class changed to index:', activeClassIndex);
-    renderAttendanceTable();
+    this.renderAttendanceTable();
   },
   
   markAllPresent: function() {
@@ -444,9 +447,10 @@ window.admKelas = {
     this.showView('viewKelas');
   },
   
+  // ✅ RECAP FUNCTIONS
   changeRecapClass: function(classId) {
     activeClassIndex = classes.findIndex(c => c.id === classId);
-    generateRecap();
+    this.renderRecap();
   },
   
   deleteAllData: async function() {
@@ -456,12 +460,13 @@ window.admKelas = {
     await storage.saveClasses([]);
     classes = [];
     activeClassIndex = null;
-    renderClassesGrid();
-    populateClassSelects();
+    this.renderClassesGrid();
+    this.populateClassSelects();
     alert('✅ Semua data telah dihapus!');
     window.location.reload();
   },
   
+  // ✅ EXPORT FUNCTIONS
   downloadPDF: async function() {
     try {
       const { jsPDF } = await import('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
@@ -525,9 +530,9 @@ window.admKelas = {
           }
           
           classes = await storage.loadClasses();
-          updateRealtimeCounter();
-          renderStudentTable();
-          renderClassesGrid();
+          window.admKelas.updateRealtimeCounter();
+          window.admKelas.renderStudentTable();
+          window.admKelas.renderClassesGrid();
           
           alert(`✅ Berhasil mengimpor ${added} siswa!`);
           input.value = '';
@@ -550,5 +555,5 @@ window.admKelas = {
 console.log('🟢 [AdmKelas] window.renderAdmKelas:', typeof window.renderAdmKelas);
 console.log('🟢 [AdmKelas] window.admKelas:', typeof window.admKelas);
 console.log('🟢 [AdmKelas] window.admKelas.navigateToAttendance:', typeof window.admKelas?.navigateToAttendance);
-console.log('🟢 [AdmKelas] renderAttendanceTable:', typeof renderAttendanceTable);
+console.log('🟢 [AdmKelas] window.admKelas.renderAttendanceTable:', typeof window.admKelas?.renderAttendanceTable);
 console.log('🟢 [AdmKelas] Module FINISHED - Ready to use!');
