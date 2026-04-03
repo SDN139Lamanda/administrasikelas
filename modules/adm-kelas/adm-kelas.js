@@ -42,6 +42,7 @@ window.renderAdmKelas = async function() {
   
   // Load data
   classes = await storage.loadClasses();
+  console.log('✅ [AdmKelas] Classes loaded:', classes.length);
   
   // Render UI
   container.innerHTML = getMainTemplate();
@@ -66,26 +67,85 @@ window.renderAdmKelas = async function() {
 // ============================================
 window.admKelas = {
   showView: function(viewId) {
+    console.log('👁️ [AdmKelas] showView called with:', viewId);
+    
     document.querySelectorAll('.view-section').forEach(v => v.classList.add('hidden'));
     document.getElementById(viewId)?.classList.remove('hidden');
+    
+    console.log('✅ [AdmKelas] View displayed:', viewId);
   },
   
   navigateToAttendance: async function() {
-    if (classes.length === 0) return alert('Buat kelas dulu!');
-    populateClassSelects();
-    if (activeClassIndex !== null) {
-      document.getElementById('selectKelasAbsen').value = classes[activeClassIndex].id;
+    console.log('🔴 [AdmKelas] navigateToAttendance() DIPANGGIL');
+    
+    try {
+      // ✅ 1. Reload data from storage (PENTING!)
+      console.log('🔄 [AdmKelas] Reloading classes from storage...');
+      classes = await storage.loadClasses();
+      console.log('✅ [AdmKelas] Classes loaded:', classes.length, 'classes');
+      
+      // ✅ 2. Check if classes exist
+      if (!classes || classes.length === 0) {
+        console.warn('⚠️ [AdmKelas] No classes found');
+        return alert('Buat kelas dulu!');
+      }
+      
+      // ✅ 3. Populate select dropdown
+      console.log('🔄 [AdmKelas] Calling populateClassSelects()');
+      populateClassSelects();
+      
+      // ✅ 4. Check and set active class
+      console.log('🎯 [AdmKelas] activeClassIndex:', activeClassIndex);
+      
+      // If activeClassIndex is null but classes exist, select the first one
+      if (activeClassIndex === null || activeClassIndex >= classes.length) {
+        console.log('⚠️ [AdmKelas] activeClassIndex invalid, setting to 0');
+        activeClassIndex = 0;
+      }
+      
+      // ✅ 5. Set select value
+      const selectEl = document.getElementById('selectKelasAbsen');
+      console.log('🔍 [AdmKelas] selectKelasAbsen element:', selectEl);
+      
+      if (selectEl && classes[activeClassIndex]) {
+        selectEl.value = classes[activeClassIndex].id;
+        console.log('✅ [AdmKelas] Set select value to:', classes[activeClassIndex].id);
+      } else {
+        console.error('❌ [AdmKelas] Cannot set select value');
+      }
+      
+      // ✅ 6. Render attendance table
+      console.log('📋 [AdmKelas] Calling renderAttendanceTable()');
+      renderAttendanceTable();
+      
+      // ✅ 7. Show presensi view
+      console.log('👁️ [AdmKelas] Calling showView("viewPresensi")');
+      this.showView('viewPresensi');
+      
+      console.log('🟢 [AdmKelas] navigateToAttendance() SELESAI');
+      
+    } catch (error) {
+      console.error('❌ [AdmKelas] navigateToAttendance ERROR:', error);
+      alert('Error membuka presensi: ' + error.message);
     }
-    renderAttendanceTable();
-    this.showView('viewPresensi');
   },
   
   navigateToRecap: async function() {
-    if (classes.length === 0) return alert('Belum ada data!');
-    populateClassSelects();
-    if (activeClassIndex !== null) {
-      document.getElementById('selectKelasRekap').value = classes[activeClassIndex].id;
+    console.log('📊 [AdmKelas] navigateToRecap() called');
+    
+    if (!classes || classes.length === 0) {
+      return alert('Belum ada data!');
     }
+    
+    populateClassSelects();
+    
+    if (activeClassIndex !== null && classes[activeClassIndex]) {
+      const selectEl = document.getElementById('selectKelasRekap');
+      if (selectEl) {
+        selectEl.value = classes[activeClassIndex].id;
+      }
+    }
+    
     toggleFilterView();
     this.showView('viewRekap');
   },
@@ -189,6 +249,7 @@ window.admKelas = {
   // Attendance functions
   changeAttendanceClass: function(classId) {
     activeClassIndex = classes.findIndex(c => c.id === classId);
+    console.log('🎯 [AdmKelas] Active class changed to index:', activeClassIndex);
     renderAttendanceTable();
   },
   
@@ -503,4 +564,5 @@ function setupEventListeners() {
 // ============================================
 console.log('🟢 [AdmKelas] window.renderAdmKelas:', typeof window.renderAdmKelas);
 console.log('🟢 [AdmKelas] window.admKelas:', typeof window.admKelas);
+console.log('🟢 [AdmKelas] window.admKelas.navigateToAttendance:', typeof window.admKelas?.navigateToAttendance);
 console.log('🟢 [AdmKelas] Module FINISHED - Ready to use!');
