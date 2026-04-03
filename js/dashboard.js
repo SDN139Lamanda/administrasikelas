@@ -1,7 +1,7 @@
 /**
  * ============================================
  * DASHBOARD LOGIC - Platform Administrasi Kelas
- * VERSI: BULLETPROOF + GRANULAR VISIBILITY
+ * VERSI: BULLETPROOF + GRANULAR VISIBILITY + getDoc FIX
  * ============================================
  */
 
@@ -39,7 +39,7 @@ window.showSection = function(sectionId) {
             targetSection.classList.remove('hidden');
             targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
             
-            // ✅ NEW: Filter class cards based on user's assigned kelas
+            // ✅ Filter class cards based on user's assigned kelas
             const jenjang = sectionId.replace('-section', ''); // "sd", "smp", "sma"
             if (typeof window.initKelasCards === 'function' && ['sd', 'smp', 'sma'].includes(jenjang)) {
                 window.initKelasCards(jenjang);
@@ -81,7 +81,7 @@ window.backToDashboard = function() {
         if (moduleContainer) moduleContainer.classList.add('hidden');
         if (refleksiContainer) refleksiContainer.classList.add('hidden');
         
-        // ✅ NEW: Reset class cards visibility when returning to dashboard
+        // ✅ Reset class cards visibility when returning to dashboard
         document.querySelectorAll('.kelas-card').forEach(card => {
             card.classList.remove('hidden');
         });
@@ -160,8 +160,11 @@ console.log('   - window.initKelasCards:', typeof window.initKelasCards);
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('✅ [Dashboard] DOM Ready');
     
-    // Check authentication status
+    // Check authentication status (wait for it to complete)
     await checkAuthStatus();
+    
+    // ✅ Wait a bit more for data to propagate
+    await new Promise(resolve => setTimeout(resolve, 300));
     
     // Initialize room card visibility
     await initRoomCards();
@@ -186,45 +189,54 @@ async function checkAuthStatus() {
     try {
         const { auth, onAuthStateChanged } = await import('../modules/firebase-config.js');
         
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                document.getElementById('userEmail').textContent = user.email;
-                document.getElementById('userAvatar').src = user.photoURL || `https://ui-avatars.com/api/?name=${user.displayName || 'User'}&background=7c3aed&color=fff`;
-                document.getElementById('userContextText').textContent = user.displayName || user.email;
-                console.log('✅ [Dashboard] User logged in:', user.email);
-                
-                // ✅ NEW: Fetch user data from Firestore for role-based visibility
-                try {
-                    const { db, doc, getDoc } = await import('../modules/firebase-config.js');
-                    const userDoc = await getDoc(doc(db, 'users', user.uid));
+        // ✅ Return Promise that resolves after user data loaded
+        return new Promise((resolve) => {
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    document.getElementById('userEmail').textContent = user.email;
+                    document.getElementById('userAvatar').src = user.photoURL || `https://ui-avatars.com/api/?name=${user.displayName || 'User'}&background=7c3aed&color=fff`;
+                    document.getElementById('userContextText').textContent = user.displayName || user.email;
+                    console.log('✅ [Dashboard] User logged in:', user.email);
                     
-                    if (userDoc.exists()) {
-                        const userData = userDoc.data();
-                        window.currentUserRole = userData.role || 'guru';
-                        window.currentUserJenjang = userData.jenjang || null;
-                        window.currentUserKelas = userData.kelas || null;
-                        console.log('✅ [Dashboard] User profile loaded:', { 
-                            role: window.currentUserRole, 
-                            jenjang: window.currentUserJenjang, 
-                            kelas: window.currentUserKelas 
-                        });
-                    } else {
-                        console.warn('⚠️ [Dashboard] User doc not found, using defaults');
+                    // ✅ Fetch user data from Firestore
+                    try {
+                        // ✅ FIX: Import getDoc along with db and doc
+                        const { db, doc, getDoc } = await import('../modules/firebase-config.js');
+                        
+                        const userDoc = await getDoc(doc(db, 'users', user.uid));
+                        
+                        if (userDoc.exists()) {
+                            const userData = userDoc.data();
+                            window.currentUserRole = userData.role || 'guru';
+                            window.currentUserJenjang = userData.jenjang || null;
+                            window.currentUserKelas = userData.kelas || null;
+                            console.log('✅ [Dashboard] User profile loaded:', { 
+                                role: window.currentUserRole, 
+                                jenjang: window.currentUserJenjang, 
+                                kelas: window.currentUserKelas 
+                            });
+                        } else {
+                            console.warn('⚠️ [Dashboard] User doc NOT FOUND in Firestore!');
+                            console.log('🔍 Expected Document ID:', user.uid);
+                            window.currentUserRole = 'guru';
+                            window.currentUserJenjang = null;
+                            window.currentUserKelas = null;
+                        }
+                    } catch (e) {
+                        console.error('❌ [Dashboard] Failed to fetch user profile:', e);
                         window.currentUserRole = 'guru';
                         window.currentUserJenjang = null;
                         window.currentUserKelas = null;
                     }
-                } catch (e) {
-                    console.error('❌ [Dashboard] Failed to fetch user profile:', e);
-                    // Fallback values
-                    window.currentUserRole = 'guru';
-                    window.currentUserJenjang = null;
-                    window.currentUserKelas = null;
+                    
+                    // ✅ Resolve promise after data loaded
+                    resolve();
+                } else {
+                    console.warn('⚠️ [Dashboard] User not logged in, redirecting...');
+                    window.location.href = 'index.html';
+                    resolve();
                 }
-            } else {
-                console.warn('⚠️ [Dashboard] User not logged in, redirecting...');
-                window.location.href = 'index.html';
-            }
+            });
         });
     } catch (error) {
         console.error('❌ [Dashboard] Auth check error:', error);
@@ -240,32 +252,31 @@ async function checkAuthStatus() {
 async function initRoomCards() {
     console.log('🔍 [Dashboard] initRoomCards() called');
     
-    try {
-        // Wait a bit for auth to populate user data
-        await new Promise(resolve => setTimeout(resolve, 100));
-        
-        const userRole = window.currentUserRole || 'guru';
-        const userJenjang = window.currentUserJenjang || null;
-        
-        console.log('🎯 [Dashboard] Applying visibility:', { role: userRole, jenjang: userJenjang });
-        
-        if (userRole === 'guru' && !userJenjang) {
-            // Guru without jenjang restriction → show ALL
-            console.log('👨‍🏫 [Dashboard] Showing all rooms (no jenjang restriction)');
-            showAllRooms();
-        } else if (userJenjang) {
-            // Filter by jenjang
-            console.log(`🎯 [Dashboard] Showing ${userJenjang.toUpperCase()} rooms only`);
-            showRoomsByJenjang(userJenjang);
-        } else {
-            // Fallback
-            console.log('⚠️ [Dashboard] Fallback: Showing all rooms');
-            showAllRooms();
-        }
-        
-    } catch (error) {
-        console.error('❌ [Dashboard] initRoomCards error:', error);
-        showAllRooms(); // Fallback
+    // ✅ Wait for auth + Firestore data to be ready
+    console.log('⏳ [Dashboard] Waiting for user data...');
+    await new Promise(resolve => setTimeout(resolve, 500)); // Wait 500ms
+    
+    const userRole = window.currentUserRole || 'guru';
+    const userJenjang = window.currentUserJenjang || null;
+    
+    console.log('🎯 [Dashboard] User data:', { role: userRole, jenjang: userJenjang, kelas: window.currentUserKelas });
+    
+    // ✅ DEBUG: Check if data is null (means Firestore not loaded)
+    if (window.currentUserRole === undefined) {
+        console.error('❌ [Dashboard] User data NOT loaded! Check Firestore connection!');
+        showAllRooms();
+        return;
+    }
+    
+    if (userRole === 'guru' && !userJenjang) {
+        console.log('👨‍🏫 [Dashboard] Showing all rooms (no jenjang restriction)');
+        showAllRooms();
+    } else if (userJenjang) {
+        console.log(`🎯 [Dashboard] Showing ${userJenjang.toUpperCase()} rooms only`);
+        showRoomsByJenjang(userJenjang);
+    } else {
+        console.log('⚠️ [Dashboard] Fallback: Showing all rooms');
+        showAllRooms();
     }
     
     console.log('✅ [Dashboard] Room cards initialized');
