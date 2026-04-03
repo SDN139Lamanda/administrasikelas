@@ -1,30 +1,52 @@
 /**
  * ============================================
- * MODULE: REFLEKSI (FORM SIMPLE + FIREBASE)
+ * MODULE: REFLEKSI GURU
  * Platform Administrasi Kelas Digital
+ * ============================================
+ * Fitur:
+ * - Form refleksi terstruktur (6 aspek)
+ * - Firebase Firestore realtime
+ * - Multi-user support
+ * - Auto-save dengan timestamp
  * ============================================
  */
 
 console.log('🔴 [Refleksi Module] Script START');
 
-// ✅ Import Firebase
-import { db, auth, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from './firebase-config.js';
+// ✅ STEP 1: Import Firebase (dari folder yang sama)
+import { 
+  db, 
+  auth, 
+  collection, 
+  addDoc, 
+  query, 
+  orderBy, 
+  onSnapshot, 
+  serverTimestamp 
+} from './firebase-config.js';
 
 console.log('✅ [Refleksi] Firebase imports successful');
+console.log('✅ [Refleksi] db:', typeof db);
+console.log('✅ [Refleksi] auth:', typeof auth);
 
-// ✅ Global Function
+// ✅ STEP 2: Register Global Function (untuk onclick di HTML)
 window.renderRefleksiForm = function() {
   console.log('📝 [Refleksi] renderRefleksiForm() called');
   
   const container = document.getElementById('refleksi-container');
+  
   if (!container) {
-    console.error('❌ Container not found!');
+    console.error('❌ [Refleksi] Container #refleksi-container NOT FOUND!');
+    alert('Error: Container refleksi tidak ditemukan di HTML!');
     return;
   }
   
-  const user = auth.currentUser;
+  console.log('✅ [Refleksi] Container found');
   
-  // ✅ Render Form (Design dari Anda + Firebase Integration)
+  const user = auth.currentUser;
+  console.log('👤 [Refleksi] Current user:', user?.email || 'Not logged in');
+  
+  // ✅ STEP 3: Render HTML Form
   container.innerHTML = `
     <style>
       .reflection-form {
@@ -75,6 +97,9 @@ window.renderRefleksiForm = function() {
         margin-top: 15px;
         border-radius: 6px;
         border-left: 4px solid #6b46c1;
+      }
+      .reflection-item small {
+        color: #666;
       }
     </style>
     
@@ -136,7 +161,6 @@ window.renderRefleksiForm = function() {
           </div>
         `}
         
-        <!-- List Refleksi -->
         <h3 class="text-xl font-bold mt-8 mb-4">📚 Refleksi Tersimpan</h3>
         <div id="refleksi-list" class="space-y-4">
           <div class="text-center py-8 text-gray-500">
@@ -148,24 +172,26 @@ window.renderRefleksiForm = function() {
     </div>
   `;
   
-  // Show container
+  // ✅ STEP 4: Show Container
   container.classList.remove('hidden');
+  console.log('✅ [Refleksi] Container displayed');
   
-  // Add form submit handler
+  // ✅ STEP 5: Add Form Submit Handler
   const form = document.getElementById('refleksi-form');
   if (form) {
     form.addEventListener('submit', handleSubmit);
+    console.log('✅ [Refleksi] Form submit handler attached');
   }
   
-  // Load realtime data
+  // ✅ STEP 6: Load Realtime Data
   loadRefleksiData();
-  
-  console.log('✅ [Refleksi] Form rendered & ready');
+  console.log('✅ [Refleksi] Realtime data loading started');
 };
 
-// ✅ Handle Form Submit
+// ✅ STEP 7: Handle Form Submit
 async function handleSubmit(event) {
   event.preventDefault();
+  console.log('📤 [Refleksi] Form submitted');
   
   const user = auth.currentUser;
   if (!user) {
@@ -191,6 +217,8 @@ async function handleSubmit(event) {
   }
   
   try {
+    console.log('🔥 [Refleksi] Sending to Firestore...');
+    
     await addDoc(collection(db, 'reflections'), {
       guruId: user.uid,
       guruName: user.displayName || 'Guru',
@@ -201,23 +229,31 @@ async function handleSubmit(event) {
       edited: false
     });
     
+    console.log('✅ [Refleksi] Data sent successfully!');
     alert('✅ Refleksi berhasil disimpan!');
     form.reset();
     
   } catch (error) {
-    console.error('❌ Error:', error);
+    console.error('❌ [Refleksi] Error sending ', error);
     alert('❌ Gagal: ' + (error.code === 'permission-denied' ? 'Izin ditolak. Cek Firebase Rules!' : error.message));
   }
 }
 
-// ✅ Load Realtime Data
+// ✅ STEP 8: Load Realtime Data
 function loadRefleksiData() {
   const list = document.getElementById('refleksi-list');
-  if (!list) return;
+  if (!list) {
+    console.error('❌ [Refleksi] List container not found!');
+    return;
+  }
+  
+  console.log('🔄 [Refleksi] Setting up realtime listener...');
   
   const q = query(collection(db, 'reflections'), orderBy('timestamp', 'desc'));
   
   onSnapshot(q, (snapshot) => {
+    console.log('📥 [Refleksi] Realtime update:', snapshot.docs.length, 'documents');
+    
     if (snapshot.empty) {
       list.innerHTML = `
         <div class="text-center py-8 text-gray-500">
@@ -256,16 +292,26 @@ function loadRefleksiData() {
     }).join('');
     
   }, (error) => {
-    console.error('❌ Realtime error:', error);
+    console.error('❌ [Refleksi] Realtime error:', error);
     list.innerHTML = `
       <div class="text-center py-8 text-red-500">
         <i class="fas fa-exclamation-circle text-3xl mb-3"></i>
         <p>Gagal memuat: ${error.message}</p>
+        <p class="text-sm mt-2">Cek Firebase Console & Rules</p>
       </div>
     `;
   });
 }
 
-// ✅ Confirm Registration
+// ✅ STEP 9: Confirm Registration
 console.log('🟢 [Refleksi] window.renderRefleksiForm:', typeof window.renderRefleksiForm);
 console.log('🟢 [Refleksi] Module FINISHED - Ready to use!');
+
+// ✅ STEP 10: Auto-test (untuk debugging)
+setTimeout(() => {
+  if (typeof window.renderRefleksiForm === 'function') {
+    console.log('✅ [Refleksi] Function is registered and callable!');
+  } else {
+    console.error('❌ [Refleksi] Function NOT registered! Check import/export!');
+  }
+}, 2000);
