@@ -1,214 +1,355 @@
-/* ============================================ */
-/* DASHBOARD STYLES - dashboard.css             */
-/* Platform Administrasi Kelas Digital          */
-/* ============================================ */
+/**
+ * ============================================
+ * DASHBOARD STYLES - LAYOUT 2 KOLOM
+ * Responsive: Mobile, Tablet, Desktop
+ * ============================================
+ */
 
-/* ─────────────────────────────────────────── */
-/* 1. DASHBOARD HERO                           */
-/* ─────────────────────────────────────────── */
+/* ============================================
+ * MAIN LAYOUT - 2 COLUMNS
+ * ============================================ */
 
-.dashboard-hero {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    padding: 3rem 0;
-    text-align: center;
+#main-content {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 200px);
 }
 
-.user-context-badge {
-    display: inline-flex;
-    align-items: center;
-    background-color: rgba(255, 255, 255, 0.2);
-    padding: 0.75rem 1.5rem;
-    border-radius: 9999px;
-    color: white;
-    font-size: 0.875rem;
-    margin-top: 1rem;
-    backdrop-filter: blur(4px);
+/* Desktop: 2 columns */
+@media (min-width: 1024px) {
+  #main-content {
+    flex-direction: row;
+  }
+  
+  #content-area {
+    width: 66.666%; /* 2/3 */
+    order: 1;
+  }
+  
+  #menu-area {
+    width: 33.333%; /* 1/3 */
+    order: 2;
+    position: sticky;
+    top: 80px;
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+  }
 }
 
-/* ─────────────────────────────────────────── */
-/* 2. 8 RUANG UTAMA (Rooms Grid)              */
-/* ─────────────────────────────────────────── */
-
-.rooms-grid {
-    display: grid;
-    grid-template-columns: repeat(1, 1fr);
-    gap: 1.5rem;
+/* Tablet: Adjust proportions */
+@media (min-width: 768px) and (max-width: 1023px) {
+  #content-area {
+    width: 60%;
+  }
+  
+  #menu-area {
+    width: 40%;
+  }
 }
 
-.room-card {
-    background-color: white;
-    border-radius: 1rem;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+/* Mobile: Stack vertically */
+@media (max-width: 767px) {
+  #main-content {
+    flex-direction: column;
+  }
+  
+  #content-area {
+    width: 100%;
+    order: 2; /* Content below menu on mobile */
+  }
+  
+  #menu-area {
+    width: 100%;
+    order: 1; /* Menu on top on mobile */
+    position: relative;
+    top: 0;
+    border-left: none;
+    border-bottom: 2px solid #e5e7eb;
+  }
 }
 
-.room-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+/* ============================================
+ * VERTICAL ROOM CARDS (RIGHT SIDEBAR)
+ * ============================================ */
+
+.rooms-grid-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
-.room-link {
-    display: block;
-    padding: 1.5rem;
-    text-align: center;
-    text-decoration: none;
-    color: inherit;
+.room-card-vertical {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  transition: all 0.2s ease;
+  overflow: hidden;
 }
 
-.room-icon {
-    width: 4rem;
-    height: 4rem;
-    border-radius: 1rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 1rem;
+.room-card-vertical:hover {
+  border-color: #6366f1;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+  transform: translateX(-2px);
 }
-.room-icon i {
-    font-size: 2rem;
-    color: white;
+
+.room-link-vertical {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  text-decoration: none;
+  color: inherit;
 }
-.room-icon.bg-blue { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-.room-icon.bg-green { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
-.room-icon.bg-purple { background: linear-gradient(135deg, #833ab4 0%, #fd1d1d 100%); }
-.room-icon.bg-orange { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
-.room-icon.bg-pink { background: linear-gradient(135deg, #fc4a1a 0%, #f7b733 100%); }
+
+.room-icon-vertical {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.room-icon-vertical.bg-blue { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+.room-icon-vertical.bg-green { background: linear-gradient(135deg, #10b981, #059669); }
+.room-icon-vertical.bg-purple { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+.room-icon-vertical.bg-orange { background: linear-gradient(135deg, #f97316, #ea580c); }
+.room-icon-vertical.bg-pink { background: linear-gradient(135deg, #ec4899, #db2777); }
+
+.room-info {
+  flex: 1;
+  min-width: 0;
+}
 
 .room-title {
-    font-size: 1.125rem;
-    font-weight: 700;
-    color: #1f2937;
-    margin-bottom: 0.5rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #1f2937;
+  margin: 0;
+  line-height: 1.3;
 }
 
 .room-desc {
-    font-size: 0.875rem;
-    color: #6b7280;
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin: 0.25rem 0 0 0;
 }
 
-/* ─────────────────────────────────────────── */
-/* 3. KELAS GRID (Kamars)                     */
-/* ─────────────────────────────────────────── */
-
-.kelas-grid {
-    display: grid;
-    grid-template-columns: repeat(1, 1fr);
-    gap: 1.5rem;
+/* Active state for selected room */
+.room-card-vertical.active {
+  border-color: #6366f1;
+  background: linear-gradient(135deg, #eef2ff, #f5f3ff);
 }
 
-.kelas-card {
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-    border-radius: 1rem;
-    padding: 1.5rem;
-    text-align: center;
-    transition: transform 0.2s ease;
+.room-card-vertical.active .room-title {
+  color: #6366f1;
 }
 
-.kelas-card:hover {
-    transform: scale(1.05);
+/* ============================================
+ * CONTENT AREA (LEFT SIDE)
+ * ============================================ */
+
+#content-area {
+  background: #f9fafb;
+  padding: 1.5rem;
 }
 
-.kelas-link {
-    display: block;
-    text-decoration: none;
-    color: inherit;
-}
-
-.kelas-number {
-    width: 3rem;
-    height: 3rem;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 9999px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 1rem;
-    color: white;
-    font-size: 1.5rem;
-    font-weight: 700;
-}
-
-.kelas-title {
-    font-size: 1.125rem;
-    font-weight: 700;
-    color: #1f2937;
-    margin-bottom: 0.5rem;
-}
-
-.kelas-desc {
-    font-size: 0.875rem;
-    color: #4b5563;
-}
-
-/* ─────────────────────────────────────────── */
-/* 4. RESPONSIVE BREAKPOINTS                  */
-/* ─────────────────────────────────────────── */
-
-/* Tablet: 768px+ */
-@media (min-width: 768px) {
-    .rooms-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-    
-    .kelas-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-/* Laptop: 1024px+ */
 @media (min-width: 1024px) {
-    .rooms-grid {
-        grid-template-columns: repeat(4, 1fr);
-    }
-    
-    .kelas-grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
+  #content-area {
+    padding: 2rem;
+  }
 }
 
-/* Mobile: 767px and below */
-@media (max-width: 767px) {
-    .dashboard-hero {
-        padding: 2rem 0;
-    }
-    
-    .room-card,
-    .kelas-card {
-        padding: 1rem;
-    }
-    
-    /* Ensure tap targets are at least 44px */
-    .room-link,
-    .kelas-link {
-        min-height: 44px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-    }
-}
-
-/* ─────────────────────────────────────────── */
-/* 5. SECTION VISIBILITY (For Navigation)     */
-/* ─────────────────────────────────────────── */
-
-.section.hidden {
-    display: none;
-}
-
-.section.active {
-    display: block;
-    animation: fadeIn 0.3s ease-in-out;
+.dashboard-welcome {
+  animation: fadeIn 0.3s ease;
 }
 
 @keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Hero Section */
+.dashboard-hero {
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  border-radius: 1.5rem;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  color: white;
+}
+
+.hero-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+}
+
+.hero-subtitle {
+  font-size: 1rem;
+  opacity: 0.9;
+  margin: 0;
+}
+
+/* Section Styles */
+.section {
+  margin-bottom: 2rem;
+}
+
+.section-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 0.5rem 0;
+}
+
+.section-subtitle {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* Kelas Grid */
+.kelas-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .kelas-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .kelas-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.kelas-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 1rem;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.kelas-card:hover {
+  border-color: #6366f1;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+  transform: translateY(-2px);
+}
+
+.kelas-link {
+  display: block;
+  padding: 1.5rem;
+  text-align: center;
+  text-decoration: none;
+  color: inherit;
+}
+
+.kelas-number {
+  width: 3rem;
+  height: 3rem;
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  color: white;
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0 auto 1rem auto;
+}
+
+.kelas-title {
+  font-weight: 600;
+  font-size: 1rem;
+  color: #1f2937;
+  margin: 0 0 0.25rem 0;
+}
+
+.kelas-desc {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* ============================================
+ * RESPONSIVE ADJUSTMENTS
+ * ============================================ */
+
+/* Mobile: Smaller padding */
+@media (max-width: 640px) {
+  #content-area {
+    padding: 1rem;
+  }
+  
+  .dashboard-hero {
+    padding: 1.5rem;
+  }
+  
+  .hero-title {
+    font-size: 1.5rem;
+  }
+  
+  .room-link-vertical {
+    padding: 0.75rem;
+  }
+  
+  .room-icon-vertical {
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 1rem;
+  }
+  
+  .room-title {
+    font-size: 0.875rem;
+  }
+  
+  .room-desc {
+    font-size: 0.7rem;
+  }
+}
+
+/* Tablet: Medium adjustments */
+@media (min-width: 641px) and (max-width: 1023px) {
+  .rooms-grid-vertical {
+    gap: 0.5rem;
+  }
+}
+
+/* ============================================
+ * UTILITY CLASSES
+ * ============================================ */
+
+.hidden {
+  display: none !important;
+}
+
+/* Scroll behavior for menu */
+#menu-area {
+  scrollbar-width: thin;
+  scrollbar-color: #d1d5db #f9fafb;
+}
+
+#menu-area::-webkit-scrollbar {
+  width: 6px;
+}
+
+#menu-area::-webkit-scrollbar-track {
+  background: #f9fafb;
+}
+
+#menu-area::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+#menu-area::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
 }
