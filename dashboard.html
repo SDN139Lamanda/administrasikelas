@@ -79,9 +79,9 @@
                 </h2>
                 
                 <div class="rooms-grid">
-                    <!-- RUANG 1: SD (Conditional) -->
+                    <!-- ✅ FIXED: RUANG 1: SD - Added onclick handler -->
                     <article class="room-card room-sd hidden" data-jenjang="sd" data-feature="sd">
-                        <a href="#sd-section" class="room-link">
+                        <a href="javascript:void(0)" class="room-link" onclick="showSection('sd-section'); return false;">
                             <div class="room-icon bg-blue" aria-hidden="true">
                                 <i class="fas fa-elementary"></i>
                             </div>
@@ -90,9 +90,9 @@
                         </a>
                     </article>
                     
-                    <!-- RUANG 2: SMP (Conditional) -->
+                    <!-- ✅ FIXED: RUANG 2: SMP - Added onclick handler -->
                     <article class="room-card room-smp hidden" data-jenjang="smp" data-feature="smp">
-                        <a href="#smp-section" class="room-link">
+                        <a href="javascript:void(0)" class="room-link" onclick="showSection('smp-section'); return false;">
                             <div class="room-icon bg-green" aria-hidden="true">
                                 <i class="fas fa-school"></i>
                             </div>
@@ -101,9 +101,9 @@
                         </a>
                     </article>
                     
-                    <!-- RUANG 3: SMA (Conditional) -->
+                    <!-- ✅ FIXED: RUANG 3: SMA - Added onclick handler -->
                     <article class="room-card room-sma hidden" data-jenjang="sma" data-feature="sma">
-                        <a href="#sma-section" class="room-link">
+                        <a href="javascript:void(0)" class="room-link" onclick="showSection('sma-section'); return false;">
                             <div class="room-icon bg-purple" aria-hidden="true">
                                 <i class="fas fa-graduation-cap"></i>
                             </div>
@@ -112,7 +112,7 @@
                         </a>
                     </article>
                     
-                    <!-- ✅ UPDATE: RUANG 4: Adm. Kelas - Tambah onclick untuk module -->
+                    <!-- RUANG 4: Adm. Kelas (All Users) -->
                     <article class="room-card room-adm-kelas" data-feature="adm-kelas">
                         <a href="javascript:void(0)" class="room-link" onclick="renderAdmKelas(); return false;">
                             <div class="room-icon bg-orange" aria-hidden="true">
@@ -145,7 +145,7 @@
                         </a>
                     </article>
                     
-                    <!-- ✅ UPDATE: RUANG 7: Refleksi - Tambah onclick untuk module -->
+                    <!-- RUANG 7: Refleksi (All Users) -->
                     <article class="room-card room-refleksi" data-feature="refleksi">
                         <a href="javascript:void(0)" class="room-link" onclick="renderRefleksiForm(); return false;">
                             <div class="room-icon bg-purple" aria-hidden="true">
@@ -156,7 +156,7 @@
                         </a>
                     </article>
                     
-                    <!-- ✅ UPDATE: RUANG 8: Generator Modul - Tambah onclick + fix href -->
+                    <!-- RUANG 8: Generator Modul (All Users) -->
                     <article class="room-card room-generator-modul" data-feature="generator-modul">
                         <a href="javascript:void(0)" class="room-link" onclick="renderGeneratorModule(); return false;">
                             <div class="room-icon bg-pink" aria-hidden="true">
@@ -186,7 +186,7 @@
                 </div>
                 
                 <div class="kelas-grid">
-                    <!-- ✅ UPDATE: Kelas 1 - Unified navigation -->
+                    <!-- Kelas 1 -->
                     <article class="kelas-card" data-kelas="1">
                         <a href="javascript:void(0)" class="kelas-link" onclick="loadSemester('sd', '1'); return false;">
                             <div class="kelas-number">1</div>
@@ -194,7 +194,7 @@
                             <p class="kelas-desc">Fase A</p>
                         </a>
                     </article>
-                    <!-- ✅ UPDATE: Kelas 2 - Unified navigation -->
+                    <!-- Kelas 2 -->
                     <article class="kelas-card" data-kelas="2">
                         <a href="javascript:void(0)" class="kelas-link" onclick="loadSemester('sd', '2'); return false;">
                             <div class="kelas-number">2</div>
@@ -202,7 +202,7 @@
                             <p class="kelas-desc">Fase A</p>
                         </a>
                     </article>
-                    <!-- ✅ UPDATE: Kelas 3 - Unified navigation -->
+                    <!-- Kelas 3 -->
                     <article class="kelas-card" data-kelas="3">
                         <a href="javascript:void(0)" class="kelas-link" onclick="loadSemester('sd', '3'); return false;">
                             <div class="kelas-number">3</div>
@@ -210,7 +210,7 @@
                             <p class="kelas-desc">Fase B</p>
                         </a>
                     </article>
-                    <!-- ✅ UPDATE: Kelas 4 - Unified navigation -->
+                    <!-- Kelas 4 -->
                     <article class="kelas-card" data-kelas="4">
                         <a href="javascript:void(0)" class="kelas-link" onclick="loadSemester('sd', '4'); return false;">
                             <div class="kelas-number">4</div>
@@ -218,7 +218,7 @@
                             <p class="kelas-desc">Fase B</p>
                         </a>
                     </article>
-                    <!-- ✅ UPDATE: Kelas 5 - Unified navigation -->
+                    <!-- Kelas 5 -->
                     <article class="kelas-card" data-kelas="5">
                         <a href="javascript:void(0)" class="kelas-link" onclick="loadSemester('sd', '5'); return false;">
                             <div class="kelas-number">5</div>
@@ -226,7 +226,7 @@
                             <p class="kelas-desc">Fase C</p>
                         </a>
                     </article>
-                    <!-- ✅ UPDATE: Kelas 6 - Unified navigation -->
+                    <!-- Kelas 6 -->
                     <article class="kelas-card" data-kelas="6">
                         <a href="javascript:void(0)" class="kelas-link" onclick="loadSemester('sd', '6'); return false;">
                             <div class="kelas-number">6</div>
@@ -252,7 +252,7 @@
                 </div>
                 
                 <div class="kelas-grid">
-                    <!-- ✅ UPDATE: Kelas 7 - Unified navigation -->
+                    <!-- Kelas 7 -->
                     <article class="kelas-card" data-kelas="7">
                         <a href="javascript:void(0)" class="kelas-link" onclick="loadSemester('smp', '7'); return false;">
                             <div class="kelas-number">7</div>
@@ -260,7 +260,7 @@
                             <p class="kelas-desc">Fase D</p>
                         </a>
                     </article>
-                    <!-- ✅ UPDATE: Kelas 8 - Unified navigation -->
+                    <!-- Kelas 8 -->
                     <article class="kelas-card" data-kelas="8">
                         <a href="javascript:void(0)" class="kelas-link" onclick="loadSemester('smp', '8'); return false;">
                             <div class="kelas-number">8</div>
@@ -268,7 +268,7 @@
                             <p class="kelas-desc">Fase D</p>
                         </a>
                     </article>
-                    <!-- ✅ UPDATE: Kelas 9 - Unified navigation -->
+                    <!-- Kelas 9 -->
                     <article class="kelas-card" data-kelas="9">
                         <a href="javascript:void(0)" class="kelas-link" onclick="loadSemester('smp', '9'); return false;">
                             <div class="kelas-number">9</div>
@@ -294,7 +294,7 @@
                 </div>
                 
                 <div class="kelas-grid">
-                    <!-- ✅ UPDATE: Kelas 10 - Unified navigation -->
+                    <!-- Kelas 10 -->
                     <article class="kelas-card" data-kelas="10">
                         <a href="javascript:void(0)" class="kelas-link" onclick="loadSemester('sma', '10'); return false;">
                             <div class="kelas-number">10</div>
@@ -302,7 +302,7 @@
                             <p class="kelas-desc">Fase E</p>
                         </a>
                     </article>
-                    <!-- ✅ UPDATE: Kelas 11 - Unified navigation -->
+                    <!-- Kelas 11 -->
                     <article class="kelas-card" data-kelas="11">
                         <a href="javascript:void(0)" class="kelas-link" onclick="loadSemester('sma', '11'); return false;">
                             <div class="kelas-number">11</div>
@@ -310,7 +310,7 @@
                             <p class="kelas-desc">Fase F</p>
                         </a>
                     </article>
-                    <!-- ✅ UPDATE: Kelas 12 - Unified navigation -->
+                    <!-- Kelas 12 -->
                     <article class="kelas-card" data-kelas="12">
                         <a href="javascript:void(0)" class="kelas-link" onclick="loadSemester('sma', '12'); return false;">
                             <div class="kelas-number">12</div>
@@ -329,7 +329,7 @@
             </div>
         </section>
 
-        <!-- ✅ UPDATE: REFLEKSI CONTAINER (Untuk Firebase realtime content) -->
+        <!-- REFLEKSI CONTAINER (Untuk Firebase realtime content) -->
         <section id="refleksi-container" class="section bg-gray-50 hidden">
             <!-- Dynamic content will be loaded here by modules/refleksi.js -->
         </section>
@@ -349,17 +349,17 @@
     <!-- Global JS -->
     <script type="module" src="js/main.js"></script>
     <script type="module" src="js/dashboard.js"></script>
-    <!-- ✅ UPDATE: Unified navigation module (replaces sd-classes.js) -->
+    <!-- Unified navigation module (replaces sd-classes.js) -->
     <script type="module" src="modules/jenjang-classes.js"></script>
-    <!-- ✅ TAMBAHKAN: Script tag untuk Asisten Modul AI -->
+    <!-- Script tag untuk Asisten Modul AI -->
     <script type="module" src="modules/asisten-modul.js"></script>
     <script type="module" src="modules/sd-matematika.js"></script>
     
-    <!-- ✅ UPDATE: Firebase Config & Refleksi Module -->
+    <!-- Firebase Config & Refleksi Module -->
     <script type="module" src="modules/firebase-config.js"></script>
     <script type="module" src="modules/refleksi.js"></script>
     
-    <!-- ✅ UPDATE: Adm. Kelas Module Scripts -->
+    <!-- Adm. Kelas Module Scripts -->
     <script type="module" src="modules/adm-kelas/utils.js"></script>
     <script type="module" src="modules/adm-kelas/storage.js"></script>
     <script type="module" src="modules/adm-kelas/adm-kelas-template.js"></script>
