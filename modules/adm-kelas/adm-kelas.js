@@ -557,3 +557,44 @@ console.log('🟢 [AdmKelas] window.admKelas:', typeof window.admKelas);
 console.log('🟢 [AdmKelas] window.admKelas.navigateToAttendance:', typeof window.admKelas?.navigateToAttendance);
 console.log('🟢 [AdmKelas] window.admKelas.renderAttendanceTable:', typeof window.admKelas?.renderAttendanceTable);
 console.log('🟢 [AdmKelas] Module FINISHED - Ready to use!');
+
+window.admKelas = {
+  
+  // ✅ TAMBAHKAN fungsi backToDashboard
+  backToDashboard: function() {
+    console.log('🏠 [AdmKelas] backToDashboard() called');
+    
+    const container = document.getElementById('module-container');
+    if (container) {
+      container.innerHTML = '';
+      container.classList.add('hidden');
+      console.log('✅ [AdmKelas] Module container hidden');
+    }
+    
+    // Show welcome section (dashboard home)
+    const welcomeSection = document.querySelector('.dashboard-hero')?.closest('section');
+    if (welcomeSection) {
+      welcomeSection.classList.remove('hidden');
+      console.log('✅ [AdmKelas] Welcome section shown');
+    }
+    
+    // Show 8 Ruang Utama section
+    const roomsSection = document.querySelector('[aria-labelledby="rooms-heading"]');
+    if (roomsSection) {
+      roomsSection.classList.remove('hidden');
+      console.log('✅ [AdmKelas] Rooms section shown');
+    }
+    
+    // Hide jenjang sections
+    document.querySelectorAll('#sd-section, #smp-section, #sma-section').forEach(section => {
+      section.classList.add('hidden');
+    });
+    
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    console.log('🟢 [AdmKelas] backToDashboard() SELESAI');
+  },
+  
+  // ... rest of existing functions ...
+};
