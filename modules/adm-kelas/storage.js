@@ -6,7 +6,7 @@
  */
 
 import { db } from '../firebase-config.js';
-import { collection, addDoc, getDocs, updateDoc, deleteDoc, doc, query, where, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+import { collection, addDoc, getDocs, updateDoc, deleteDoc, doc, query, where } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
 const DB_KEY = 'eduDBProV6';
 const USE_FIREBASE = false; // 🔴 Set true setelah Firebase siap
@@ -105,10 +105,8 @@ export class DataStorage {
     const classIdx = classes.findIndex(c => c.id === classId);
     if (classIdx === -1) throw new Error('Class not found');
     
-    // Remove existing entry for same date
     classes[classIdx].absen = classes[classIdx].absen.filter(a => a.tanggal !== date);
     
-    // Add new entry
     classes[classIdx].absen.push({
       tanggal: date,
       data: attendanceData,
@@ -129,7 +127,6 @@ export class DataStorage {
 
   async _saveToFirebase(collectionName, data) {
     if (!this.userId) return;
-    // Simple overwrite for now (can be optimized later)
     const q = query(collection(db, collectionName), where('userId', '==', this.userId));
     const snapshot = await getDocs(q);
     snapshot.docs.forEach(async (docSnap) => {
