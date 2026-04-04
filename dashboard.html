@@ -351,6 +351,30 @@
         </div>
     </footer>
 
+    <!-- ✅ TAMBAHAN: Gemini API Key Config (localStorage - Aman) -->
+    <script>
+        (function() {
+            const KEY = 'gemini_api_key_v1';
+            const stored = localStorage.getItem(KEY);
+            
+            if (stored && stored.startsWith('AIzaSy') && stored.length >= 39) {
+                window.GEMINI_API_KEY = stored;
+                console.log('🔑 [Config] API Key loaded from localStorage ✅');
+            } else {
+                const input = prompt('🤖 Masukkan Gemini API Key Anda:\n\n(Didapat dari aistudio.google.com)\n\n⚠️ Key akan disimpan di browser ini saja (localStorage)');
+                
+                if (input && input.startsWith('AIzaSy') && input.length >= 39) {
+                    window.GEMINI_API_KEY = input;
+                    localStorage.setItem(KEY, input);
+                    console.log('🔑 [Config] API Key saved to localStorage ✅');
+                    alert('✅ API Key tersimpan! Anda bisa generate CP/TP/ATP dengan AI.');
+                } else if (input !== null) {
+                    alert('⚠️ Format API key tidak valid. Generate akan menggunakan mode offline.');
+                }
+            }
+        })();
+    </script>
+
     <!-- ✅ SCRIPT TAGS - URUTAN YANG BENAR (Dependencies First!) -->
     
     <!-- 1. FIREBASE CONFIG - PALING PERTAMA (dependencies untuk semua module) -->
