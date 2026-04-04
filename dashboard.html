@@ -6,7 +6,7 @@
     <title>Dashboard - Platform Guru SD/SMP/SMA</title>
     <meta name="description" content="Dashboard Administrasi Kelas Digital">
     
-    <!-- ✅ TAMBAHKAN: Meta tags untuk prevent cache (FIX LOGOUT FLOW) -->
+    <!-- ✅ Meta tags untuk prevent cache -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -351,28 +351,29 @@
         </div>
     </footer>
 
-    <!-- Global JS -->
+    <!-- ✅ SCRIPT TAGS - URUTAN YANG BENAR (Dependencies First!) -->
+    
+    <!-- 1. FIREBASE CONFIG - PALING PERTAMA (dependencies untuk semua module) -->
+    <script type="module" src="modules/firebase-config.js"></script>
+    
+    <!-- 2. CORE APP LOGIC -->
     <script type="module" src="js/main.js"></script>
     <script type="module" src="js/dashboard.js"></script>
-    <!-- Unified navigation module (replaces sd-classes.js) -->
+    
+    <!-- 3. FEATURE MODULES (depend pada firebase-config) -->
     <script type="module" src="modules/jenjang-classes.js"></script>
-    <!-- Script tag untuk Asisten Modul AI -->
+    <script type="module" src="modules/refleksi.js"></script>
     <script type="module" src="modules/asisten-modul.js"></script>
     <script type="module" src="modules/sd-matematika.js"></script>
     
-    <!-- Firebase Config & Refleksi Module -->
-    <script type="module" src="modules/firebase-config.js"></script>
-    <script type="module" src="modules/refleksi.js"></script>
+    <!-- 4. ✅ CTA GENERATOR (setelah firebase-config loaded) -->
+    <script type="module" src="modules/cta-generator.js"></script>
     
-    <!-- Adm. Kelas Module Scripts -->
+    <!-- 5. ADM. KELAS SUB-MODULES -->
     <script type="module" src="modules/adm-kelas/utils.js"></script>
     <script type="module" src="modules/adm-kelas/storage.js"></script>
     <script type="module" src="modules/adm-kelas/adm-kelas-template.js"></script>
     <script type="module" src="modules/adm-kelas/adm-kelas.js"></script>
-    
-    <!-- ✅ BENAR: Path langsung ke modules/cta-generator.js -->
-    <script type="module" src="./modules/cta-generator.js"></script>
-    
     
 </body>
 </html>
