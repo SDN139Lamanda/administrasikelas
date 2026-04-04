@@ -1,7 +1,7 @@
 /**
  * ============================================
  * DASHBOARD LOGIC - Platform Administrasi Kelas
- * VERSI: BULLETPROOF + GRANULAR VISIBILITY + getDoc FIX
+ * VERSI: BULLETPROOF + GRANULAR VISIBILITY + LOGOUT FIX
  * ============================================
  */
 
@@ -101,18 +101,36 @@ window.loadSemester = function(jenjang, kelas) {
     // Handled by jenjang-classes.js module
 };
 
-// Fungsi logout
+// ✅ UPDATED: Fungsi logout dengan fix cache & storage clear
 window.logout = async function() {
     console.log('🚪 [Dashboard] logout DIPANGGIL');
     
     try {
         const { auth, signOut } = await import('../modules/firebase-config.js');
+        
+        // ✅ 1. Sign out dari Firebase Auth
         await signOut(auth);
-        console.log('✅ Logout successful');
-        window.location.href = 'index.html';
+        console.log('✅ [Dashboard] Firebase signOut successful');
+        
+        // ✅ 2. Clear localStorage & sessionStorage
+        localStorage.clear();
+        sessionStorage.clear();
+        console.log('✅ [Dashboard] Storage cleared');
+        
+        // ✅ 3. Force redirect to index.html dengan timestamp (bypass cache)
+        window.location.href = 'index.html?loggedout=' + Date.now();
+        
+        // ✅ 4. Force reload setelah redirect (untuk mobile)
+        setTimeout(() => {
+            if (window.location.href.includes('index.html')) {
+                window.location.reload(true);
+            }
+        }, 200);
+        
     } catch (error) {
-        console.error('❌ Logout error:', error);
-        alert('Gagal logout. Silakan coba lagi.');
+        console.error('❌ [Dashboard] Logout error:', error);
+        // Fallback: force redirect anyway
+        window.location.href = 'index.html?loggedout=' + Date.now();
     }
 };
 
@@ -232,8 +250,14 @@ async function checkAuthStatus() {
                     // ✅ Resolve promise after data loaded
                     resolve();
                 } else {
-                    console.warn('⚠️ [Dashboard] User not logged in, redirecting...');
-                    window.location.href = 'index.html';
+                    console.warn('⚠️ [Dashboard] User not logged in, redirecting to login...');
+                    
+                    // ✅ CLEAR STORAGE BEFORE REDIRECT (fix logout loop)
+                    localStorage.clear();
+                    sessionStorage.clear();
+                    
+                    // ✅ FORCE REDIRECT WITH TIMESTAMP (bypass cache)
+                    window.location.href = 'index.html?notauth=' + Date.now();
                     resolve();
                 }
             });
@@ -345,6 +369,6 @@ console.log('📋 Available functions:');
 console.log('   • showSection(sectionId)');
 console.log('   • backToDashboard()');
 console.log('   • loadSemester(jenjang, kelas)');
-console.log('   • logout()');
-console.log('   • initKelasCards(jenjang) ← NEW!');
+console.log('   • logout() ← UPDATED with cache fix!');
+console.log('   • initKelasCards(jenjang)');
 console.log('🚀 READY TO USE!');
