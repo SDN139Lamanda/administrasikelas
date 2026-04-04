@@ -2,11 +2,12 @@
  * ============================================
  * MODULE: REFLEKSI GURU
  * Platform Administrasi Kelas Digital
+ * ISOLASI DATA: guruId-based filtering
  * ============================================
  * Fitur:
  * - Form refleksi terstruktur (6 aspek)
  * - Firebase Firestore realtime
- * - Multi-user support
+ * - Multi-user support dengan isolasi data
  * - Auto-save dengan timestamp
  * ============================================
  */
@@ -22,7 +23,8 @@ import {
   query, 
   orderBy, 
   onSnapshot, 
-  serverTimestamp 
+  serverTimestamp,
+  where  // ✅ TAMBAHKAN: Untuk filter isolasi data
 } from './firebase-config.js';
 
 console.log('✅ [Refleksi] Firebase imports successful');
@@ -183,7 +185,7 @@ window.renderRefleksiForm = function() {
     console.log('✅ [Refleksi] Form submit handler attached');
   }
   
-  // ✅ STEP 6: Load Realtime Data
+  // ✅ STEP 6: Load Realtime Data (with isolation)
   loadRefleksiData();
   console.log('✅ [Refleksi] Realtime data loading started');
 };
@@ -220,7 +222,7 @@ async function handleSubmit(event) {
     console.log('🔥 [Refleksi] Sending to Firestore...');
     
     await addDoc(collection(db, 'reflections'), {
-      guruId: user.uid,
+      guruId: user.uid,  // ✅ Sudah benar: field untuk isolasi
       guruName: user.displayName || 'Guru',
       guruEmail: user.email,
       guruPhoto: user.photoURL || 'https://ui-avatars.com/api/?name=User',
@@ -239,7 +241,7 @@ async function handleSubmit(event) {
   }
 }
 
-// ✅ STEP 8: Load Realtime Data
+// ✅ STEP 8: Load Realtime Data (WITH ISOLATION FIX)
 function loadRefleksiData() {
   const list = document.getElementById('refleksi-list');
   if (!list) {
@@ -249,7 +251,27 @@ function loadRefleksiData() {
   
   console.log('🔄 [Refleksi] Setting up realtime listener...');
   
-  const q = query(collection(db, 'reflections'), orderBy('timestamp', 'desc'));
+  const user = auth.currentUser;
+  
+  // ✅ FIX UTAMA: Tambah filter by guruId untuk isolasi data
+  let q;
+  if (user) {
+    // User biasa: hanya lihat refleksi sendiri
+    q = query(
+      collection(db, 'reflections'), 
+      where('guruId', '==', user.uid),  // ✅ TAMBAHKAN: Isolasi data!
+      orderBy('timestamp', 'desc')
+    );
+  } else {
+    // Tidak login: tidak bisa load data
+    list.innerHTML = `
+      <div class="text-center py-8 text-gray-500">
+        <i class="fas fa-lock text-3xl mb-3"></i>
+        <p>Silakan login untuk melihat refleksi</p>
+      </div>
+    `;
+    return;
+  }
   
   onSnapshot(q, (snapshot) => {
     console.log('📥 [Refleksi] Realtime update:', snapshot.docs.length, 'documents');
