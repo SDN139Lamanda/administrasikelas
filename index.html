@@ -6,15 +6,20 @@
     <title>Administrasi Pembelajaran Digital - Platform Guru SD/SMP/SMA</title>
     <meta name="description" content="Platform Administrasi Kelas Digital untuk Guru SD/SMP/SMA. Kelola modul, penilaian, refleksi, dan lebih banyak lagi.">
     
-    <!-- Open Graph / Social Media Meta Tags (Optional but Recommended) -->
+    <!-- Open Graph / Social Media Meta Tags -->
     <meta property="og:title" content="Administrasi Kelas Digital - Platform Guru">
     <meta property="og:description" content="Kelola administras perangkat pembelajaran , penilaian, refleksi dalam satu platform terintegrasi">
     <meta property="og:type" content="website">
     
+    <!-- ✅ TAMBAHKAN: Meta tags untuk prevent cache (FIX LOGOUT FLOW) -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    
     <!-- Tailwind CSS (CDN) -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Custom CSS (Load order matters!) -->
+    <!-- Custom CSS -->
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/components.css">
     
@@ -74,7 +79,6 @@
                         <i class="fas fa-sign-in-alt mr-2" aria-hidden="true"></i>Login
                     </a>
                 </div>
-                <!-- ✅ UPDATE: Email policy sesuai kesepakatan -->
                 <p class="hero-note">
                     <i class="fas fa-check-circle mr-1" aria-hidden="true"></i> Email Bebas (Gmail/Yahoo/Outlook/dll)
                     <span class="mx-3" aria-hidden="true">•</span>
@@ -144,7 +148,6 @@
                     <article class="step-card">
                         <div class="step-number" aria-hidden="true">1</div>
                         <h3 class="step-title">Daftar Akun</h3>
-                        <!-- ✅ UPDATE: Email bebas policy -->
                         <p class="step-desc">Klik tombol Daftar dan gunakan email aktif Anda (Gmail, Yahoo, Outlook, dll)</p>
                     </article>
                     
@@ -181,7 +184,6 @@
                         <p class="section-subtitle mb-8">Dirancang khusus untuk memudahkan pekerjaan administrasi guru SD/SMP/SMA dengan fitur yang lengkap dan mudah digunakan.</p>
                         
                         <ul class="benefits-list">
-                            <!-- ✅ UPDATE: Benefit #1 - Email policy -->
                             <li class="benefit-item">
                                 <i class="fas fa-check-circle" aria-hidden="true"></i>
                                 <div>
@@ -189,7 +191,6 @@
                                     <p class="benefit-desc">Gunakan email apa saja (Gmail, Yahoo, Outlook) untuk pendaftaran</p>
                                 </div>
                             </li>
-                            <!-- ✅ UPDATE: Benefit #2 - Fix teks -->
                             <li class="benefit-item">
                                 <i class="fas fa-check-circle" aria-hidden="true"></i>
                                 <div>
@@ -197,7 +198,6 @@
                                     <p class="benefit-desc">Tidak ada biaya berlangganan, sepenuhnya gratis selamanya</p>
                                 </div>
                             </li>
-                            <!-- ✅ UPDATE: Benefit #3 - Lengkapi kalimat -->
                             <li class="benefit-item">
                                 <i class="fas fa-check-circle" aria-hidden="true"></i>
                                 <div>
@@ -231,7 +231,6 @@
                                 </div>
                                 <div>
                                     <p class="info-title">Email Pendaftaran</p>
-                                    <!-- ✅ UPDATE: Email bebas policy -->
                                     <p class="info-desc">Gunakan email aktif Anda (Gmail/Yahoo/dll)</p>
                                 </div>
                             </div>
@@ -259,7 +258,6 @@
                                 </div>
                                 <div>
                                     <p class="info-title">Bantuan</p>
-                                    <!-- ✅ UPDATE: Email admin distandarisasi -->
                                     <p class="info-desc">Hubungi admin: radiah.tifarahs@gmail.com</p>
                                 </div>
                             </div>
@@ -303,7 +301,6 @@
                     <ul class="footer-list">
                         <li class="footer-contact-item">
                             <i class="fas fa-envelope" aria-hidden="true"></i>
-                            <!-- ✅ UPDATE: Email admin distandarisasi -->
                             <a href="mailto:radiah.tifarahs@gmail.com" class="footer-link">radiah.tifarahs@gmail.com</a>
                         </li>
                         <li class="footer-contact-item">
@@ -323,5 +320,48 @@
 
     <!-- Global JS -->
     <script type="module" src="js/main.js"></script>
+    
+    <!-- ✅ TAMBAHKAN: Script untuk handle logout flow & cache clear -->
+    <script>
+        // ✅ Check if user just logged out (bypass cache)
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('loggedout') || urlParams.get('notauth')) {
+            console.log('🚪 [Index] User just logged out, clearing all cache...');
+            
+            // Clear all storage
+            localStorage.clear();
+            sessionStorage.clear();
+            
+            // Clear cache if supported
+            if ('caches' in window) {
+                caches.keys().then(function(names) {
+                    for (let name of names) caches.delete(name);
+                });
+            }
+            
+            // Clean URL (remove query param)
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+        
+        // ✅ Check auth state on page load
+        window.addEventListener('load', async () => {
+            try {
+                const { auth, onAuthStateChanged } = await import('./modules/firebase-config.js');
+                
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        // User still logged in → redirect to dashboard
+                        console.log('✅ [Index] User authenticated, redirecting to dashboard...');
+                        window.location.href = 'dashboard.html';
+                    } else {
+                        // User logged out → stay on login page
+                        console.log('✅ [Index] User logged out, showing login page');
+                    }
+                });
+            } catch (error) {
+                console.error('❌ [Index] Auth check error:', error);
+            }
+        });
+    </script>
 </body>
 </html>
