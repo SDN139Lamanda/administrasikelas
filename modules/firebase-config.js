@@ -1,82 +1,143 @@
-// modules/firebase-config.js
-// Konfigurasi Firebase - Auth + Firestore (LENGKAP + Google Sign-In)
-
-// ✅ Import Firebase SDK (dari CDN)
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-
-// ✅ Import Auth functions (LENGKAP termasuk Google Sign-In)
-import { 
-  getAuth, 
-  signInWithEmailAndPassword, 
-  signInWithPopup,      // ← TAMBAHAN: Untuk Google login
-  GoogleAuthProvider,   // ← TAMBAHAN: Provider Google
-  signOut,
-  onAuthStateChanged 
-} from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-
-// ✅ Import Firestore functions (TAMBAH getDoc!)
-import { 
-  getFirestore,
-  collection,
-  addDoc,
-  getDocs,
-  getDoc,              // ← ✅ DITAMBAHKAN: Untuk fetch single document!
-  updateDoc,
-  deleteDoc,
-  doc,
-  query,
-  orderBy,
-  onSnapshot,
-  serverTimestamp,
-  where
-} from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
-
-// ✅ Firebase Config (Data Asli)
-const firebaseConfig = {
-  apiKey: "AIzaSyCYoUcSKj8aAZTaNgKtrn0bYHPmedVHAE4",
-  authDomain: "sdn139lamanda-a67a8.firebaseapp.com",
-  databaseURL: "https://sdn139lamanda-a67a8-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "sdn139lamanda-a67a8",
-  storageBucket: "sdn139lamanda-a67a8.firebasestorage.app",
-  messagingSenderId: "520862158793",
-  appId: "1:520862158793:web:c8cb5a4259d5e54ea06218",
-  measurementId: "G-S012NQH5LS"
-};
-
-// ✅ Initialize Firebase
-const app = initializeApp(firebaseConfig);
-
-// ✅ Initialize Services
-const auth = getAuth(app);
-const db = getFirestore(app);
-const googleProvider = new GoogleAuthProvider(); // ← Provider untuk Google login
-
-// ✅ EXPORT SEMUA YANG DIPERLUKAN (TAMBAH getDoc!)
-export { 
-  // Auth
-  auth, 
-  googleProvider,           // ← TAMBAHAN: Export provider Google
-  signInWithEmailAndPassword, 
-  signInWithPopup,          // ← TAMBAHAN: Export function Google login
-  signOut,
-  onAuthStateChanged,
-  
-  // Firestore Core
-  db,
-  
-  // Firestore Functions (TAMBAH getDoc!)
-  collection,
-  addDoc,
-  getDocs,
-  getDoc,                  // ← ✅ DITAMBAHKAN: Untuk fetch single document!
-  updateDoc,
-  deleteDoc,
-  doc,
-  query,
-  orderBy,
-  onSnapshot,
-  serverTimestamp,
-  where
-};
-
-console.log('✅ Firebase initialized & all exports ready');
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ============================================
+    // HELPER FUNCTIONS
+    // ============================================
+    
+    // Cek apakah user sudah login
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Cek apakah user adalah admin
+    function isAdmin() {
+      return isAuthenticated() && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    // Cek apakah user mengakses data sendiri
+    function isOwnData(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Get user data dari Firestore
+    function getUserData(userId) {
+      return get(/databases/$(database)/documents/users/$(userId)).data;
+    }
+    
+    // ============================================
+    // USERS COLLECTION (MAIN)
+    // ============================================
+    
+    match /users/{userId} {
+      
+      // CREATE: Hanya admin yang bisa create user baru
+      allow create: if isAdmin();
+      
+      // READ: 
+      // • User bisa baca data sendiri
+      // • Admin bisa baca semua data
+      // • User bisa baca data lain HANYA jika jenjang sama & role=guru
+      allow read: if isOwnData(userId) || 
+                  isAdmin() ||
+                  (isAuthenticated() && 
+                   getUserData(request.auth.uid).jenjang == getUserData(userId).jenjang &&
+                   getUserData(request.auth.uid).role == 'guru' &&
+                   getUserData(userId).role == 'guru');
+      
+      // UPDATE: 
+      // • User hanya bisa update field tertentu di data sendiri
+      // • Admin bisa update semua field
+      allow update: if isOwnData(userId) && 
+                    // User hanya bisa update: lastLogin, namaLengkap, noHp
+                    request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+                      'lastLogin', 'namaLengkap', 'noHp'
+                    ]) ||
+                    isAdmin();
+      
+      // DELETE: Hanya admin yang bisa hapus user
+      allow delete: if isAdmin();
+    }
+    
+    // ============================================
+    // APPROVAL_LOGS COLLECTION (Admin Only)
+    // ============================================
+    
+    match /approval_logs/{logId} {
+      allow read, write: if isAdmin();
+    }
+    
+    // ============================================
+    // CLASSES COLLECTION (Adm. Kelas - storage.js)
+    // ============================================
+    
+    match /classes/{classId} {
+      // READ: User hanya bisa baca data kelas MILIK SENDIRI
+      allow read: if isAuthenticated() && (
+        isAdmin() ||  // Admin: akses semua
+        resource.data.userId == request.auth.uid  // User: hanya data sendiri
+      );
+      
+      // WRITE: User hanya bisa tulis data MILIK SENDIRI
+      allow write: if isAuthenticated() && (
+        isAdmin() ||  // Admin: bisa tulis semua
+        (request.resource.data.userId == request.auth.uid)  // User: hanya data sendiri
+      );
+    }
+    
+    // ============================================
+    // REFLECTIONS COLLECTION (Refleksi Module)
+    // ============================================
+    
+    match /reflections/{reflectionId} {
+      // READ: User hanya bisa baca refleksi MILIK SENDIRI
+      allow read: if isAuthenticated() && (
+        isAdmin() ||  // Admin: akses semua
+        resource.data.guruId == request.auth.uid  // User: hanya refleksi sendiri
+      );
+      
+      // CREATE: User bisa buat refleksi baru dengan guruId sendiri
+      allow create: if isAuthenticated() && (
+        isAdmin() ||
+        request.resource.data.guruId == request.auth.uid  // Harus sesuai userId login
+      );
+      
+      // UPDATE/DELETE: User hanya bisa edit/hapus refleksi MILIK SENDIRI
+      allow update, delete: if isAuthenticated() && (
+        isAdmin() ||
+        resource.data.guruId == request.auth.uid
+      );
+    }
+    
+    // ============================================
+    // PENILAIAN COLLECTION (Contoh)
+    // ============================================
+    
+    match /penilaian/{docId} {
+      allow read: if isAuthenticated() && (
+        isAdmin() ||
+        resource.data.userId == request.auth.uid ||
+        // Guru bisa baca nilai siswa di kelas/mapel yang sama
+        (getUserData(request.auth.uid).jenjang == 'sd' &&
+         getUserData(request.auth.uid).kelas == resource.data.kelas) ||
+        (getUserData(request.auth.uid).jenjang in ['smp', 'sma'] &&
+         getUserData(request.auth.uid).mataPelajaranSMP == resource.data.mataPelajaran)
+      );
+      
+      allow write: if isAuthenticated() && (
+        isAdmin() ||
+        resource.data.userId == request.auth.uid
+      );
+    }
+    
+    // ============================================
+    // DEFAULT: DENY ALL (Safety Net)
+    // ============================================
+    
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
