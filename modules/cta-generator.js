@@ -9,6 +9,8 @@
  * - Isolasi data (userId-based)
  * - Admin bypass untuk monitoring
  * - Auto-fill jenjang, kelas, semester dari parameter
+ * - Modal notification untuk offline mode
+ * - Kop preview hanya muncul setelah generate
  * ============================================
  */
 
@@ -368,13 +370,13 @@ window.renderCTAGenerator = function(jenjangFromParam, kelasFromParam, semesterF
       <div id="cta-result" class="hidden result-section">
         <h3 class="text-xl font-bold mb-4 text-gray-800">📋 Hasil Generate</h3>
         
-        <!-- Kop Preview -->
-        <div id="kop-preview" class="kop-preview">
-          <h3 id="preview-sekolah">SDN 139 LAMANDA</h3>
+        <!-- ✅ Kop Preview — UPDATED: Hidden sebelum generate, kosongkan default -->
+        <div id="kop-preview" class="kop-preview" style="display: none;">
+          <h3 id="preview-sekolah"></h3>
           <p><strong>CP/TP/ATP - Kurikulum Merdeka</strong></p>
-          <p id="preview-detail">Matematika - Kelas 4 - Semester 1</p>
-          <p id="preview-tahun">Tahun Ajaran 2025/2026</p>
-          <p id="preview-topik" class="topik"><strong>Topik:</strong> Pecahan Sederhana</p>
+          <p id="preview-detail"></p>
+          <p id="preview-tahun"></p>
+          <p id="preview-topik" class="topik"></p>
         </div>
         
         <label for="result-cp"><i class="fas fa-bullseye mr-2"></i>Capaian Pembelajaran (CP)</label>
@@ -558,7 +560,48 @@ function parseAIResponse(text) {
     };
 }
 
-// ✅ STEP 7: Handle Generate (REAL AI dengan FALLBACK ke Mock) — UPDATED fix warning stacking
+// ✅ FUNGSI BARU: Show Offline Mode Modal
+function showOfflineModal() {
+  console.log('📱 [CTA Generator] Showing offline modal...');
+  
+  const modalHTML = `
+    <div id="offline-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onclick="closeOfflineModal()">
+      <div class="bg-white rounded-lg max-w-md mx-4 p-6 shadow-xl" onclick="event.stopPropagation()">
+        <div class="text-center">
+          <div class="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-wifi text-amber-600 text-2xl"></i>
+          </div>
+          <h3 class="text-xl font-bold text-gray-800 mb-2">Mode Offline Aktif</h3>
+          <p class="text-gray-600 mb-6">
+            Generate sedang menggunakan mode standar. 
+            Hasil tetap dapat digunakan untuk keperluan administrasi Anda.
+          </p>
+          <div class="flex gap-3 justify-center">
+            <button onclick="closeOfflineModal()" class="px-6 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition">
+              <i class="fas fa-check mr-2"></i>Mengerti
+            </button>
+            <button onclick="location.reload()" class="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition">
+              <i class="fas fa-redo mr-2"></i>Refresh
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  document.body.insertAdjacentHTML('beforeend', modalHTML);
+}
+
+// ✅ FUNGSI BARU: Close Offline Modal
+function closeOfflineModal() {
+  const modal = document.getElementById('offline-modal');
+  if (modal) {
+    modal.remove();
+    console.log('📱 [CTA Generator] Offline modal closed');
+  }
+}
+
+// ✅ STEP 7: Handle Generate (REAL AI dengan FALLBACK ke Mock) — UPDATED dengan modal
 async function handleGenerate() {
   console.log('🪄 [CTA Generator] Generate button clicked');
   
@@ -583,6 +626,7 @@ async function handleGenerate() {
   const resultDiv = document.getElementById('cta-result');
   if (resultDiv) resultDiv.classList.remove('hidden');
   
+  // ✅ UPDATED: Show kop preview setelah generate
   updateKopPreview(sekolah, tahun, mapel, kelas, semester, topik);
   
   document.getElementById('result-cp').value = '⏳ Sedang generate...';
@@ -621,12 +665,9 @@ async function handleGenerate() {
     document.getElementById('result-tp').value = result.tp;
     document.getElementById('result-atp').value = result.atp;
     
-    // Tampilkan info jika menggunakan mock
+    // ✅ GANTI: Tampilkan modal jika menggunakan mock (BUKAN warning inline)
     if (usedMock) {
-      const infoDiv = document.createElement('div');
-      infoDiv.className = 'mt-2 p-3 bg-amber-50 border border-amber-200 rounded text-sm text-amber-800';
-      infoDiv.innerHTML = '⚠️ Menggunakan mode offline. <button onclick="this.parentElement.remove()" class="ml-2 text-amber-600 hover:underline">Tutup</button>';
-      document.getElementById('cta-result').insertBefore(infoDiv, document.getElementById('cta-result').firstChild);
+      showOfflineModal();
     }
     
     console.log('✅ [CTA Generator] Generate complete');
@@ -637,8 +678,14 @@ async function handleGenerate() {
   }
 }
 
-// ✅ Update Kop Preview — TIDAK DIUBAH
+// ✅ Update Kop Preview — UPDATED: Show preview setelah generate
 function updateKopPreview(sekolah, tahun, mapel, kelas, semester, topik) {
+  // ✅ Show kop preview setelah generate
+  const previewDiv = document.getElementById('kop-preview');
+  if (previewDiv) {
+    previewDiv.style.display = 'block';
+  }
+  
   document.getElementById('preview-sekolah').textContent = sekolah.toUpperCase();
   document.getElementById('preview-detail').textContent = `${mapel.toUpperCase()} - Kelas ${kelas} - Semester ${semester === '1' ? '1 (Ganjil)' : '2 (Genap)'}`;
   document.getElementById('preview-tahun').textContent = `Tahun Ajaran ${tahun || '2025/2026'}`;
