@@ -452,14 +452,25 @@ function setupEventHandlers() {
   if (btnRegenerate) btnRegenerate.addEventListener('click', handleGenerate);
 }
 
-// ✅ TAMBAHAN 1: REAL AI GENERATE dengan Google Gemini
+// ✅ TAMBAHAN 1: REAL AI GENERATE dengan Google Gemini — UPDATED dengan debug log
 async function realAIGenerate(prompt, mapel, jenjang, kelas, semester, sekolah, guru, topik) {
     console.log('🤖 [CTA Generator] Calling Gemini API...');
     
     const API_KEY = window.GEMINI_API_KEY;
     
+    // ✅ DEBUG: Verifikasi API key
+    console.log('🔑 [CTA Generator] API Key available:', API_KEY ? '✅ YES' : '❌ NO');
+    console.log('🔑 [CTA Generator] API Key length:', API_KEY?.length || 0);
+    console.log('🔑 [CTA Generator] API Key starts with AIzaSy:', API_KEY?.startsWith('AIzaSy') ? '✅ Yes' : '❌ No');
+    
     if (!API_KEY) {
-        throw new Error('API Key tidak ditemukan! Silakan masukkan Gemini API Key yang valid.');
+        console.error('❌ [CTA Generator] API Key is undefined!');
+        throw new Error('API Key tidak ditemukan! Silakan refresh halaman dan masukkan API Key.');
+    }
+    
+    if (!API_KEY.startsWith('AIzaSy') || API_KEY.length < 39) {
+        console.error('❌ [CTA Generator] API Key format invalid!');
+        throw new Error('API Key tidak valid! Format harus AIzaSyXXXXXXXX...');
     }
     
     const fullPrompt = `${prompt}
@@ -481,38 +492,42 @@ Format Output yang Diinginkan:
 
 Gunakan bahasa Indonesia yang formal dan sesuai dengan Kurikulum Merdeka.`;
 
+    const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+    
+    console.log('🌐 [CTA Generator] Fetch URL:', url.substring(0, 100) + '...');
+    
     try {
-        const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${API_KEY}`,
-            {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    contents: [{ parts: [{ text: fullPrompt }] }],
-                    generationConfig: {
-                        temperature: 0.7,
-                        topK: 40,
-                        topP: 0.95,
-                        maxOutputTokens: 2048,
-                    }
-                })
-            }
-        );
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: fullPrompt }] }],
+                generationConfig: {
+                    temperature: 0.7,
+                    topK: 40,
+                    topP: 0.95,
+                    maxOutputTokens: 2048,
+                }
+            })
+        });
+        
+        console.log('📡 [CTA Generator] Response status:', response.status, response.ok ? '✅' : '❌');
         
         const data = await response.json();
         
         if (data.error) {
-            console.error('❌ Gemini API Error:', data.error);
+            console.error('❌ [CTA Generator] Gemini API Error:', data.error);
             throw new Error(data.error.message || 'API Error: ' + JSON.stringify(data.error));
         }
         
         const aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
         
         if (!aiResponse) {
+            console.error('❌ [CTA Generator] AI Response empty!');
             throw new Error('Response AI kosong atau tidak valid');
         }
         
-        console.log('✅ [CTA Generator] AI Response received');
+        console.log('✅ [CTA Generator] AI Response received - Length:', aiResponse.length);
         return parseAIResponse(aiResponse);
         
     } catch (error) {
@@ -521,7 +536,7 @@ Gunakan bahasa Indonesia yang formal dan sesuai dengan Kurikulum Merdeka.`;
     }
 }
 
-// ✅ TAMBAHAN 2: Parse AI Response menjadi CP, TP, ATP
+// ✅ TAMBAHAN 2: Parse AI Response menjadi CP, TP, ATP — TIDAK DIUBAH
 function parseAIResponse(text) {
     console.log('📋 [CTA Generator] Parsing AI response...');
     
@@ -543,7 +558,7 @@ function parseAIResponse(text) {
     };
 }
 
-// ✅ STEP 7: Handle Generate (REAL AI dengan FALLBACK ke Mock)
+// ✅ STEP 7: Handle Generate (REAL AI dengan FALLBACK ke Mock) — UPDATED fix warning stacking
 async function handleGenerate() {
   console.log('🪄 [CTA Generator] Generate button clicked');
   
@@ -581,7 +596,14 @@ async function handleGenerate() {
     const prompt = promptTemplates[templateKey] || promptTemplates.default;
     console.log('📋 [CTA Generator] Using template:', templateKey);
     
-    // ✅ TAMBAHAN 3: Coba Real AI dulu, fallback ke mock jika gagal
+    // ✅ FIX: Clear warning lama sebelum generate baru (mencegah warning menumpuk)
+    const oldWarning = document.querySelector('.bg-amber-50.border-amber-200');
+    if (oldWarning) {
+      oldWarning.remove();
+      console.log('🧹 [CTA Generator] Cleared old warning');
+    }
+    
+    // ✅ Coba Real AI dulu, fallback ke mock jika gagal
     let result;
     let usedMock = false;
     
@@ -615,7 +637,7 @@ async function handleGenerate() {
   }
 }
 
-// ✅ Update Kop Preview
+// ✅ Update Kop Preview — TIDAK DIUBAH
 function updateKopPreview(sekolah, tahun, mapel, kelas, semester, topik) {
   document.getElementById('preview-sekolah').textContent = sekolah.toUpperCase();
   document.getElementById('preview-detail').textContent = `${mapel.toUpperCase()} - Kelas ${kelas} - Semester ${semester === '1' ? '1 (Ganjil)' : '2 (Genap)'}`;
@@ -623,7 +645,7 @@ function updateKopPreview(sekolah, tahun, mapel, kelas, semester, topik) {
   document.getElementById('preview-topik').innerHTML = `<strong>Topik:</strong> ${topik}`;
 }
 
-// ✅ Mock AI Generate (Fallback jika API gagal) - TIDAK DIUBAH
+// ✅ Mock AI Generate (Fallback jika API gagal) — TIDAK DIUBAH
 async function mockAIGenerate(prompt, mapel, jenjang, kelas, semester, sekolah, guru, topik) {
   await new Promise(resolve => setTimeout(resolve, 2000));
   const mapelCapital = mapel.toUpperCase();
@@ -636,7 +658,7 @@ async function mockAIGenerate(prompt, mapel, jenjang, kelas, semester, sekolah, 
   };
 }
 
-// ✅ STEP 8: Handle Save to Firestore (WITH ISOLASI + ADMIN BYPASS) - TIDAK DIUBAH
+// ✅ STEP 8: Handle Save to Firestore (WITH ISOLASI + ADMIN BYPASS) — TIDAK DIUBAH
 async function handleSave() {
   console.log('💾 [CTA Generator] Save button clicked');
   
@@ -700,7 +722,7 @@ async function handleSave() {
   }
 }
 
-// ✅ STEP 9: Load CTA Data (WITH ISOLASI + ADMIN BYPASS) - TIDAK DIUBAH
+// ✅ STEP 9: Load CTA Data (WITH ISOLASI + ADMIN BYPASS) — TIDAK DIUBAH
 function loadCTAData() {
   const list = document.getElementById('cta-list');
   const countSpan = document.getElementById('saved-count');
