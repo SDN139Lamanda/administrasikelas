@@ -332,11 +332,15 @@ window.renderCTAGenerator = function(jenjangFromParam, kelasFromParam, semesterF
             <select id="cta-mapel" required>
               <option value="">Pilih Mapel</option>
               <option value="matematika">Matematika</option>
-              <option value="ipa">IPA</option>
+              <option value="ipas">IPAS</option>
               <option value="bahasa-indonesia">Bahasa Indonesia</option>
-              <option value="ips">IPS</option>
               <option value="pjok">PJOK</option>
               <option value="seni-budaya">Seni Budaya</option>
+              <option value="pendidikan kewarganegaraan">PKn</option>
+              <option value="paibd">PAIBD</option>
+              <option value="fisika">FISIKA</option>
+              <option value="kimia">KIMIA</option>
+              <option value="biologi">BIOLOGI</option>
               <option value="lainnya">Lainnya</option>
             </select>
           </div>
