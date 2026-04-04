@@ -43,6 +43,22 @@ window.renderAdmKelas = async function() {
   container.innerHTML = getMainTemplate();
   container.classList.remove('hidden');
   
+  // ✅ TAMBAHKAN: Hide dashboard sections for consistent UX
+  const welcomeSection = document.querySelector('.dashboard-hero')?.closest('section');
+  if (welcomeSection) {
+    welcomeSection.classList.add('hidden');
+    console.log('✅ [AdmKelas] Welcome section hidden');
+  }
+  const roomsSection = document.querySelector('[aria-labelledby="rooms-heading"]');
+  if (roomsSection) {
+    roomsSection.classList.add('hidden');
+    console.log('✅ [AdmKelas] Rooms section hidden');
+  }
+  document.querySelectorAll('#sd-section, #smp-section, #sma-section').forEach(section => {
+    section.classList.add('hidden');
+    console.log('✅ [AdmKelas] Jenjang section hidden:', section.id);
+  });
+  
   const dateInput = document.getElementById('inputTgl');
   if (dateInput) dateInput.valueAsDate = new Date();
   
@@ -541,7 +557,7 @@ window.admKelas = {
     }
   },
   
-  // ✅ BACK TO DASHBOARD
+  // ✅ BACK TO DASHBOARD (SUDAH BENAR - TIDAK DIUBAH)
   backToDashboard: function() {
     console.log('🏠 [AdmKelas] backToDashboard() called');
     
