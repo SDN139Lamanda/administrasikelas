@@ -1,0 +1,39 @@
+# ============================================
+# .gitignore - Platform Administrasi Kelas
+# ============================================
+
+# 🔐 API Keys & Secrets (WAJIB!)
+*.key
+*.secret
+.env
+.env.local
+.env.production
+config.local.js
+firebase-config.local.js
+*.local.js
+api-key.json
+secrets.json
+
+# 🔑 Firebase
+firebase-debug.log
+firestore-debug.log
+
+# 💻 OS Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 📝 IDE
+.vscode/
+.idea/
+
+# 📦 Dependencies
+node_modules/
+
+# 🏗️ Build Files
+dist/
+build/
+
+# 📊 Logs
+*.log
+npm-debug.log*
