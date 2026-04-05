@@ -351,28 +351,84 @@
         </div>
     </footer>
 
-    <!-- ✅ TAMBAHAN: Gemini API Key Config (localStorage - Aman) -->
+    <!-- ✅ CUSTOM MODAL FOR API KEY (GANTI NATIVE PROMPT) -->
     <script>
-        (function() {
-            const KEY = 'gemini_api_key_v1';
-            const stored = localStorage.getItem(KEY);
-            
-            if (stored && stored.startsWith('AIzaSy') && stored.length >= 39) {
-                window.GEMINI_API_KEY = stored;
-                console.log('🔑 [Config] API Key loaded from localStorage ✅');
-            } else {
-                const input = prompt('🤖 Masukkan Gemini API Key Anda:\n\n(Didapat dari aistudio.google.com)\n\n⚠️ Key akan disimpan di browser ini saja (localStorage)');
-                
-                if (input && input.startsWith('AIzaSy') && input.length >= 39) {
-                    window.GEMINI_API_KEY = input;
-                    localStorage.setItem(KEY, input);
-                    console.log('🔑 [Config] API Key saved to localStorage ✅');
-                    alert('✅ API Key tersimpan! Anda bisa generate CP/TP/ATP dengan AI.');
-                } else if (input !== null) {
-                    alert('⚠️ Format API key tidak valid. Generate akan menggunakan mode offline.');
-                }
+      (function() {
+        const KEY = 'gemini_api_key_v1';
+        const stored = localStorage.getItem(KEY);
+        
+        if (stored && stored.startsWith('AIzaSy') && stored.length >= 39) {
+          window.GEMINI_API_KEY = stored;
+          console.log('🔑 [Config] API Key loaded from localStorage ✅');
+          return;
+        }
+        
+        function showApiKeyModal() {
+          const modal = document.createElement('div');
+          modal.id = 'api-key-modal';
+          modal.style.cssText = `
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.6); display: flex;
+            align-items: center; justify-content: center;
+            z-index: 9999; font-family: system-ui, -apple-system, sans-serif;
+          `;
+          
+          modal.innerHTML = `
+            <div style="background: white; border-radius: 16px; padding: 32px; max-width: 480px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.3); animation: modalSlide 0.3s ease;">
+              <style>@keyframes modalSlide { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }</style>
+              <div style="text-align: center; margin-bottom: 24px;">
+                <div style="width: 64px; height: 64px; background: linear-gradient(135deg, #7c3aed, #0891b2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 28px;">🎉</div>
+                <h2 style="margin: 0 0 8px 0; font-size: 24px; color: #1f2937; font-weight: 700;">Selamat Datang! 👋</h2>
+                <p style="margin: 0; color: #6b7280; font-size: 14px;">Platform Administrasi Kelas Digital</p>
+              </div>
+              <div style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 12px; padding: 16px; margin-bottom: 20px;">
+                <p style="margin: 0 0 12px 0; color: #0c4a6e; font-size: 14px; line-height: 1.5;"><strong>🤖 Fitur AI Aktif!</strong><br>Untuk menggunakan Generator CP/TP/ATP dengan AI, silakan masukkan API Key Gemini Anda.</p>
+                <p style="margin: 0; color: #6b7280; font-size: 12px; line-height: 1.4;">💡 Dapatkan API Key gratis di:<br><a href="https://aistudio.google.com/apikey" target="_blank" style="color: #0891b2; text-decoration: none;">aistudio.google.com/apikey</a></p>
+              </div>
+              <input type="password" id="api-key-input" placeholder="Paste API Key Anda di sini (AIzaSy...)" style="width: 100%; padding: 14px 16px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 14px; margin-bottom: 16px; box-sizing: border-box; transition: border-color 0.2s;" onfocus="this.style.borderColor='#0891b2'" onblur="this.style.borderColor='#e5e7eb'">
+              <div style="display: flex; gap: 12px;">
+                <button id="btn-skip" style="flex: 1; padding: 12px; background: #f3f4f6; color: #374151; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#e5e7eb'" onmouseout="this.style.background='#f3f4f6'">Lewati (Mode Offline)</button>
+                <button id="btn-save" style="flex: 2; padding: 12px; background: linear-gradient(135deg, #7c3aed, #0891b2); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(124,58,237,0.3)'" onmouseout="this.style.transform='none'; this.style.boxShadow='none'">Simpan & Lanjut 🚀</button>
+              </div>
+              <p style="margin: 16px 0 0 0; color: #9ca3af; font-size: 11px; text-align: center;">🔐 Key disimpan lokal di browser Anda saja<br>Tidak dikirim ke server manapun</p>
+            </div>
+          `;
+          
+          document.body.appendChild(modal);
+          
+          document.getElementById('btn-save').addEventListener('click', function() {
+            const input = document.getElementById('api-key-input').value.trim();
+            if (input && input.startsWith('AIzaSy') && input.length >= 39) {
+              window.GEMINI_API_KEY = input;
+              localStorage.setItem(KEY, input);
+              console.log('🔑 [Config] API Key saved ✅');
+              modal.remove();
+              alert('✅ API Key tersimpan! Selamat menggunakan Platform Administrasi Kelas Digital! 🎉');
+            } else if (input) {
+              alert('⚠️ Format API Key tidak valid.\n\nHarus dimulai dengan: AIzaSy...\n\nSilakan cek ulang key Anda.');
+              document.getElementById('api-key-input').focus();
             }
-        })();
+          });
+          
+          document.getElementById('btn-skip').addEventListener('click', function() {
+            modal.remove();
+            console.log('⚠️ [Config] User skipped API key - using offline mode');
+            alert('ℹ️ Mode Offline Aktif\n\nFitur AI tidak tersedia. Hasil generate menggunakan template standar.');
+          });
+          
+          document.getElementById('api-key-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') { document.getElementById('btn-save').click(); }
+          });
+          
+          setTimeout(() => document.getElementById('api-key-input').focus(), 100);
+        }
+        
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', showApiKeyModal);
+        } else {
+          showApiKeyModal();
+        }
+      })();
     </script>
 
     <!-- ✅ SCRIPT TAGS - URUTAN YANG BENAR (Dependencies First!) -->
