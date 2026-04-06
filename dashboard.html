@@ -84,7 +84,7 @@
                 </h2>
                 
                 <div class="rooms-grid">
-                    <!-- ✅ FIXED: RUANG 1: SD - Added onclick handler -->
+                    <!-- RUANG 1: SD -->
                     <article class="room-card room-sd hidden" data-jenjang="sd" data-feature="sd">
                         <a href="javascript:void(0)" class="room-link" onclick="showSection('sd-section'); return false;">
                             <div class="room-icon bg-blue" aria-hidden="true">
@@ -95,7 +95,7 @@
                         </a>
                     </article>
                     
-                    <!-- ✅ FIXED: RUANG 2: SMP - Added onclick handler -->
+                    <!-- RUANG 2: SMP -->
                     <article class="room-card room-smp hidden" data-jenjang="smp" data-feature="smp">
                         <a href="javascript:void(0)" class="room-link" onclick="showSection('smp-section'); return false;">
                             <div class="room-icon bg-green" aria-hidden="true">
@@ -106,7 +106,7 @@
                         </a>
                     </article>
                     
-                    <!-- ✅ FIXED: RUANG 3: SMA - Added onclick handler -->
+                    <!-- RUANG 3: SMA -->
                     <article class="room-card room-sma hidden" data-jenjang="sma" data-feature="sma">
                         <a href="javascript:void(0)" class="room-link" onclick="showSection('sma-section'); return false;">
                             <div class="room-icon bg-purple" aria-hidden="true">
@@ -117,7 +117,7 @@
                         </a>
                     </article>
                     
-                    <!-- RUANG 4: Adm. Kelas (All Users) -->
+                    <!-- RUANG 4: Adm. Kelas -->
                     <article class="room-card room-adm-kelas" data-feature="adm-kelas">
                         <a href="javascript:void(0)" class="room-link" onclick="renderAdmKelas(); return false;">
                             <div class="room-icon bg-orange" aria-hidden="true">
@@ -128,7 +128,7 @@
                         </a>
                     </article>
                     
-                    <!-- RUANG 5: Adm. Pembelajaran (All Users) -->
+                    <!-- RUANG 5: Adm. Pembelajaran -->
                     <article class="room-card room-adm-pembelajaran" data-feature="adm-pembelajaran">
                         <a href="#adm-pembelajaran" class="room-link">
                             <div class="room-icon bg-blue" aria-hidden="true">
@@ -139,7 +139,7 @@
                         </a>
                     </article>
                     
-                    <!-- RUANG 6: Penilaian (All Users) -->
+                    <!-- RUANG 6: Penilaian -->
                     <article class="room-card room-penilaian" data-feature="penilaian">
                         <a href="#penilaian" class="room-link">
                             <div class="room-icon bg-green" aria-hidden="true">
@@ -150,7 +150,7 @@
                         </a>
                     </article>
                     
-                    <!-- RUANG 7: Refleksi (All Users) -->
+                    <!-- RUANG 7: Refleksi -->
                     <article class="room-card room-refleksi" data-feature="refleksi">
                         <a href="javascript:void(0)" class="room-link" onclick="renderRefleksiForm(); return false;">
                             <div class="room-icon bg-purple" aria-hidden="true">
@@ -161,7 +161,7 @@
                         </a>
                     </article>
                     
-                    <!-- RUANG 8: Generator Modul (All Users) -->
+                    <!-- RUANG 8: Generator Modul -->
                     <article class="room-card room-generator-modul" data-feature="generator-modul">
                         <a href="javascript:void(0)" class="room-link" onclick="renderGeneratorModule(); return false;">
                             <div class="room-icon bg-pink" aria-hidden="true">
@@ -175,9 +175,7 @@
             </div>
         </section>
 
-        <!-- SECTIONS FOR EACH JENJANG (KAMAR-KAMAR) -->
-        
-        <!-- SD SECTION (Kelas 1-6) -->
+        <!-- SD SECTION -->
         <section id="sd-section" class="section bg-white hidden" data-jenjang="sd" aria-labelledby="sd-heading">
             <div class="container">
                 <div class="section-header">
@@ -189,61 +187,18 @@
                         <i class="fas fa-arrow-left mr-2" aria-hidden="true"></i>Kembali ke Dashboard
                     </button>
                 </div>
-                
                 <div class="kelas-grid">
-                    <!-- Kelas 1 -->
-                    <article class="kelas-card" data-kelas="1">
-                        <a href="javascript:void(0)" class="kelas-link" onclick="loadSemester('sd', '1'); return false;">
-                            <div class="kelas-number">1</div>
-                            <h3 class="kelas-title">Kelas 1</h3>
-                            <p class="kelas-desc">Fase A</p>
-                        </a>
-                    </article>
-                    <!-- Kelas 2 -->
-                    <article class="kelas-card" data-kelas="2">
-                        <a href="javascript:void(0)" class="kelas-link" onclick="loadSemester('sd', '2'); return false;">
-                            <div class="kelas-number">2</div>
-                            <h3 class="kelas-title">Kelas 2</h3>
-                            <p class="kelas-desc">Fase A</p>
-                        </a>
-                    </article>
-                    <!-- Kelas 3 -->
-                    <article class="kelas-card" data-kelas="3">
-                        <a href="javascript:void(0)" class="kelas-link" onclick="loadSemester('sd', '3'); return false;">
-                            <div class="kelas-number">3</div>
-                            <h3 class="kelas-title">Kelas 3</h3>
-                            <p class="kelas-desc">Fase B</p>
-                        </a>
-                    </article>
-                    <!-- Kelas 4 -->
-                    <article class="kelas-card" data-kelas="4">
-                        <a href="javascript:void(0)" class="kelas-link" onclick="loadSemester('sd', '4'); return false;">
-                            <div class="kelas-number">4</div>
-                            <h3 class="kelas-title">Kelas 4</h3>
-                            <p class="kelas-desc">Fase B</p>
-                        </a>
-                    </article>
-                    <!-- Kelas 5 -->
-                    <article class="kelas-card" data-kelas="5">
-                        <a href="javascript:void(0)" class="kelas-link" onclick="loadSemester('sd', '5'); return false;">
-                            <div class="kelas-number">5</div>
-                            <h3 class="kelas-title">Kelas 5</h3>
-                            <p class="kelas-desc">Fase C</p>
-                        </a>
-                    </article>
-                    <!-- Kelas 6 -->
-                    <article class="kelas-card" data-kelas="6">
-                        <a href="javascript:void(0)" class="kelas-link" onclick="loadSemester('sd', '6'); return false;">
-                            <div class="kelas-number">6</div>
-                            <h3 class="kelas-title">Kelas 6</h3>
-                            <p class="kelas-desc">Fase C</p>
-                        </a>
-                    </article>
+                    <article class="kelas-card" data-kelas="1"><a href="javascript:void(0)" class="kelas-link" onclick="loadSemester('sd', '1'); return false;"><div class="kelas-number">1</div><h3 class="kelas-title">Kelas 1</h3><p class="kelas-desc">Fase A</p></a></article>
+                    <article class="kelas-card" data-kelas="2"><a href="javascript:void(0)" class="kelas-link" onclick="loadSemester('sd', '2'); return false;"><div class="kelas-number">2</div><h3 class="kelas-title">Kelas 2</h3><p class="kelas-desc">Fase A</p></a></article>
+                    <article class="kelas-card" data-kelas="3"><a href="javascript:void(0)" class="kelas-link" onclick="loadSemester('sd', '3'); return false;"><div class="kelas-number">3</div><h3 class="kelas-title">Kelas 3</h3><p class="kelas-desc">Fase B</p></a></article>
+                    <article class="kelas-card" data-kelas="4"><a href="javascript:void(0)" class="kelas-link" onclick="loadSemester('sd', '4'); return false;"><div class="kelas-number">4</div><h3 class="kelas-title">Kelas 4</h3><p class="kelas-desc">Fase B</p></a></article>
+                    <article class="kelas-card" data-kelas="5"><a href="javascript:void(0)" class="kelas-link" onclick="loadSemester('sd', '5'); return false;"><div class="kelas-number">5</div><h3 class="kelas-title">Kelas 5</h3><p class="kelas-desc">Fase C</p></a></article>
+                    <article class="kelas-card" data-kelas="6"><a href="javascript:void(0)" class="kelas-link" onclick="loadSemester('sd', '6'); return false;"><div class="kelas-number">6</div><h3 class="kelas-title">Kelas 6</h3><p class="kelas-desc">Fase C</p></a></article>
                 </div>
             </div>
         </section>
 
-        <!-- SMP SECTION (Kelas 7-9) -->
+        <!-- SMP SECTION -->
         <section id="smp-section" class="section bg-white hidden" data-jenjang="smp" aria-labelledby="smp-heading">
             <div class="container">
                 <div class="section-header">
@@ -255,37 +210,15 @@
                         <i class="fas fa-arrow-left mr-2" aria-hidden="true"></i>Kembali ke Dashboard
                     </button>
                 </div>
-                
                 <div class="kelas-grid">
-                    <!-- Kelas 7 -->
-                    <article class="kelas-card" data-kelas="7">
-                        <a href="javascript:void(0)" class="kelas-link" onclick="loadSemester('smp', '7'); return false;">
-                            <div class="kelas-number">7</div>
-                            <h3 class="kelas-title">Kelas 7</h3>
-                            <p class="kelas-desc">Fase D</p>
-                        </a>
-                    </article>
-                    <!-- Kelas 8 -->
-                    <article class="kelas-card" data-kelas="8">
-                        <a href="javascript:void(0)" class="kelas-link" onclick="loadSemester('smp', '8'); return false;">
-                            <div class="kelas-number">8</div>
-                            <h3 class="kelas-title">Kelas 8</h3>
-                            <p class="kelas-desc">Fase D</p>
-                        </a>
-                    </article>
-                    <!-- Kelas 9 -->
-                    <article class="kelas-card" data-kelas="9">
-                        <a href="javascript:void(0)" class="kelas-link" onclick="loadSemester('smp', '9'); return false;">
-                            <div class="kelas-number">9</div>
-                            <h3 class="kelas-title">Kelas 9</h3>
-                            <p class="kelas-desc">Fase D</p>
-                        </a>
-                    </article>
+                    <article class="kelas-card" data-kelas="7"><a href="javascript:void(0)" class="kelas-link" onclick="loadSemester('smp', '7'); return false;"><div class="kelas-number">7</div><h3 class="kelas-title">Kelas 7</h3><p class="kelas-desc">Fase D</p></a></article>
+                    <article class="kelas-card" data-kelas="8"><a href="javascript:void(0)" class="kelas-link" onclick="loadSemester('smp', '8'); return false;"><div class="kelas-number">8</div><h3 class="kelas-title">Kelas 8</h3><p class="kelas-desc">Fase D</p></a></article>
+                    <article class="kelas-card" data-kelas="9"><a href="javascript:void(0)" class="kelas-link" onclick="loadSemester('smp', '9'); return false;"><div class="kelas-number">9</div><h3 class="kelas-title">Kelas 9</h3><p class="kelas-desc">Fase D</p></a></article>
                 </div>
             </div>
         </section>
 
-        <!-- SMA SECTION (Kelas 10-12) -->
+        <!-- SMA SECTION -->
         <section id="sma-section" class="section bg-white hidden" data-jenjang="sma" aria-labelledby="sma-heading">
             <div class="container">
                 <div class="section-header">
@@ -297,44 +230,22 @@
                         <i class="fas fa-arrow-left mr-2" aria-hidden="true"></i>Kembali ke Dashboard
                     </button>
                 </div>
-                
                 <div class="kelas-grid">
-                    <!-- Kelas 10 -->
-                    <article class="kelas-card" data-kelas="10">
-                        <a href="javascript:void(0)" class="kelas-link" onclick="loadSemester('sma', '10'); return false;">
-                            <div class="kelas-number">10</div>
-                            <h3 class="kelas-title">Kelas 10</h3>
-                            <p class="kelas-desc">Fase E</p>
-                        </a>
-                    </article>
-                    <!-- Kelas 11 -->
-                    <article class="kelas-card" data-kelas="11">
-                        <a href="javascript:void(0)" class="kelas-link" onclick="loadSemester('sma', '11'); return false;">
-                            <div class="kelas-number">11</div>
-                            <h3 class="kelas-title">Kelas 11</h3>
-                            <p class="kelas-desc">Fase F</p>
-                        </a>
-                    </article>
-                    <!-- Kelas 12 -->
-                    <article class="kelas-card" data-kelas="12">
-                        <a href="javascript:void(0)" class="kelas-link" onclick="loadSemester('sma', '12'); return false;">
-                            <div class="kelas-number">12</div>
-                            <h3 class="kelas-title">Kelas 12</h3>
-                            <p class="kelas-desc">Fase F</p>
-                        </a>
-                    </article>
+                    <article class="kelas-card" data-kelas="10"><a href="javascript:void(0)" class="kelas-link" onclick="loadSemester('sma', '10'); return false;"><div class="kelas-number">10</div><h3 class="kelas-title">Kelas 10</h3><p class="kelas-desc">Fase E</p></a></article>
+                    <article class="kelas-card" data-kelas="11"><a href="javascript:void(0)" class="kelas-link" onclick="loadSemester('sma', '11'); return false;"><div class="kelas-number">11</div><h3 class="kelas-title">Kelas 11</h3><p class="kelas-desc">Fase F</p></a></article>
+                    <article class="kelas-card" data-kelas="12"><a href="javascript:void(0)" class="kelas-link" onclick="loadSemester('sma', '12'); return false;"><div class="kelas-number">12</div><h3 class="kelas-title">Kelas 12</h3><p class="kelas-desc">Fase F</p></a></article>
                 </div>
             </div>
         </section>
 
-        <!-- MODULE CONTAINERS (Will be loaded dynamically) -->
+        <!-- MODULE CONTAINERS -->
         <section id="module-container" class="section bg-gray-50">
             <div class="container">
                 <!-- Dynamic content will be loaded here -->
             </div>
         </section>
 
-        <!-- REFLEKSI CONTAINER (Untuk Firebase realtime content) -->
+        <!-- REFLEKSI CONTAINER -->
         <section id="refleksi-container" class="section bg-gray-50 hidden">
             <!-- Dynamic content will be loaded here by modules/refleksi.js -->
         </section>
@@ -351,7 +262,7 @@
         </div>
     </footer>
 
-    <!-- ✅ CUSTOM MODAL FOR API KEY (GANTI NATIVE PROMPT) -->
+    <!-- ✅ CUSTOM MODAL: MINIMALIS (User Data + API Key) -->
     <script>
       (function() {
         const KEY = 'gemini_api_key_v1';
@@ -359,7 +270,7 @@
         
         if (stored && stored.startsWith('AIzaSy') && stored.length >= 39) {
           window.GEMINI_API_KEY = stored;
-          console.log('🔑 [Config] API Key loaded from localStorage ✅');
+          console.log('🔑 [Config] API Key loaded ✅');
           return;
         }
         
@@ -368,59 +279,75 @@
           modal.id = 'api-key-modal';
           modal.style.cssText = `
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.6); display: flex;
+            background: rgba(0,0,0,0.5); display: flex;
             align-items: center; justify-content: center;
-            z-index: 9999; font-family: system-ui, -apple-system, sans-serif;
+            z-index: 9999; font-family: inherit; padding: 16px;
           `;
           
           modal.innerHTML = `
-            <div style="background: white; border-radius: 16px; padding: 32px; max-width: 480px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.3); animation: modalSlide 0.3s ease;">
+            <div style="
+              background: white; border-radius: 12px; padding: 28px;
+              max-width: 420px; width: 100%;
+              box-shadow: 0 20px 60px rgba(124,58,237,0.2);
+              border-top: 4px solid #7c3aed;
+              animation: modalSlide 0.3s ease;
+            ">
               <style>@keyframes modalSlide { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }</style>
-              <div style="text-align: center; margin-bottom: 24px;">
-                <div style="width: 64px; height: 64px; background: linear-gradient(135deg, #7c3aed, #0891b2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 28px;">🎉</div>
-                <h2 style="margin: 0 0 8px 0; font-size: 24px; color: #1f2937; font-weight: 700;">Selamat Datang! 👋</h2>
-                <p style="margin: 0; color: #6b7280; font-size: 14px;">Platform Administrasi Kelas Digital</p>
-              </div>
-              <div style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 12px; padding: 16px; margin-bottom: 20px;">
-                <p style="margin: 0 0 12px 0; color: #0c4a6e; font-size: 14px; line-height: 1.5;"><strong>🤖 model GENERET!</strong><br>Untuk menggunakan Generator CP/TP/ATP dengan AI, silakan masukkan API Key Gemini Anda.</p>
-                <p style="margin: 0; color: #6b7280; font-size: 12px; line-height: 1.4;">💡 MASUKKAN NAMA LENGKAP ANDA" target="_blank" style="color: #0891b2; text-decoration: none;">aistudio.google.com/apikey</a></p>
-              </div>
-              <input type="password" id="api-key-input" placeholder="Paste API Key Anda di sini (AIzaSy...)" style="width: 100%; padding: 14px 16px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 14px; margin-bottom: 16px; box-sizing: border-box; transition: border-color 0.2s;" onfocus="this.style.borderColor='#0891b2'" onblur="this.style.borderColor='#e5e7eb'">
+              
+              <h2 style="margin: 0 0 20px 0; font-size: 20px; color: #1f2937; font-weight: 700; text-align: center;">Selamat Datang! 👋</h2>
+              
+              <input type="text" id="user-nama" placeholder="Nama Lengkap" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; margin-bottom: 12px; box-sizing: border-box;" onfocus="this.style.borderColor='#7c3aed'" onblur="this.style.borderColor='#e5e7eb'">
+              
+              <input type="text" id="user-kepsek" placeholder="Nama Kepala Sekolah" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; margin-bottom: 12px; box-sizing: border-box;" onfocus="this.style.borderColor='#7c3aed'" onblur="this.style.borderColor='#e5e7eb'">
+              
+              <input type="text" id="user-sekolah" placeholder="Nama Sekolah *" required style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; margin-bottom: 16px; box-sizing: border-box; font-weight: 500;" onfocus="this.style.borderColor='#7c3aed'" onblur="this.style.borderColor='#e5e7eb'">
+              
+              <input type="password" id="api-key-input" placeholder="API Key (opsional)" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; margin-bottom: 20px; box-sizing: border-box;" onfocus="this.style.borderColor='#0891b2'" onblur="this.style.borderColor='#e5e7eb'">
+              
               <div style="display: flex; gap: 12px;">
-                <button id="btn-skip" style="flex: 1; padding: 12px; background: #f3f4f6; color: #374151; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#e5e7eb'" onmouseout="this.style.background='#f3f4f6'">Lewati (Mode Offline)</button>
-                <button id="btn-save" style="flex: 2; padding: 12px; background: linear-gradient(135deg, #7c3aed, #0891b2); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(124,58,237,0.3)'" onmouseout="this.style.transform='none'; this.style.boxShadow='none'">Simpan & Lanjut 🚀</button>
+                <button id="btn-skip" style="flex: 1; padding: 12px; background: #f3f4f6; color: #374151; border: none; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer;" onmouseover="this.style.background='#e5e7eb'" onmouseout="this.style.background='#f3f4f6'">Lewati</button>
+                <button id="btn-save" style="flex: 2; padding: 12px; background: linear-gradient(135deg, #7c3aed 0%, #0891b2 100%); color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(124,58,237,0.3)'" onmouseout="this.style.transform='none'; this.style.boxShadow='none'">Simpan</button>
               </div>
-              <p style="margin: 16px 0 0 0; color: #9ca3af; font-size: 11px; text-align: center;">🔐 Key disimpan lokal di browser Anda saja<br>Tidak dikirim ke server manapun</p>
             </div>
           `;
           
           document.body.appendChild(modal);
           
           document.getElementById('btn-save').addEventListener('click', function() {
-            const input = document.getElementById('api-key-input').value.trim();
-            if (input && input.startsWith('AIzaSy') && input.length >= 39) {
-              window.GEMINI_API_KEY = input;
-              localStorage.setItem(KEY, input);
-              console.log('🔑 [Config] API Key saved ✅');
-              modal.remove();
-              alert('✅ API Key tersimpan! Selamat menggunakan Platform Administrasi Kelas Digital! 🎉');
-            } else if (input) {
-              alert('⚠️ Format API Key tidak valid.\n\nHarus dimulai dengan: AIzaSy...\n\nSilakan cek ulang key Anda.');
-              document.getElementById('api-key-input').focus();
+            const nama = document.getElementById('user-nama')?.value.trim();
+            const kepsek = document.getElementById('user-kepsek')?.value.trim();
+            const sekolah = document.getElementById('user-sekolah')?.value.trim();
+            const apiKey = document.getElementById('api-key-input')?.value.trim();
+            
+            if (!sekolah) {
+              alert('Nama Sekolah wajib diisi.');
+              document.getElementById('user-sekolah')?.focus();
+              return;
             }
+            
+            if (nama) localStorage.setItem('user_nama_lengkap', nama);
+            if (kepsek) localStorage.setItem('user_nama_kepsek', kepsek);
+            if (sekolah) localStorage.setItem('user_nama_sekolah', sekolah);
+            if (apiKey && apiKey.startsWith('AIzaSy') && apiKey.length >= 39) {
+              window.GEMINI_API_KEY = apiKey;
+              localStorage.setItem(KEY, apiKey);
+            }
+            
+            modal.remove();
+            alert('✅ Tersimpan!');
           });
           
           document.getElementById('btn-skip').addEventListener('click', function() {
             modal.remove();
-            console.log('⚠️ [Config] User skipped API key - using offline mode');
-            alert('ℹ️ Mode Offline Aktif\n\nFitur AI tidak tersedia. Hasil generate menggunakan template standar.');
           });
           
-          document.getElementById('api-key-input').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') { document.getElementById('btn-save').click(); }
+          modal.querySelectorAll('input').forEach(input => {
+            input.addEventListener('keypress', function(e) {
+              if (e.key === 'Enter') { document.getElementById('btn-save').click(); }
+            });
           });
           
-          setTimeout(() => document.getElementById('api-key-input').focus(), 100);
+          setTimeout(() => document.getElementById('user-nama')?.focus(), 100);
         }
         
         if (document.readyState === 'loading') {
@@ -431,25 +358,15 @@
       })();
     </script>
 
-    <!-- ✅ SCRIPT TAGS - URUTAN YANG BENAR (Dependencies First!) -->
-    
-    <!-- 1. FIREBASE CONFIG - PALING PERTAMA (dependencies untuk semua module) -->
+    <!-- ✅ SCRIPT TAGS - URUTAN YANG BENAR -->
     <script type="module" src="modules/firebase-config.js"></script>
-    
-    <!-- 2. CORE APP LOGIC -->
     <script type="module" src="js/main.js"></script>
     <script type="module" src="js/dashboard.js"></script>
-    
-    <!-- 3. FEATURE MODULES (depend pada firebase-config) -->
     <script type="module" src="modules/jenjang-classes.js"></script>
     <script type="module" src="modules/refleksi.js"></script>
     <script type="module" src="modules/asisten-modul.js"></script>
     <script type="module" src="modules/sd-matematika.js"></script>
-    
-    <!-- 4. ✅ CTA GENERATOR (setelah firebase-config loaded) -->
     <script type="module" src="modules/cta-generator.js"></script>
-    
-    <!-- 5. ADM. KELAS SUB-MODULES -->
     <script type="module" src="modules/adm-kelas/utils.js"></script>
     <script type="module" src="modules/adm-kelas/storage.js"></script>
     <script type="module" src="modules/adm-kelas/adm-kelas-template.js"></script>
