@@ -7,7 +7,9 @@
  * - Auto-fill data user dari localStorage (modal)
  * - MOCK MODE ONLY (No API Key)
  * - Editable fields (user bisa ubah auto-fill)
- * - Isolasi data (userId-based)
+ * - Profil Pancasila included
+ * - Clean result display (no scroll frame)
+ * - Kop format sesuai standar modul ajar
  * ============================================
  */
 
@@ -29,15 +31,11 @@ import {
 
 console.log('✅ [Asisten Modul] Firebase imports successful');
 
-// ✅ STEP 1: Register Global Function
 window.renderGeneratorModule = function() {
   console.log('📝 [Asisten Modul] renderGeneratorModule() called');
   
   const container = document.getElementById('module-container');
-  if (!container) {
-    console.error('❌ Container not found!');
-    return;
-  }
+  if (!container) { console.error('❌ Container not found!'); return; }
   
   const user = auth.currentUser;
   
@@ -52,7 +50,7 @@ window.renderGeneratorModule = function() {
   
   container.innerHTML = `
     <style>
-      .modul-form { max-width: 900px; margin: auto; padding: 30px; background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+      .modul-form { max-width: 950px; margin: auto; padding: 30px; background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
       .modul-form h2 { text-align: center; color: #7c3aed; margin-bottom: 10px; font-size: 28px; }
       .subtitle { text-align: center; color: #6b7280; margin-bottom: 30px; }
       .section-title { font-size: 18px; font-weight: 700; color: #374151; margin: 25px 0 15px 0; padding-bottom: 8px; border-bottom: 2px solid #e5e7eb; display: flex; align-items: center; gap: 8px; }
@@ -66,18 +64,34 @@ window.renderGeneratorModule = function() {
       .btn-save:hover { background: linear-gradient(135deg, #059669 0%, #047857 100%); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(16,185,129,0.3); }
       .btn-secondary { background: #6b7280; color: white; margin-top: 10px; }
       .btn-secondary:hover { background: #4b5563; transform: translateY(-2px); }
-      .result-section { background: #f5f3ff; padding: 20px; border-radius: 8px; margin-top: 20px; border: 1px solid #ddd6fe; }
+      .result-section { background: transparent; padding: 0; margin-top: 20px; }
       .btn-back { margin-top: 20px; padding: 12px 30px; background: #6b7280; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; width: auto; }
       .btn-back:hover { background: #4b5563; }
       .hidden { display: none !important; }
       .auto-filled { background: #f0fdf4; border-color: #10b981 !important; }
       .grid-cols-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
-      @media (max-width: 768px) { .grid-cols-2 { grid-template-columns: 1fr; } }
+      .grid-cols-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+      @media (max-width: 768px) { .grid-cols-2, .grid-cols-3 { grid-template-columns: 1fr; } }
+      
+      /* ✅ HASIL GENERATE — TANPA BINGKAI/SCROLL */
+      #result-modul {
+        width: 100%;
+        min-height: 500px;
+        padding: 20px;
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        font-family: monospace;
+        font-size: 13px;
+        line-height: 1.5;
+        white-space: pre-wrap;
+        margin-top: 12px;
+      }
     </style>
     
     <div class="modul-form">
       <h2>📚 Asisten Modul Ajar</h2>
-      <p class="subtitle">Buat Modul Ajar dengan Template</p>
+      <p class="subtitle">Buat Modul Ajar dengan Template Kurikulum Merdeka</p>
       
       <button class="btn-back" onclick="backToDashboard()">
         <i class="fas fa-arrow-left mr-2"></i>Kembali ke Dashboard
@@ -103,39 +117,31 @@ window.renderGeneratorModule = function() {
         <!-- ✅ SECTION 2: INFORMASI SEKOLAH (AUTO-FILL DARI MODAL) -->
         <div class="section-title"><i class="fas fa-school"></i><span>2. Informasi Sekolah (Auto-Fill)</span></div>
         
-        <div class="grid-cols-2">
-          <div>
-            <label for="modul-sekolah"><i class="fas fa-university mr-2"></i>Nama Sekolah</label>
-            <input type="text" id="modul-sekolah" placeholder="Nama sekolah" value="${userSekolah}" class="${userSekolah ? 'auto-filled' : ''}" required>
-            ${userSekolah ? '<p style="font-size:11px;color:#10b981;margin-top:4px;">✅ Auto-filled dari modal (bisa diedit)</p>' : ''}
-          </div>
-          <div>
-            <label for="modul-kepsek"><i class="fas fa-user-tie mr-2"></i>Kepala Sekolah</label>
-            <input type="text" id="modul-kepsek" placeholder="Nama kepala sekolah" value="${userKepsek}" class="${userKepsek ? 'auto-filled' : ''}">
-            ${userKepsek ? '<p style="font-size:11px;color:#10b981;margin-top:4px;">✅ Auto-filled dari modal (bisa diedit)</p>' : ''}
-          </div>
+        <div>
+          <label for="modul-sekolah"><i class="fas fa-university mr-2"></i>Nama Sekolah</label>
+          <input type="text" id="modul-sekolah" placeholder="Nama sekolah" value="${userSekolah}" class="${userSekolah ? 'auto-filled' : ''}" required>
+          ${userSekolah ? '<p style="font-size:11px;color:#10b981;margin-top:4px;">✅ Auto-filled dari modal (bisa diedit)</p>' : ''}
         </div>
         
         <div class="grid-cols-2">
           <div>
-            <label for="modul-nip-kepsek"><i class="fas fa-id-card mr-2"></i>NIP Kepala Sekolah</label>
-            <input type="text" id="modul-nip-kepsek" placeholder="NIP kepala sekolah" value="${userNIPKepsek}" class="${userNIPKepsek ? 'auto-filled' : ''}">
-            ${userNIPKepsek ? '<p style="font-size:11px;color:#10b981;margin-top:4px;">✅ Auto-filled dari modal (bisa diedit)</p>' : ''}
-          </div>
-          <div>
             <label for="modul-tahun"><i class="fas fa-calendar mr-2"></i>Tahun Ajaran</label>
             <input type="text" id="modul-tahun" placeholder="2025/2026" value="2025/2026">
+          </div>
+          <div>
+            <label for="modul-alokasi"><i class="fas fa-clock mr-2"></i>Alokasi Waktu</label>
+            <input type="text" id="modul-alokasi" placeholder="Contoh: 2 x 35 menit">
           </div>
         </div>
         
         <!-- ✅ SECTION 3: INFORMASI MODUL -->
         <div class="section-title"><i class="fas fa-book"></i><span>3. Informasi Modul</span></div>
         
-        <div class="grid-cols-2">
+        <div class="grid-cols-3">
           <div>
             <label for="modul-jenjang"><i class="fas fa-school mr-2"></i>Jenjang</label>
             <select id="modul-jenjang" required>
-              <option value="">Pilih Jenjang</option>
+              <option value="">Pilih</option>
               <option value="sd">SD</option>
               <option value="smp">SMP</option>
               <option value="sma">SMA</option>
@@ -144,45 +150,42 @@ window.renderGeneratorModule = function() {
           <div>
             <label for="modul-kelas"><i class="fas fa-users mr-2"></i>Kelas</label>
             <select id="modul-kelas" required>
-              <option value="">Pilih Kelas</option>
-              <option value="1">Kelas 1</option>
-              <option value="2">Kelas 2</option>
-              <option value="3">Kelas 3</option>
-              <option value="4">Kelas 4</option>
-              <option value="5">Kelas 5</option>
-              <option value="6">Kelas 6</option>
-              <option value="7">Kelas 7</option>
-              <option value="8">Kelas 8</option>
-              <option value="9">Kelas 9</option>
-              <option value="10">Kelas 10</option>
-              <option value="11">Kelas 11</option>
-              <option value="12">Kelas 12</option>
+              <option value="">Pilih</option>
+              <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+              <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+              <option value="7">7</option><option value="8">8</option><option value="9">9</option>
+              <option value="10">10</option><option value="11">11</option><option value="12">12</option>
             </select>
           </div>
-        </div>
-        
-        <div class="grid-cols-2">
           <div>
-            <label for="modul-mapel"><i class="fas fa-book mr-2"></i>Mata Pelajaran</label>
+            <label for="modul-mapel"><i class="fas fa-book mr-2"></i>Mapel</label>
             <select id="modul-mapel" required>
-              <option value="">Pilih Mapel</option>
+              <option value="">Pilih</option>
               <option value="matematika">Matematika</option>
               <option value="ipas">IPAS</option>
-              <option value="bahasa-indonesia">Bahasa Indonesia</option>
+              <option value="bahasa-indonesia">B. Indonesia</option>
               <option value="pjok">PJOK</option>
               <option value="seni-budaya">Seni Budaya</option>
               <option value="lainnya">Lainnya</option>
             </select>
           </div>
-          <div>
-            <label for="modul-topik"><i class="fas fa-tag mr-2"></i>Topik/Materi</label>
-            <input type="text" id="modul-topik" placeholder="Contoh: Pecahan Sederhana" required>
-          </div>
         </div>
         
         <div>
-          <label for="modul-alokasi"><i class="fas fa-clock mr-2"></i>Alokasi Waktu</label>
-          <input type="text" id="modul-alokasi" placeholder="Contoh: 2 x 35 menit (1 Pertemuan)">
+          <label for="modul-topik"><i class="fas fa-tag mr-2"></i>Topik/Materi</label>
+          <input type="text" id="modul-topik" placeholder="Contoh: Pecahan Sederhana" required>
+        </div>
+        
+        <!-- ✅ SECTION 4: PROFIL PELAJAR PANCASILA (RESTORED) -->
+        <div class="section-title"><i class="fas fa-star"></i><span>4. Profil Pelajar Pancasila</span></div>
+        
+        <div class="grid-cols-3">
+          <div><label><input type="checkbox" id="ppp-1" value="Beriman, Bertakwa"> Beriman, Bertakwa</label></div>
+          <div><label><input type="checkbox" id="ppp-2" value="Berkebinekaan Global"> Berkebinekaan Global</label></div>
+          <div><label><input type="checkbox" id="ppp-3" value="Bergotong Royong"> Bergotong Royong</label></div>
+          <div><label><input type="checkbox" id="ppp-4" value="Mandiri"> Mandiri</label></div>
+          <div><label><input type="checkbox" id="ppp-5" value="Bernalar Kritis"> Bernalar Kritis</label></div>
+          <div><label><input type="checkbox" id="ppp-6" value="Kreatif"> Kreatif</label></div>
         </div>
         
         <button type="button" id="btn-generate" class="btn-generate">
@@ -190,19 +193,19 @@ window.renderGeneratorModule = function() {
         </button>
       </form>
       
-      <!-- Hasil Generate -->
+      <!-- ✅ HASIL GENERATE — TANPA BINGKAI SCROLL -->
       <div id="modul-result" class="hidden result-section">
-        <h3 class="text-xl font-bold mb-4 text-gray-800">📋 Hasil Generate Modul Ajar</h3>
+        <h3 class="text-xl font-bold mb-4 text-gray-800">📋 Hasil Generate</h3>
+        <textarea id="result-modul" placeholder="Modul akan muncul setelah generate..." style="min-height: 600px; width: 100%; padding: 16px; border: 1px solid #e5e7eb; border-radius: 8px; font-family: monospace; font-size: 13px; line-height: 1.5; white-space: pre-wrap;"></textarea>
         
-        <label for="result-modul"><i class="fas fa-file-alt mr-2"></i>Modul Ajar Lengkap</label>
-        <textarea id="result-modul" placeholder="Modul akan muncul setelah generate..." style="min-height: 400px;"></textarea>
-        
-        <button type="button" id="btn-save" class="btn-save">
-          <i class="fas fa-save"></i> Simpan ke Firestore
-        </button>
-        <button type="button" id="btn-regenerate" class="btn-secondary">
-          <i class="fas fa-redo"></i> Generate Ulang
-        </button>
+        <div style="display: flex; gap: 12px; margin-top: 16px;">
+          <button type="button" id="btn-save" class="btn-save" style="flex: 2;">
+            <i class="fas fa-save"></i> Simpan ke Firestore
+          </button>
+          <button type="button" id="btn-regenerate" class="btn-secondary" style="flex: 1;">
+            <i class="fas fa-redo"></i> Ulang
+          </button>
+        </div>
       </div>
       
       <!-- Daftar Modul Tersimpan -->
@@ -211,10 +214,7 @@ window.renderGeneratorModule = function() {
           <i class="fas fa-archive mr-2"></i>Modul Tersimpan (<span id="saved-count">0</span>)
         </h3>
         <div id="modul-list" class="space-y-4">
-          <div class="loading-spinner">
-            <i class="fas fa-spinner fa-spin text-2xl mb-3"></i>
-            <p>Memuat data...</p>
-          </div>
+          <div class="loading-spinner"><i class="fas fa-spinner fa-spin text-2xl mb-3"></i><p>Memuat...</p></div>
         </div>
       </div>
     </div>
@@ -227,18 +227,14 @@ window.renderGeneratorModule = function() {
     setupEventHandlers();
     loadModulData();
   }
-  
-  console.log('✅ [Asisten Modul] Event handlers attached');
 };
 
-// ✅ Helper: Hide Dashboard Sections
 function hideDashboardSections() {
   document.querySelector('.dashboard-hero')?.closest('section')?.classList.add('hidden');
   document.querySelector('[aria-labelledby="rooms-heading"]')?.classList.add('hidden');
   document.querySelectorAll('#sd-section, #smp-section, #sma-section').forEach(s => s.classList.add('hidden'));
 }
 
-// ✅ Helper: Setup Event Handlers
 function setupEventHandlers() {
   const btnGenerate = document.getElementById('btn-generate');
   const btnSave = document.getElementById('btn-save');
@@ -249,13 +245,14 @@ function setupEventHandlers() {
   if (btnRegenerate) btnRegenerate.addEventListener('click', handleGenerate);
 }
 
-// ✅ MOCK GENERATE (NO API KEY)
-async function mockGenerateModul(guru, nip, sekolah, kepsek, nipKepsek, tahun, jenjang, kelas, mapel, topik, alokasi) {
+// ✅ MOCK GENERATE — RESTORED: Profil Pancasila + Kop Tanpa Kepsek
+async function mockGenerateModul(guru, nip, sekolah, tahun, jenjang, kelas, mapel, topik, alokasi, profilPancasila) {
   console.log('📝 [Asisten Modul] Generating mock modul...');
   await new Promise(resolve => setTimeout(resolve, 2000));
   
   const jenjangCapital = jenjang.toUpperCase();
   const mapelCapital = mapel.toUpperCase();
+  const pppList = profilPancasila.filter(p => p.checked).map(p => p.value).join(', ') || '-';
   
   return `
 ═══════════════════════════════════════════════════════════
@@ -265,20 +262,22 @@ async function mockGenerateModul(guru, nip, sekolah, kepsek, nipKepsek, tahun, j
 
 I. INFORMASI UMUM
 ───────────────────────────────────────────────────────────
-Nama Penyusun         : ${guru || '-'}
-NIP                   : ${nip || '-'}
-Nama Sekolah          : ${sekolah || '-'}
-Nama Kepala Sekolah   : ${kepsek || '-'}
-NIP Kepala Sekolah    : ${nipKepsek || '-'}
-Tahun Ajaran          : ${tahun || '2025/2026'}
-Jenjang/Kelas         : ${jenjangCapital} / Kelas ${kelas}
-Mata Pelajaran        : ${mapelCapital}
-Topik/Materi          : ${topik || '-'}
-Alokasi Waktu         : ${alokasi || '-'}
+Nama Penyusun      : ${guru || '-'}
+NIP                : ${nip || '-'}
+Nama Sekolah       : ${sekolah || '-'}
+Tahun Ajaran       : ${tahun || '2025/2026'}
+Jenjang/Kelas      : ${jenjangCapital} / Kelas ${kelas}
+Mata Pelajaran     : ${mapelCapital}
+Topik/Materi       : ${topik || '-'}
+Alokasi Waktu      : ${alokasi || '-'}
+
+II. PROFIL PELAJAR PANCASILA
+───────────────────────────────────────────────────────────
+${pppList}
 
 ═══════════════════════════════════════════════════════════
 
-II. KOMPONEN INTI
+III. KOMPONEN INTI
 ───────────────────────────────────────────────────────────
 
 A. TUJUAN PEMBELAJARAN
@@ -337,8 +336,8 @@ Mengetahui,
 Kepala Sekolah
 
 
-( ${kepsek || '.....................'} )
-NIP. ${nipKepsek || '.....................'}
+( ${userKepsek || '.....................'} )
+NIP. ${userNIPKepsek || '.....................'}
 
 Guru Mata Pelajaran
 
@@ -349,7 +348,6 @@ NIP. ${nip || '.....................'}
   `.trim();
 }
 
-// ✅ HANDLE GENERATE
 async function handleGenerate() {
   console.log('🪄 [Asisten Modul] Generate clicked');
   
@@ -359,14 +357,22 @@ async function handleGenerate() {
   const guru = document.getElementById('modul-guru')?.value;
   const nip = document.getElementById('modul-nip')?.value;
   const sekolah = document.getElementById('modul-sekolah')?.value;
-  const kepsek = document.getElementById('modul-kepsek')?.value;
-  const nipKepsek = document.getElementById('modul-nip-kepsek')?.value;
   const tahun = document.getElementById('modul-tahun')?.value;
   const jenjang = document.getElementById('modul-jenjang')?.value;
   const kelas = document.getElementById('modul-kelas')?.value;
   const mapel = document.getElementById('modul-mapel')?.value;
   const topik = document.getElementById('modul-topik')?.value;
   const alokasi = document.getElementById('modul-alokasi')?.value;
+  
+  // ✅ Ambil Profil Pancasila
+  const profilPancasila = [
+    { id: 'ppp-1', value: 'Beriman, Bertakwa' },
+    { id: 'ppp-2', value: 'Berkebinekaan Global' },
+    { id: 'ppp-3', value: 'Bergotong Royong' },
+    { id: 'ppp-4', value: 'Mandiri' },
+    { id: 'ppp-5', value: 'Bernalar Kritis' },
+    { id: 'ppp-6', value: 'Kreatif' }
+  ].map(p => ({ checked: document.getElementById(p.id)?.checked, value: p.value }));
   
   if (!sekolah) { alert('⚠️ Nama Sekolah wajib diisi!'); return; }
   if (!jenjang || !kelas || !mapel || !topik) { alert('⚠️ Lengkapi Informasi Modul!'); return; }
@@ -378,19 +384,15 @@ async function handleGenerate() {
   resultDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
   
   try {
-    const result = await mockGenerateModul(guru, nip, sekolah, kepsek, nipKepsek, tahun, jenjang, kelas, mapel, topik, alokasi);
-    
+    const result = await mockGenerateModul(guru, nip, sekolah, tahun, jenjang, kelas, mapel, topik, alokasi, profilPancasila);
     document.getElementById('result-modul').value = result;
-    
     console.log('✅ [Asisten Modul] Generate complete!');
-    
   } catch (error) {
     console.error('❌ [Asisten Modul] Error:', error);
     alert('❌ Gagal generate: ' + error.message);
   }
 }
 
-// ✅ HANDLE SAVE
 async function handleSave() {
   console.log('💾 [Asisten Modul] Save clicked');
   
@@ -414,14 +416,13 @@ async function handleSave() {
       guru: document.getElementById('modul-guru')?.value,
       nip: document.getElementById('modul-nip')?.value,
       sekolah: document.getElementById('modul-sekolah')?.value,
-      kepsek: document.getElementById('modul-kepsek')?.value,
-      nipKepsek: document.getElementById('modul-nip-kepsek')?.value,
       tahun: document.getElementById('modul-tahun')?.value,
       jenjang: document.getElementById('modul-jenjang')?.value,
       kelas: document.getElementById('modul-kelas')?.value,
       mapel: document.getElementById('modul-mapel')?.value,
       topik: document.getElementById('modul-topik')?.value,
       alokasi: document.getElementById('modul-alokasi')?.value,
+      profilPancasila: Array.from(document.querySelectorAll('#modul-form input[type="checkbox"]:checked')).map(cb => cb.value),
       modul: modul,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
@@ -439,7 +440,6 @@ async function handleSave() {
   }
 }
 
-// ✅ LOAD MODUL DATA
 function loadModulData() {
   const list = document.getElementById('modul-list');
   const countSpan = document.getElementById('saved-count');
@@ -493,4 +493,4 @@ function loadModulData() {
   })();
 }
 
-console.log('🟢 [Asisten Modul] READY — AUTO-FILL FROM MODAL ENABLED!');
+console.log('🟢 [Asisten Modul] READY — AUTO-FILL + PROFIL PANCASILA + CLEAN RESULT');
