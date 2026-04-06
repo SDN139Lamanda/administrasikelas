@@ -6,7 +6,8 @@
  * FITUR:
  * - AI-Powered Generation
  * - Clean Commercial UI
- * - No external branding
+ * - Role-Based Class Access (Teacher/Admin)
+ * - Borderless result textareas
  * ============================================
  */
 
@@ -37,19 +38,66 @@ import {
 
 console.log('✅ [CTA Generator] All imports successful');
 
-window.renderCTAGenerator = function(jenjangFromParam, kelasFromParam, semesterFromParam) {
+// ✅ GLOBAL STATE
+let userRole = 'teacher';
+let userKelasDiampu = [];
+
+window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, semesterFromParam) {
   console.log('📝 [CTA Generator] renderCTAGenerator() called');
   
   const container = document.getElementById('module-container');
   if (!container) { console.error('❌ Container not found!'); return; }
   
   const user = auth.currentUser;
+  if (!user) { alert('⚠️ Silakan login dulu!'); return; }
+  
   const userNama = localStorage.getItem('user_nama_lengkap') || '';
   const userSekolah = localStorage.getItem('user_nama_sekolah') || '';
-  const groqKeyExists = hasGroqApiKey();
+  const aiReady = hasGroqApiKey();
   
-  console.log('👤 [CTA Generator] User ', { userNama, userSekolah });
-  console.log('🤖 [CTA Generator] AI Ready:', groqKeyExists);
+  // ✅ LOAD USER DATA FROM FIRESTORE
+  console.log('👤 [CTA Generator] Loading user data...');
+  try {
+    const userDoc = await getDoc(doc(db, 'users', user.uid));
+    if (userDoc.exists()) {
+      const userData = userDoc.data();
+      userRole = userData.role || 'teacher';
+      userKelasDiampu = userData.kelas_diampu || [];
+      
+      console.log('👤 [CTA Generator] User Role:', userRole);
+      console.log('👤 [CTA Generator] Kelas Diampu:', userKelasDiampu);
+    } else {
+      userRole = 'teacher';
+      userKelasDiampu = [];
+    }
+  } catch (e) {
+    console.error('❌ [CTA Generator] Failed to load user data:', e);
+    userRole = 'teacher';
+    userKelasDiampu = [];
+  }
+  
+  // ✅ DETERMINE CLASS OPTIONS
+  const allClasses = ['1','2','3','4','5','6','7','8','9','10','11','12'];
+  let availableClasses = allClasses;
+  let isClassLocked = false;
+  
+  if (userRole === 'teacher' && userKelasDiampu.length > 0) {
+    availableClasses = userKelasDiampu;
+    isClassLocked = true;
+    console.log('🔒 [CTA Generator] Class locked to:', availableClasses);
+  } else {
+    console.log('🔓 [CTA Generator] Class unlocked (admin or no class assigned)');
+  }
+  
+  // ✅ DETERMINE DEFAULT CLASS
+  let defaultClass = kelasFromParam || '';
+  if (isClassLocked && availableClasses.length > 0) {
+    defaultClass = availableClasses[0];
+  }
+  
+  console.log('📚 [CTA Generator] Available classes:', availableClasses);
+  console.log('📚 [CTA Generator] Default class:', defaultClass);
+  console.log('📚 [CTA Generator] Is locked:', isClassLocked);
   
   container.innerHTML = `
     <style>
@@ -58,9 +106,50 @@ window.renderCTAGenerator = function(jenjangFromParam, kelasFromParam, semesterF
       .subtitle { text-align: center; color: #6b7280; margin-bottom: 30px; }
       .section-title { font-size: 18px; font-weight: 700; color: #374151; margin: 25px 0 15px 0; padding-bottom: 8px; border-bottom: 2px solid #e5e7eb; display: flex; align-items: center; gap: 8px; }
       .cta-generator-form label { display: block; margin-top: 12px; font-weight: 600; color: #374151; font-size: 14px; }
-      .cta-generator-form select, .cta-generator-form input, .cta-generator-form textarea { width: 100%; margin-top: 8px; padding: 12px; border-radius: 8px; border: 1px solid #d1d5db; font-size: 14px; font-family: inherit; }
-      .cta-generator-form textarea { min-height: 200px; resize: vertical; line-height: 1.6; background: #f9fafb; }
-      .cta-generator-form textarea:focus { outline: none; border-color: #0891b2; background: white; }
+      
+      .cta-generator-form input,
+      .cta-generator-form select {
+        width: 100%;
+        margin-top: 8px;
+        padding: 12px;
+        border-radius: 8px;
+        border: 1px solid #d1d5db;
+        font-size: 14px;
+        font-family: inherit;
+      }
+      .cta-generator-form input:focus,
+      .cta-generator-form select:focus {
+        outline: none;
+        border-color: #0891b2;
+      }
+      
+      /* ✅ Locked select styling */
+      .cta-generator-form select:disabled {
+        background: #f3f4f6;
+        color: #6b7280;
+        cursor: not-allowed;
+      }
+      
+      #result-cp, #result-tp, #result-atp {
+        width: 100%;
+        min-height: 200px;
+        padding: 16px;
+        border: NONE !important;
+        border-radius: 8px;
+        background: #f9fafb;
+        font-family: monospace;
+        font-size: 13px;
+        line-height: 1.6;
+        white-space: pre-wrap;
+        margin-top: 8px;
+        resize: vertical;
+        box-shadow: none !important;
+        outline: none !important;
+      }
+      #result-cp:focus, #result-tp:focus, #result-atp:focus {
+        background: white;
+      }
+      
       .btn-generate, .btn-save, .btn-secondary { margin-top: 20px; padding: 14px 30px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; }
       .btn-generate { background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%); color: white; }
       .btn-generate:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(8,145,178,0.3); }
@@ -79,26 +168,24 @@ window.renderCTAGenerator = function(jenjangFromParam, kelasFromParam, semesterF
       .status-badge { display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 11px; font-weight: 600; margin-left: 8px; }
       .status-ready { background: #dcfce7; color: #166534; }
       .status-warning { background: #fef3c7; color: #92400e; }
+      .status-info { background: #dbeafe; color: #1e40af; }
       .result-section { margin-top: 30px; }
       .result-section h3 { color: #1f2937; margin-bottom: 16px; }
+      .lock-indicator { font-size: 11px; color: #6b7280; margin-top: 4px; display: flex; align-items: center; gap: 4px; }
     </style>
     
     <div class="cta-generator-form">
       <h2>📄 Generator CP/TP/ATP</h2>
       <p class="subtitle">
         Buat Perangkat Pembelajaran dengan AI
-        ${groqKeyExists ? '<span class="status-badge status-ready">✅ AI Siap</span>' : '<span class="status-badge status-warning">⚠️ Setup Diperlukan</span>'}
+        ${aiReady ? '<span class="status-badge status-ready">✅ AI Siap</span>' : '<span class="status-badge status-warning">⚠️ Setup Diperlukan</span>'}
+        ${userRole === 'admin' ? '<span class="status-badge status-info">👑 Admin</span>' : '<span class="status-badge status-info">👤 Guru</span>'}
       </p>
       
-      ${!groqKeyExists ? `
+      ${!aiReady ? `
         <div style="background:#fef3c7;padding:16px;border-radius:8px;margin-bottom:20px;color:#92400e;font-size:13px;border-left:4px solid #f59e0b;">
           <strong>⚠️ Setup AI Diperlukan</strong><br><br>
-          Silakan input API key di modal profil untuk menggunakan fitur ini.<br><br>
-          <strong>Cara setup:</strong><br>
-          1. Clear localStorage: <code style="background:#fbbf24;padding:2px 6px;border-radius:4px;">localStorage.clear()</code><br>
-          2. Refresh halaman<br>
-          3. Input API key di modal yang muncul<br>
-          4. Simpan dan mulai generate
+          Silakan input API key di modal profil untuk menggunakan fitur ini.
         </div>
       ` : '<div style="background:#dcfce7;padding:12px;border-radius:8px;margin-bottom:20px;color:#166534;font-size:13px;border-left:4px solid #10b981;">✅ AI aktif dan siap digunakan</div>'}
       
@@ -112,7 +199,6 @@ window.renderCTAGenerator = function(jenjangFromParam, kelasFromParam, semesterF
         <div>
           <label for="kop-sekolah"><i class="fas fa-school mr-2"></i>Nama Sekolah</label>
           <input type="text" id="kop-sekolah" placeholder="Masukkan nama sekolah" value="${userSekolah}" class="${userSekolah ? 'auto-filled' : ''}" required>
-          ${userSekolah ? '<p style="font-size:11px;color:#10b981;margin-top:4px;">✅ Auto-filled (bisa diedit)</p>' : ''}
         </div>
         
         <div class="grid-cols-2">
@@ -123,7 +209,6 @@ window.renderCTAGenerator = function(jenjangFromParam, kelasFromParam, semesterF
           <div>
             <label for="cta-guru"><i class="fas fa-chalkboard-teacher mr-2"></i>Nama Guru</label>
             <input type="text" id="cta-guru" placeholder="Opsional" value="${userNama}" class="${userNama ? 'auto-filled' : ''}">
-            ${userNama ? '<p style="font-size:11px;color:#10b981;margin-top:4px;">✅ Auto-filled (bisa diedit)</p>' : ''}
           </div>
         </div>
         
@@ -141,21 +226,11 @@ window.renderCTAGenerator = function(jenjangFromParam, kelasFromParam, semesterF
           </div>
           <div>
             <label for="cta-kelas"><i class="fas fa-users mr-2"></i>Kelas</label>
-            <select id="cta-kelas" required>
+            <select id="cta-kelas" required ${isClassLocked ? 'disabled' : ''}>
               <option value="">Pilih</option>
-              <option value="1" ${kelasFromParam === '1' ? 'selected' : ''}>1</option>
-              <option value="2" ${kelasFromParam === '2' ? 'selected' : ''}>2</option>
-              <option value="3" ${kelasFromParam === '3' ? 'selected' : ''}>3</option>
-              <option value="4" ${kelasFromParam === '4' ? 'selected' : ''}>4</option>
-              <option value="5" ${kelasFromParam === '5' ? 'selected' : ''}>5</option>
-              <option value="6" ${kelasFromParam === '6' ? 'selected' : ''}>6</option>
-              <option value="7" ${kelasFromParam === '7' ? 'selected' : ''}>7</option>
-              <option value="8" ${kelasFromParam === '8' ? 'selected' : ''}>8</option>
-              <option value="9" ${kelasFromParam === '9' ? 'selected' : ''}>9</option>
-              <option value="10" ${kelasFromParam === '10' ? 'selected' : ''}>10</option>
-              <option value="11" ${kelasFromParam === '11' ? 'selected' : ''}>11</option>
-              <option value="12" ${kelasFromParam === '12' ? 'selected' : ''}>12</option>
+              ${availableClasses.map(k => `<option value="${k}" ${k === defaultClass ? 'selected' : ''}>${k}</option>`).join('')}
             </select>
+            ${isClassLocked ? `<p class="lock-indicator"><i class="fas fa-lock"></i> Terkunci untuk kelas yang Anda ampu</p>` : ''}
           </div>
           <div>
             <label for="cta-semester"><i class="fas fa-clock mr-2"></i>Semester</label>
@@ -227,10 +302,8 @@ window.renderCTAGenerator = function(jenjangFromParam, kelasFromParam, semesterF
   hideDashboardSections();
   container.classList.remove('hidden');
   
-  if (user) {
-    setupEventHandlers();
-    loadCTAData();
-  }
+  setupEventHandlers();
+  loadCTAData();
   
   console.log('✅ [CTA Generator] UI rendered');
 };
@@ -272,8 +345,8 @@ async function handleGenerate() {
     return;
   }
   
-  const groqKeyExists = hasGroqApiKey();
-  if (!groqKeyExists) {
+  const aiReady = hasGroqApiKey();
+  if (!aiReady) {
     alert('⚠️ Setup AI diperlukan. Silakan input API key di modal profil.');
     return;
   }
@@ -308,6 +381,8 @@ async function handleGenerate() {
       errorMessage = 'Limit AI harian habis. Tunggu 24 jam.';
     } else if (error.message.includes('koneksi') || error.message.includes('network')) {
       errorMessage = 'Koneksi internet bermasalah.';
+    } else if (error.message.includes('decommissioned') || error.message.includes('model')) {
+      errorMessage = 'Model AI sedang diupdate. Hubungi admin.';
     }
     
     document.getElementById('result-cp').value = `❌ Error: ${errorMessage}`;
@@ -422,4 +497,4 @@ function loadCTAData() {
   })();
 }
 
-console.log('🟢 [CTA Generator] READY — Commercial UI');
+console.log('🟢 [CTA Generator] READY — Role-Based Class Access');
