@@ -1,0 +1,313 @@
+{
+  "metadata": {
+    "jenjang": "sd",
+    "kelas": "1",
+    "fase": "A",
+    "semester": "1",
+    "kurikulum": "Merdeka",
+    "referensi": "Kepmendikbudristek No. 033/H/KR/2022",
+    "lastUpdated": "2025-01-01",
+    "wordCount": 1600,
+    "description": "Tujuan Pembelajaran Kelas 1 SD Fase A - Semester 1"
+  },
+  "mapel": {
+    "matematika": {
+      "tp_id": "MATH-TP-SD-001",
+      "fase": "A",
+      "tujuan_pembelajaran": [
+        {
+          "kode": "TP-MATH-001",
+          "deskripsi": "Peserta didik dapat membaca dan menulis bilangan cacah dari 1 sampai 20 dengan benar menggunakan benda konkret.",
+          "indikator_pencapaian": [
+            "Menyebutkan bilangan 1-20 secara urut",
+            "Menulis lambang bilangan 1-20",
+            "Menghitung benda konkret sebanyak bilangan yang disebutkan",
+            "Menunjukkan kartu bilangan sesuai dengan jumlah benda"
+          ]
+        },
+        {
+          "kode": "TP-MATH-002",
+          "deskripsi": "Peserta didik dapat membaca dan menulis bilangan cacah dari 1 sampai 50 dengan benar.",
+          "indikator_pencapaian": [
+            "Menyebutkan bilangan 1-50 secara urut",
+            "Menulis lambang bilangan 1-50",
+            "Menentukan bilangan sebelum dan sesudah bilangan tertentu",
+            "Melengkapi urutan bilangan yang kosong"
+          ]
+        },
+        {
+          "kode": "TP-MATH-003",
+          "deskripsi": "Peserta didik dapat membaca dan menulis bilangan cacah dari 1 sampai 100 dengan benar.",
+          "indikator_pencapaian": [
+            "Menyebutkan bilangan 1-100 secara urut",
+            "Menulis lambang bilangan 1-100",
+            "Menentukan nilai tempat puluhan dan satuan",
+            "Menyusun bilangan dari kartu angka"
+          ]
+        },
+        {
+          "kode": "TP-MATH-004",
+          "deskripsi": "Peserta didik dapat membandingkan dua bilangan cacah sampai 100 menggunakan tanda lebih dari, kurang dari, atau sama dengan.",
+          "indikator_pencapaian": [
+            "Menentukan bilangan yang lebih besar",
+            "Menentukan bilangan yang lebih kecil",
+            "Menentukan dua bilangan yang sama",
+            "Menggunakan simbol >, <, = dengan benar"
+          ]
+        },
+        {
+          "kode": "TP-MATH-005",
+          "deskripsi": "Peserta didik dapat mengurutkan bilangan cacah sampai 100 dari terkecil ke terbesar dan sebaliknya.",
+          "indikator_pencapaian": [
+            "Mengurutkan 3-5 bilangan dari terkecil ke terbesar",
+            "Mengurutkan 3-5 bilangan dari terbesar ke terkecil",
+            "Menempatkan bilangan pada garis bilangan",
+            "Menentukan bilangan di antara dua bilangan"
+          ]
+        },
+        {
+          "kode": "TP-MATH-006",
+          "deskripsi": "Peserta didik dapat melakukan penjumlahan dua bilangan cacah dengan hasil sampai 100.",
+          "indikator_pencapaian": [
+            "Menjumlahkan dua bilangan satu angka",
+            "Menjumlahkan bilangan satu angka dengan dua angka",
+            "Menjumlahkan dua bilangan dua angka tanpa menyimpan",
+            "Menyelesaikan soal cerita penjumlahan"
+          ]
+        },
+        {
+          "kode": "TP-MATH-007",
+          "deskripsi": "Peserta didik dapat melakukan pengurangan dua bilangan cacah dengan hasil sampai 100.",
+          "indikator_pencapaian": [
+            "Mengurangi dua bilangan satu angka",
+            "Mengurangi bilangan dua angka dengan satu angka",
+            "Mengurangi dua bilangan dua angka tanpa meminjam",
+            "Menyelesaikan soal cerita pengurangan"
+          ]
+        },
+        {
+          "kode": "TP-MATH-008",
+          "deskripsi": "Peserta didik dapat mengenali dan melanjutkan pola gambar dan bilangan sederhana.",
+          "indikator_pencapaian": [
+            "Mengenali pola AB-AB pada gambar",
+            "Mengenali pola ABC-ABC pada gambar",
+            "Melanjutkan pola bilangan sederhana",
+            "Membuat pola sendiri dengan benda konkret"
+          ]
+        },
+        {
+          "kode": "TP-MATH-009",
+          "deskripsi": "Peserta didik dapat mengenali dan mengklasifikasi bangun datar sederhana.",
+          "indikator_pencapaian": [
+            "Mengenali segitiga",
+            "Mengenali segiempat",
+            "Mengenali lingkaran",
+            "Mengelompokkan bangun datar berdasarkan bentuk"
+          ]
+        },
+        {
+          "kode": "TP-MATH-010",
+          "deskripsi": "Peserta didik dapat mengukur panjang dan berat benda dengan satuan tidak baku.",
+          "indikator_pencapaian": [
+            "Mengukur panjang dengan jengkal",
+            "Mengukur panjang dengan langkah",
+            "Mengukur berat dengan tangan",
+            "Membandingkan hasil pengukuran dua benda"
+          ]
+        }
+      ]
+    },
+    "ipas": {
+      "tp_id": "IPAS-TP-SD-001",
+      "fase": "A",
+      "tujuan_pembelajaran": [
+        {
+          "kode": "TP-IPAS-001",
+          "deskripsi": "Peserta didik dapat mengenali dan menyebutkan nama-nama anggota tubuh serta fungsinya dengan benar.",
+          "indikator_pencapaian": [
+            "Menyebutkan nama-nama anggota tubuh",
+            "Menjelaskan fungsi setiap anggota tubuh",
+            "Menunjukkan anggota tubuh pada diri sendiri",
+            "Menjaga kebersihan anggota tubuh"
+          ]
+        },
+        {
+          "kode": "TP-IPAS-002",
+          "deskripsi": "Peserta didik dapat mengenali berbagai hewan di lingkungan sekitar dan ciri-cirinya.",
+          "indikator_pencapaian": [
+            "Menyebutkan nama-nama hewan di sekitar",
+            "Mengelompokkan hewan berdasarkan tempat hidup",
+            "Menjelaskan ciri-ciri hewan",
+            "Menjelaskan cara hewan bergerak"
+          ]
+        },
+        {
+          "kode": "TP-IPAS-003",
+          "deskripsi": "Peserta didik dapat mengenali berbagai tumbuhan di lingkungan sekitar dan ciri-cirinya.",
+          "indikator_pencapaian": [
+            "Menyebutkan nama-nama tumbuhan di sekitar",
+            "Menyebutkan bagian-bagian tumbuhan",
+            "Menjelaskan fungsi bagian tumbuhan",
+            "Mengelompokkan tumbuhan berdasarkan ukuran"
+          ]
+        },
+        {
+          "kode": "TP-IPAS-004",
+          "deskripsi": "Peserta didik dapat membedakan benda hidup dan benda tak hidup berdasarkan ciri-cirinya.",
+          "indikator_pencapaian": [
+            "Menyebutkan ciri-ciri benda hidup",
+            "Menyebutkan ciri-ciri benda tak hidup",
+            "Mengelompokkan benda hidup dan tak hidup",
+            "Memberikan contoh benda hidup dan tak hidup"
+          ]
+        },
+        {
+          "kode": "TP-IPAS-005",
+          "deskripsi": "Peserta didik dapat mengenali berbagai warna, bentuk, dan ukuran benda di lingkungan sekitar.",
+          "indikator_pencapaian": [
+            "Menyebutkan nama-nama warna",
+            "Mengelompokkan benda berdasarkan warna",
+            "Mengelompokkan benda berdasarkan bentuk",
+            "Mengelompokkan benda berdasarkan ukuran"
+          ]
+        },
+        {
+          "kode": "TP-IPAS-006",
+          "deskripsi": "Peserta didik dapat mengenali berbagai bunyi di lingkungan sekitar dan sumbernya.",
+          "indikator_pencapaian": [
+            "Menyebutkan berbagai bunyi di sekitar",
+            "Menentukan sumber bunyi",
+            "Membedakan bunyi keras dan lembut",
+            "Meniru berbagai bunyi di sekitar"
+          ]
+        },
+        {
+          "kode": "TP-IPAS-007",
+          "deskripsi": "Peserta didik dapat mengamati dan menceritakan perubahan cuaca dan musim.",
+          "indikator_pencapaian": [
+            "Menyebutkan jenis-jenis cuaca",
+            "Mengenali tanda-tanda cuaca",
+            "Menceritakan perubahan cuaca",
+            "Menyesuaikan pakaian dengan cuaca"
+          ]
+        },
+        {
+          "kode": "TP-IPAS-008",
+          "deskripsi": "Peserta didik dapat mengamati berbagai permukaan benda dan teksturnya.",
+          "indikator_pencapaian": [
+            "Membedakan permukaan kasar dan halus",
+            "Menyentuh berbagai benda dan menjelaskan teksturnya",
+            "Mengelompokkan benda berdasarkan tekstur",
+            "Menceritakan hasil pengamatan tekstur"
+          ]
+        },
+        {
+          "kode": "TP-IPAS-009",
+          "deskripsi": "Peserta didik dapat mengamati berbagai cara benda bergerak.",
+          "indikator_pencapaian": [
+            "Menyebutkan berbagai cara benda bergerak",
+            "Membedakan gerak lurus dan berputar",
+            "Menjelaskan penyebab benda bergerak",
+            "Membuat benda bergerak dengan berbagai cara"
+          ]
+        },
+        {
+          "kode": "TP-IPAS-010",
+          "deskripsi": "Peserta didik dapat menjelaskan kegunaan air dalam kehidupan sehari-hari.",
+          "indikator_pencapaian": [
+            "Menyebutkan kegunaan air di rumah",
+            "Menyebutkan kegunaan air di sekolah",
+            "Menjelaskan pentingnya air bagi makhluk hidup",
+            "Menghemat penggunaan air dalam kehidupan sehari-hari"
+          ]
+        }
+      ]
+    },
+    "bahasa_indonesia": {
+      "tp_id": "BINDO-TP-SD-001",
+      "fase": "A",
+      "tujuan_pembelajaran": [
+        {
+          "kode": "TP-BINDO-001",
+          "deskripsi": "Peserta didik dapat mendengarkan dan melaksanakan instruksi lisan sederhana.",
+          "indikator_pencapaian": [
+            "Menyimak instruksi dengan perhatian",
+            "Melaksanakan instruksi satu langkah",
+            "Melaksanakan instruksi dua langkah",
+            "Bertanya jika tidak memahami instruksi"
+          ]
+        },
+        {
+          "kode": "TP-BINDO-002",
+          "deskripsi": "Peserta didik dapat memperkenalkan diri dengan kalimat sederhana.",
+          "indikator_pencapaian": [
+            "Menyebutkan nama lengkap",
+            "Menyebutkan nama panggilan",
+            "Menyebutkan alamat",
+            "Menyebutkan hobi"
+          ]
+        },
+        {
+          "kode": "TP-BINDO-003",
+          "deskripsi": "Peserta didik dapat mengenali dan membaca huruf vokal dan konsonan.",
+          "indikator_pencapaian": [
+            "Mengenali huruf vokal a, i, u, e, o",
+            "Mengenali huruf konsonan",
+            "Membaca huruf dengan lafal benar",
+            "Menulis huruf dengan benar"
+          ]
+        },
+        {
+          "kode": "TP-BINDO-004",
+          "deskripsi": "Peserta didik dapat membaca suku kata dan kata sederhana.",
+          "indikator_pencapaian": [
+            "Membaca suku kata ba, bi, bu, be, bo",
+            "Membaca kata dua suku kata",
+            "Membaca kata tiga suku kata",
+            "Membaca dengan lafal yang jelas"
+          ]
+        },
+        {
+          "kode": "TP-BINDO-005",
+          "deskripsi": "Peserta didik dapat membaca kalimat sederhana dengan benar.",
+          "indikator_pencapaian": [
+            "Membaca kalimat 3-5 kata",
+            "Membaca kalimat dengan intonasi benar",
+            "Memahami makna kalimat yang dibaca",
+            "Menjawab pertanyaan tentang bacaan"
+          ]
+        },
+        {
+          "kode": "TP-BINDO-006",
+          "deskripsi": "Peserta didik dapat menulis huruf dan kata dengan benar.",
+          "indikator_pencapaian": [
+            "Menulis huruf dengan bentuk benar",
+            "Menulis kata dengan ejaan benar",
+            "Menulis dengan ukuran huruf yang konsisten",
+            "Menulis dengan rapi dan dapat dibaca"
+          ]
+        },
+        {
+          "kode": "TP-BINDO-007",
+          "deskripsi": "Peserta didik dapat menyalin kalimat sederhana dengan tulisan yang dapat dibaca.",
+          "indikator_pencapaian": [
+            "Menyalin kalimat dari papan tulis",
+            "Menyalin kalimat dari buku",
+            "Menulis dengan jarak antar kata yang tepat",
+            "Menggunakan tanda baca sederhana"
+          ]
+        },
+        {
+          "kode": "TP-BINDO-008",
+          "deskripsi": "Peserta didik dapat menulis kalimat sederhana berdasarkan gambar.",
+          "indikator_pencapaian": [
+            "Mengamati gambar dengan teliti",
+            "Menyusun kalimat tentang gambar",
+            "Menulis kalimat dengan ejaan benar",
+            "Membacakan hasil tulisan kepada teman"
+          ]
+        }
+      ]
+    }
+  }
+}
