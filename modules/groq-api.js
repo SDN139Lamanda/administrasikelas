@@ -7,16 +7,15 @@
 
 console.log('🔴 [Groq API] Script START');
 
-// ✅ GROQ API CONFIG — UPDATED ENDPOINT & MODEL
+// ✅ GROQ API CONFIG — FIXED MODEL & LIMITS
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
-const GROQ_MODEL = 'llama-3.1-70b-versatile'; // ✅ Model lebih stabil
+const GROQ_MODEL = 'llama-3.1-70b-versatile'; // ✅ Model yang stabil & support ID
 
 /**
  * Get Groq API key from localStorage
  */
 export function getGroqApiKey() {
-  const key = localStorage.getItem('groq_api_key');
-  return key || null;
+  return localStorage.getItem('groq_api_key') || null;
 }
 
 /**
@@ -40,75 +39,51 @@ export function clearGroqApiKey() {
  */
 export function hasGroqApiKey() {
   const key = getGroqApiKey();
-  // ✅ Valid Groq key: starts with 'gsk_' and min 20 chars
-  const valid = key && key.length >= 20 && key.startsWith('gsk_');
-  console.log('🔑 [Groq API] Has valid key:', valid);
-  console.log('🔑 [Groq API] Key length:', key?.length);
-  console.log('🔑 [Groq API] Key starts with gsk_:', key?.startsWith('gsk_'));
-  return valid;
+  return key && key.length >= 20 && key.startsWith('gsk_');
 }
 
 /**
- * Build prompt for CP/TP/ATP generation
+ * ✅ FIXED: Build prompt — COMPACT VERSION (under 6000 tokens)
  */
 function buildPrompt(data) {
-  return `Anda adalah asisten guru profesional yang ahli dalam Kurikulum Merdeka Indonesia.
+  return `Anda asisten guru Kurikulum Merdeka. Buat CP/TP/ATP singkat.
 
-Tugas: Buat dokumen CP/TP/ATP lengkap untuk pembelajaran.
+DATA:
+Sekolah: ${data.sekolah} | Jenjang: ${data.jenjang?.toUpperCase()} | Kelas: ${data.kelas}
+Semester: ${data.semester === '1' ? '1' : '2'} | Mapel: ${data.mapel} | Topik: ${data.topik}
 
-DATA PEMBELAJARAN:
-- Sekolah: ${data.sekolah}
-- Jenjang: ${data.jenjang?.toUpperCase() || '-'}
-- Kelas: ${data.kelas || '-'}
-- Semester: ${data.semester === '1' ? '1 (Ganjil)' : '2 (Genap)'}
-- Mata Pelajaran: ${data.mapel || '-'}
-- Topik/Materi: ${data.topik || '-'}
-- Guru: ${data.guru || '-'}
-- Tahun Ajaran: ${data.tahun || '2025/2026'}
+OUTPUT FORMAT (singkat, jelas):
 
-FORMAT OUTPUT (WAJIB IKUTI STRUKTUR INI):
+=== CP ===
+Fase: [sesuai kelas]
+• [Elemen 1]: [capaian singkat]
+  Indikator: • [indikator 1] • [indikator 2]
+• [Elemen 2]: [capaian singkat]
+  Indikator: • [indikator 1] • [indikator 2]
 
-═══════════════════════════════════════════════════════════
-CAPAIAN PEMBELAJARAN (CP)
-═══════════════════════════════════════════════════════════
+=== TP ===
+• [TP 1]
+  Indikator: • [indikator 1] • [indikator 2]
+• [TP 2]
+  Indikator: • [indikator 1] • [indikator 2]
 
-Fase: [Fase sesuai kelas]
-Elemen:
-1. [Nama Elemen]
-   [Deskripsi capaian pembelajaran detail minimal 100 kata]
-   Indikator:
-   • [Indikator 1]
-   • [Indikator 2]
+=== ATP ===
+Minggu 1: [tujuan]
+• Kegiatan: [kegiatan 1], [kegiatan 2]
+• Asesmen: [asesmen]
+Minggu 2: [tujuan]
+• Kegiatan: [kegiatan 1], [kegiatan 2]
+• Asesmen: [asesmen]
 
-[Minimal 3 elemen sesuai mapel]
-
-═══════════════════════════════════════════════════════════
-TUJUAN PEMBELAJARAN (TP)
-═══════════════════════════════════════════════════════════
-
-[Minimal 5-8 tujuan pembelajaran]
-
-═══════════════════════════════════════════════════════════
-ALUR TUJUAN PEMBELAJARAN (ATP)
-═══════════════════════════════════════════════════════════
-
-[Minimal 8-12 minggu dengan kegiatan dan asesmen]
-
-Bahasa: Indonesia formal.
-Panjang: Minimal 1500 kata.`;
+Bahasa: Indonesia. Total: ~800 kata.`;
 }
 
 /**
- * ✅ TEST API KEY FIRST — Before generate
+ * Test Groq API connection
  */
 export async function testGroqConnection() {
   const apiKey = getGroqApiKey();
-  if (!apiKey) {
-    console.error('❌ [Groq API] No API key for test');
-    return { success: false, error: 'API key tidak ditemukan' };
-  }
-  
-  console.log('🧪 [Groq API] Testing connection...');
+  if (!apiKey) return { success: false, error: 'API key tidak ditemukan' };
   
   try {
     const response = await fetch(GROQ_API_URL, {
@@ -120,32 +95,21 @@ export async function testGroqConnection() {
       body: JSON.stringify({
         model: GROQ_MODEL,
         messages: [{ role: 'user', content: 'Hello' }],
-        max_tokens: 10
+        max_tokens: 50
       })
     });
     
-    console.log('📊 [Groq API] Test response:', response.status);
+    if (response.ok) return { success: true };
     
-    if (response.ok) {
-      console.log('✅ [Groq API] Connection successful!');
-      return { success: true };
-    } else {
-      const errorData = await response.json().catch(() => ({}));
-      console.error('❌ [Groq API] Test failed:', errorData);
-      
-      if (response.status === 401) {
-        return { success: false, error: 'API Key tidak valid (401)' };
-      } else if (response.status === 404) {
-        return { success: false, error: 'API endpoint tidak ditemukan (404)' };
-      } else if (response.status === 429) {
-        return { success: false, error: 'Quota API habis (429)' };
-      } else {
-        return { success: false, error: `Groq API Error: ${response.status}` };
-      }
-    }
-  } catch (error) {
-    console.error('❌ [Groq API] Test error:', error);
-    return { success: false, error: 'Koneksi internet bermasalah' };
+    const error = await response.json().catch(() => ({}));
+    return { 
+      success: false, 
+      error: response.status === 401 ? 'API Key invalid' : 
+             response.status === 429 ? 'Quota habis' : 
+             `Error: ${response.status}`
+    };
+  } catch (e) {
+    return { success: false, error: 'Koneksi bermasalah' };
   }
 }
 
@@ -156,44 +120,21 @@ export async function generateWithGroq(inputData) {
   const apiKey = getGroqApiKey();
   
   console.log('🤖 [Groq API] Starting generation...');
-  console.log('🔑 [Groq API] API Key exists:', !!apiKey);
-  console.log('🔑 [Groq API] API Key length:', apiKey?.length);
-  console.log('🔑 [Groq API] API Key starts with gsk_:', apiKey?.startsWith('gsk_'));
+  console.log('🔑 [Groq API] Key valid:', hasGroqApiKey());
+  console.log('🤖 [Groq API] Model:', GROQ_MODEL);
   
-  // ✅ VALIDATE API KEY
-  if (!apiKey) {
-    console.error('❌ [Groq API] No API key!');
-    throw new Error('Groq API key tidak ditemukan. Silakan input API key di modal profil.');
+  if (!apiKey || !hasGroqApiKey()) {
+    throw new Error('Groq API key tidak valid. Input ulang di modal profil.');
   }
   
-  if (!apiKey.startsWith('gsk_')) {
-    console.error('❌ [Groq API] Invalid key format!');
-    throw new Error('Groq API key tidak valid (harus dimulai dengan gsk_)');
+  // ✅ Test connection first
+  const test = await testGroqConnection();
+  if (!test.success) {
+    throw new Error(test.error);
   }
-  
-  if (apiKey.length < 20) {
-    console.error('❌ [Groq API] Key too short!');
-    throw new Error('Groq API key terlalu pendek. Copy ulang dari console.groq.com');
-  }
-  
-  // ✅ TEST CONNECTION FIRST
-  console.log('🧪 [Groq API] Testing connection before generate...');
-  const testResult = await testGroqConnection();
-  if (!testResult.success) {
-    console.error('❌ [Groq API] Connection test failed:', testResult.error);
-    throw new Error(testResult.error);
-  }
-  console.log('✅ [Groq API] Connection test passed!');
   
   const prompt = buildPrompt(inputData);
-  
-  console.log('🌐 [Groq API] URL:', GROQ_API_URL);
-  console.log('🤖 [Groq API] Model:', GROQ_MODEL);
-  console.log('📝 [Groq API] Input:', { 
-    jenjang: inputData.jenjang, 
-    kelas: inputData.kelas, 
-    mapel: inputData.mapel 
-  });
+  console.log('📝 [Groq API] Prompt length:', prompt.length, 'chars');
   
   try {
     const response = await fetch(GROQ_API_URL, {
@@ -203,65 +144,50 @@ export async function generateWithGroq(inputData) {
         'Authorization': `Bearer ${apiKey}`
       },
       body: JSON.stringify({
-        model: GROQ_MODEL,
+        model: GROQ_MODEL, // ✅ Explicit model name
         messages: [
-          {
-            role: 'system',
-            content: 'Anda adalah asisten guru profesional yang ahli dalam Kurikulum Merdeka Indonesia. Buat dokumen CP/TP/ATP lengkap, detail, dan sesuai standar Kemendikbudristek.'
-          },
-          {
-            role: 'user',
-            content: prompt
-          }
+          { role: 'system', content: 'Asisten guru Kurikulum Merdeka. Jawaban singkat, jelas, bahasa Indonesia.' },
+          { role: 'user', content: prompt }
         ],
         temperature: 0.7,
-        max_tokens: 4096,
+        max_tokens: 2048, // ✅ Reduced from 4096 to avoid token limit
         top_p: 1,
         stream: false
       })
     });
     
-    console.log('📊 [Groq API] Response status:', response.status, response.statusText);
+    console.log('📊 [Groq API] Status:', response.status);
     
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      console.error('❌ [Groq API] API Error:', errorData);
+      const error = await response.json().catch(() => ({}));
       
-      let errorMessage = `Groq API Error: ${response.status}`;
-      
-      if (response.status === 401) {
-        errorMessage = 'API Key TIDAK VALID. Silakan: 1) Buka console.groq.com/keys 2) Buat API key baru 3) Input ulang di modal profil';
-      } else if (response.status === 404) {
-        errorMessage = 'API endpoint tidak ditemukan. Kemungkinan: 1) API key invalid 2) Model tidak tersedia. Coba buat API key baru di console.groq.com';
+      if (response.status === 413 || error.error?.code === 'request_too_large') {
+        throw new Error('Request terlalu besar. Coba dengan topik lebih spesifik.');
+      } else if (response.status === 401) {
+        throw new Error('API Key tidak valid. Buat baru di console.groq.com/keys');
       } else if (response.status === 429) {
-        errorMessage = 'Quota Groq API habis (14,400 req/hari). Tunggu 24 jam atau buat API key baru.';
-      } else if (response.status === 500) {
-        errorMessage = 'Groq server error. Coba lagi nanti.';
+        throw new Error('Quota Groq habis. Tunggu 24 jam atau buat key baru.');
+      } else if (response.status === 404) {
+        throw new Error('Model tidak tersedia. Cek console.groq.com/models');
       }
       
-      throw new Error(errorMessage);
+      throw new Error(`Groq API Error: ${response.status}`);
     }
     
     const data = await response.json();
-    console.log('✅ [Groq API] Response received:', data);
-    
     const aiResponse = data.choices?.[0]?.message?.content;
     
-    if (!aiResponse) {
-      console.error('❌ [Groq API] Empty response!');
-      throw new Error('Response AI kosong');
-    }
+    if (!aiResponse) throw new Error('Response AI kosong');
     
-    console.log('📝 [Groq API] Response length:', aiResponse.length);
+    console.log('✅ [Groq API] Response received:', aiResponse.length, 'chars');
     
-    // Parse response
     return parseGroqResponse(aiResponse);
     
   } catch (error) {
-    console.error('❌ [Groq API] Error:', error.name, error.message);
+    console.error('❌ [Groq API] Error:', error.message);
     
-    if (error.name === 'TypeError' && error.message.includes('fetch')) {
-      throw new Error('Koneksi internet bermasalah. Cek koneksi HP Anda.');
+    if (error.name === 'TypeError') {
+      throw new Error('Koneksi internet bermasalah.');
     }
     
     throw error;
@@ -269,59 +195,41 @@ export async function generateWithGroq(inputData) {
 }
 
 /**
- * Parse Groq response into CP, TP, ATP sections
+ * Parse Groq response
  */
 function parseGroqResponse(text) {
-  console.log('🔍 [Groq API] Parsing response...');
-  
   let cp = '', tp = '', atp = '';
   
   try {
-    const cpMarkers = ['CAPAIAN PEMBELAJARAN', 'CAPAIAN PEMBELAJARAN (CP)'];
-    const tpMarkers = ['TUJUAN PEMBELAJARAN', 'TUJUAN PEMBELAJARAN (TP)'];
-    const atpMarkers = ['ALUR TUJUAN PEMBELAJARAN', 'ALUR TUJUAN PEMBELAJARAN (ATP)'];
+    const cpIdx = text.indexOf('=== CP ===');
+    const tpIdx = text.indexOf('=== TP ===');
+    const atpIdx = text.indexOf('=== ATP ===');
     
-    let cpIndex = -1, tpIndex = -1, atpIndex = -1;
+    if (cpIdx !== -1 && tpIdx !== -1) cp = text.substring(cpIdx, tpIdx).trim();
+    else if (cpIdx !== -1) cp = text.substring(cpIdx).split('===')[0].trim();
     
-    cpMarkers.forEach(m => { const i = text.indexOf(m); if (i !== -1 && (cpIndex === -1 || i < cpIndex)) cpIndex = i; });
-    tpMarkers.forEach(m => { const i = text.indexOf(m); if (i !== -1 && (tpIndex === -1 || i < tpIndex)) tpIndex = i; });
-    atpMarkers.forEach(m => { const i = text.indexOf(m); if (i !== -1 && (atpIndex === -1 || i < atpIndex)) atpIndex = i; });
+    if (tpIdx !== -1 && atpIdx !== -1) tp = text.substring(tpIdx, atpIdx).trim();
+    else if (tpIdx !== -1) tp = text.substring(tpIdx).split('===')[0].trim();
     
-    console.log('📍 [Groq API] Markers:', { cpIndex, tpIndex, atpIndex });
-    
-    if (cpIndex !== -1) {
-      const end = (tpIndex !== -1 && tpIndex > cpIndex) ? tpIndex : (atpIndex !== -1 ? atpIndex : text.length);
-      cp = text.substring(cpIndex, end).trim();
-    }
-    if (tpIndex !== -1) {
-      const end = (atpIndex !== -1 && atpIndex > tpIndex) ? atpIndex : text.length;
-      tp = text.substring(tpIndex, end).trim();
-    }
-    if (atpIndex !== -1) {
-      atp = text.substring(atpIndex).trim();
-    }
+    if (atpIdx !== -1) atp = text.substring(atpIdx).trim();
     
     if (!cp && !tp && !atp) {
-      console.log('⚠️ [Groq API] Markers not found, using fallback');
-      const parts = text.split(/\n\s*\n/).filter(p => p.trim().length > 0);
+      const parts = text.split(/\n\s*\n/).filter(p => p.trim());
       if (parts.length >= 3) {
         const third = Math.ceil(parts.length / 3);
         cp = parts.slice(0, third).join('\n\n');
-        tp = parts.slice(third, third * 2).join('\n\n');
-        atp = parts.slice(third * 2).join('\n\n');
+        tp = parts.slice(third, third*2).join('\n\n');
+        atp = parts.slice(third*2).join('\n\n');
       } else {
         cp = text;
       }
     }
-    
-    console.log('✅ [Groq API] Parse result:', { cpLength: cp.length, tpLength: tp.length, atpLength: atp.length });
-    
   } catch (e) {
-    console.error('❌ [Groq API] Parse error:', e);
+    console.error('❌ Parse error:', e);
     cp = text;
   }
   
-  return { cp: cp || text, tp: tp || '', atp: tp || '' };
+  return { cp: cp || text, tp: tp || '', atp: atp || '' };
 }
 
-console.log('🟢 [Groq API] READY — Model: llama-3.1-70b-versatile');
+console.log('🟢 [Groq API] READY — Model: llama-3.1-70b-versatile, max_tokens: 2048');
