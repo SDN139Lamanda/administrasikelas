@@ -4,14 +4,14 @@
  * Platform Administrasi Kelas Digital
  * ============================================
  * FITUR:
- * - Auto-fill data user dari localStorage (modal)
- * - MOCK MODE ONLY (Load from JSON files)
- * - Editable fields (user bisa ubah auto-fill)
- * - Integrasi dengan cta-loader.js & cta-templates.js
+ * - HYBRID MODE: Mock JSON + Groq AI
+ * - Auto-fill data user dari localStorage
+ * - Toggle antara Mock dan AI
+ * - Fallback otomatis jika AI gagal
  * ============================================
  */
 
-console.log('🔴 [CTA Generator] Script START — MOCK MODE');
+console.log('🔴 [CTA Generator] Script START — HYBRID MODE');
 
 // ✅ IMPORT MODULES
 import { 
@@ -27,11 +27,14 @@ import {
   getFase,
   formatMapelName,
   formatSemester,
-  buildKopDokumen,
-  generateHeader,
-  combineDokumen,
   validateInput
 } from './cta-templates.js';
+
+import {
+  hasGroqApiKey,
+  generateWithGroq,
+  testGroqConnection
+} from './groq-api.js';
 
 import { 
   db, 
@@ -49,29 +52,26 @@ import {
 
 console.log('✅ [CTA Generator] All imports successful');
 
+// ✅ GLOBAL STATE
+let useAIMode = false;
+
 // ✅ REGISTER GLOBAL FUNCTION
 window.renderCTAGenerator = function(jenjangFromParam, kelasFromParam, semesterFromParam) {
   console.log('📝 [CTA Generator] renderCTAGenerator() called');
-  console.log('📝 [CTA Generator] Params:', { jenjangFromParam, kelasFromParam, semesterFromParam });
   
   const container = document.getElementById('module-container');
-  if (!container) {
-    console.error('❌ [CTA Generator] Container not found!');
-    return;
-  }
+  if (!container) { console.error('❌ Container not found!'); return; }
   
   const user = auth.currentUser;
   
   // ✅ AMBIL DATA DARI MODAL (LOCALSTORAGE)
   const userNama = localStorage.getItem('user_nama_lengkap') || '';
-  const userNIP = localStorage.getItem('user_nip') || '';
-  const userKepsek = localStorage.getItem('user_nama_kepsek') || '';
-  const userNIPKepsek = localStorage.getItem('user_nip_kepsek') || '';
   const userSekolah = localStorage.getItem('user_nama_sekolah') || '';
+  const groqKeyExists = hasGroqApiKey();
   
-  console.log('👤 [CTA Generator] User data from modal:', { userNama, userSekolah });
+  console.log('👤 [CTA Generator] User data:', { userNama, userSekolah, groqKeyExists });
   
-  // ✅ PRELOAD DATA untuk performa (optional)
+  // ✅ PRELOAD DATA
   if (jenjangFromParam && kelasFromParam) {
     preloadData(jenjangFromParam, kelasFromParam);
   }
@@ -85,16 +85,14 @@ window.renderCTAGenerator = function(jenjangFromParam, kelasFromParam, semesterF
       .cta-generator-form label { display: block; margin-top: 12px; font-weight: 600; color: #374151; font-size: 14px; }
       .cta-generator-form select, .cta-generator-form input, .cta-generator-form textarea { width: 100%; margin-top: 8px; padding: 12px; border-radius: 8px; border: 1px solid #d1d5db; font-size: 14px; font-family: inherit; }
       .cta-generator-form textarea { min-height: 120px; resize: vertical; line-height: 1.6; }
-      .btn-generate, .btn-save, .btn-secondary { margin-top: 20px; padding: 14px 30px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; }
+      .btn-generate, .btn-save, .btn-secondary, .btn-toggle { margin-top: 20px; padding: 14px 30px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; }
       .btn-generate { background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%); color: white; }
-      .btn-generate:hover { background: linear-gradient(135deg, #0e7490 0%, #155e75 100%); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(8,145,178,0.3); }
+      .btn-generate:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(8,145,178,0.3); }
       .btn-save { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; }
-      .btn-save:hover { background: linear-gradient(135deg, #059669 0%, #047857 100%); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(16,185,129,0.3); }
       .btn-secondary { background: #6b7280; color: white; margin-top: 10px; }
-      .btn-secondary:hover { background: #4b5563; transform: translateY(-2px); }
-      .result-section { background: transparent; padding: 0; margin-top: 20px; }
+      .btn-toggle { background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); color: white; }
+      .btn-toggle.active { background: linear-gradient(135deg, #059669 0%, #047857 100%); }
       .btn-back { margin-top: 20px; padding: 12px 30px; background: #6b7280; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; width: auto; }
-      .btn-back:hover { background: #4b5563; }
       .hidden { display: none !important; }
       .auto-filled { background: #f0fdf4; border-color: #10b981 !important; }
       .grid-cols-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
@@ -103,11 +101,26 @@ window.renderCTAGenerator = function(jenjangFromParam, kelasFromParam, semesterF
       #result-cp, #result-tp, #result-atp { width: 100%; min-height: 200px; padding: 16px; border: 1px solid #e5e7eb; border-radius: 8px; font-family: monospace; font-size: 13px; line-height: 1.5; white-space: pre-wrap; margin-top: 8px; }
       .loading-spinner { text-align: center; padding: 40px; color: #6b7280; }
       .cta-item { background: white; padding: 20px; margin-top: 15px; border-radius: 8px; border-left: 4px solid #0891b2; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+      .mode-indicator { display: inline-block; padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; margin-left: 12px; }
+      .mode-mock { background: #dbeafe; color: #1e40af; }
+      .mode-ai { background: #dcfce7; color: #166534; }
+      .ai-status { font-size: 12px; color: #6b7280; margin-top: 8px; }
     </style>
     
     <div class="cta-generator-form">
       <h2>📄 Generator CP/TP/ATP</h2>
-      <p class="subtitle">Buat Perangkat Pembelajaran dengan Template Kurikulum Merdeka</p>
+      <p class="subtitle">
+        Buat Perangkat Pembelajaran
+        <span class="mode-indicator ${useAIMode && groqKeyExists ? 'mode-ai' : 'mode-mock'}">
+          ${useAIMode && groqKeyExists ? '🤖 AI Mode' : '📦 Mock Mode'}
+        </span>
+      </p>
+      
+      <!-- ✅ TOGGLE AI MODE -->
+      <button type="button" id="btn-toggle-ai" class="btn-toggle ${useAIMode && groqKeyExists ? 'active' : ''}" onclick="toggleAIMode()">
+        <i class="fas fa-robot"></i> ${useAIMode && groqKeyExists ? 'AI Mode Aktif (Groq)' : 'Aktifkan AI Mode (Groq)'}
+      </button>
+      ${!groqKeyExists ? '<p class="ai-status">⚠️ Input API key di modal profil untuk aktifkan AI mode</p>' : ''}
       
       <button class="btn-back" onclick="backToDashboard()">
         <i class="fas fa-arrow-left mr-2"></i>Kembali ke Dashboard
@@ -239,7 +252,7 @@ window.renderCTAGenerator = function(jenjangFromParam, kelasFromParam, semesterF
     loadCTAData();
   }
   
-  console.log('✅ [CTA Generator] UI rendered & event handlers attached');
+  console.log('✅ [CTA Generator] UI rendered');
 };
 
 // ✅ HELPER: Hide Dashboard Sections
@@ -260,7 +273,27 @@ function setupEventHandlers() {
   if (btnRegenerate) btnRegenerate.addEventListener('click', handleGenerate);
 }
 
-// ✅ HANDLE GENERATE — LOAD FROM JSON MOCK DATA
+// ✅ GLOBAL FUNCTION: Toggle AI Mode
+window.toggleAIMode = async function() {
+  const groqKeyExists = hasGroqApiKey();
+  
+  if (!groqKeyExists) {
+    alert('⚠️ API Key Groq belum diinput!\n\nSilakan lengkapi data profil di modal pertama kali login untuk menambahkan API key Groq.');
+    return;
+  }
+  
+  useAIMode = !useAIMode;
+  
+  // Re-render to update UI
+  const jenjang = document.getElementById('cta-jenjang')?.value;
+  const kelas = document.getElementById('cta-kelas')?.value;
+  const semester = document.getElementById('cta-semester')?.value;
+  renderCTAGenerator(jenjang, kelas, semester);
+  
+  console.log('🔄 [CTA Generator] AI Mode toggled:', useAIMode);
+};
+
+// ✅ HANDLE GENERATE — HYBRID MODE
 async function handleGenerate() {
   console.log('🪄 [CTA Generator] Generate clicked');
   
@@ -288,27 +321,39 @@ async function handleGenerate() {
   if (resultDiv) resultDiv.classList.remove('hidden');
   
   // ✅ Show loading state
-  document.getElementById('result-cp').value = '⏳ Loading CP from template...';
-  document.getElementById('result-tp').value = '⏳ Loading TP from template...';
-  document.getElementById('result-atp').value = '⏳ Loading ATP from template...';
+  const mode = useAIMode && hasGroqApiKey() ? 'AI (Groq)' : 'Mock JSON';
+  document.getElementById('result-cp').value = `⏳ Loading CP from ${mode}...`;
+  document.getElementById('result-tp').value = `⏳ Loading TP from ${mode}...`;
+  document.getElementById('result-atp').value = `⏳ Loading ATP from ${mode}...`;
   resultDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
   
   try {
-    // ✅ LOAD DATA FROM JSON FILES
-    console.log('📂 [CTA Generator] Loading mock data for:', { jenjang, kelas, mapel });
+    let result;
     
-    const [cpData, tpData, atpData] = await Promise.all([
-      getCP(jenjang, kelas, mapel),
-      getTP(jenjang, kelas, mapel),
-      getATP(jenjang, kelas, mapel)
-    ]);
-    
-    if (!cpData || !tpData || !atpData) {
-      throw new Error(`Data template tidak ditemukan untuk ${mapel} Kelas ${kelas}. Pastikan file JSON sudah dibuat di folder data/${jenjang}/`);
+    // ✅ CHECK MODE
+    if (useAIMode && hasGroqApiKey()) {
+      // 🤖 AI MODE: Call Groq API
+      console.log('🤖 [CTA Generator] Using Groq AI mode');
+      
+      const inputData = { sekolah, jenjang, kelas, semester, mapel, guru, topik, tahun };
+      result = await generateWithGroq(inputData);
+      
+    } else {
+      // 📦 MOCK MODE: Load from JSON
+      console.log('📦 [CTA Generator] Using Mock JSON mode');
+      
+      const [cpData, tpData, atpData] = await Promise.all([
+        getCP(jenjang, kelas, mapel),
+        getTP(jenjang, kelas, mapel),
+        getATP(jenjang, kelas, mapel)
+      ]);
+      
+      if (!cpData || !tpData || !atpData) {
+        throw new Error(`Data template tidak ditemukan untuk ${mapel} Kelas ${kelas}.`);
+      }
+      
+      result = processContent(cpData, tpData, atpData, topik);
     }
-    
-    // ✅ PROCESS CONTENT (format & randomize)
-    const result = processContent(cpData, tpData, atpData, topik);
     
     // ✅ Display results
     document.getElementById('result-cp').value = result.cp;
@@ -319,6 +364,18 @@ async function handleGenerate() {
     
   } catch (error) {
     console.error('❌ [CTA Generator] Error:', error);
+    
+    // ✅ FALLBACK TO MOCK IF AI FAILS
+    if (useAIMode && hasGroqApiKey()) {
+      console.log('⚠️ [CTA Generator] AI failed, falling back to Mock');
+      alert('⚠️ Groq AI gagal: ' + error.message + '\n\nMenggunakan Mock JSON sebagai fallback...');
+      
+      // Retry with mock
+      useAIMode = false;
+      handleGenerate();
+      return;
+    }
+    
     document.getElementById('result-cp').value = '❌ Error: ' + error.message;
     document.getElementById('result-tp').value = '';
     document.getElementById('result-atp').value = '';
@@ -358,6 +415,7 @@ async function handleSave() {
       mapel: document.getElementById('cta-mapel')?.value,
       guru: document.getElementById('cta-guru')?.value,
       topik: document.getElementById('cta-topik')?.value,
+      mode: useAIMode && hasGroqApiKey() ? 'AI (Groq)' : 'Mock JSON',
       cp: cp,
       tp: tp,
       atp: atp,
@@ -381,7 +439,7 @@ async function handleSave() {
 function loadCTAData() {
   const list = document.getElementById('cta-list');
   const countSpan = document.getElementById('saved-count');
-  if (!list) { console.error('❌ [CTA Generator] List container not found!'); return; }
+  if (!list) { console.error('❌ List container not found!'); return; }
   
   const user = auth.currentUser;
   if (!user) {
@@ -410,11 +468,13 @@ function loadCTAData() {
         list.innerHTML = snapshot.docs.map(docSnap => {
           const d = docSnap.data();
           const date = d.createdAt?.toDate?.()?.toLocaleString('id-ID') || '-';
+          const modeBadge = d.mode ? `<span style="background:#dbeafe;color:#1e40af;padding:2px 8px;border-radius:10px;font-size:10px;">${d.mode}</span>` : '';
           return `
             <div class="cta-item">
               <div class="flex justify-between items-start mb-2">
                 <div>
                   <strong class="text-lg">${d.mapel?.toUpperCase() || '-'} - Kelas ${d.kelas}</strong>
+                  ${modeBadge}
                   <br><small class="text-gray-500">${d.userName} • ${d.sekolah || '-'}</small>
                 </div>
                 <small class="text-gray-400">${date}</small>
@@ -431,4 +491,4 @@ function loadCTAData() {
   })();
 }
 
-console.log('🟢 [CTA Generator] READY — MOCK MODE + JSON DATA LOADER');
+console.log('🟢 [CTA Generator] READY — HYBRID MODE (Mock + Groq AI)');
