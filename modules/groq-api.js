@@ -7,9 +7,9 @@
 
 console.log('🔴 [Groq API] Script START');
 
-// ✅ GROQ API CONFIG — FIXED MODEL & LIMITS
+// ✅ GROQ API CONFIG — STABLE MODEL
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
-const GROQ_MODEL = 'llama-3.1-70b-versatile'; // ✅ Model yang stabil & support ID
+const GROQ_MODEL = 'llama-3.1-8b-instant'; // ✅ Model paling stabil & cepat
 
 /**
  * Get Groq API key from localStorage
@@ -43,39 +43,35 @@ export function hasGroqApiKey() {
 }
 
 /**
- * ✅ FIXED: Build prompt — COMPACT VERSION (under 6000 tokens)
+ * ✅ FIXED: Escape special characters in prompt
+ */
+function escapePrompt(text) {
+  return text
+    .replace(/\\/g, '\\\\')  // Escape backslash
+    .replace(/"/g, '\\"')    // Escape double quotes
+    .replace(/\n/g, '\\n')   // Escape newlines for JSON
+    .replace(/\r/g, '\\r')   // Escape carriage return
+    .replace(/\t/g, '\\t');  // Escape tabs
+}
+
+/**
+ * ✅ FIXED: Build prompt — SIMPLE & SAFE
  */
 function buildPrompt(data) {
-  return `Anda asisten guru Kurikulum Merdeka. Buat CP/TP/ATP singkat.
+  // ✅ Simple, safe prompt without special chars
+  const jenjang = (data.jenjang || '').toUpperCase();
+  const semester = data.semester === '1' ? '1' : '2';
+  
+  return `Buat CP/TP/ATP Kurikulum Merdeka singkat.
 
-DATA:
-Sekolah: ${data.sekolah} | Jenjang: ${data.jenjang?.toUpperCase()} | Kelas: ${data.kelas}
-Semester: ${data.semester === '1' ? '1' : '2'} | Mapel: ${data.mapel} | Topik: ${data.topik}
+Data: ${data.sekolah}, ${jenjang} Kelas ${data.kelas}, Semester ${semester}, ${data.mapel}, Topik: ${data.topik}
 
-OUTPUT FORMAT (singkat, jelas):
+Format:
+CP: Fase [X], 3 elemen dengan indikator singkat
+TP: 5 tujuan dengan indikator
+ATP: 8 minggu dengan kegiatan dan asesmen
 
-=== CP ===
-Fase: [sesuai kelas]
-• [Elemen 1]: [capaian singkat]
-  Indikator: • [indikator 1] • [indikator 2]
-• [Elemen 2]: [capaian singkat]
-  Indikator: • [indikator 1] • [indikator 2]
-
-=== TP ===
-• [TP 1]
-  Indikator: • [indikator 1] • [indikator 2]
-• [TP 2]
-  Indikator: • [indikator 1] • [indikator 2]
-
-=== ATP ===
-Minggu 1: [tujuan]
-• Kegiatan: [kegiatan 1], [kegiatan 2]
-• Asesmen: [asesmen]
-Minggu 2: [tujuan]
-• Kegiatan: [kegiatan 1], [kegiatan 2]
-• Asesmen: [asesmen]
-
-Bahasa: Indonesia. Total: ~800 kata.`;
+Bahasa Indonesia, total ~500 kata.`;
 }
 
 /**
@@ -88,26 +84,17 @@ export async function testGroqConnection() {
   try {
     const response = await fetch(GROQ_API_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
-      },
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
       body: JSON.stringify({
         model: GROQ_MODEL,
-        messages: [{ role: 'user', content: 'Hello' }],
-        max_tokens: 50
+        messages: [{ role: 'user', content: 'Hi' }],
+        max_tokens: 20
       })
     });
     
     if (response.ok) return { success: true };
-    
-    const error = await response.json().catch(() => ({}));
-    return { 
-      success: false, 
-      error: response.status === 401 ? 'API Key invalid' : 
-             response.status === 429 ? 'Quota habis' : 
-             `Error: ${response.status}`
-    };
+    const err = await response.json().catch(() => ({}));
+    return { success: false, error: `Status ${response.status}: ${err.error?.message || ''}` };
   } catch (e) {
     return { success: false, error: 'Koneksi bermasalah' };
   }
@@ -130,11 +117,29 @@ export async function generateWithGroq(inputData) {
   // ✅ Test connection first
   const test = await testGroqConnection();
   if (!test.success) {
-    throw new Error(test.error);
+    throw new Error('Test koneksi gagal: ' + test.error);
   }
   
-  const prompt = buildPrompt(inputData);
-  console.log('📝 [Groq API] Prompt length:', prompt.length, 'chars');
+  // ✅ Build & escape prompt
+  const rawPrompt = buildPrompt(inputData);
+  const prompt = escapePrompt(rawPrompt);
+  
+  console.log('📝 [Groq API] Prompt length:', rawPrompt.length, 'chars');
+  
+  // ✅ Build request body
+  const requestBody = {
+    model: GROQ_MODEL,
+    messages: [
+      { role: 'system', content: 'Asisten guru Kurikulum Merdeka. Jawaban singkat, jelas, bahasa Indonesia.' },
+      { role: 'user', content: rawPrompt } // ✅ Use raw prompt (fetch handles encoding)
+    ],
+    temperature: 0.7,
+    max_tokens: 1024, // ✅ Small for 8b-instant model
+    top_p: 1,
+    stream: false
+  };
+  
+  console.log('📦 [Groq API] Request body size:', JSON.stringify(requestBody).length, 'bytes');
   
   try {
     const response = await fetch(GROQ_API_URL, {
@@ -143,51 +148,55 @@ export async function generateWithGroq(inputData) {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${apiKey}`
       },
-      body: JSON.stringify({
-        model: GROQ_MODEL, // ✅ Explicit model name
-        messages: [
-          { role: 'system', content: 'Asisten guru Kurikulum Merdeka. Jawaban singkat, jelas, bahasa Indonesia.' },
-          { role: 'user', content: prompt }
-        ],
-        temperature: 0.7,
-        max_tokens: 2048, // ✅ Reduced from 4096 to avoid token limit
-        top_p: 1,
-        stream: false
-      })
+      body: JSON.stringify(requestBody)
     });
     
-    console.log('📊 [Groq API] Status:', response.status);
+    console.log('📊 [Groq API] Response status:', response.status, response.statusText);
     
     if (!response.ok) {
-      const error = await response.json().catch(() => ({}));
+      const errorData = await response.json().catch(() => ({}));
+      console.error('❌ [Groq API] Error response:', errorData);
       
-      if (response.status === 413 || error.error?.code === 'request_too_large') {
-        throw new Error('Request terlalu besar. Coba dengan topik lebih spesifik.');
-      } else if (response.status === 401) {
+      const status = response.status;
+      const errorMsg = errorData.error?.message || '';
+      
+      if (status === 400) {
+        if (errorMsg.includes('model')) {
+          throw new Error('Model tidak tersedia. Coba ganti model di kode.');
+        } else if (errorMsg.includes('messages') || errorMsg.includes('format')) {
+          throw new Error('Format request tidak valid. Coba refresh halaman.');
+        } else {
+          throw new Error('Request tidak valid (400). Coba dengan topik lebih sederhana.');
+        }
+      } else if (status === 401) {
         throw new Error('API Key tidak valid. Buat baru di console.groq.com/keys');
-      } else if (response.status === 429) {
+      } else if (status === 429) {
         throw new Error('Quota Groq habis. Tunggu 24 jam atau buat key baru.');
-      } else if (response.status === 404) {
-        throw new Error('Model tidak tersedia. Cek console.groq.com/models');
+      } else if (status === 413) {
+        throw new Error('Request terlalu besar. Gunakan topik lebih spesifik.');
       }
       
-      throw new Error(`Groq API Error: ${response.status}`);
+      throw new Error(`Groq API Error ${status}: ${errorMsg || 'Unknown error'}`);
     }
     
     const data = await response.json();
+    console.log('✅ [Groq API] Response received:', data);
+    
     const aiResponse = data.choices?.[0]?.message?.content;
     
-    if (!aiResponse) throw new Error('Response AI kosong');
+    if (!aiResponse) {
+      throw new Error('Response AI kosong');
+    }
     
-    console.log('✅ [Groq API] Response received:', aiResponse.length, 'chars');
+    console.log('📝 [Groq API] Response length:', aiResponse.length, 'chars');
     
     return parseGroqResponse(aiResponse);
     
   } catch (error) {
-    console.error('❌ [Groq API] Error:', error.message);
+    console.error('❌ [Groq API] Error:', error.name, error.message);
     
-    if (error.name === 'TypeError') {
-      throw new Error('Koneksi internet bermasalah.');
+    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+      throw new Error('Koneksi internet bermasalah. Cek koneksi Anda.');
     }
     
     throw error;
@@ -198,38 +207,52 @@ export async function generateWithGroq(inputData) {
  * Parse Groq response
  */
 function parseGroqResponse(text) {
+  console.log('🔍 [Groq API] Parsing response...');
+  
   let cp = '', tp = '', atp = '';
   
   try {
-    const cpIdx = text.indexOf('=== CP ===');
-    const tpIdx = text.indexOf('=== TP ===');
-    const atpIdx = text.indexOf('=== ATP ===');
+    // ✅ Simple parsing with clear markers
+    const parts = text.split(/===\s*(CP|TP|ATP)\s*===/i).filter(p => p.trim());
     
-    if (cpIdx !== -1 && tpIdx !== -1) cp = text.substring(cpIdx, tpIdx).trim();
-    else if (cpIdx !== -1) cp = text.substring(cpIdx).split('===')[0].trim();
+    for (let i = 0; i < parts.length; i++) {
+      const marker = parts[i]?.trim().toUpperCase();
+      const content = parts[i + 1]?.trim() || '';
+      
+      if (marker === 'CP') cp = content;
+      else if (marker === 'TP') tp = content;
+      else if (marker === 'ATP') atp = content;
+    }
     
-    if (tpIdx !== -1 && atpIdx !== -1) tp = text.substring(tpIdx, atpIdx).trim();
-    else if (tpIdx !== -1) tp = text.substring(tpIdx).split('===')[0].trim();
-    
-    if (atpIdx !== -1) atp = text.substring(atpIdx).trim();
-    
+    // ✅ Fallback: split by double newlines
     if (!cp && !tp && !atp) {
-      const parts = text.split(/\n\s*\n/).filter(p => p.trim());
-      if (parts.length >= 3) {
-        const third = Math.ceil(parts.length / 3);
-        cp = parts.slice(0, third).join('\n\n');
-        tp = parts.slice(third, third*2).join('\n\n');
-        atp = parts.slice(third*2).join('\n\n');
+      const lines = text.split(/\n\s*\n/).filter(l => l.trim());
+      if (lines.length >= 3) {
+        const third = Math.ceil(lines.length / 3);
+        cp = lines.slice(0, third).join('\n\n');
+        tp = lines.slice(third, third * 2).join('\n\n');
+        atp = lines.slice(third * 2).join('\n\n');
       } else {
         cp = text;
       }
     }
+    
+    console.log('✅ [Groq API] Parse result:', { 
+      cpLength: cp?.length || 0, 
+      tpLength: tp?.length || 0, 
+      atpLength: atp?.length || 0 
+    });
+    
   } catch (e) {
-    console.error('❌ Parse error:', e);
+    console.error('❌ [Groq API] Parse error:', e);
     cp = text;
   }
   
-  return { cp: cp || text, tp: tp || '', atp: atp || '' };
+  return { 
+    cp: cp || 'CP tidak tersedia', 
+    tp: tp || 'TP tidak tersedia', 
+    atp: atp || 'ATP tidak tersedia' 
+  };
 }
 
-console.log('🟢 [Groq API] READY — Model: llama-3.1-70b-versatile, max_tokens: 2048');
+console.log('🟢 [Groq API] READY — Model: llama-3.1-8b-instant, max_tokens: 1024');
