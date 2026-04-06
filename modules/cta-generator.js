@@ -4,16 +4,14 @@
  * Platform Administrasi Kelas Digital
  * ============================================
  * FITUR:
- * - AI-ONLY: 100% menggunakan Groq AI
- * - NO Mock JSON fallback
- * - Simple & clean code
- * - Clear error messages
+ * - AI-Powered Generation
+ * - Clean Commercial UI
+ * - No external branding
  * ============================================
  */
 
-console.log('🔴 [CTA Generator] Script START — AI-ONLY MODE');
+console.log('🔴 [CTA Generator] Script START');
 
-// ✅ IMPORT MODULES
 import {
   hasGroqApiKey,
   generateWithGroq
@@ -39,7 +37,6 @@ import {
 
 console.log('✅ [CTA Generator] All imports successful');
 
-// ✅ REGISTER GLOBAL FUNCTION
 window.renderCTAGenerator = function(jenjangFromParam, kelasFromParam, semesterFromParam) {
   console.log('📝 [CTA Generator] renderCTAGenerator() called');
   
@@ -47,14 +44,12 @@ window.renderCTAGenerator = function(jenjangFromParam, kelasFromParam, semesterF
   if (!container) { console.error('❌ Container not found!'); return; }
   
   const user = auth.currentUser;
-  
-  // ✅ AMBIL DATA DARI MODAL (LOCALSTORAGE)
   const userNama = localStorage.getItem('user_nama_lengkap') || '';
   const userSekolah = localStorage.getItem('user_nama_sekolah') || '';
   const groqKeyExists = hasGroqApiKey();
   
   console.log('👤 [CTA Generator] User ', { userNama, userSekolah });
-  console.log('🔑 [CTA Generator] Has Groq Key:', groqKeyExists);
+  console.log('🤖 [CTA Generator] AI Ready:', groqKeyExists);
   
   container.innerHTML = `
     <style>
@@ -64,7 +59,8 @@ window.renderCTAGenerator = function(jenjangFromParam, kelasFromParam, semesterF
       .section-title { font-size: 18px; font-weight: 700; color: #374151; margin: 25px 0 15px 0; padding-bottom: 8px; border-bottom: 2px solid #e5e7eb; display: flex; align-items: center; gap: 8px; }
       .cta-generator-form label { display: block; margin-top: 12px; font-weight: 600; color: #374151; font-size: 14px; }
       .cta-generator-form select, .cta-generator-form input, .cta-generator-form textarea { width: 100%; margin-top: 8px; padding: 12px; border-radius: 8px; border: 1px solid #d1d5db; font-size: 14px; font-family: inherit; }
-      .cta-generator-form textarea { min-height: 120px; resize: vertical; line-height: 1.6; }
+      .cta-generator-form textarea { min-height: 200px; resize: vertical; line-height: 1.6; background: #f9fafb; }
+      .cta-generator-form textarea:focus { outline: none; border-color: #0891b2; background: white; }
       .btn-generate, .btn-save, .btn-secondary { margin-top: 20px; padding: 14px 30px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; }
       .btn-generate { background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%); color: white; }
       .btn-generate:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(8,145,178,0.3); }
@@ -79,45 +75,44 @@ window.renderCTAGenerator = function(jenjangFromParam, kelasFromParam, semesterF
       .grid-cols-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
       .grid-cols-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
       @media (max-width: 768px) { .grid-cols-2, .grid-cols-3 { grid-template-columns: 1fr; } }
-      #result-cp, #result-tp, #result-atp { width: 100%; min-height: 200px; padding: 16px; border: 1px solid #e5e7eb; border-radius: 8px; font-family: monospace; font-size: 13px; line-height: 1.5; white-space: pre-wrap; margin-top: 8px; }
-      .loading-spinner { text-align: center; padding: 40px; color: #6b7280; }
       .cta-item { background: white; padding: 20px; margin-top: 15px; border-radius: 8px; border-left: 4px solid #0891b2; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-      .mode-badge { display: inline-block; padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; margin-left: 12px; background: #dcfce7; color: #166534; }
-      .api-warning { background: #fef3c7; padding: 16px; border-radius: 8px; margin-bottom: 20px; color: #92400e; font-size: 13px; border-left: 4px solid #f59e0b; }
+      .status-badge { display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 11px; font-weight: 600; margin-left: 8px; }
+      .status-ready { background: #dcfce7; color: #166534; }
+      .status-warning { background: #fef3c7; color: #92400e; }
+      .result-section { margin-top: 30px; }
+      .result-section h3 { color: #1f2937; margin-bottom: 16px; }
     </style>
     
     <div class="cta-generator-form">
       <h2>📄 Generator CP/TP/ATP</h2>
       <p class="subtitle">
         Buat Perangkat Pembelajaran dengan AI
-        <span class="mode-badge">🤖 Groq AI Mode</span>
+        ${groqKeyExists ? '<span class="status-badge status-ready">✅ AI Siap</span>' : '<span class="status-badge status-warning">⚠️ Setup Diperlukan</span>'}
       </p>
       
       ${!groqKeyExists ? `
-        <div class="api-warning">
-          <strong>⚠️ Groq API Key Tidak Ditemukan</strong><br><br>
-          Silakan input API key di modal profil untuk menggunakan generator ini.<br><br>
-          <strong>Cara mendapatkan API key gratis:</strong><br>
-          1. Buka <a href="https://console.groq.com/keys" target="_blank" style="color:#0891b2;text-decoration:underline;">console.groq.com/keys</a><br>
-          2. Login dengan Google/GitHub<br>
-          3. Klik "Create API Key"<br>
-          4. Copy key (dimulai dengan gsk_...)<br>
-          5. Clear localStorage: <code style="background:#fbbf24;padding:2px 6px;border-radius:4px;">localStorage.clear()</code><br>
-          6. Refresh halaman dan input key di modal
+        <div style="background:#fef3c7;padding:16px;border-radius:8px;margin-bottom:20px;color:#92400e;font-size:13px;border-left:4px solid #f59e0b;">
+          <strong>⚠️ Setup AI Diperlukan</strong><br><br>
+          Silakan input API key di modal profil untuk menggunakan fitur ini.<br><br>
+          <strong>Cara setup:</strong><br>
+          1. Clear localStorage: <code style="background:#fbbf24;padding:2px 6px;border-radius:4px;">localStorage.clear()</code><br>
+          2. Refresh halaman<br>
+          3. Input API key di modal yang muncul<br>
+          4. Simpan dan mulai generate
         </div>
-      ` : '<p style="background:#dcfce7;padding:12px;border-radius:8px;margin-bottom:20px;color:#166534;font-size:13px;">✅ Groq API key terdeteksi — AI siap digunakan!</p>'}
+      ` : '<div style="background:#dcfce7;padding:12px;border-radius:8px;margin-bottom:20px;color:#166534;font-size:13px;border-left:4px solid #10b981;">✅ AI aktif dan siap digunakan</div>'}
       
       <button class="btn-back" onclick="backToDashboard()">
         <i class="fas fa-arrow-left mr-2"></i>Kembali ke Dashboard
       </button>
       
       <form id="cta-form">
-        <div class="section-title"><i class="fas fa-university"></i><span>1. Informasi Sekolah (Auto-Fill)</span></div>
+        <div class="section-title"><i class="fas fa-university"></i><span>1. Informasi Sekolah</span></div>
         
         <div>
           <label for="kop-sekolah"><i class="fas fa-school mr-2"></i>Nama Sekolah</label>
           <input type="text" id="kop-sekolah" placeholder="Masukkan nama sekolah" value="${userSekolah}" class="${userSekolah ? 'auto-filled' : ''}" required>
-          ${userSekolah ? '<p style="font-size:11px;color:#10b981;margin-top:4px;">✅ Auto-filled dari modal (bisa diedit)</p>' : ''}
+          ${userSekolah ? '<p style="font-size:11px;color:#10b981;margin-top:4px;">✅ Auto-filled (bisa diedit)</p>' : ''}
         </div>
         
         <div class="grid-cols-2">
@@ -128,7 +123,7 @@ window.renderCTAGenerator = function(jenjangFromParam, kelasFromParam, semesterF
           <div>
             <label for="cta-guru"><i class="fas fa-chalkboard-teacher mr-2"></i>Nama Guru</label>
             <input type="text" id="cta-guru" placeholder="Opsional" value="${userNama}" class="${userNama ? 'auto-filled' : ''}">
-            ${userNama ? '<p style="font-size:11px;color:#10b981;margin-top:4px;">✅ Auto-filled dari modal (bisa diedit)</p>' : ''}
+            ${userNama ? '<p style="font-size:11px;color:#10b981;margin-top:4px;">✅ Auto-filled (bisa diedit)</p>' : ''}
           </div>
         </div>
         
@@ -220,7 +215,7 @@ window.renderCTAGenerator = function(jenjangFromParam, kelasFromParam, semesterF
       
       <div class="mt-12">
         <h3 class="text-xl font-bold mb-4 text-gray-800">
-          <i class="fas fa-archive mr-2"></i>CP/TP/ATP Tersimpan (<span id="saved-count">0</span>)
+          <i class="fas fa-archive mr-2"></i>Dokumen Tersimpan (<span id="saved-count">0</span>)
         </h3>
         <div id="cta-list" class="space-y-4">
           <div class="loading-spinner"><i class="fas fa-spinner fa-spin text-2xl mb-3"></i><p>Memuat...</p></div>
@@ -237,17 +232,15 @@ window.renderCTAGenerator = function(jenjangFromParam, kelasFromParam, semesterF
     loadCTAData();
   }
   
-  console.log('✅ [CTA Generator] UI rendered — AI-ONLY MODE');
+  console.log('✅ [CTA Generator] UI rendered');
 };
 
-// ✅ HELPER: Hide Dashboard Sections
 function hideDashboardSections() {
   document.querySelector('.dashboard-hero')?.closest('section')?.classList.add('hidden');
   document.querySelector('[aria-labelledby="rooms-heading"]')?.classList.add('hidden');
   document.querySelectorAll('#sd-section, #smp-section, #sma-section').forEach(s => s.classList.add('hidden'));
 }
 
-// ✅ HELPER: Setup Event Handlers
 function setupEventHandlers() {
   const btnGenerate = document.getElementById('btn-generate');
   const btnSave = document.getElementById('btn-save');
@@ -258,14 +251,12 @@ function setupEventHandlers() {
   if (btnRegenerate) btnRegenerate.addEventListener('click', handleGenerate);
 }
 
-// ✅ HANDLE GENERATE — AI-ONLY (NO FALLBACK)
 async function handleGenerate() {
   console.log('🪄 [CTA Generator] Generate clicked');
   
   const user = auth.currentUser;
   if (!user) { alert('⚠️ Silakan login dulu!'); return; }
   
-  // ✅ Get form values
   const jenjang = document.getElementById('cta-jenjang')?.value;
   const kelas = document.getElementById('cta-kelas')?.value;
   const semester = document.getElementById('cta-semester')?.value;
@@ -275,66 +266,58 @@ async function handleGenerate() {
   const guru = document.getElementById('cta-guru')?.value;
   const topik = document.getElementById('cta-topik')?.value;
   
-  // ✅ Validate input
   const validation = validateInput({ sekolah, jenjang, kelas, semester, mapel, topik });
   if (!validation.valid) {
     alert('⚠️ ' + validation.errors.join('\n'));
     return;
   }
   
-  // ✅ Check API Key
   const groqKeyExists = hasGroqApiKey();
   if (!groqKeyExists) {
-    alert('⚠️ Groq API Key tidak ditemukan!\n\nSilakan input API key di modal profil pertama kali login.');
+    alert('⚠️ Setup AI diperlukan. Silakan input API key di modal profil.');
     return;
   }
   
   const resultDiv = document.getElementById('cta-result');
   if (resultDiv) resultDiv.classList.remove('hidden');
   
-  // ✅ Show loading state
-  document.getElementById('result-cp').value = `⏳ Generating CP dengan Groq AI...`;
-  document.getElementById('result-tp').value = `⏳ Generating TP dengan Groq AI...`;
-  document.getElementById('result-atp').value = `⏳ Generating ATP dengan Groq AI...`;
+  document.getElementById('result-cp').value = `⏳ Generating CP...`;
+  document.getElementById('result-tp').value = `⏳ Generating TP...`;
+  document.getElementById('result-atp').value = `⏳ Generating ATP...`;
   resultDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
   
   try {
-    console.log('🤖 [CTA Generator] Calling Groq API...');
+    console.log('🤖 [CTA Generator] Calling AI...');
     
     const inputData = { sekolah, jenjang, kelas, semester, mapel, guru, topik, tahun };
     const result = await generateWithGroq(inputData);
     
-    // ✅ Display results
     document.getElementById('result-cp').value = result.cp;
     document.getElementById('result-tp').value = result.tp;
     document.getElementById('result-atp').value = result.atp;
     
-    console.log('✅ [CTA Generator] AI generation complete!');
-    console.log('📊 Result:', { cpLength: result.cp.length, tpLength: result.tp.length, atpLength: result.atp.length });
+    console.log('✅ [CTA Generator] Generation complete!');
     
   } catch (error) {
-    console.error('❌ [CTA Generator] Groq API Error:', error);
+    console.error('❌ [CTA Generator] Error:', error);
     
     let errorMessage = error.message;
-    
-    // ✅ User-friendly error messages
     if (error.message.includes('API key')) {
-      errorMessage = 'Groq API Key tidak valid. Silakan input ulang di modal profil.';
-    } else if (error.message.includes('quota') || error.message.includes('rate limit')) {
-      errorMessage = 'Quota Groq API habis (14,400 req/hari). Tunggu 24 jam atau gunakan API key baru.';
-    } else if (error.message.includes('network') || error.message.includes('fetch')) {
-      errorMessage = 'Koneksi internet bermasalah. Cek koneksi Anda.';
+      errorMessage = 'Setup AI diperlukan. Input API key di modal profil.';
+    } else if (error.message.includes('quota') || error.message.includes('429')) {
+      errorMessage = 'Limit AI harian habis. Tunggu 24 jam.';
+    } else if (error.message.includes('koneksi') || error.message.includes('network')) {
+      errorMessage = 'Koneksi internet bermasalah.';
     }
     
     document.getElementById('result-cp').value = `❌ Error: ${errorMessage}`;
     document.getElementById('result-tp').value = '';
     document.getElementById('result-atp').value = '';
     
-    alert('❌ Gagal generate dengan Groq AI:\n\n' + errorMessage + '\n\nSilakan cek console (F12) untuk detail error.');
+    alert('❌ Gagal generate:\n\n' + errorMessage);
   }
 }
 
-// ✅ HANDLE SAVE TO FIRESTORE
 async function handleSave() {
   console.log('💾 [CTA Generator] Save clicked');
   
@@ -366,7 +349,7 @@ async function handleSave() {
       mapel: document.getElementById('cta-mapel')?.value,
       guru: document.getElementById('cta-guru')?.value,
       topik: document.getElementById('cta-topik')?.value,
-      mode: 'AI (Groq)',
+      mode: 'AI',
       cp: cp,
       tp: tp,
       atp: atp,
@@ -376,7 +359,7 @@ async function handleSave() {
     });
     
     console.log('✅ [CTA Generator] Data saved!');
-    alert('✅ CP/TP/ATP berhasil disimpan!');
+    alert('✅ Berhasil disimpan!');
     loadCTAData();
     document.getElementById('cta-result').classList.add('hidden');
     document.getElementById('cta-form').reset();
@@ -386,7 +369,6 @@ async function handleSave() {
   }
 }
 
-// ✅ LOAD CTA DATA FROM FIRESTORE
 function loadCTAData() {
   const list = document.getElementById('cta-list');
   const countSpan = document.getElementById('saved-count');
@@ -412,20 +394,18 @@ function loadCTAData() {
       
       onSnapshot(q, (snapshot) => {
         if (snapshot.empty) {
-          list.innerHTML = `<div class="text-center py-8 text-gray-500"><p>Belum ada CP/TP/ATP tersimpan</p></div>`;
+          list.innerHTML = `<div class="text-center py-8 text-gray-500"><p>Belum ada dokumen tersimpan</p></div>`;
           return;
         }
         if (countSpan) countSpan.textContent = snapshot.docs.length;
         list.innerHTML = snapshot.docs.map(docSnap => {
           const d = docSnap.data();
           const date = d.createdAt?.toDate?.()?.toLocaleString('id-ID') || '-';
-          const modeBadge = d.mode ? `<span style="background:#dbeafe;color:#1e40af;padding:2px 8px;border-radius:10px;font-size:10px;">${d.mode}</span>` : '';
           return `
             <div class="cta-item">
               <div class="flex justify-between items-start mb-2">
                 <div>
                   <strong class="text-lg">${d.mapel?.toUpperCase() || '-'} - Kelas ${d.kelas}</strong>
-                  ${modeBadge}
                   <br><small class="text-gray-500">${d.userName} • ${d.sekolah || '-'}</small>
                 </div>
                 <small class="text-gray-400">${date}</small>
@@ -442,4 +422,4 @@ function loadCTAData() {
   })();
 }
 
-console.log('🟢 [CTA Generator] READY — AI-ONLY MODE (100% Groq AI)');
+console.log('🟢 [CTA Generator] READY — Commercial UI');
