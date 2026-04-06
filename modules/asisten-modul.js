@@ -1,635 +1,496 @@
 /**
  * ============================================
- * MODULE: ASISTEN MODUL AJAR (AI GENERATOR)
+ * MODULE: ASISTEN MODUL AJAR
  * Platform Administrasi Kelas Digital
  * ============================================
- * 
- * ✅ Adapted for True Modular Architecture
- * ✅ Renders to #module-container
- * ✅ All functions on window object for onclick
- * ✅ Sync navigation with dashboard
+ * FITUR:
+ * - Auto-fill data user dari localStorage (modal)
+ * - MOCK MODE ONLY (No API Key)
+ * - Editable fields (user bisa ubah auto-fill)
+ * - Isolasi data (userId-based)
+ * ============================================
  */
 
-console.log('🔴 [Generator AI] Script START');
+console.log('🔴 [Asisten Modul] Script START — MOCK MODE');
 
-// ✅ FIX: Import path corrected (modules folder)
-import { db, auth } from './firebase-config.js';
 import { 
-    collection, 
-    addDoc, 
-    getDocs, 
-    doc, 
-    deleteDoc, 
-    query, 
-    orderBy,
-    where
-} from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+  db, 
+  auth, 
+  collection, 
+  addDoc, 
+  query, 
+  where, 
+  orderBy, 
+  onSnapshot,
+  doc,
+  getDoc,
+  serverTimestamp 
+} from './firebase-config.js';
 
-const collectionName = "modul-ajar";
-const ADMIN_EMAIL = 'andi@139batuassung.com';
+console.log('✅ [Asisten Modul] Firebase imports successful');
 
-// ============================================
-// FUNGSI HELPER: CHECK STATUS DENGAN ADMIN BYPASS
-// ============================================
-function checkAccessPermission() {
-    const currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
-    const userEmail = currentUser?.email;
-    const isAdmin = userEmail === ADMIN_EMAIL;
-    
-    if (isAdmin) return true;
-    
-    if (currentUser?.status !== 'active') {
-        alert('⚠️ Fitur ini belum aktif. Akun Anda masih menunggu persetujuan admin.');
-        return false;
-    }
-    return true;
-}
-
-// ============================================
-// FUNGSI HELPER: ENABLE READ-ONLY VISUAL CUE
-// ============================================
-function enableReadOnlyVisual() {
-    document.querySelectorAll('button[onclick*="generateModul"], button[onclick*="saveToFirebase"], button[onclick*="deleteModul"]')
-        .forEach(btn => {
-            btn.disabled = true;
-            btn.classList.add('opacity-50', 'cursor-not-allowed');
-            btn.title = 'Fitur aktif setelah akun disetujui admin';
-        });
-    
-    document.querySelectorAll('#formModul input, #formModul textarea, #formModul select')
-        .forEach(input => {
-            input.disabled = true;
-            input.classList.add('bg-gray-100', 'cursor-not-allowed');
-        });
-    
-    console.log('🔒 [Generator AI] Read-only mode enabled');
-}
-
-// ============================================
-// ✅ FUNGSI BARU: BACK TO DASHBOARD (GLOBAL)
-// ============================================
-window.backToGeneratorModule = function() {
-    console.log('🏠 [Generator AI] Back to Dashboard called');
-    
-    // Hide module container
-    const container = document.getElementById('module-container');
-    if (container) {
-        container.classList.add('hidden');
-        container.innerHTML = '';
-    }
-    
-    // Show dashboard hero
-    const hero = document.querySelector('.dashboard-hero');
-    if (hero) hero.classList.remove('hidden');
-    
-    // Hide all sections except rooms section
-    document.querySelectorAll('.section').forEach(section => {
-        if (!section.querySelector('.rooms-grid') && section.id !== 'module-container') {
-            section.classList.add('hidden');
-        }
-    });
-    
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-};
-
-// ============================================
-// ✅ FUNGSI UTAMA: RENDER MODULE (ADAPTED)
-// ============================================
+// ✅ STEP 1: Register Global Function
 window.renderGeneratorModule = function() {
-    console.log('🎨 [Generator AI] Render called');
+  console.log('📝 [Asisten Modul] renderGeneratorModule() called');
+  
+  const container = document.getElementById('module-container');
+  if (!container) {
+    console.error('❌ Container not found!');
+    return;
+  }
+  
+  const user = auth.currentUser;
+  
+  // ✅ AMBIL DATA DARI MODAL (LOCALSTORAGE)
+  const userNama = localStorage.getItem('user_nama_lengkap') || '';
+  const userNIP = localStorage.getItem('user_nip') || '';
+  const userKepsek = localStorage.getItem('user_nama_kepsek') || '';
+  const userNIPKepsek = localStorage.getItem('user_nip_kepsek') || '';
+  const userSekolah = localStorage.getItem('user_nama_sekolah') || '';
+  
+  console.log('👤 [Asisten Modul] User data from modal:', { userNama, userSekolah });
+  
+  container.innerHTML = `
+    <style>
+      .modul-form { max-width: 900px; margin: auto; padding: 30px; background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+      .modul-form h2 { text-align: center; color: #7c3aed; margin-bottom: 10px; font-size: 28px; }
+      .subtitle { text-align: center; color: #6b7280; margin-bottom: 30px; }
+      .section-title { font-size: 18px; font-weight: 700; color: #374151; margin: 25px 0 15px 0; padding-bottom: 8px; border-bottom: 2px solid #e5e7eb; display: flex; align-items: center; gap: 8px; }
+      .modul-form label { display: block; margin-top: 12px; font-weight: 600; color: #374151; font-size: 14px; }
+      .modul-form select, .modul-form input, .modul-form textarea { width: 100%; margin-top: 8px; padding: 12px; border-radius: 8px; border: 1px solid #d1d5db; font-size: 14px; font-family: inherit; }
+      .modul-form textarea { min-height: 100px; resize: vertical; line-height: 1.6; }
+      .btn-generate, .btn-save, .btn-secondary { margin-top: 20px; padding: 14px 30px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; }
+      .btn-generate { background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); color: white; }
+      .btn-generate:hover { background: linear-gradient(135deg, #6d28d9 0%, #5b21b6 100%); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(124,58,237,0.3); }
+      .btn-save { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; }
+      .btn-save:hover { background: linear-gradient(135deg, #059669 0%, #047857 100%); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(16,185,129,0.3); }
+      .btn-secondary { background: #6b7280; color: white; margin-top: 10px; }
+      .btn-secondary:hover { background: #4b5563; transform: translateY(-2px); }
+      .result-section { background: #f5f3ff; padding: 20px; border-radius: 8px; margin-top: 20px; border: 1px solid #ddd6fe; }
+      .btn-back { margin-top: 20px; padding: 12px 30px; background: #6b7280; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; width: auto; }
+      .btn-back:hover { background: #4b5563; }
+      .hidden { display: none !important; }
+      .auto-filled { background: #f0fdf4; border-color: #10b981 !important; }
+      .grid-cols-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+      @media (max-width: 768px) { .grid-cols-2 { grid-template-columns: 1fr; } }
+    </style>
     
-    // Hide all sections except module-container
-    document.querySelectorAll('.section').forEach(section => {
-        if (section.id !== 'module-container') {
-            section.classList.add('hidden');
-        }
-    });
-    
-    // Get container
-    const container = document.getElementById('module-container');
-    if (!container) {
-        console.error('❌ [Generator AI] Module container not found!');
-        return;
-    }
-    
-    // Render HTML (same as your original, with small navigation fix)
-    container.innerHTML = `
-        <!-- RESPONSIVE CSS FOR ALL DEVICES -->
-        <style>
-            /* ... (CSS Anda tetap sama, tidak diubah) ... */
-            .modul-preview-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; scroll-behavior: smooth; }
-            #modulBody { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 14px; line-height: 1.7; padding: 24px; max-width: 100%; overflow-wrap: break-word; word-wrap: break-word; word-break: break-word; color: #1f2937; }
-            #modulBody table { width: 100%; font-size: 13px; display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; border-collapse: collapse; }
-            #modulBody table th, #modulBody table td { padding: 8px 12px; border: 1px solid #e5e7eb; text-align: left; }
-            #modulBody h1 { font-size: 22px; font-weight: 700; margin: 24px 0 16px; line-height: 1.3; color: #111827; }
-            #modulBody h2 { font-size: 19px; font-weight: 600; margin: 20px 0 12px; line-height: 1.3; color: #1f2937; }
-            #modulBody h3 { font-size: 16px; font-weight: 600; margin: 16px 0 10px; line-height: 1.4; color: #374151; }
-            #modulBody h4 { font-size: 14px; font-weight: 600; margin: 12px 0 8px; color: #4b5563; }
-            #modulBody p { margin: 8px 0; color: #374151; }
-            #modulBody ul, #modulBody ol { margin: 8px 0; padding-left: 24px; }
-            #modulBody li { margin: 4px 0; }
-            #modulBody .grid, #modulBody .flex { display: flex; flex-wrap: wrap; gap: 12px; }
-            #modulBody .grid > div, #modulBody .flex > div { flex: 1; min-width: 200px; }
-            #modulBody .cover-section { text-align: center; padding: 20px 16px; border-bottom: 3px solid #7c3aed; margin-bottom: 24px; }
-            #modulBody .cover-section h1 { font-size: 24px; margin-bottom: 8px; color: #111827; }
-            #modulBody .cover-section h2 { font-size: 18px; color: #7c3aed; margin-bottom: 16px; }
-            #modulBody .cover-info { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px 16px; text-align: left; max-width: 600px; margin: 0 auto; font-size: 13px; }
-            #modulBody .info-box { background: #f9fafb; border-left: 4px solid #7c3aed; padding: 12px 16px; margin: 12px 0; border-radius: 0 4px 4px 0; }
-            #modulBody .info-box.green { background: #f0fdf4; border-left-color: #22c55e; }
-            #modulBody .info-box.blue { background: #eff6ff; border-left-color: #3b82f6; }
-            #modulBody .info-box.yellow { background: #fefce8; border-left-color: #eab308; }
-            #modulBody .info-box.purple { background: #faf5ff; border-left-color: #a855f7; }
-            #modulBody .info-box.red { background: #fef2f2; border-left-color: #ef4444; }
-            #modulBody .section { margin: 24px 0; }
-            #modulBody .section-title { font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 10px; margin-bottom: 14px; color: #1f2937; }
-            #modulBody .section-icon { width: 32px; height: 32px; background: #7c3aed; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
-            #modulBody .content-indent { padding-left: 44px; }
-            @media (max-width: 640px) { #modulBody .content-indent { padding-left: 36px; } }
-            #modulBody .signature-section { display: flex; justify-content: space-between; margin-top: 40px; padding-top: 24px; border-top: 2px solid #d1d5db; gap: 40px; }
-            #modulBody .signature-box { flex: 1; text-align: center; }
-            #modulBody .signature-line { border-bottom: 2px solid #1f2937; padding: 0 40px; margin: 60px 0 4px 0; display: inline-block; min-width: 180px; }
-            #modulBody .footer { border-top: 1px solid #e5e7eb; padding-top: 16px; margin-top: 32px; text-align: center; font-size: 12px; color: #6b7280; }
-            #modulBody .list-disc { list-style-type: disc; }
-            #modulBody .list-decimal { list-style-type: decimal; }
-            #modulBody .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; }
-            #modulBody .badge-blue { background: #dbeafe; color: #1e40af; }
-            @media (max-width: 768px) { #modulBody { font-size: 13px; padding: 16px 12px; } #modulBody h1 { font-size: 20px; margin: 20px 0 14px; } #modulBody h2 { font-size: 17px; margin: 16px 0 10px; } #modulBody h3 { font-size: 15px; margin: 14px 0 8px; } #modulBody h4 { font-size: 14px; } #modulBody .cover-section { padding: 16px 12px; } #modulBody .cover-section h1 { font-size: 20px; } #modulBody .cover-section h2 { font-size: 16px; } #modulBody .cover-info { grid-template-columns: 1fr; text-align: center; } #modulBody .grid, #modulBody .flex { flex-direction: column; } #modulBody .grid > div, #modulBody .flex > div { width: 100%; min-width: 100%; } #modulBody .section-title { font-size: 15px; } #modulBody .section-icon { width: 28px; height: 28px; font-size: 12px; } #modulBody .info-box { padding: 10px 12px; font-size: 12px; } #modulBody table { font-size: 12px; } #modulBody table th, #modulBody table td { padding: 6px 10px; } }
-            @media (max-width: 480px) { #modulBody { font-size: 12px; padding: 12px 8px; } #modulBody h1 { font-size: 18px; margin: 16px 0 12px; } #modulBody h2 { font-size: 16px; margin: 14px 0 8px; } #modulBody h3 { font-size: 14px; margin: 12px 0 6px; } #modulBody .cover-section h1 { font-size: 18px; } #modulBody .cover-section h2 { font-size: 14px; } #modulBody .section-icon { width: 26px; height: 26px; font-size: 11px; } #modulBody .info-box { padding: 8px 10px; font-size: 11px; } #modulBody table { font-size: 11px; } #modulBody .signature-section { flex-direction: column; gap: 24px; } #modulBody .signature-line { min-width: 160px; padding: 0 30px; } }
-            @media print { #modulBody { padding: 0; font-size: 11pt; color: #000; } #modulBody .no-print { display: none !important; } #modulBody a { text-decoration: none; color: #000; } @page { margin: 2cm; } }
-            .text-center { text-align: center; } .text-left { text-align: left; } .font-bold { font-weight: 600; } .font-semibold { font-weight: 500; } .text-gray-500 { color: #6b7280; } .text-gray-600 { color: #4b5563; } .text-gray-700 { color: #374151; } .text-gray-800 { color: #1f2937; } .text-gray-900 { color: #111827; } .text-purple-600 { color: #7c3aed; } .bg-gray-50 { background: #f9fafb; } .bg-blue-50 { background: #eff6ff; } .bg-green-50 { background: #f0fdf4; } .bg-yellow-50 { background: #fefce8; } .bg-purple-50 { background: #faf5ff; } .bg-red-50 { background: #fef2f2; } .border-l-4 { border-left-width: 4px; border-left-style: solid; } .border-purple-600 { border-color: #7c3aed; } .border-blue-500 { border-color: #3b82f6; } .border-green-500 { border-color: #22c55e; } .border-yellow-500 { border-color: #eab308; } .border-red-500 { border-color: #ef4444; } .rounded { border-radius: 6px; } .p-3 { padding: 12px; } .p-4 { padding: 16px; } .mb-2 { margin-bottom: 8px; } .mb-3 { margin-bottom: 12px; } .mb-4 { margin-bottom: 16px; } .mb-6 { margin-bottom: 24px; } .mt-2 { margin-top: 8px; } .mt-4 { margin-top: 16px; } .space-y-2 > * + * { margin-top: 8px; } .space-y-3 > * + * { margin-top: 12px; } .space-y-4 > * + * { margin-top: 16px; } .pl-5 { padding-left: 20px; } .pl-11 { padding-left: 44px; } .pl-14 { padding-left: 56px; }
-        </style>
+    <div class="modul-form">
+      <h2>📚 Asisten Modul Ajar</h2>
+      <p class="subtitle">Buat Modul Ajar dengan Template</p>
+      
+      <button class="btn-back" onclick="backToDashboard()">
+        <i class="fas fa-arrow-left mr-2"></i>Kembali ke Dashboard
+      </button>
+      
+      <form id="modul-form">
+        <!-- ✅ SECTION 1: INFORMASI GURU (AUTO-FILL DARI MODAL) -->
+        <div class="section-title"><i class="fas fa-user-tie"></i><span>1. Informasi Guru (Auto-Fill)</span></div>
         
-        <!-- Header Section with BACK BUTTON -->
-        <div class="mb-6">
-            <div class="flex items-center justify-between mb-4">
-                <div class="flex items-center gap-3">
-                    <div class="p-3 bg-purple-100 rounded-xl">
-                        <i class="fas fa-wand-magic-sparkles text-purple-600 text-2xl"></i>
-                    </div>
-                    <div>
-                        <h2 class="text-2xl font-bold text-gray-800">Asisten Modul Ajar</h2>
-                        <p class="text-gray-500 text-sm">Generator Modul Pembelajaran Kurikulum Merdeka</p>
-                    </div>
-                </div>
-                <!-- ✅ BACK TO DASHBOARD BUTTON -->
-                <button onclick="backToGeneratorModule()" class="btn btn-ghost btn-sm no-print">
-                    <i class="fas fa-arrow-left mr-2"></i>Kembali
-                </button>
-            </div>
+        <div class="grid-cols-2">
+          <div>
+            <label for="modul-guru"><i class="fas fa-chalkboard-teacher mr-2"></i>Nama Guru</label>
+            <input type="text" id="modul-guru" placeholder="Nama lengkap guru" value="${userNama}" class="${userNama ? 'auto-filled' : ''}">
+            ${userNama ? '<p style="font-size:11px;color:#10b981;margin-top:4px;">✅ Auto-filled dari modal (bisa diedit)</p>' : ''}
+          </div>
+          <div>
+            <label for="modul-nip"><i class="fas fa-id-card mr-2"></i>NIP</label>
+            <input type="text" id="modul-nip" placeholder="NIP guru" value="${userNIP}" class="${userNIP ? 'auto-filled' : ''}">
+            ${userNIP ? '<p style="font-size:11px;color:#10b981;margin-top:4px;">✅ Auto-filled dari modal (bisa diedit)</p>' : ''}
+          </div>
         </div>
-
-        <!-- Tab Navigation -->
-        <div class="border-b border-gray-200 mb-6">
-            <nav class="-mb-px flex space-x-8 overflow-x-auto">
-                <button onclick="window.showTab('generator')" id="tab-generator" 
-                    class="tab-button py-4 px-1 border-b-2 font-medium text-sm active border-purple-500 text-purple-600 whitespace-nowrap">
-                    <i class="fas fa-pen-fancy mr-2"></i>Generator Modul
-                </button>
-                <button onclick="window.showTab('riwayat')" id="tab-riwayat" 
-                    class="tab-button py-4 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 whitespace-nowrap">
-                    <i class="fas fa-history mr-2"></i>Riwayat Modul
-                </button>
-            </nav>
+        
+        <!-- ✅ SECTION 2: INFORMASI SEKOLAH (AUTO-FILL DARI MODAL) -->
+        <div class="section-title"><i class="fas fa-school"></i><span>2. Informasi Sekolah (Auto-Fill)</span></div>
+        
+        <div class="grid-cols-2">
+          <div>
+            <label for="modul-sekolah"><i class="fas fa-university mr-2"></i>Nama Sekolah</label>
+            <input type="text" id="modul-sekolah" placeholder="Nama sekolah" value="${userSekolah}" class="${userSekolah ? 'auto-filled' : ''}" required>
+            ${userSekolah ? '<p style="font-size:11px;color:#10b981;margin-top:4px;">✅ Auto-filled dari modal (bisa diedit)</p>' : ''}
+          </div>
+          <div>
+            <label for="modul-kepsek"><i class="fas fa-user-tie mr-2"></i>Kepala Sekolah</label>
+            <input type="text" id="modul-kepsek" placeholder="Nama kepala sekolah" value="${userKepsek}" class="${userKepsek ? 'auto-filled' : ''}">
+            ${userKepsek ? '<p style="font-size:11px;color:#10b981;margin-top:4px;">✅ Auto-filled dari modal (bisa diedit)</p>' : ''}
+          </div>
         </div>
-
-        <!-- TAB CONTENT: GENERATOR -->
-        <div id="content-generator" class="tab-content">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- Form Input (Left Column) -->
-                <div class="lg:col-span-1">
-                    <div class="bg-white rounded-lg shadow-sm p-6 sticky top-4">
-                        <h3 class="font-bold text-gray-800 mb-4 flex items-center">
-                            <i class="fas fa-sliders-h text-purple-600 mr-2"></i>
-                            Parameter Modul
-                        </h3>
-
-                        <form id="formModul" class="space-y-4">
-                            <!-- Identitas -->
-                            <div class="space-y-3">
-                                <h4 class="text-sm font-semibold text-gray-700 border-b pb-2">📋 Identitas Modul</h4>
-                                <div>
-                                    <label class="block text-gray-700 text-xs font-bold mb-1">Nama Penyusun *</label>
-                                    <input type="text" id="namaPenyusun" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-purple-500 text-sm" placeholder="Nama guru" required>
-                                </div>
-                                <div>
-                                    <label class="block text-gray-700 text-xs font-bold mb-1">Nama Sekolah *</label>
-                                    <input type="text" id="namaSekolah" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-purple-500 text-sm" value="SDN 139 LAMANDA" required>
-                                </div>
-                            </div>
-
-                            <!-- Informasi -->
-                            <div class="space-y-3">
-                                <h4 class="text-sm font-semibold text-gray-700 border-b pb-2">📚 Informasi Pembelajaran</h4>
-                                <div>
-                                    <label class="block text-gray-700 text-xs font-bold mb-1">Mata Pelajaran *</label>
-                                    <select id="mapel" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-purple-500 text-sm" required>
-                                        <option value="">Pilih Mapel</option>
-                                        <option value="Matematika">Matematika</option>
-                                        <option value="Bahasa Indonesia">Bahasa Indonesia</option>
-                                        <option value="IPA">IPA (Sains)</option>
-                                        <option value="IPS">IPS</option>
-                                        <option value="Pendidikan Pancasila">Pendidikan Pancasila</option>
-                                        <option value="PJOK">PJOK</option>
-                                        <option value="Seni Budaya">Seni Budaya</option>
-                                        <option value="Bahasa Inggris">Bahasa Inggris</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block text-gray-700 text-xs font-bold mb-1">Kelas / Fase *</label>
-                                    <select id="kelasFase" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-purple-500 text-sm" required>
-                                        <option value="">Pilih Kelas</option>
-                                        <option value="1-A">Kelas 1 (Fase A)</option>
-                                        <option value="2-A">Kelas 2 (Fase A)</option>
-                                        <option value="3-B">Kelas 3 (Fase B)</option>
-                                        <option value="4-B">Kelas 4 (Fase B)</option>
-                                        <option value="5-C">Kelas 5 (Fase C)</option>
-                                        <option value="6-C">Kelas 6 (Fase C)</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block text-gray-700 text-xs font-bold mb-1">Alokasi Waktu *</label>
-                                    <input type="text" id="alokasiWaktu" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-purple-500 text-sm" placeholder="Contoh: 2 x 35 menit" value="2 x 35 menit" required>
-                                </div>
-                                <div>
-                                    <label class="block text-gray-700 text-xs font-bold mb-1">Tahun Pelajaran</label>
-                                    <input type="text" id="tahunPelajaran" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-purple-500 text-sm" value="2025/2026">
-                                </div>
-                            </div>
-
-                            <!-- Konten -->
-                            <div class="space-y-3">
-                                <h4 class="text-sm font-semibold text-gray-700 border-b pb-2">📝 Konten Pembelajaran</h4>
-                                <div>
-                                    <label class="block text-gray-700 text-xs font-bold mb-1">Topik / Materi *</label>
-                                    <input type="text" id="topik" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-purple-500 text-sm" placeholder="Contoh: Pecahan Sederhana" required>
-                                </div>
-                                <div>
-                                    <label class="block text-gray-700 text-xs font-bold mb-1">Capaian Pembelajaran (CP) *</label>
-                                    <textarea id="capaianPembelajaran" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-purple-500 text-sm h-20" placeholder="Salin CP dari dokumen kurikulum..." required></textarea>
-                                    <p class="text-xs text-gray-500 mt-1">Dapat diisi manual atau biarkan kosong untuk auto-generate</p>
-                                </div>
-                                <div>
-                                    <label class="block text-gray-700 text-xs font-bold mb-1">Tujuan Pembelajaran *</label>
-                                    <textarea id="tujuanPembelajaran" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-purple-500 text-sm h-20" placeholder="Setelah pembelajaran, siswa dapat..." required></textarea>
-                                </div>
-                                <div>
-                                    <label class="block text-gray-700 text-xs font-bold mb-1">Profil Pelajar Pancasila</label>
-                                    <select id="profilPancasila" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-purple-500 text-sm" multiple>
-                                        <option value="Beriman">Beriman, Bertakwa kepada Tuhan YME</option>
-                                        <option value="Berkebinekaan">Berkebinekaan Global</option>
-                                        <option value="Bergotong-royong">Bergotong Royong</option>
-                                        <option value="Mandiri">Mandiri</option>
-                                        <option value="Bernalar Kritis">Bernalar Kritis</option>
-                                        <option value="Kreatif">Kreatif</option>
-                                    </select>
-                                    <p class="text-xs text-gray-500 mt-1">Tahan Ctrl untuk pilih multiple</p>
-                                </div>
-                                <div>
-                                    <label class="block text-gray-700 text-xs font-bold mb-1">Model Pembelajaran</label>
-                                    <select id="modelPembelajaran" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-purple-500 text-sm">
-                                        <option value="Tatap Muka">Tatap Muka</option>
-                                        <option value="Blended Learning">Blended Learning</option>
-                                        <option value="Daring">Daring (Online)</option>
-                                        <option value="Luring">Luring (Offline)</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block text-gray-700 text-xs font-bold mb-1">Media & Sumber Belajar</label>
-                                    <textarea id="mediaPembelajaran" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-purple-500 text-sm h-16" placeholder="Contoh: PPT, Video, LKPD, Buku Siswa..."></textarea>
-                                </div>
-                            </div>
-
-                            <!-- Action Buttons -->
-                            <div class="pt-4 space-y-2">
-                                <button type="button" onclick="window.generateModul()" class="w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-3 rounded-lg text-sm font-semibold transition flex items-center justify-center gap-2">
-                                    <i class="fas fa-wand-magic-sparkles"></i> <span class="hidden sm:inline">Generate Modul Ajar</span><span class="sm:hidden">Generate</span>
-                                </button>
-                                <button type="button" onclick="window.resetForm()" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm transition">
-                                    <i class="fas fa-undo"></i> <span class="hidden sm:inline">Reset Form</span><span class="sm:hidden">Reset</span>
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-
-                <!-- Preview (Right Column) -->
-                <div class="lg:col-span-2">
-                    <div id="emptyPreview" class="bg-white rounded-lg shadow-sm p-12 text-center">
-                        <i class="fas fa-file-circle-plus text-6xl text-gray-300 mb-4"></i>
-                        <h3 class="text-xl font-semibold text-gray-600 mb-2">Belum Ada Modul</h3>
-                        <p class="text-gray-500">Isi form di sebelah kiri dan klik "Generate Modul Ajar"</p>
-                    </div>
-                    <div id="loadingPreview" class="hidden bg-white rounded-lg shadow-sm p-12 text-center">
-                        <i class="fas fa-spinner fa-spin text-4xl text-purple-500 mb-4"></i>
-                        <h3 class="text-xl font-semibold text-gray-600 mb-2">Menyusun Modul Ajar...</h3>
-                        <p class="text-gray-500">AI sedang menganalisis parameter Anda</p>
-                    </div>
-                    <div id="previewContent" class="hidden">
-                        <div class="bg-white rounded-lg shadow-sm overflow-hidden">
-                            <div class="bg-gradient-to-r from-purple-600 to-blue-600 text-white p-4 sm:p-6 no-print">
-                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                                    <div class="flex-1">
-                                        <h2 class="text-xl sm:text-2xl font-bold mb-1">MODUL AJAR</h2>
-                                        <p class="text-purple-100 text-sm sm:text-base" id="previewTopik">Topik Pembelajaran</p>
-                                    </div>
-                                    <div class="flex flex-wrap gap-2 w-full sm:w-auto">
-                                        <button onclick="window.copyModul()" class="bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded text-xs sm:text-sm flex items-center gap-1 transition flex-1 sm:flex-none justify-center">
-                                            <i class="fas fa-copy"></i> <span class="hidden sm:inline">Copy</span>
-                                        </button>
-                                        <button onclick="window.downloadWord()" class="bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded text-xs sm:text-sm flex items-center gap-1 transition flex-1 sm:flex-none justify-center">
-                                            <i class="fas fa-file-word"></i> <span class="hidden sm:inline">Word</span>
-                                        </button>
-                                        <button onclick="window.downloadPDF()" class="bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded text-xs sm:text-sm flex items-center gap-1 transition flex-1 sm:flex-none justify-center">
-                                            <i class="fas fa-file-pdf"></i> <span class="hidden sm:inline">PDF</span>
-                                        </button>
-                                        <button onclick="window.saveToFirebase()" class="bg-green-500/80 hover:bg-green-500 text-white px-3 py-1.5 rounded text-xs sm:text-sm flex items-center gap-1 transition flex-1 sm:flex-none justify-center">
-                                            <i class="fas fa-save"></i> <span class="hidden sm:inline">Simpan</span>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="modul-preview-wrapper">
-                                <div id="modulBody"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        
+        <div class="grid-cols-2">
+          <div>
+            <label for="modul-nip-kepsek"><i class="fas fa-id-card mr-2"></i>NIP Kepala Sekolah</label>
+            <input type="text" id="modul-nip-kepsek" placeholder="NIP kepala sekolah" value="${userNIPKepsek}" class="${userNIPKepsek ? 'auto-filled' : ''}">
+            ${userNIPKepsek ? '<p style="font-size:11px;color:#10b981;margin-top:4px;">✅ Auto-filled dari modal (bisa diedit)</p>' : ''}
+          </div>
+          <div>
+            <label for="modul-tahun"><i class="fas fa-calendar mr-2"></i>Tahun Ajaran</label>
+            <input type="text" id="modul-tahun" placeholder="2025/2026" value="2025/2026">
+          </div>
         </div>
-
-        <!-- TAB CONTENT: RIWAYAT -->
-        <div id="content-riwayat" class="tab-content hidden">
-            <div class="bg-white rounded-lg shadow-sm p-6">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-lg font-bold text-gray-800">Riwayat Modul Ajar</h3>
-                    <button onclick="window.loadRiwayat()" class="bg-purple-100 hover:bg-purple-200 text-purple-700 px-4 py-2 rounded-lg text-sm flex items-center gap-2">
-                        <i class="fas fa-sync-alt"></i> Refresh
-                    </button>
-                </div>
-                <div id="loadingRiwayat" class="text-center py-8">
-                    <i class="fas fa-spinner fa-spin text-3xl text-purple-500"></i>
-                    <p class="text-gray-500 mt-2">Memuat riwayat...</p>
-                </div>
-                <div id="gridRiwayat" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 hidden"></div>
-                <div id="emptyRiwayat" class="text-center py-8 hidden">
-                    <i class="fas fa-inbox text-4xl text-gray-300 mb-3"></i>
-                    <p class="text-gray-500">Belum ada modul yang disimpan</p>
-                </div>
-            </div>
+        
+        <!-- ✅ SECTION 3: INFORMASI MODUL -->
+        <div class="section-title"><i class="fas fa-book"></i><span>3. Informasi Modul</span></div>
+        
+        <div class="grid-cols-2">
+          <div>
+            <label for="modul-jenjang"><i class="fas fa-school mr-2"></i>Jenjang</label>
+            <select id="modul-jenjang" required>
+              <option value="">Pilih Jenjang</option>
+              <option value="sd">SD</option>
+              <option value="smp">SMP</option>
+              <option value="sma">SMA</option>
+            </select>
+          </div>
+          <div>
+            <label for="modul-kelas"><i class="fas fa-users mr-2"></i>Kelas</label>
+            <select id="modul-kelas" required>
+              <option value="">Pilih Kelas</option>
+              <option value="1">Kelas 1</option>
+              <option value="2">Kelas 2</option>
+              <option value="3">Kelas 3</option>
+              <option value="4">Kelas 4</option>
+              <option value="5">Kelas 5</option>
+              <option value="6">Kelas 6</option>
+              <option value="7">Kelas 7</option>
+              <option value="8">Kelas 8</option>
+              <option value="9">Kelas 9</option>
+              <option value="10">Kelas 10</option>
+              <option value="11">Kelas 11</option>
+              <option value="12">Kelas 12</option>
+            </select>
+          </div>
         </div>
-    `;
-    
-    // Initialize module logic
-    initModule();
-    
-    console.log('✅ [Generator AI] Module rendered to #module-container');
+        
+        <div class="grid-cols-2">
+          <div>
+            <label for="modul-mapel"><i class="fas fa-book mr-2"></i>Mata Pelajaran</label>
+            <select id="modul-mapel" required>
+              <option value="">Pilih Mapel</option>
+              <option value="matematika">Matematika</option>
+              <option value="ipas">IPAS</option>
+              <option value="bahasa-indonesia">Bahasa Indonesia</option>
+              <option value="pjok">PJOK</option>
+              <option value="seni-budaya">Seni Budaya</option>
+              <option value="lainnya">Lainnya</option>
+            </select>
+          </div>
+          <div>
+            <label for="modul-topik"><i class="fas fa-tag mr-2"></i>Topik/Materi</label>
+            <input type="text" id="modul-topik" placeholder="Contoh: Pecahan Sederhana" required>
+          </div>
+        </div>
+        
+        <div>
+          <label for="modul-alokasi"><i class="fas fa-clock mr-2"></i>Alokasi Waktu</label>
+          <input type="text" id="modul-alokasi" placeholder="Contoh: 2 x 35 menit (1 Pertemuan)">
+        </div>
+        
+        <button type="button" id="btn-generate" class="btn-generate">
+          <i class="fas fa-magic"></i> Generate Modul Ajar
+        </button>
+      </form>
+      
+      <!-- Hasil Generate -->
+      <div id="modul-result" class="hidden result-section">
+        <h3 class="text-xl font-bold mb-4 text-gray-800">📋 Hasil Generate Modul Ajar</h3>
+        
+        <label for="result-modul"><i class="fas fa-file-alt mr-2"></i>Modul Ajar Lengkap</label>
+        <textarea id="result-modul" placeholder="Modul akan muncul setelah generate..." style="min-height: 400px;"></textarea>
+        
+        <button type="button" id="btn-save" class="btn-save">
+          <i class="fas fa-save"></i> Simpan ke Firestore
+        </button>
+        <button type="button" id="btn-regenerate" class="btn-secondary">
+          <i class="fas fa-redo"></i> Generate Ulang
+        </button>
+      </div>
+      
+      <!-- Daftar Modul Tersimpan -->
+      <div class="mt-12">
+        <h3 class="text-xl font-bold mb-4 text-gray-800">
+          <i class="fas fa-archive mr-2"></i>Modul Tersimpan (<span id="saved-count">0</span>)
+        </h3>
+        <div id="modul-list" class="space-y-4">
+          <div class="loading-spinner">
+            <i class="fas fa-spinner fa-spin text-2xl mb-3"></i>
+            <p>Memuat data...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  hideDashboardSections();
+  container.classList.remove('hidden');
+  
+  if (user) {
+    setupEventHandlers();
+    loadModulData();
+  }
+  
+  console.log('✅ [Asisten Modul] Event handlers attached');
 };
 
-// ============================================
-// FUNGSI INIT - Logic Module (Your Original Code)
-// ============================================
-async function initModule() {
-    // Check user status
-    const currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
-    const userEmail = currentUser?.email;
-    const isAdmin = userEmail === ADMIN_EMAIL;
-    
-    console.log('🔍 [Generator AI] initModule:', { email: userEmail, isAdmin: isAdmin, status: currentUser?.status });
-    
-    if (!isAdmin && currentUser?.status !== 'active') {
-        enableReadOnlyVisual();
-    }
-
-    const formModul = document.getElementById('formModul');
-    const emptyPreview = document.getElementById('emptyPreview');
-    const loadingPreview = document.getElementById('loadingPreview');
-    const previewContent = document.getElementById('previewContent');
-    const modulBody = document.getElementById('modulBody');
-    const previewTopik = document.getElementById('previewTopik');
-
-    // --- FUNGSI TAB ---
-    window.showTab = (tabName) => {
-        document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-        document.querySelectorAll('.tab-button').forEach(btn => {
-            btn.classList.remove('active', 'border-purple-500', 'text-purple-600');
-            btn.classList.add('border-transparent', 'text-gray-500');
-        });
-        document.getElementById(`content-${tabName}`).classList.remove('hidden');
-        document.getElementById(`tab-${tabName}`).classList.add('active', 'border-purple-500', 'text-purple-600');
-        document.getElementById(`tab-${tabName}`).classList.remove('border-transparent', 'text-gray-500');
-        if (tabName === 'riwayat') loadRiwayat();
-    }
-
-    // --- FUNGSI RESET FORM ---
-    window.resetForm = () => {
-        formModul.reset();
-        document.getElementById('namaSekolah').value = 'SDN 139 LAMANDA';
-        document.getElementById('tahunPelajaran').value = '2025/2026';
-        document.getElementById('alokasiWaktu').value = '2 x 35 menit';
-        emptyPreview.classList.remove('hidden');
-        previewContent.classList.add('hidden');
-    }
-
-    // ============================================
-    // 🔹 GENERATOR MODUL AJAR
-    // ============================================
-    window.generateModul = () => {
-        if (!checkAccessPermission()) return;
-        
-        const data = {
-            namaPenyusun: document.getElementById('namaPenyusun').value.trim(),
-            namaSekolah: document.getElementById('namaSekolah').value.trim(),
-            mapel: document.getElementById('mapel').value,
-            kelasFase: document.getElementById('kelasFase').value,
-            alokasiWaktu: document.getElementById('alokasiWaktu').value.trim(),
-            tahunPelajaran: document.getElementById('tahunPelajaran').value.trim(),
-            topik: document.getElementById('topik').value.trim(),
-            capaianPembelajaran: document.getElementById('capaianPembelajaran').value.trim(),
-            tujuanPembelajaran: document.getElementById('tujuanPembelajaran').value.trim(),
-            profilPancasila: Array.from(document.getElementById('profilPancasila').selectedOptions).map(opt => opt.value),
-            modelPembelajaran: document.getElementById('modelPembelajaran').value,
-            mediaPembelajaran: document.getElementById('mediaPembelajaran').value.trim()
-        };
-
-        const required = ['namaPenyusun', 'namaSekolah', 'mapel', 'kelasFase', 'alokasiWaktu', 'topik', 'tujuanPembelajaran'];
-        const missing = required.filter(field => !data[field]);
-
-        if (missing.length > 0) {
-            alert('⚠️ Mohon lengkapi field bertanda *');
-            return;
-        }
-
-        emptyPreview.classList.add('hidden');
-        previewContent.classList.add('hidden');
-        loadingPreview.classList.remove('hidden');
-
-        setTimeout(() => {
-            const modulHTML = createComplexModulTemplate(data);
-            modulBody.innerHTML = modulHTML;
-            previewTopik.textContent = `${data.topik} - ${data.mapel} Kelas ${data.kelasFase.split('-')[0]}`;
-            loadingPreview.classList.add('hidden');
-            previewContent.classList.remove('hidden');
-            window.currentModulData = data;
-            window.currentModulHTML = modulHTML;
-            previewContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }, 2000);
-    }
-
-    // ============================================
-    // COMPLEX MODUL TEMPLATE GENERATOR (Your Original)
-    // ============================================
-    function createComplexModulTemplate(data) {
-        const { namaPenyusun, namaSekolah, mapel, kelasFase, alokasiWaktu, tahunPelajaran, topik, capaianPembelajaran, tujuanPembelajaran, profilPancasila, modelPembelajaran, mediaPembelajaran } = data;
-        const kelas = kelasFase.split('-')[0];
-        const fase = kelasFase.split('-')[1];
-        const tanggal = new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-        const cpContent = capaianPembelajaran || generateCapaianPembelajaran(mapel, kelas);
-        const langkahContent = generateLangkahPembelajaranDetail(kelas, topik, mapel, modelPembelajaran);
-        const asesmenContent = generateAsesmenDetail(kelas, topik, mapel);
-        const profilContent = generateProfilPancasilaSection(profilPancasila, topik);
-        const mediaContent = mediaPembelajaran || generateMediaPembelajaran(mapel, kelas);
-
-        return `
-            <div class="cover-section">
-                <div class="flex justify-center mb-4"><div class="w-16 h-16 sm:w-20 sm:h-20 bg-purple-100 rounded-full flex items-center justify-center mx-auto"><i class="fas fa-graduation-cap text-3xl sm:text-4xl text-purple-600"></i></div></div>
-                <h1 class="text-center">MODUL AJAR</h1>
-                <h2 class="text-center text-purple-600">${topik.toUpperCase()}</h2>
-                <div class="cover-info">
-                    <p><strong>Mata Pelajaran:</strong> ${mapel}</p>
-                    <p><strong>Kelas/Fase:</strong> Kelas ${kelas} / Fase ${fase}</p>
-                    <p><strong>Alokasi Waktu:</strong> ${alokasiWaktu}</p>
-                    <p><strong>Tahun Pelajaran:</strong> ${tahunPelajaran}</p>
-                    <p><strong>Sekolah:</strong> ${namaSekolah}</p>
-                    <p><strong>Penyusun:</strong> ${namaPenyusun}</p>
-                </div>
-                <p class="text-xs text-gray-500 mt-4">Generated: ${tanggal}</p>
-            </div>
-            <div class="section">
-                <h3 class="section-title"><span class="section-icon">A</span> INFORMASI UMUM</h3>
-                <div class="info-box space-y-2">
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2"><p class="text-gray-600"><strong>Kompetensi Awal:</strong></p><p class="col-span-2 text-gray-700">${generateKompetensiAwal(kelas, mapel)}</p></div>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2"><p class="text-gray-600"><strong>Profil Pelajar Pancasila:</strong></p><p class="col-span-2 text-gray-700">${profilPancasila.join(', ') || 'Bernalar Kritis, Kreatif, Mandiri'}</p></div>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2"><p class="text-gray-600"><strong>Sarana & Prasarana:</strong></p><p class="col-span-2 text-gray-700">${mediaContent}</p></div>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2"><p class="text-gray-600"><strong>Target Peserta Didik:</strong></p><p class="col-span-2 text-gray-700">Siswa reguler/tipikal; umum, tidak ada kesulitan dalam memahami konsep dan abstraksi</p></div>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2"><p class="text-gray-600"><strong>Model Pembelajaran:</strong></p><p class="col-span-2 text-gray-700">${modelPembelajaran} dengan pendekatan student-centered</p></div>
-                </div>
-            </div>
-            <div class="section">
-                <h3 class="section-title"><span class="section-icon">B</span> KOMPONEN INTI</h3>
-                <div class="mb-4"><h4 class="font-semibold text-gray-800 mb-2 content-indent">1. Tujuan Pembelajaran</h4><p class="text-gray-700 content-indent">${tujuanPembelajaran}</p></div>
-                <div class="mb-4"><h4 class="font-semibold text-gray-800 mb-2 content-indent">2. Pemahaman Bermakna</h4><p class="text-gray-700 content-indent">${generatePemahamanBermakna(topik, mapel, kelas)}</p></div>
-                <div class="mb-4"><h4 class="font-semibold text-gray-800 mb-2 content-indent">3. Pertanyaan Pemantik</h4><ul class="list-disc pl-14 space-y-1 text-gray-700">${generatePertanyaanPemantikComplex(topik, kelas, mapel).map(q => `<li>${q}</li>`).join('')}</ul></div>
-                <div class="mb-4"><h4 class="font-semibold text-gray-800 mb-2 content-indent">4. Kegiatan Pembelajaran</h4>${langkahContent}</div>
-                <div class="mb-4"><h4 class="font-semibold text-gray-800 mb-2 content-indent">5. Asesmen Pembelajaran</h4>${asesmenContent}</div>
-                <div class="mb-4"><h4 class="font-semibold text-gray-800 mb-2 content-indent">6. Pengayaan dan Remedial</h4><div class="info-box blue content-indent"><p class="text-gray-700"><strong>Pengayaan:</strong> Siswa yang sudah mencapai tujuan pembelajaran dapat mengerjakan soal tantangan atau membantu teman yang belum memahami.</p><p class="text-gray-700 mt-2"><strong>Remedial:</strong> Siswa yang belum mencapai tujuan pembelajaran akan diberikan bimbingan khusus dengan pendekatan yang berbeda dan latihan tambahan.</p></div></div>
-            </div>
-            <div class="section">
-                <h3 class="section-title"><span class="section-icon">C</span> LAMPIRAN</h3>
-                <div class="info-box space-y-3">
-                    <p><strong>1. Lembar Kerja Peserta Didik (LKPD)</strong> - Terlampir terpisah</p>
-                    <p><strong>2. Bahan Bacaan Guru & Peserta Didik</strong> - Sesuai materi ${topik}</p>
-                    <p><strong>3. Glosarium</strong> - Daftar istilah kunci pada materi ${topik}</p>
-                    <p><strong>4. Daftar Pustaka</strong> - Buku teks ${mapel} Kelas ${kelas}, Kurikulum Merdeka</p>
-                </div>
-            </div>
-            <div class="border-t-2 border-gray-300 pt-6 mt-8">
-                <div class="signature-section">
-                    <div class="signature-box"><p class="text-sm text-gray-700 mb-16">Mengetahui,<br>Kepala Sekolah</p><p class="font-semibold signature-line">_________________________</p><p class="text-xs text-gray-500 mt-1">NIP. ...........................</p></div>
-                    <div class="signature-box"><p class="text-sm text-gray-700 mb-16">${tanggal}<br>Guru Mata Pelajaran</p><p class="font-semibold signature-line">${namaPenyusun}</p><p class="text-xs text-gray-500 mt-1">NIP. ...........................</p></div>
-                </div>
-            </div>
-            <div class="footer"><p>Modul ini disusun menggunakan Asisten Modul Ajar - ${namaSekolah}</p><p class="mt-1">Kurikulum Merdeka | Tahun Pelajaran ${tahunPelajaran}</p></div>
-        `;
-    }
-
-    // ============================================
-    // HELPER FUNCTIONS (Your Original)
-    // ============================================
-    function generateCapaianPembelajaran(mapel, kelas) {
-        const cpDatabase = {
-            'Matematika': { '1': 'Peserta didik dapat melakukan operasi penjumlahan dan pengurangan bilangan cacah sampai 100', '2': 'Peserta didik dapat melakukan operasi perkalian dan pembagian bilangan cacah', '3': 'Peserta didik dapat melakukan operasi hitung bilangan cacah, pecahan, dan desimal', '4': 'Peserta didik dapat melakukan operasi hitung bilangan bulat dan pecahan', '5': 'Peserta didik dapat melakukan operasi hitung bilangan bulat, pecahan, dan desimal', '6': 'Peserta didik dapat melakukan operasi hitung bilangan bulat, pecahan, dan persentase' },
-            'Bahasa Indonesia': { '1': 'Peserta didik mampu membaca kata-kata yang dikenal sehari-hari', '2': 'Peserta didik mampu membaca teks pendek dengan lancar', '3': 'Peserta didik mampu membaca teks dengan pemahaman yang baik', '4': 'Peserta didik mampu membaca dan memahami teks informatif', '5': 'Peserta didik mampu membaca dan menganalisis teks berbagai jenis', '6': 'Peserta didik mampu membaca kritis dan memahami teks kompleks' }
-        };
-        return cpDatabase[mapel]?.[kelas] || 'Capaian pembelajaran sesuai Kurikulum Merdeka';
-    }
-    function generateKompetensiAwal(kelas, mapel) { return `Siswa telah memahami konsep dasar ${mapel} pada pertemuan sebelumnya dan memiliki pengetahuan prasyarat yang cukup untuk mempelajari materi baru.`; }
-    function generatePemahamanBermakna(topik, mapel, kelas) { return `Melalui pembelajaran ${topik}, siswa memahami bahwa konsep ini memiliki aplikasi nyata dalam kehidupan sehari-hari dan dapat digunakan untuk memecahkan masalah kontekstual yang relevan dengan lingkungan mereka.`; }
-    function generatePertanyaanPemantikComplex(topik, kelas, mapel) { return [`Apa yang kalian ketahui tentang ${topik.toLowerCase()}?`, `Mengapa ${topik.toLowerCase()} penting untuk dipelajari dalam ${mapel}?`, `Di mana kita dapat menemukan penerapan ${topik.toLowerCase()} dalam kehidupan sehari-hari?`, `Bagaimana jika ${topik.toLowerCase()} tidak ada? Apa dampaknya?`]; }
-    function generateLangkahPembelajaranDetail(kelas, topik, mapel, model) {
-        const isLower = ['1', '2', '3'].includes(kelas);
-        return `<div class="space-y-4"><div class="info-box blue"><p class="font-semibold text-blue-800 mb-2">🔹 KEGIATAN PENDAHULUAN (${isLower ? '10' : '15'} menit)</p><ul class="list-disc pl-5 text-sm text-gray-700 space-y-1"><li>Guru membuka pembelajaran dengan salam, doa, dan presensi</li><li>Apersepsi: Mengaitkan materi sebelumnya dengan ${topik}</li><li>Menyampaikan tujuan pembelajaran dan manfaatnya</li><li>Memberikan motivasi dan ice breaker ${isLower ? '(lagu/tepuk semangat)' : '(pertanyaan pemantik)'}</li></ul></div><div class="info-box green"><p class="font-semibold text-green-800 mb-2">🔹 KEGIATAN INTI (${isLower ? '45' : '55'} menit)</p><div class="text-sm text-gray-700 space-y-3"><p><strong>Fase 1 - Orientasi:</strong></p><ul class="list-disc pl-5 space-y-1"><li>Siswa mengamati stimulus (gambar/video/objek) terkait ${topik}</li><li>Guru mengajukan pertanyaan pemantik untuk memicu rasa ingin tahu</li></ul><p class="mt-3"><strong>Fase 2 - Organisasi:</strong></p><ul class="list-disc pl-5 space-y-1"><li>Siswa dibagi dalam kelompok ${isLower ? '4-5 orang' : '3-4 orang'}</li><li>Setiap kelompok menerima LKPD dan bahan diskusi</li><li>Siswa berdiskusi dan mengerjakan tugas secara kolaboratif</li></ul><p class="mt-3"><strong>Fase 3 - Investigasi:</strong></p><ul class="list-disc pl-5 space-y-1"><li>Siswa mengeksplorasi konsep ${topik} melalui aktivitas hands-on</li><li>Guru berkeliling memberikan scaffolding dan bimbingan</li><li>Siswa mencatat hasil temuan dan kesimpulan sementara</li></ul><p class="mt-3"><strong>Fase 4 - Presentasi:</strong></p><ul class="list-disc pl-5 space-y-1"><li>Perwakilan kelompok mempresentasikan hasil diskusi</li><li>Kelompok lain memberikan tanggapan dan pertanyaan</li><li>Guru memfasilitasi diskusi kelas dan memberikan penguatan</li></ul></div></div><div class="info-box purple"><p class="font-semibold text-purple-800 mb-2">🔹 KEGIATAN PENUTUP (${isLower ? '10' : '15'} menit)</p><ul class="list-disc pl-5 text-sm text-gray-700 space-y-1"><li>Siswa bersama guru menyimpulkan pembelajaran hari ini</li><li>Refleksi: Siswa menyebutkan 1 hal yang dipelajari dan 1 pertanyaan yang masih ada</li><li>Guru memberikan umpan balik terhadap proses pembelajaran</li><li>Penugasan/pengayaan (opsional) untuk pertemuan berikutnya</li><li>Penutup dengan doa dan salam</li></ul></div></div>`;
-    }
-    function generateAsesmenDetail(kelas, topik, mapel) {
-        const isLower = ['1', '2', '3'].includes(kelas);
-        return `<div class="space-y-4 text-sm text-gray-700"><div class="info-box yellow"><p class="font-semibold text-yellow-800 mb-2">📊 Asesmen Formatif (Selama Proses)</p><ul class="list-disc pl-5 space-y-1"><li><strong>Observasi:</strong> Keaktifan siswa dalam diskusi dan kerja kelompok</li><li><strong>Unjuk Kerja:</strong> Presentasi hasil diskusi dan kemampuan berkomunikasi</li><li><strong>Kuis Singkat:</strong> ${isLower ? '3-5 soal lisan' : '5-10 soal tertulis'} untuk cek pemahaman</li><li><strong>Lembar Ceklis:</strong> Penilaian keterampilan proses ${isLower ? 'sederhana' : 'kompleks'}</li></ul></div><div class="info-box red"><p class="font-semibold text-red-800 mb-2">📝 Asesmen Sumatif (Akhir)</p><ul class="list-disc pl-5 space-y-1"><li><strong>Tes Tertulis:</strong> ${isLower ? 'Soal pilihan ganda dan isian singkat' : 'Soal uraian dan analisis'} tentang ${topik}</li><li><strong>Produk/Karya:</strong> Membuat ${isLower ? 'gambar/poster sederhana' : 'laporan/proyek kecil'} terkait ${topik}</li><li><strong>Portofolio:</strong> Kumpulan hasil kerja siswa selama pembelajaran</li></ul><p class="mt-2 text-xs text-gray-600"><em>Kriteria Ketuntasan: Skor ≥ 75 (KKM)</em></p></div><div class="info-box green"><p class="font-semibold text-green-800 mb-2">📋 Rubrik Penilaian</p><div class="text-xs space-y-2"><p><strong>Sikap:</strong> Kerjasama, tanggung jawab, disiplin (Skala 1-4)</p><p><strong>Pengetahuan:</strong> Pemahaman konsep ${topik} (Skala 1-100)</p><p><strong>Keterampilan:</strong> Kemampuan menerapkan konsep dalam penyelesaian masalah (Skala 1-4)</p></div></div></div>`;
-    }
-    function generateProfilPancasilaSection(profilPancasila, topik) {
-        if (!profilPancasila || profilPancasila.length === 0) profilPancasila = ['Bernalar Kritis', 'Kreatif', 'Mandiri'];
-        const deskripsiProfil = { 'Beriman': 'Siswa menunjukkan sikap beriman dan bertakwa dalam setiap aktivitas pembelajaran', 'Berkebinekaan': 'Siswa menghargai perbedaan pendapat dan budaya dalam diskusi kelompok', 'Bergotong-royong': 'Siswa bekerjasama dengan baik dalam menyelesaikan tugas kelompok', 'Mandiri': 'Siswa mampu menyelesaikan tugas secara mandiri dengan tanggung jawab', 'Bernalar Kritis': 'Siswa mampu menganalisis masalah dan mengajukan solusi yang logis', 'Kreatif': 'Siswa menghasilkan ide-ide kreatif dalam penyelesaian masalah' };
-        return profilPancasila.map(p => `<div class="flex items-start gap-2 mb-2"><i class="fas fa-check-circle text-green-500 mt-1"></i><div><p class="font-semibold text-gray-800">${p}</p><p class="text-sm text-gray-600">${deskripsiProfil[p] || ''}</p></div></div>`).join('');
-    }
-    function generateMediaPembelajaran(mapel, kelas) {
-        const mediaDatabase = { 'Matematika': 'Papan tulis, spidol, kartu bilangan, manipulatif (blok dienes), LKPD, projector', 'Bahasa Indonesia': 'Teks bacaan, gambar ilustrasi, audio cerita, LKPD, projector', 'IPA': 'Alat peraga, gambar/foto, video eksperimen, LKPD, alat praktikum sederhana', 'IPS': 'Peta, gambar, video dokumenter, LKPD, projector', 'PJOK': 'Lapangan, bola, cone, peluit, stopwatch', 'Seni Budaya': 'Kertas gambar, pensil warna, krayon, gunting, lem, contoh karya' };
-        return mediaDatabase[mapel] || 'Papan tulis, LKPD, projector, bahan ajar sesuai materi';
-    }
-
-    // ============================================
-    // EXPORT & SAVE FUNCTIONS (Your Original)
-    // ============================================
-    window.copyModul = () => {
-        const content = modulBody.innerText;
-        navigator.clipboard.writeText(content).then(() => alert('✅ Modul berhasil disalin ke clipboard!')).catch(err => { console.error('Gagal copy:', err); alert('❌ Gagal menyalin. Silakan blok teks dan copy manual.'); });
-    }
-    window.downloadWord = () => {
-        const content = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Modul Ajar</title></head><body>${modulBody.innerHTML}</body></html>`;
-        const blob = new Blob(['\ufeff', content], { type: 'application/msword' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a'); a.href = url; a.download = `ModulAjar_${window.currentModulData?.topik?.replace(/\s+/g, '_') || 'modul'}.doc`; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
-    }
-    window.downloadPDF = () => {
-        const printWindow = window.open('', '_blank');
-        printWindow.document.write(`<html><head><title>Modul Ajar - ${window.currentModulData?.topik || ''}</title><style>body { font-family: Arial, sans-serif; padding: 40px; } .prose { max-width: 800px; margin: 0 auto; }</style></head><body>${modulBody.innerHTML}</body></html>`);
-        printWindow.document.close(); printWindow.print();
-    }
-    window.saveToFirebase = async () => {
-        if (!checkAccessPermission()) return;
-        if (!confirm('Simpan modul ini ke database?')) return;
-        const data = window.currentModulData;
-        try {
-            await addDoc(collection(db, collectionName), { ...data, htmlContent: window.currentModulHTML, userId: auth.currentUser?.uid, createdAt: new Date(), updatedAt: new Date() });
-            alert('✅ Modul berhasil disimpan!'); window.showTab('riwayat');
-        } catch (error) { console.error('Error saving modul:', error); alert('❌ Gagal menyimpan: ' + error.message); }
-    }
-    window.loadRiwayat = async () => {
-        const loadingRiwayat = document.getElementById('loadingRiwayat'); const gridRiwayat = document.getElementById('gridRiwayat'); const emptyRiwayat = document.getElementById('emptyRiwayat');
-        loadingRiwayat.classList.remove('hidden'); gridRiwayat.classList.add('hidden'); emptyRiwayat.classList.add('hidden');
-        try {
-            const userEmail = auth.currentUser?.email; const isAdmin = userEmail === ADMIN_EMAIL;
-            let q; if (isAdmin) { q = query(collection(db, collectionName), orderBy("createdAt", "desc")); } else { q = query(collection(db, collectionName), where("userId", "==", auth.currentUser?.uid), orderBy("createdAt", "desc")); }
-            const snapshot = await getDocs(q); gridRiwayat.innerHTML = '';
-            if (snapshot.empty) { loadingRiwayat.classList.add('hidden'); emptyRiwayat.classList.remove('hidden'); return; }
-            snapshot.forEach(docSnap => { const data = docSnap.data(); const tanggal = new Date(data.createdAt?.toDate ? data.createdAt.toDate() : data.createdAt).toLocaleDateString('id-ID'); gridRiwayat.innerHTML += `<div class="border rounded-lg p-4 hover:shadow-md transition"><div class="flex justify-between items-start mb-2"><span class="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded">${data.mapel}</span><button onclick="window.deleteModul('${docSnap.id}')" class="text-red-500 hover:text-red-700"><i class="fas fa-trash"></i></button></div><h4 class="font-semibold text-gray-800 mb-1">${data.topik}</h4><p class="text-sm text-gray-600 mb-2">Kelas ${data.kelasFase?.split('-')[0]} | ${tanggal}</p><p class="text-xs text-gray-500">Oleh: ${data.namaPenyusun}</p><button onclick="window.viewModul('${docSnap.id}')" class="mt-3 w-full bg-purple-100 hover:bg-purple-200 text-purple-700 px-3 py-1.5 rounded text-sm"><i class="fas fa-eye mr-1"></i> Lihat</button></div>`; });
-            loadingRiwayat.classList.add('hidden'); gridRiwayat.classList.remove('hidden');
-        } catch (error) { console.error('Error loading riwayat:', error); loadingRiwayat.classList.add('hidden'); emptyRiwayat.innerHTML = `<i class="fas fa-exclamation-circle text-4xl text-red-300 mb-3"></i><p class="text-red-500">Gagal memuat riwayat: ${error.message}</p>`; emptyRiwayat.classList.remove('hidden'); }
-    }
-    window.deleteModul = async (id) => { if (!checkAccessPermission()) return; if (!confirm('Hapus modul ini dari riwayat?')) return; try { await deleteDoc(doc(db, collectionName, id)); alert('✅ Modul berhasil dihapus!'); loadRiwayat(); } catch (error) { alert('❌ Gagal menghapus: ' + error.message); } }
-    window.viewModul = (id) => { if (!checkAccessPermission()) return; alert('Fitur view modul akan segera hadir!'); }
-
-    // Initial load
-    loadRiwayat();
+// ✅ Helper: Hide Dashboard Sections
+function hideDashboardSections() {
+  document.querySelector('.dashboard-hero')?.closest('section')?.classList.add('hidden');
+  document.querySelector('[aria-labelledby="rooms-heading"]')?.classList.add('hidden');
+  document.querySelectorAll('#sd-section, #smp-section, #sma-section').forEach(s => s.classList.add('hidden'));
 }
 
-// ============================================
-// CONFIRM: Functions Registered di Window
-// ============================================
-console.log('🟢 [Generator AI] window.renderGeneratorModule:', typeof window.renderGeneratorModule);
-console.log('🟢 [Generator AI] window.backToGeneratorModule:', typeof window.backToGeneratorModule);
-console.log('🟢 [Generator AI] window.generateModul:', typeof window.generateModul);
+// ✅ Helper: Setup Event Handlers
+function setupEventHandlers() {
+  const btnGenerate = document.getElementById('btn-generate');
+  const btnSave = document.getElementById('btn-save');
+  const btnRegenerate = document.getElementById('btn-regenerate');
+  
+  if (btnGenerate) btnGenerate.addEventListener('click', handleGenerate);
+  if (btnSave) btnSave.addEventListener('click', handleSave);
+  if (btnRegenerate) btnRegenerate.addEventListener('click', handleGenerate);
+}
 
-console.log('💡 [Generator AI] TEST: Ketik "window.renderGeneratorModule()" di console untuk test');
-console.log('🟢 [Generator AI] Script FINISHED');
+// ✅ MOCK GENERATE (NO API KEY)
+async function mockGenerateModul(guru, nip, sekolah, kepsek, nipKepsek, tahun, jenjang, kelas, mapel, topik, alokasi) {
+  console.log('📝 [Asisten Modul] Generating mock modul...');
+  await new Promise(resolve => setTimeout(resolve, 2000));
+  
+  const jenjangCapital = jenjang.toUpperCase();
+  const mapelCapital = mapel.toUpperCase();
+  
+  return `
+═══════════════════════════════════════════════════════════
+                    MODUL AJAR
+                  KURIKULUM MERDEKA
+═══════════════════════════════════════════════════════════
 
-// ============================================
-// EXPORT (Optional)
-// ============================================
-export { checkAccessPermission };
+I. INFORMASI UMUM
+───────────────────────────────────────────────────────────
+Nama Penyusun         : ${guru || '-'}
+NIP                   : ${nip || '-'}
+Nama Sekolah          : ${sekolah || '-'}
+Nama Kepala Sekolah   : ${kepsek || '-'}
+NIP Kepala Sekolah    : ${nipKepsek || '-'}
+Tahun Ajaran          : ${tahun || '2025/2026'}
+Jenjang/Kelas         : ${jenjangCapital} / Kelas ${kelas}
+Mata Pelajaran        : ${mapelCapital}
+Topik/Materi          : ${topik || '-'}
+Alokasi Waktu         : ${alokasi || '-'}
+
+═══════════════════════════════════════════════════════════
+
+II. KOMPONEN INTI
+───────────────────────────────────────────────────────────
+
+A. TUJUAN PEMBELAJARAN
+   Setelah mengikuti pembelajaran ini, peserta didik dapat:
+   1. Memahami konsep dasar ${topik || 'materi'} dengan benar
+   2. Menerapkan ${topik || 'materi'} dalam situasi nyata
+   3. Menganalisis hubungan antar konsep ${topik || 'materi'}
+   4. Menyajikan hasil pembelajaran dengan jelas
+
+B. PEMAHAMAN BERMAKNA
+   Peserta didik memahami bahwa ${topik || 'materi ini'} 
+   memiliki keterkaitan dengan kehidupan sehari-hari dan 
+   dapat diterapkan dalam berbagai konteks.
+
+C. PERTANYAAN PEMANTIK
+   1. Apa yang kalian ketahui tentang ${topik || 'materi ini'}?
+   2. Bagaimana ${topik || 'materi ini'} digunakan dalam kehidupan?
+   3. Mengapa ${topik || 'materi ini'} penting untuk dipelajari?
+
+D. KEGIATAN PEMBELAJARAN
+   ┌─────────────────────────────────────────────────────┐
+   │ PERTEMUAN 1                                         │
+   ├─────────────────────────────────────────────────────┤
+   │ Pendahuluan (10 menit)                             │
+   │ • Salam dan doa                                    │
+   │ • Apersepsi                                        │
+   │ • Penyampaian tujuan                               │
+   ├─────────────────────────────────────────────────────┤
+   │ Kegiatan Inti (50 menit)                           │
+   │ • Eksplorasi konsep                                │
+   │ • Diskusi kelompok                                 │
+   │ • Presentasi hasil                                 │
+   ├─────────────────────────────────────────────────────┤
+   │ Penutup (10 menit)                                 │
+   │ • Refleksi                                         │
+   │ • Kesimpulan                                       │
+   │ • Doa penutup                                      │
+   └─────────────────────────────────────────────────────┘
+
+E. ASESMEN
+   1. Asesmen Diagnostik: Kuis awal
+   2. Asesmen Formatif: Observasi, lembar kerja
+   3. Asesmen Sumatif: Tes tertulis
+
+F. PENGAYAAN DAN REMEDIAL
+   • Pengayaan: Tugas proyek tambahan
+   • Remedial: Pembelajaran ulang dengan metode berbeda
+
+G. LAMPIRAN
+   • Lembar Kerja Peserta Didik (LKPD)
+   • Rubrik Penilaian
+   • Bahan Bacaan Guru dan Peserta Didik
+
+═══════════════════════════════════════════════════════════
+Mengetahui,
+Kepala Sekolah
+
+
+( ${kepsek || '.....................'} )
+NIP. ${nipKepsek || '.....................'}
+
+Guru Mata Pelajaran
+
+
+( ${guru || '.....................'} )
+NIP. ${nip || '.....................'}
+═══════════════════════════════════════════════════════════
+  `.trim();
+}
+
+// ✅ HANDLE GENERATE
+async function handleGenerate() {
+  console.log('🪄 [Asisten Modul] Generate clicked');
+  
+  const user = auth.currentUser;
+  if (!user) { alert('⚠️ Silakan login dulu!'); return; }
+  
+  const guru = document.getElementById('modul-guru')?.value;
+  const nip = document.getElementById('modul-nip')?.value;
+  const sekolah = document.getElementById('modul-sekolah')?.value;
+  const kepsek = document.getElementById('modul-kepsek')?.value;
+  const nipKepsek = document.getElementById('modul-nip-kepsek')?.value;
+  const tahun = document.getElementById('modul-tahun')?.value;
+  const jenjang = document.getElementById('modul-jenjang')?.value;
+  const kelas = document.getElementById('modul-kelas')?.value;
+  const mapel = document.getElementById('modul-mapel')?.value;
+  const topik = document.getElementById('modul-topik')?.value;
+  const alokasi = document.getElementById('modul-alokasi')?.value;
+  
+  if (!sekolah) { alert('⚠️ Nama Sekolah wajib diisi!'); return; }
+  if (!jenjang || !kelas || !mapel || !topik) { alert('⚠️ Lengkapi Informasi Modul!'); return; }
+  
+  const resultDiv = document.getElementById('modul-result');
+  if (resultDiv) resultDiv.classList.remove('hidden');
+  
+  document.getElementById('result-modul').value = '⏳ Sedang generate...';
+  resultDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  
+  try {
+    const result = await mockGenerateModul(guru, nip, sekolah, kepsek, nipKepsek, tahun, jenjang, kelas, mapel, topik, alokasi);
+    
+    document.getElementById('result-modul').value = result;
+    
+    console.log('✅ [Asisten Modul] Generate complete!');
+    
+  } catch (error) {
+    console.error('❌ [Asisten Modul] Error:', error);
+    alert('❌ Gagal generate: ' + error.message);
+  }
+}
+
+// ✅ HANDLE SAVE
+async function handleSave() {
+  console.log('💾 [Asisten Modul] Save clicked');
+  
+  const user = auth.currentUser;
+  if (!user) { alert('⚠️ Silakan login dulu!'); return; }
+  
+  const modul = document.getElementById('result-modul')?.value;
+  if (!modul || modul === '⏳ Sedang generate...') {
+    alert('⚠️ Generate data dulu sebelum menyimpan!');
+    return;
+  }
+  
+  try {
+    const userDoc = await getDoc(doc(db, 'users', user.uid));
+    const isAdmin = userDoc.exists() && userDoc.data()?.role === 'admin';
+    
+    await addDoc(collection(db, 'modul_ajar'), {
+      userId: user.uid,
+      userEmail: user.email,
+      userName: user.displayName || 'Guru',
+      guru: document.getElementById('modul-guru')?.value,
+      nip: document.getElementById('modul-nip')?.value,
+      sekolah: document.getElementById('modul-sekolah')?.value,
+      kepsek: document.getElementById('modul-kepsek')?.value,
+      nipKepsek: document.getElementById('modul-nip-kepsek')?.value,
+      tahun: document.getElementById('modul-tahun')?.value,
+      jenjang: document.getElementById('modul-jenjang')?.value,
+      kelas: document.getElementById('modul-kelas')?.value,
+      mapel: document.getElementById('modul-mapel')?.value,
+      topik: document.getElementById('modul-topik')?.value,
+      alokasi: document.getElementById('modul-alokasi')?.value,
+      modul: modul,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+      isAdmin: isAdmin
+    });
+    
+    console.log('✅ [Asisten Modul] Data saved!');
+    alert('✅ Modul Ajar berhasil disimpan!');
+    loadModulData();
+    document.getElementById('modul-result').classList.add('hidden');
+    document.getElementById('modul-form').reset();
+  } catch (error) {
+    console.error('❌ [Asisten Modul] Save error:', error);
+    alert('❌ Gagal simpan: ' + error.message);
+  }
+}
+
+// ✅ LOAD MODUL DATA
+function loadModulData() {
+  const list = document.getElementById('modul-list');
+  const countSpan = document.getElementById('saved-count');
+  if (!list) { console.error('❌ List container not found!'); return; }
+  
+  const user = auth.currentUser;
+  if (!user) {
+    list.innerHTML = `<div class="text-center py-8 text-gray-500"><p>Silakan login untuk melihat data</p></div>`;
+    return;
+  }
+  
+  (async () => {
+    try {
+      const userDoc = await getDoc(doc(db, 'users', user.uid));
+      const isAdmin = userDoc.exists() && userDoc.data()?.role === 'admin';
+      
+      let q;
+      if (isAdmin) {
+        q = query(collection(db, 'modul_ajar'), orderBy('createdAt', 'desc'));
+      } else {
+        q = query(collection(db, 'modul_ajar'), where('userId', '==', user.uid), orderBy('createdAt', 'desc'));
+      }
+      
+      onSnapshot(q, (snapshot) => {
+        if (snapshot.empty) {
+          list.innerHTML = `<div class="text-center py-8 text-gray-500"><p>Belum ada modul tersimpan</p></div>`;
+          return;
+        }
+        if (countSpan) countSpan.textContent = snapshot.docs.length;
+        list.innerHTML = snapshot.docs.map(docSnap => {
+          const d = docSnap.data();
+          const date = d.createdAt?.toDate?.()?.toLocaleString('id-ID') || '-';
+          return `
+            <div class="cta-item">
+              <div class="flex justify-between items-start mb-2">
+                <div>
+                  <strong class="text-lg">${d.mapel?.toUpperCase() || '-'} - Kelas ${d.kelas}</strong>
+                  <br><small class="text-gray-500">${d.userName} • ${d.sekolah || '-'}</small>
+                </div>
+                <small class="text-gray-400">${date}</small>
+              </div>
+              <p class="text-gray-700 mt-2"><strong>📋 Topik:</strong> ${d.topik || '-'}</p>
+              <p class="text-gray-600 text-sm">${d.modul?.substring(0, 150) || '-'}...</p>
+            </div>
+          `;
+        }).join('');
+      });
+    } catch (e) {
+      console.error('❌ [Asisten Modul] Load error:', e);
+    }
+  })();
+}
+
+console.log('🟢 [Asisten Modul] READY — AUTO-FILL FROM MODAL ENABLED!');
