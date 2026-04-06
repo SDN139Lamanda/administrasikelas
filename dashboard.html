@@ -6,38 +6,28 @@
     <title>Dashboard - Platform Guru SD/SMP/SMA</title>
     <meta name="description" content="Dashboard Administrasi Kelas Digital">
     
-    <!-- Meta tags untuk prevent cache -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     
-    <!-- Tailwind CSS (CDN) -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Custom CSS -->
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/dashboard.css">
-    
-    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="bg-gray-50">
 
-    <!-- Skip Link for Accessibility -->
     <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-purple-600 text-white px-4 py-2 rounded z-50">
         Lewati ke konten utama
     </a>
 
-    <!-- Navigation Bar -->
     <nav class="navbar" role="navigation" aria-label="Navigasi Utama">
         <div class="container">
             <div class="nav-content">
                 <div class="nav-brand">
                     <a href="dashboard.html" class="flex items-center gap-3" aria-label="Kembali ke Dashboard">
-                        <div class="nav-logo" aria-hidden="true">
-                            <i class="fas fa-school"></i>
-                        </div>
+                        <div class="nav-logo" aria-hidden="true"><i class="fas fa-school"></i></div>
                         <div>
                             <h1 class="nav-title">Administrasi Kelas</h1>
                             <p class="nav-subtitle">Platform Guru SD/SMP/SMA</p>
@@ -57,18 +47,14 @@
         </div>
     </nav>
 
-    <!-- Main Content Wrapper -->
     <main id="main-content">
         
-        <!-- Welcome Section -->
         <section class="hero dashboard-hero" aria-labelledby="welcome-heading">
             <div class="container">
                 <h1 id="welcome-heading" class="hero-title text-white">
                     <i class="fas fa-home mr-3" aria-hidden="true"></i>Dashboard
                 </h1>
-                <p class="hero-subtitle text-white">
-                    Selamat datang di Rumah Digital Anda
-                </p>
+                <p class="hero-subtitle text-white">Selamat datang di Rumah Digital Anda</p>
                 <div class="user-context-badge" id="userContextBadge">
                     <i class="fas fa-user-circle mr-2" aria-hidden="true"></i>
                     <span id="userContextText">Loading...</span>
@@ -76,7 +62,6 @@
             </div>
         </section>
 
-        <!-- 8 RUANG UTAMA -->
         <section class="section" aria-labelledby="rooms-heading">
             <div class="container">
                 <h2 id="rooms-heading" class="section-title text-center mb-8">
@@ -151,7 +136,6 @@
             </div>
         </section>
 
-        <!-- SD SECTION -->
         <section id="sd-section" class="section bg-white hidden" data-jenjang="sd">
             <div class="container">
                 <div class="section-header">
@@ -170,7 +154,6 @@
             </div>
         </section>
 
-        <!-- SMP SECTION -->
         <section id="smp-section" class="section bg-white hidden" data-jenjang="smp">
             <div class="container">
                 <div class="section-header">
@@ -186,7 +169,6 @@
             </div>
         </section>
 
-        <!-- SMA SECTION -->
         <section id="sma-section" class="section bg-white hidden" data-jenjang="sma">
             <div class="container">
                 <div class="section-header">
@@ -202,16 +184,11 @@
             </div>
         </section>
 
-        <!-- MODULE CONTAINERS -->
-        <section id="module-container" class="section bg-gray-50">
-            <div class="container"></div>
-        </section>
-
+        <section id="module-container" class="section bg-gray-50"><div class="container"></div></section>
         <section id="refleksi-container" class="section bg-gray-50 hidden"></section>
 
     </main>
 
-    <!-- Footer -->
     <footer class="footer">
         <div class="container">
             <p>&copy; 2026 Platform Administrasi Kelas Digital.</p>
@@ -219,7 +196,120 @@
         </div>
     </footer>
 
-    <!-- ✅ SCRIPT TAGS (NO API KEY MODAL) -->
+    <!-- ✅ MODAL DATA PROFIL (FIRST LOGIN ONLY - NO API KEY) -->
+    <script>
+      (function() {
+        // ✅ CEK: Apakah user sudah isi data profil?
+        const namaSudahAda = localStorage.getItem('user_nama_lengkap');
+        const sekolahSudahAda = localStorage.getItem('user_nama_sekolah');
+        
+        // ✅ JIKA SUDAH ADA → JANGAN TAMPILKAN MODAL
+        if (namaSudahAda && sekolahSudahAda) {
+          console.log('✅ [Config] User data exists — No modal');
+          return;
+        }
+        
+        console.log('⚠️ [Config] First time — Showing modal');
+        
+        function showProfileModal() {
+          const modal = document.createElement('div');
+          modal.id = 'profile-modal';
+          modal.style.cssText = `
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5); display: flex;
+            align-items: center; justify-content: center;
+            z-index: 9999; font-family: inherit; padding: 16px;
+          `;
+          
+          modal.innerHTML = `
+            <div style="
+              background: white; border-radius: 12px; padding: 32px;
+              max-width: 480px; width: 100%;
+              box-shadow: 0 20px 60px rgba(124,58,237,0.2);
+              border-top: 4px solid #7c3aed;
+              animation: modalSlide 0.3s ease;
+              max-height: 90vh; overflow-y: auto;
+            ">
+              <style>@keyframes modalSlide { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }</style>
+              
+              <h2 style="margin: 0 0 8px 0; font-size: 22px; color: #1f2937; font-weight: 700; text-align: center;">Selamat Datang! 👋</h2>
+              <p style="margin: 0 0 24px 0; color: #6b7280; font-size: 14px; text-align: center;">Lengkapi data profil Anda</p>
+              
+              <label style="display: block; font-size: 13px; color: #374151; margin-bottom: 6px; font-weight: 600;">Nama Lengkap:</label>
+              <input type="text" id="user-nama" placeholder="Contoh: Siti Rahayu, S.Pd" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; margin-bottom: 16px; box-sizing: border-box;" onfocus="this.style.borderColor='#7c3aed'" onblur="this.style.borderColor='#e5e7eb'">
+              
+              <label style="display: block; font-size: 13px; color: #374151; margin-bottom: 6px; font-weight: 600;">NIP:</label>
+              <input type="text" id="user-nip" placeholder="Contoh: 199001012020121001" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; margin-bottom: 16px; box-sizing: border-box;" onfocus="this.style.borderColor='#7c3aed'" onblur="this.style.borderColor='#e5e7eb'">
+              
+              <label style="display: block; font-size: 13px; color: #374151; margin-bottom: 6px; font-weight: 600;">Nama Kepala Sekolah:</label>
+              <input type="text" id="user-kepsek" placeholder="Contoh: Drs. Ahmad Fauzi, M.Pd" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; margin-bottom: 16px; box-sizing: border-box;" onfocus="this.style.borderColor='#7c3aed'" onblur="this.style.borderColor='#e5e7eb'">
+              
+              <label style="display: block; font-size: 13px; color: #374151; margin-bottom: 6px; font-weight: 600;">NIP Kepala Sekolah:</label>
+              <input type="text" id="user-nip-kepsek" placeholder="Contoh: 198501012010101001" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; margin-bottom: 16px; box-sizing: border-box;" onfocus="this.style.borderColor='#7c3aed'" onblur="this.style.borderColor='#e5e7eb'">
+              
+              <label style="display: block; font-size: 13px; color: #374151; margin-bottom: 6px; font-weight: 600;">Nama Sekolah: <span style="color: #ef4444;">*</span></label>
+              <input type="text" id="user-sekolah" placeholder="Contoh: SDN 139 Lamanda" required style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; margin-bottom: 20px; box-sizing: border-box; font-weight: 500;" onfocus="this.style.borderColor='#7c3aed'" onblur="this.style.borderColor='#e5e7eb'">
+              
+              <div style="display: flex; gap: 12px;">
+                <button id="btn-skip" style="flex: 1; padding: 12px; background: #f3f4f6; color: #374151; border: none; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer;" onmouseover="this.style.background='#e5e7eb'" onmouseout="this.style.background='#f3f4f6'">Nanti</button>
+                <button id="btn-save" style="flex: 2; padding: 12px; background: linear-gradient(135deg, #7c3aed 0%, #0891b2 100%); color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(124,58,237,0.3)'" onmouseout="this.style.transform='none'; this.style.boxShadow='none'">Simpan Data</button>
+              </div>
+              
+              <p style="margin: 20px 0 0 0; color: #9ca3af; font-size: 11px; text-align: center;">🔐 Data disimpan lokal di browser Anda</p>
+            </div>
+          `;
+          
+          document.body.appendChild(modal);
+          
+          document.getElementById('btn-save').addEventListener('click', function() {
+            const nama = document.getElementById('user-nama')?.value.trim();
+            const nip = document.getElementById('user-nip')?.value.trim();
+            const kepsek = document.getElementById('user-kepsek')?.value.trim();
+            const nipKepsek = document.getElementById('user-nip-kepsek')?.value.trim();
+            const sekolah = document.getElementById('user-sekolah')?.value.trim();
+            
+            if (!sekolah) {
+              alert('Nama Sekolah wajib diisi.');
+              document.getElementById('user-sekolah')?.focus();
+              return;
+            }
+            
+            // ✅ SIMPAN SEMUA DATA KE LOCALSTORAGE
+            if (nama) localStorage.setItem('user_nama_lengkap', nama);
+            if (nip) localStorage.setItem('user_nip', nip);
+            if (kepsek) localStorage.setItem('user_nama_kepsek', kepsek);
+            if (nipKepsek) localStorage.setItem('user_nip_kepsek', nipKepsek);
+            if (sekolah) localStorage.setItem('user_nama_sekolah', sekolah);
+            
+            console.log('✅ [Config] Profile data saved:', { nama, nip, kepsek, sekolah });
+            
+            modal.remove();
+            alert('✅ Data tersimpan! Modal tidak akan muncul lagi.');
+          });
+          
+          document.getElementById('btn-skip').addEventListener('click', function() {
+            modal.remove();
+            console.log('⚠️ [Config] User skipped');
+          });
+          
+          modal.querySelectorAll('input').forEach(input => {
+            input.addEventListener('keypress', function(e) {
+              if (e.key === 'Enter') { document.getElementById('btn-save').click(); }
+            });
+          });
+          
+          setTimeout(() => document.getElementById('user-nama')?.focus(), 100);
+        }
+        
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', showProfileModal);
+        } else {
+          showProfileModal();
+        }
+      })();
+    </script>
+
+    <!-- ✅ SCRIPT TAGS -->
     <script type="module" src="modules/firebase-config.js"></script>
     <script type="module" src="js/main.js"></script>
     <script type="module" src="js/dashboard.js"></script>
