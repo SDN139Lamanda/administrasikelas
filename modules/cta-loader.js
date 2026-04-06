@@ -8,6 +8,7 @@
  * - Match data berdasarkan jenjang, kelas, mapel, semester
  * - Randomize konten berdasarkan topik
  * - Return CP, TP, ATP yang sudah di-process
+ * - Graceful error handling (non-blocking)
  * ============================================
  */
 
@@ -28,7 +29,7 @@ const dataCache = {
  * @param {string} jenjang - sd, smp, sma
  * @param {string} kelas - 1-12
  * @param {string} type - cp, tp, atp
- * @returns {Promise<Object>} Data JSON yang sudah di-parse
+ * @returns {Promise<Object|null>} Data JSON yang sudah di-parse, atau null jika tidak ditemukan
  */
 async function loadJSONData(jenjang, kelas, type) {
   const cacheKey = `${jenjang}_${kelas}_${type}`;
@@ -47,7 +48,9 @@ async function loadJSONData(jenjang, kelas, type) {
     const response = await fetch(url);
     
     if (!response.ok) {
-      throw new Error(`Failed to load ${url}: ${response.status} ${response.statusText}`);
+      // ✅ Jangan throw error — return null saja
+      console.warn('⚠️ [CTA Loader] JSON not found:', url);
+      return null;
     }
     
     const data = await response.json();
@@ -59,8 +62,10 @@ async function loadJSONData(jenjang, kelas, type) {
     return data;
     
   } catch (error) {
-    console.error('❌ [CTA Loader] Error loading JSON:', error);
-    throw new Error(`Gagal memuat data ${type.toUpperCase()} untuk ${jenjang.toUpperCase()} Kelas ${kelas}. Pastikan file JSON ada di folder data/${jenjang}/`);
+    // ✅ Graceful error handling — return null, jangan throw
+    console.warn('⚠️ [CTA Loader] Error loading JSON:', error.message);
+    console.log('💡 [CTA Loader] Will use AI or load on-demand');
+    return null;
   }
 }
 
@@ -69,10 +74,16 @@ async function loadJSONData(jenjang, kelas, type) {
  * @param {string} jenjang - sd, smp, sma
  * @param {string} kelas - 1-12
  * @param {string} mapel - matematika, ipas, dll
- * @returns {Promise<Object>} CP data untuk mapel yang dipilih
+ * @returns {Promise<Object|null>} CP data untuk mapel yang dipilih
  */
 export async function getCP(jenjang, kelas, mapel) {
   const data = await loadJSONData(jenjang, kelas, 'cp');
+  
+  // ✅ Handle null data
+  if (!data) {
+    console.warn('⚠️ [CTA Loader] CP data not found:', { jenjang, kelas, mapel });
+    return null;
+  }
   
   if (!data.mapel || !data.mapel[mapel]) {
     console.warn('⚠️ [CTA Loader] Mapel not found:', mapel);
@@ -87,10 +98,16 @@ export async function getCP(jenjang, kelas, mapel) {
  * @param {string} jenjang - sd, smp, sma
  * @param {string} kelas - 1-12
  * @param {string} mapel - matematika, ipas, dll
- * @returns {Promise<Object>} TP data untuk mapel yang dipilih
+ * @returns {Promise<Object|null>} TP data untuk mapel yang dipilih
  */
 export async function getTP(jenjang, kelas, mapel) {
   const data = await loadJSONData(jenjang, kelas, 'tp');
+  
+  // ✅ Handle null data
+  if (!data) {
+    console.warn('⚠️ [CTA Loader] TP data not found:', { jenjang, kelas, mapel });
+    return null;
+  }
   
   if (!data.mapel || !data.mapel[mapel]) {
     console.warn('⚠️ [CTA Loader] Mapel not found:', mapel);
@@ -105,10 +122,16 @@ export async function getTP(jenjang, kelas, mapel) {
  * @param {string} jenjang - sd, smp, sma
  * @param {string} kelas - 1-12
  * @param {string} mapel - matematika, ipas, dll
- * @returns {Promise<Object>} ATP data untuk mapel yang dipilih
+ * @returns {Promise<Object|null>} ATP data untuk mapel yang dipilih
  */
 export async function getATP(jenjang, kelas, mapel) {
   const data = await loadJSONData(jenjang, kelas, 'atp');
+  
+  // ✅ Handle null data
+  if (!data) {
+    console.warn('⚠️ [CTA Loader] ATP data not found:', { jenjang, kelas, mapel });
+    return null;
+  }
   
   if (!data.mapel || !data.mapel[mapel]) {
     console.warn('⚠️ [CTA Loader] Mapel not found:', mapel);
@@ -148,6 +171,8 @@ export function processContent(cpData, tpData, atpData, topik) {
  * @returns {string} Formatted CP text
  */
 function formatCP(cpData, topik) {
+  if (!cpData) return 'CP data tidak tersedia';
+  
   let text = `CAPAIAN PEMBELAJARAN (CP)\n`;
   text += `═══════════════════════════════════════════════════════════\n\n`;
   text += `Fase: ${cpData.fase || '-'}\n`;
@@ -178,6 +203,8 @@ function formatCP(cpData, topik) {
  * @returns {string} Formatted TP text
  */
 function formatTP(tpData, topik) {
+  if (!tpData) return 'TP data tidak tersedia';
+  
   let text = `TUJUAN PEMBELAJARAN (TP)\n`;
   text += `═══════════════════════════════════════════════════════════\n\n`;
   text += `Fase: ${tpData.fase || '-'}\n`;
@@ -207,6 +234,8 @@ function formatTP(tpData, topik) {
  * @returns {string} Formatted ATP text
  */
 function formatATP(atpData, topik) {
+  if (!atpData) return 'ATP data tidak tersedia';
+  
   let text = `ALUR TUJUAN PEMBELAJARAN (ATP)\n`;
   text += `═══════════════════════════════════════════════════════════\n\n`;
   text += `Fase: ${atpData.fase || '-'}\n`;
@@ -252,7 +281,8 @@ export function clearCache() {
 }
 
 /**
- * Preload data untuk performa lebih baik
+ * ✅ FIXED: Preload data untuk performa lebih baik
+ * Tidak throw error — hanya warning jika JSON tidak ada
  * @param {string} jenjang - sd, smp, sma
  * @param {string} kelas - 1-12
  */
@@ -267,7 +297,10 @@ export async function preloadData(jenjang, kelas) {
     ]);
     console.log('✅ [CTA Loader] Preload complete');
   } catch (error) {
-    console.error('❌ [CTA Loader] Preload failed:', error);
+    // ✅ JANGAN THROW ERROR — Cukup log warning
+    console.warn('⚠️ [CTA Loader] Preload failed (some JSON files not found):', error.message);
+    console.log('💡 [CTA Loader] Will load on-demand during generate');
+    // ✅ TIDAK throw error — biarkan generate handle nanti
   }
 }
 
