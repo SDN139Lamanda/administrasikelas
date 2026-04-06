@@ -186,29 +186,76 @@ export async function generateWithGroq(inputData) {
 }
 
 /**
- * Parse Groq response into CP, TP, ATP sections
+ * ✅ FIXED: Parse Groq response into CP, TP, ATP sections
+ * Menggunakan string methods (indexOf/substring) yang lebih aman
  * @param {string} text - AI response text
  * @returns {Object} {cp, tp, atp}
  */
 function parseGroqResponse(text) {
   let cp = '', tp = '', atp = '';
   
-  // Extract CP section
-  const cpMatch = text.match(/CAPAIAN PEMBELAJARAN.*?(?════════*TUJUAN PEMBELAJARAN|$)/is);
-  cp = cpMatch ? cpMatch[0].trim() : text.split('\n\n')[0] || text;
-  
-  // Extract TP section
-  const tpMatch = text.match(/TUJUAN PEMBELAJARAN.*?(?════════*ALUR TUJUAN PEMBELAJARAN|$)/is);
-  tp = tpMatch ? tpMatch[0].trim() : text.split('\n\n')[1] || '';
-  
-  // Extract ATP section
-  const atpMatch = text.match(/ALUR TUJUAN PEMBELAJARAN.*$/is);
-  atp = atpMatch ? atpMatch[0].trim() : text.split('\n\n')[2] || '';
+  try {
+    // ✅ Extract sections using safe string methods
+    const cpMarker = 'CAPAIAN PEMBELAJARAN';
+    const tpMarker = 'TUJUAN PEMBELAJARAN';
+    const atpMarker = 'ALUR TUJUAN PEMBELAJARAN';
+    
+    const cpIndex = text.indexOf(cpMarker);
+    const tpIndex = text.indexOf(tpMarker);
+    const atpIndex = text.indexOf(atpMarker);
+    
+    // Extract CP
+    if (cpIndex !== -1) {
+      if (tpIndex !== -1 && tpIndex > cpIndex) {
+        cp = text.substring(cpIndex, tpIndex).trim();
+      } else if (atpIndex !== -1 && atpIndex > cpIndex) {
+        cp = text.substring(cpIndex, atpIndex).trim();
+      } else {
+        cp = text.substring(cpIndex).trim();
+      }
+    }
+    
+    // Extract TP
+    if (tpIndex !== -1) {
+      if (atpIndex !== -1 && atpIndex > tpIndex) {
+        tp = text.substring(tpIndex, atpIndex).trim();
+      } else {
+        tp = text.substring(tpIndex).trim();
+      }
+    }
+    
+    // Extract ATP
+    if (atpIndex !== -1) {
+      atp = text.substring(atpIndex).trim();
+    }
+    
+    // ✅ Fallback: split by double newlines if markers not found
+    if (!cp && !tp && !atp) {
+      const parts = text.split(/\n\s*\n/).filter(p => p.trim().length > 0);
+      if (parts.length >= 3) {
+        cp = parts.slice(0, Math.ceil(parts.length / 3)).join('\n\n');
+        tp = parts.slice(Math.ceil(parts.length / 3), Math.ceil(parts.length * 2/3)).join('\n\n');
+        atp = parts.slice(Math.ceil(parts.length * 2/3)).join('\n\n');
+      } else if (parts.length >= 2) {
+        cp = parts[0];
+        tp = parts[1];
+      } else if (parts.length === 1) {
+        cp = parts[0];
+      }
+    }
+    
+  } catch (e) {
+    console.error('❌ [Groq API] Parse error:', e);
+    // Ultimate fallback: return entire text as CP
+    cp = text;
+    tp = '';
+    atp = '';
+  }
   
   return {
-    cp: cp.trim(),
-    tp: tp.trim(),
-    atp: atp.trim()
+    cp: cp || text,
+    tp: tp || '',
+    atp: atp || ''
   };
 }
 
