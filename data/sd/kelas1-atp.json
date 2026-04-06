@@ -1,0 +1,507 @@
+{
+  "metadata": {
+    "jenjang": "sd",
+    "kelas": "1",
+    "fase": "A",
+    "semester": "1",
+    "kurikulum": "Merdeka",
+    "referensi": "Kepmendikbudristek No. 033/H/KR/2022",
+    "lastUpdated": "2025-01-01",
+    "wordCount": 2000,
+    "description": "Alur Tujuan Pembelajaran Kelas 1 SD Fase A - Semester 1"
+  },
+  "mapel": {
+    "matematika": {
+      "atp_id": "MATH-ATP-SD-001",
+      "fase": "A",
+      "alur_pembelajaran": [
+        {
+          "minggu": 1,
+          "tujuan": "Peserta didik dapat membaca dan menulis bilangan 1-10",
+          "kegiatan": [
+            "Guru memperkenalkan bilangan 1-10 menggunakan kartu bilangan",
+            "Peserta didik menghitung benda konkret (kelereng, pensil, buku)",
+            "Peserta didik menulis lambang bilangan 1-10 di buku tulis",
+            "Permainan tebak bilangan dengan kartu angka",
+            "Menyanyikan lagu bilangan 1-10"
+          ],
+          "asesmen": [
+            "Observasi: Kemampuan menghitung benda konkret",
+            "Unjuk kerja: Menulis lambang bilangan 1-10",
+            "Lisan: Menyebutkan bilangan secara urut"
+          ]
+        },
+        {
+          "minggu": 2,
+          "tujuan": "Peserta didik dapat membaca dan menulis bilangan 1-20",
+          "kegiatan": [
+            "Review bilangan 1-10",
+            "Guru memperkenalkan bilangan 11-20",
+            "Peserta didik menghitung benda sampai 20",
+            "Latihan menulis bilangan 11-20",
+            "Permainan urutan bilangan"
+          ],
+          "asesmen": [
+            "Tertulis: Melengkapi urutan bilangan 1-20",
+            "Unjuk kerja: Menghitung 20 benda konkret",
+            "Lisan: Menyebutkan bilangan sebelum dan sesudah"
+          ]
+        },
+        {
+          "minggu": 3,
+          "tujuan": "Peserta didik dapat menentukan nilai tempat puluhan dan satuan pada bilangan 1-50",
+          "kegiatan": [
+            "Guru menjelaskan konsep puluhan dan satuan menggunakan blok dienes",
+            "Peserta didik mengelompokkan benda dalam puluhan dan satuan",
+            "Latihan menentukan nilai tempat pada bilangan 2 digit",
+            "Permainan menyusun bilangan dari kartu puluhan dan satuan",
+            "Diskusi tentang perbedaan nilai tempat"
+          ],
+          "asesmen": [
+            "Tertulis: Menentukan nilai tempat pada bilangan",
+            "Unjuk kerja: Menyusun bilangan dengan blok dienes",
+            "Lisan: Menjelaskan nilai tempat dengan kata-kata sendiri"
+          ]
+        },
+        {
+          "minggu": 4,
+          "tujuan": "Peserta didik dapat membandingkan dua bilangan sampai 50",
+          "kegiatan": [
+            "Guru memperkenalkan simbol >, <, =",
+            "Peserta didik membandingkan dua kumpulan benda",
+            "Latihan menggunakan simbol perbandingan",
+            "Permainan kartu bilangan (menentukan yang lebih besar)",
+            "Diskusi strategi membandingkan bilangan"
+          ],
+          "asesmen": [
+            "Tertulis: Menggunakan simbol >, <, = dengan benar",
+            "Unjuk kerja: Membandingkan dua kumpulan benda",
+            "Lisan: Menjelaskan bilangan mana yang lebih besar"
+          ]
+        },
+        {
+          "minggu": 5,
+          "tujuan": "Peserta didik dapat mengurutkan bilangan sampai 50 dari terkecil ke terbesar",
+          "kegiatan": [
+            "Guru menunjukkan garis bilangan 1-50",
+            "Peserta didik mengurutkan kartu bilangan",
+            "Latihan melengkapi urutan bilangan yang kosong",
+            "Permainan antre berdasarkan nomor bilangan",
+            "Menempatkan bilangan pada garis bilangan"
+          ],
+          "asesmen": [
+            "Tertulis: Mengurutkan 5 bilangan dari terkecil",
+            "Unjuk kerja: Menempatkan kartu pada garis bilangan",
+            "Lisan: Menyebutkan bilangan di antara dua bilangan"
+          ]
+        },
+        {
+          "minggu": 6,
+          "tujuan": "Peserta didik dapat melakukan penjumlahan dua bilangan dengan hasil sampai 50",
+          "kegiatan": [
+            "Guru memperkenalkan konsep penjumlahan dengan benda konkret",
+            "Peserta didik menjumlahkan dua kumpulan benda",
+            "Latihan penjumlahan tanpa menyimpan",
+            "Permainan toko-tokoan (menghitung total belanja)",
+            "Menyelesaikan soal cerita penjumlahan sederhana"
+          ],
+          "asesmen": [
+            "Tertulis: Soal penjumlahan 10 soal",
+            "Unjuk kerja: Menjumlahkan benda konkret",
+            "Lisan: Menyelesaikan soal cerita penjumlahan"
+          ]
+        },
+        {
+          "minggu": 7,
+          "tujuan": "Peserta didik dapat melakukan pengurangan dua bilangan dengan hasil sampai 50",
+          "kegiatan": [
+            "Guru memperkenalkan konsep pengurangan dengan benda konkret",
+            "Peserta didik mengurangi kumpulan benda",
+            "Latihan pengurangan tanpa meminjam",
+            "Permainan mengambil benda dari keranjang",
+            "Menyelesaikan soal cerita pengurangan sederhana"
+          ],
+          "asesmen": [
+            "Tertulis: Soal pengurangan 10 soal",
+            "Unjuk kerja: Mengurangi benda konkret",
+            "Lisan: Menyelesaikan soal cerita pengurangan"
+          ]
+        },
+        {
+          "minggu": 8,
+          "tujuan": "Peserta didik dapat menyelesaikan masalah sehari-hari terkait penjumlahan dan pengurangan",
+          "kegiatan": [
+            "Review penjumlahan dan pengurangan",
+            "Guru memberikan soal cerita kontekstual",
+            "Peserta didik bekerja kelompok menyelesaikan masalah",
+            "Presentasi hasil kerja kelompok",
+            "Refleksi strategi yang digunakan"
+          ],
+          "asesmen": [
+            "Tertulis: Soal cerita campuran 5 soal",
+            "Unjuk kerja: Presentasi solusi masalah",
+            "Lisan: Menjelaskan strategi yang digunakan"
+          ]
+        },
+        {
+          "minggu": 9,
+          "tujuan": "Peserta didik dapat mengenali dan melanjutkan pola gambar sederhana",
+          "kegiatan": [
+            "Guru menunjukkan pola AB-AB dengan gambar",
+            "Peserta didik melanjutkan pola yang diberikan",
+            "Latihan pola ABC-ABC",
+            "Peserta didik membuat pola sendiri dengan benda",
+            "Pameran pola buatan siswa"
+          ],
+          "asesmen": [
+            "Tertulis: Melanjutkan 5 pola gambar",
+            "Unjuk kerja: Membuat pola dengan benda konkret",
+            "Lisan: Menjelaskan pola yang dibuat"
+          ]
+        },
+        {
+          "minggu": 10,
+          "tujuan": "Peserta didik dapat mengenali dan mengklasifikasi bangun datar sederhana",
+          "kegiatan": [
+            "Guru memperkenalkan segitiga, segiempat, lingkaran",
+            "Peserta didik mengelompokkan bangun datar berdasarkan bentuk",
+            "Berburu bangun datar di lingkungan sekolah",
+            "Menyusun bangun datar menjadi gambar",
+            "Membuat karya seni dari bangun datar"
+          ],
+          "asesmen": [
+            "Tertulis: Mengklasifikasi 10 bangun datar",
+            "Unjuk kerja: Menunjukkan bangun datar di lingkungan",
+            "Produk: Karya seni dari bangun datar"
+          ]
+        },
+        {
+          "minggu": 11,
+          "tujuan": "Peserta didik dapat mengukur panjang benda dengan satuan tidak baku",
+          "kegiatan": [
+            "Guru memperkenalkan satuan tidak baku (jengkal, langkah)",
+            "Peserta didik mengukur panjang meja dengan jengkal",
+            "Peserta didik mengukur panjang ruangan dengan langkah",
+            "Membandingkan hasil pengukuran antar siswa",
+            "Diskusi tentang pentingnya satuan yang sama"
+          ],
+          "asesmen": [
+            "Unjuk kerja: Mengukur benda dengan jengkal",
+            "Tertulis: Mencatat hasil pengukuran",
+            "Lisan: Membandingkan hasil pengukuran"
+          ]
+        },
+        {
+          "minggu": 12,
+          "tujuan": "Peserta didik dapat mengukur berat benda dengan satuan tidak baku",
+          "kegiatan": [
+            "Guru memperkenalkan konsep berat dengan timbangan sederhana",
+            "Peserta didik menimbang benda dengan tangan",
+            "Membandingkan berat dua benda",
+            "Mengurutkan benda dari yang terberat ke teringan",
+            "Permainan tebak berat benda"
+          ],
+          "asesmen": [
+            "Unjuk kerja: Menimbang benda dengan tangan",
+            "Tertulis: Mengurutkan benda berdasarkan berat",
+            "Lisan: Menjelaskan benda mana yang lebih berat"
+          ]
+        },
+        {
+          "minggu": 13,
+          "tujuan": "Review dan penguatan materi bilangan 1-100",
+          "kegiatan": [
+            "Review semua materi bilangan",
+            "Permainan matematika (ular tangga, kartu bilangan)",
+            "Latihan soal campuran",
+            "Kompetisi matematika kelas",
+            "Refleksi pembelajaran semester 1"
+          ],
+          "asesmen": [
+            "Sumatif: Ulangan harian semester 1",
+            "Unjuk kerja: Permainan matematika",
+            "Refleksi: Menulis hal yang sudah dipelajari"
+          ]
+        },
+        {
+          "minggu": 14,
+          "tujuan": "Review dan penguatan materi pengukuran dan geometri",
+          "kegiatan": [
+            "Review materi pengukuran",
+            "Review materi bangun datar",
+            "Proyek mengukur benda di sekolah",
+            "Membuat poster bangun datar",
+            "Presentasi proyek"
+          ],
+          "asesmen": [
+            "Sumatif: Ulangan harian pengukuran dan geometri",
+            "Produk: Poster bangun datar",
+            "Unjuk kerja: Presentasi proyek"
+          ]
+        },
+        {
+          "minggu": 15,
+          "tujuan": "Asesmen Sumatif Akhir Semester",
+          "kegiatan": [
+            "Ujian tertulis semester 1",
+            "Unjuk kerja individu",
+            "Pengumpulan portofolio",
+            "Refleksi akhir semester",
+            "Perayaan pencapaian siswa"
+          ],
+          "asesmen": [
+            "Sumatif: Ujian akhir semester",
+            "Portofolio: Kumpulan tugas semester 1",
+            "Refleksi: Menulis pencapaian dan target semester 2"
+          ]
+        }
+      ]
+    },
+    "ipas": {
+      "atp_id": "IPAS-ATP-SD-001",
+      "fase": "A",
+      "alur_pembelajaran": [
+        {
+          "minggu": 1,
+          "tujuan": "Peserta didik dapat mengenali anggota tubuh dan fungsinya",
+          "kegiatan": [
+            "Guru memperkenalkan nama-nama anggota tubuh",
+            "Peserta didik menunjuk anggota tubuh sendiri",
+            "Permainan 'Guru Berkata' (menunjuk anggota tubuh)",
+            "Diskusi fungsi setiap anggota tubuh",
+            "Menggambar anggota tubuh dan memberi label"
+          ],
+          "asesmen": [
+            "Unjuk kerja: Menunjuk anggota tubuh",
+            "Tertulis: Melengkapi gambar anggota tubuh",
+            "Lisan: Menyebutkan fungsi anggota tubuh"
+          ]
+        },
+        {
+          "minggu": 2,
+          "tujuan": "Peserta didik dapat menjaga kebersihan anggota tubuh",
+          "kegiatan": [
+            "Diskusi cara menjaga kebersihan tubuh",
+            "Praktik cuci tangan yang benar",
+            "Praktik gosok gigi yang benar",
+            "Membuat jadwal kebersihan diri",
+            "Role play tentang kebersihan"
+          ],
+          "asesmen": [
+            "Unjuk kerja: Demonstrasi cuci tangan",
+            "Produk: Jadwal kebersihan diri",
+            "Observasi: Kebiasaan kebersihan di sekolah"
+          ]
+        },
+        {
+          "minggu": 3,
+          "tujuan": "Peserta didik dapat mengenali hewan di lingkungan sekitar",
+          "kegiatan": [
+            "Guru menunjukkan gambar berbagai hewan",
+            "Diskusi hewan yang ada di rumah dan sekolah",
+            "Kunjungan ke halaman sekolah untuk observasi hewan",
+            "Menggambar hewan favorit",
+            "Presentasi tentang hewan favorit"
+          ],
+          "asesmen": [
+            "Tertulis: Menyebutkan 10 hewan di sekitar",
+            "Produk: Gambar hewan dengan label",
+            "Lisan: Presentasi hewan favorit"
+          ]
+        },
+        {
+          "minggu": 4,
+          "tujuan": "Peserta didik dapat mengelompokkan hewan berdasarkan tempat hidup",
+          "kegiatan": [
+            "Guru menjelaskan hewan darat, air, dan udara",
+            "Peserta didik mengelompokkan gambar hewan",
+            "Permainan sortiran hewan berdasarkan tempat hidup",
+            "Membuat diorama habitat hewan",
+            "Diskusi tentang kebutuhan hewan"
+          ],
+          "asesmen": [
+            "Tertulis: Mengelompokkan 15 hewan",
+            "Produk: Diorama habitat hewan",
+            "Lisan: Menjelaskan tempat hidup hewan"
+          ]
+        },
+        {
+          "minggu": 5,
+          "tujuan": "Peserta didik dapat mengenali tumbuhan di lingkungan sekitar",
+          "kegiatan": [
+            "Kunjungan ke taman sekolah",
+            "Observasi berbagai tumbuhan",
+            "Mengumpulkan daun berbagai bentuk",
+            "Membuat herbarium sederhana",
+            "Diskusi tentang bagian tumbuhan"
+          ],
+          "asesmen": [
+            "Unjuk kerja: Menunjukkan berbagai tumbuhan",
+            "Produk: Herbarium sederhana",
+            "Tertulis: Menyebutkan bagian tumbuhan"
+          ]
+        },
+        {
+          "minggu": 6,
+          "tujuan": "Peserta didik dapat membedakan benda hidup dan tak hidup",
+          "kegiatan": [
+            "Guru menjelaskan ciri-ciri benda hidup",
+            "Observasi benda di kelas (hidup vs tak hidup)",
+            "Permainan sortiran benda hidup dan tak hidup",
+            "Diskusi tentang kebutuhan benda hidup",
+            "Membuat poster benda hidup dan tak hidup"
+          ],
+          "asesmen": [
+            "Tertulis: Mengklasifikasi 20 benda",
+            "Produk: Poster benda hidup dan tak hidup",
+            "Lisan: Menjelaskan ciri benda hidup"
+          ]
+        },
+        {
+          "minggu": 7,
+          "tujuan": "Peserta didik dapat mengenali berbagai warna dan bentuk benda",
+          "kegiatan": [
+            "Permainan mencari benda berdasarkan warna",
+            "Sortiran benda berdasarkan bentuk",
+            "Membuat karya seni dari benda berwarna",
+            "Diskusi tentang warna di alam",
+            "Permainan tebak warna dan bentuk"
+          ],
+          "asesmen": [
+            "Unjuk kerja: Mencari benda berdasarkan warna",
+            "Produk: Karya seni dari benda berwarna",
+            "Tertulis: Mengelompokkan benda berdasarkan bentuk"
+          ]
+        },
+        {
+          "minggu": 8,
+          "tujuan": "Peserta didik dapat mengenali berbagai bunyi di lingkungan sekitar",
+          "kegiatan": [
+            "Perjalanan keliling sekolah untuk mendengar bunyi",
+            "Mencatat bunyi yang didengar",
+            "Meniru berbagai bunyi",
+            "Permainan tebak sumber bunyi",
+            "Diskusi tentang bunyi keras dan lembut"
+          ],
+          "asesmen": [
+            "Unjuk kerja: Meniru berbagai bunyi",
+            "Tertulis: Mencatat 10 bunyi di sekitar",
+            "Lisan: Menyebutkan sumber bunyi"
+          ]
+        },
+        {
+          "minggu": 9,
+          "tujuan": "Peserta didik dapat mengamati perubahan cuaca",
+          "kegiatan": [
+            "Observasi cuaca setiap pagi",
+            "Membuat jurnal cuaca mingguan",
+            "Diskusi tentang jenis-jenis cuaca",
+            "Membuat simbol cuaca",
+            "Presentasi jurnal cuaca"
+          ],
+          "asesmen": [
+            "Produk: Jurnal cuaca mingguan",
+            "Tertulis: Menyebutkan jenis-jenis cuaca",
+            "Unjuk kerja: Presentasi jurnal cuaca"
+          ]
+        },
+        {
+          "minggu": 10,
+          "tujuan": "Peserta didik dapat mengamati berbagai permukaan benda",
+          "kegiatan": [
+            "Mengumpulkan benda dengan berbagai tekstur",
+            "Menyentuh dan mendeskripsikan tekstur",
+            "Sortiran benda kasar dan halus",
+            "Membuat buku tekstur",
+            "Permainan tebak tekstur dengan mata tertutup"
+          ],
+          "asesmen": [
+            "Unjuk kerja: Mendeskripsikan tekstur benda",
+            "Produk: Buku tekstur",
+            "Tertulis: Mengelompokkan benda berdasarkan tekstur"
+          ]
+        },
+        {
+          "minggu": 11,
+          "tujuan": "Peserta didik dapat mengamati berbagai cara benda bergerak",
+          "kegiatan": [
+            "Observasi benda yang bergerak di sekitar",
+            "Eksperimen mendorong dan menarik benda",
+            "Diskusi tentang gerak lurus dan berputar",
+            "Membuat mainan yang bergerak",
+            "Kompetisi mainan bergerak"
+          ],
+          "asesmen": [
+            "Unjuk kerja: Demonstrasi berbagai gerak benda",
+            "Produk: Mainan yang bergerak",
+            "Lisan: Menjelaskan cara benda bergerak"
+          ]
+        },
+        {
+          "minggu": 12,
+          "tujuan": "Peserta didik dapat menjelaskan kegunaan air dalam kehidupan",
+          "kegiatan": [
+            "Diskusi tentang kegunaan air di rumah",
+            "Observasi penggunaan air di sekolah",
+            "Membuat poster tentang hemat air",
+            "Role play tentang pentingnya air",
+            "Kampanye hemat air di sekolah"
+          ],
+          "asesmen": [
+            "Produk: Poster hemat air",
+            "Tertulis: Menyebutkan 10 kegunaan air",
+            "Unjuk kerja: Kampanye hemat air"
+          ]
+        },
+        {
+          "minggu": 13,
+          "tujuan": "Review materi makhluk hidup dan lingkungan",
+          "kegiatan": [
+            "Review materi anggota tubuh",
+            "Review materi hewan dan tumbuhan",
+            "Permainan kuis IPA",
+            "Proyek mini tentang makhluk hidup",
+            "Presentasi proyek"
+          ],
+          "asesmen": [
+            "Sumatif: Ulangan harian makhluk hidup",
+            "Produk: Proyek mini makhluk hidup",
+            "Unjuk kerja: Presentasi proyek"
+          ]
+        },
+        {
+          "minggu": 14,
+          "tujuan": "Review materi benda dan energi",
+          "kegiatan": [
+            "Review materi benda hidup dan tak hidup",
+            "Review materi bunyi dan gerak",
+            "Eksperimen sederhana tentang bunyi",
+            "Membuat alat musik sederhana",
+            "Pertunjukan musik kelas"
+          ],
+          "asesmen": [
+            "Sumatif: Ulangan harian benda dan energi",
+            "Produk: Alat musik sederhana",
+            "Unjuk kerja: Pertunjukan musik"
+          ]
+        },
+        {
+          "minggu": 15,
+          "tujuan": "Asesmen Sumatif Akhir Semester",
+          "kegiatan": [
+            "Ujian tertulis semester 1",
+            "Unjuk kerja praktikum sederhana",
+            "Pengumpulan portofolio IPA",
+            "Refleksi akhir semester",
+            "Perayaan pencapaian siswa"
+          ],
+          "asesmen": [
+            "Sumatif: Ujian akhir semester",
+            "Portofolio: Kumpulan tugas IPA semester 1",
+            "Refleksi: Menulis hal yang paling disukai dari IPA"
+          ]
+        }
+      ]
+    }
+  }
+}
