@@ -4,14 +4,14 @@
  * Platform Administrasi Kelas Digital
  * ============================================
  * FITUR:
- * - HYBRID MODE: Mock JSON + Groq AI
+ * - AI-FIRST: Langsung ke Groq jika AI Mode ON
+ * - Mock JSON sebagai fallback (jika AI gagal)
  * - Auto-fill data user dari localStorage
- * - Toggle antara Mock dan AI
- * - Fallback otomatis jika AI gagal
+ * - Better logging untuk debugging
  * ============================================
  */
 
-console.log('🔴 [CTA Generator] Script START — HYBRID MODE');
+console.log('🔴 [CTA Generator] Script START — AI-FIRST MODE');
 
 // ✅ IMPORT MODULES
 import { 
@@ -58,6 +58,7 @@ let useAIMode = false;
 // ✅ REGISTER GLOBAL FUNCTION
 window.renderCTAGenerator = function(jenjangFromParam, kelasFromParam, semesterFromParam) {
   console.log('📝 [CTA Generator] renderCTAGenerator() called');
+  console.log('📝 [CTA Generator] Params:', { jenjangFromParam, kelasFromParam, semesterFromParam });
   
   const container = document.getElementById('module-container');
   if (!container) { console.error('❌ Container not found!'); return; }
@@ -70,6 +71,7 @@ window.renderCTAGenerator = function(jenjangFromParam, kelasFromParam, semesterF
   const groqKeyExists = hasGroqApiKey();
   
   console.log('👤 [CTA Generator] User data:', { userNama, userSekolah, groqKeyExists });
+  console.log('🤖 [CTA Generator] AI Mode:', useAIMode, '| Has API Key:', groqKeyExists);
   
   // ✅ PRELOAD DATA
   if (jenjangFromParam && kelasFromParam) {
@@ -89,10 +91,13 @@ window.renderCTAGenerator = function(jenjangFromParam, kelasFromParam, semesterF
       .btn-generate { background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%); color: white; }
       .btn-generate:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(8,145,178,0.3); }
       .btn-save { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; }
+      .btn-save:hover { background: linear-gradient(135deg, #059669 0%, #047857 100%); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(16,185,129,0.3); }
       .btn-secondary { background: #6b7280; color: white; margin-top: 10px; }
+      .btn-secondary:hover { background: #4b5563; transform: translateY(-2px); }
       .btn-toggle { background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); color: white; }
       .btn-toggle.active { background: linear-gradient(135deg, #059669 0%, #047857 100%); }
       .btn-back { margin-top: 20px; padding: 12px 30px; background: #6b7280; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; width: auto; }
+      .btn-back:hover { background: #4b5563; }
       .hidden { display: none !important; }
       .auto-filled { background: #f0fdf4; border-color: #10b981 !important; }
       .grid-cols-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
@@ -112,15 +117,16 @@ window.renderCTAGenerator = function(jenjangFromParam, kelasFromParam, semesterF
       <p class="subtitle">
         Buat Perangkat Pembelajaran
         <span class="mode-indicator ${useAIMode && groqKeyExists ? 'mode-ai' : 'mode-mock'}">
-          ${useAIMode && groqKeyExists ? '🤖 AI Mode' : '📦 Mock Mode'}
+          ${useAIMode && groqKeyExists ? '🤖 AI Mode (Groq)' : '📦 Mock Mode (Offline)'}
         </span>
       </p>
       
       <!-- ✅ TOGGLE AI MODE -->
       <button type="button" id="btn-toggle-ai" class="btn-toggle ${useAIMode && groqKeyExists ? 'active' : ''}" onclick="toggleAIMode()">
-        <i class="fas fa-robot"></i> ${useAIMode && groqKeyExists ? 'AI Mode Aktif (Groq)' : 'Aktifkan AI Mode (Groq)'}
+        <i class="fas fa-robot"></i> ${useAIMode && groqKeyExists ? 'AI Mode AKTIF (Groq)' : 'Aktifkan AI Mode (Groq)'}
       </button>
       ${!groqKeyExists ? '<p class="ai-status">⚠️ Input API key di modal profil untuk aktifkan AI mode</p>' : ''}
+      ${groqKeyExists && !useAIMode ? '<p class="ai-status">💡 Klik tombol di atas untuk aktifkan AI Mode</p>' : ''}
       
       <button class="btn-back" onclick="backToDashboard()">
         <i class="fas fa-arrow-left mr-2"></i>Kembali ke Dashboard
@@ -283,19 +289,20 @@ window.toggleAIMode = async function() {
   }
   
   useAIMode = !useAIMode;
+  console.log('🔄 [CTA Generator] AI Mode toggled:', useAIMode);
   
   // Re-render to update UI
   const jenjang = document.getElementById('cta-jenjang')?.value;
   const kelas = document.getElementById('cta-kelas')?.value;
   const semester = document.getElementById('cta-semester')?.value;
   renderCTAGenerator(jenjang, kelas, semester);
-  
-  console.log('🔄 [CTA Generator] AI Mode toggled:', useAIMode);
 };
 
-// ✅ HANDLE GENERATE — HYBRID MODE
+// ✅ HANDLE GENERATE — AI-FIRST APPROACH
 async function handleGenerate() {
   console.log('🪄 [CTA Generator] Generate clicked');
+  console.log('🤖 [CTA Generator] AI Mode:', useAIMode);
+  console.log('🔑 [CTA Generator] Has API Key:', hasGroqApiKey());
   
   const user = auth.currentUser;
   if (!user) { alert('⚠️ Silakan login dulu!'); return; }
@@ -320,8 +327,12 @@ async function handleGenerate() {
   const resultDiv = document.getElementById('cta-result');
   if (resultDiv) resultDiv.classList.remove('hidden');
   
-  // ✅ Show loading state
-  const mode = useAIMode && hasGroqApiKey() ? 'AI (Groq)' : 'Mock JSON';
+  // ✅ CHECK MODE & SHOW LOADING
+  const aiModeActive = useAIMode && hasGroqApiKey();
+  const mode = aiModeActive ? 'AI (Groq)' : 'Mock JSON';
+  
+  console.log('🎯 [CTA Generator] Using mode:', mode);
+  
   document.getElementById('result-cp').value = `⏳ Loading CP from ${mode}...`;
   document.getElementById('result-tp').value = `⏳ Loading TP from ${mode}...`;
   document.getElementById('result-atp').value = `⏳ Loading ATP from ${mode}...`;
@@ -330,17 +341,19 @@ async function handleGenerate() {
   try {
     let result;
     
-    // ✅ CHECK MODE
-    if (useAIMode && hasGroqApiKey()) {
-      // 🤖 AI MODE: Call Groq API
+    // ✅ AI-FIRST: Try Groq API first if AI Mode is ON
+    if (aiModeActive) {
       console.log('🤖 [CTA Generator] Using Groq AI mode');
       
       const inputData = { sekolah, jenjang, kelas, semester, mapel, guru, topik, tahun };
       result = await generateWithGroq(inputData);
       
+      console.log('✅ [CTA Generator] AI generation complete!');
+      
     } else {
-      // 📦 MOCK MODE: Load from JSON
+      // ✅ FALLBACK: Mock JSON mode
       console.log('📦 [CTA Generator] Using Mock JSON mode');
+      console.log('📂 [CTA Generator] Loading:', { jenjang, kelas, mapel });
       
       const [cpData, tpData, atpData] = await Promise.all([
         getCP(jenjang, kelas, mapel),
@@ -349,10 +362,12 @@ async function handleGenerate() {
       ]);
       
       if (!cpData || !tpData || !atpData) {
-        throw new Error(`Data template tidak ditemukan untuk ${mapel} Kelas ${kelas}.`);
+        throw new Error(`Data template tidak ditemukan untuk ${mapel} Kelas ${kelas}. Pastikan file JSON ada di folder data/${jenjang}/`);
       }
       
       result = processContent(cpData, tpData, atpData, topik);
+      
+      console.log('✅ [CTA Generator] Mock generation complete!');
     }
     
     // ✅ Display results
@@ -366,7 +381,7 @@ async function handleGenerate() {
     console.error('❌ [CTA Generator] Error:', error);
     
     // ✅ FALLBACK TO MOCK IF AI FAILS
-    if (useAIMode && hasGroqApiKey()) {
+    if (aiModeActive) {
       console.log('⚠️ [CTA Generator] AI failed, falling back to Mock');
       alert('⚠️ Groq AI gagal: ' + error.message + '\n\nMenggunakan Mock JSON sebagai fallback...');
       
@@ -415,7 +430,7 @@ async function handleSave() {
       mapel: document.getElementById('cta-mapel')?.value,
       guru: document.getElementById('cta-guru')?.value,
       topik: document.getElementById('cta-topik')?.value,
-      mode: useAIMode && hasGroqApiKey() ? 'AI (Groq)' : 'Mock JSON',
+      mode: (useAIMode && hasGroqApiKey()) ? 'AI (Groq)' : 'Mock JSON',
       cp: cp,
       tp: tp,
       atp: atp,
@@ -491,4 +506,4 @@ function loadCTAData() {
   })();
 }
 
-console.log('🟢 [CTA Generator] READY — HYBRID MODE (Mock + Groq AI)');
+console.log('🟢 [CTA Generator] READY — AI-FIRST MODE (Groq + Mock Fallback)');
