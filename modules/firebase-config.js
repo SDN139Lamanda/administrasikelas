@@ -3,13 +3,22 @@
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
 
+// ✅ TAMBAHAN: Import lebih banyak Auth functions
 import { 
   getAuth, 
   signInWithEmailAndPassword, 
   signInWithPopup,
   GoogleAuthProvider,
   signOut,
-  onAuthStateChanged 
+  onAuthStateChanged,
+  // ✅ TAMBAHAN UNTUK REGISTER & RESET PASSWORD:
+  createUserWithEmailAndPassword,
+  sendEmailVerification,
+  updateProfile,
+  sendPasswordResetEmail,
+  updatePassword,
+  EmailAuthProvider,
+  reauthenticateWithCredential
 } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
 import { 
@@ -44,13 +53,24 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const googleProvider = new GoogleAuthProvider();
 
+// ✅ TAMBAHAN: Export semua fungsi yang dibutuhkan
 export { 
   auth, 
   googleProvider,
+  // Auth sign in/out
   signInWithEmailAndPassword, 
   signInWithPopup,
   signOut,
   onAuthStateChanged,
+  // ✅ TAMBAHAN: Auth functions untuk register & reset password
+  createUserWithEmailAndPassword,
+  sendEmailVerification,
+  updateProfile,
+  sendPasswordResetEmail,
+  updatePassword,
+  EmailAuthProvider,
+  reauthenticateWithCredential,
+  // Firestore
   db,
   collection,
   addDoc,
