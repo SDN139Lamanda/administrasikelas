@@ -79,6 +79,7 @@
             margin-bottom: 16px;
             font-size: 14px;
             display: none;
+            line-height: 1.5;
         }
         .message.success {
             background: #dcfce7;
@@ -90,6 +91,12 @@
             background: #fee2e2;
             color: #991b1b;
             border: 1px solid #fca5a5;
+            display: block;
+        }
+        .message.warning {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fcd34d;
             display: block;
         }
         .password-strength {
@@ -106,6 +113,15 @@
         .strength-weak { background: #ef4444; width: 33%; }
         .strength-medium { background: #f59e0b; width: 66%; }
         .strength-strong { background: #10b981; width: 100%; }
+        .debug-info {
+            background: #f3f4f6;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            color: #6b7280;
+            margin-top: 8px;
+            font-family: monospace;
+        }
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen flex items-center justify-center p-4">
@@ -215,6 +231,9 @@
         <a href="index.html" class="back-link inline-flex items-center gap-2 text-gray-600 hover:text-purple-600 mt-6 text-sm">
             <i class="fas fa-arrow-left"></i> Kembali ke Beranda
         </a>
+        
+        <!-- Debug Info (Hidden by default, show via console) -->
+        <div id="debugInfo" class="debug-info hidden"></div>
     </div>
 
     <!-- Firebase + Logic Script -->
@@ -232,12 +251,14 @@
         } from './modules/firebase-config.js';
         
         console.log('🔴 [Register] Script START');
+        console.log('🔴 [Register] Firebase SDK version: 9.22.0');
         
         const form = document.getElementById('registerForm');
         const messageDiv = document.getElementById('message');
         const submitBtn = document.getElementById('submitBtn');
         const btnText = document.getElementById('btnText');
         const loadingIcon = document.getElementById('loadingIcon');
+        const debugInfo = document.getElementById('debugInfo');
         
         // Form fields
         const namaLengkapInput = document.getElementById('namaLengkap');
@@ -256,13 +277,13 @@
         
         // ✅ Show message helper
         function showMessage(text, type = 'success') {
-            messageDiv.textContent = text;
+            messageDiv.innerHTML = text; // Use innerHTML for line breaks
             messageDiv.className = `message ${type}`;
             messageDiv.style.display = 'block';
             if (type === 'success') {
                 setTimeout(() => {
                     messageDiv.style.display = 'none';
-                }, 5000);
+                }, 8000); // Longer for email instructions
             }
         }
         
@@ -301,7 +322,6 @@
             } else {
                 passwordStrength.classList.add('strength-strong');
             }
-            
             return strength;
         }
         
@@ -323,11 +343,33 @@
                 emailInput.value.length > 0 && !emailRegex.test(emailInput.value));
         });
         
+        // ✅ DEBUG HELPER: Expose to window for console testing
+        window.debugRegister = {
+            auth,
+            db,
+            createUserWithEmailAndPassword,
+            sendEmailVerification,
+            testSendEmail: async (email) => {
+                try {
+                    console.log('🧪 [Debug] Testing email send for:', email);
+                    // Create temp user for testing (will be deleted after)
+                    const testPass = 'Test123!' + Date.now();
+                    const cred = await createUserWithEmailAndPassword(auth, email, testPass);
+                    await sendEmailVerification(cred.user);
+                    console.log('✅ [Debug] Test email sent!');
+                    // Clean up: delete test user (requires admin)
+                    return { success: true, uid: cred.user.uid };
+                } catch (e) {
+                    console.error('❌ [Debug] Test failed:', e.code, e.message);
+                    return { success: false, error: e };
+                }
+            }
+        };
+        console.log('💡 [Register] Debug helper available: window.debugRegister');
+        
         // ✅ Handle form submit
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
-            // Clear previous errors
             showMessage('', 'success');
             
             const namaLengkap = namaLengkapInput.value.trim();
@@ -340,25 +382,10 @@
             
             // ✅ Validate
             let hasError = false;
-            
-            // Email validation
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(email)) {
-                showFieldError(emailInput, emailError, true);
-                hasError = true;
-            }
-            
-            // Password validation
-            if (password.length < 6) {
-                showFieldError(passwordInput, passwordError, true);
-                hasError = true;
-            }
-            
-            // Confirm password validation
-            if (password !== confirmPassword) {
-                showFieldError(confirmPasswordInput, confirmError, true);
-                hasError = true;
-            }
+            if (!emailRegex.test(email)) { showFieldError(emailInput, emailError, true); hasError = true; }
+            if (password.length < 6) { showFieldError(passwordInput, passwordError, true); hasError = true; }
+            if (password !== confirmPassword) { showFieldError(confirmPasswordInput, confirmError, true); hasError = true; }
             
             if (hasError) {
                 showMessage('❌ Mohon perbaiki error di atas sebelum mendaftar.', 'error');
@@ -368,63 +395,131 @@
             setLoading(true);
             
             try {
-                console.log('📝 [Register] Creating account for:', email);
+                console.log('═══════════════════════════════════');
+                console.log('📝 [Register] Starting registration for:', email);
+                console.log('═══════════════════════════════════');
                 
-                // ✅ Create Firebase Auth user
+                // ✅ Step 1: Create Firebase Auth user
+                console.log('🔐 [Register] Step 1: Creating Auth account...');
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
+                console.log('✅ [Register] Auth account created:', user.uid);
+                console.log('✅ [Register] Email:', user.email);
+                console.log('✅ [Register] emailVerified:', user.emailVerified);
                 
-                console.log('✅ [Register] User created:', user.uid);
+                // ✅ Step 2: Update profile
+                console.log('👤 [Register] Step 2: Updating profile...');
+                await updateProfile(user, { displayName: namaLengkap });
+                console.log('✅ [Register] Profile updated:', namaLengkap);
                 
-                // ✅ Update profile with nama lengkap
-                await updateProfile(user, {
-                    displayName: namaLengkap
-                });
+                // ✅ Step 3: Send email verification (WITH SEPARATE ERROR HANDLING)
+                console.log('📧 [Register] Step 3: Attempting to send verification email...');
+                let emailSent = false;
+                let emailError = null;
                 
-                // ✅ Send email verification
-                await sendEmailVerification(user);
-                console.log('✅ [Register] Verification email sent');
+                try {
+                    // Add small delay to ensure user is fully ready
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    
+                    console.log('📧 [Register] Calling sendEmailVerification...');
+                    console.log('📧 [Register] User object:', {
+                        uid: user.uid,
+                        email: user.email,
+                        emailVerified: user.emailVerified,
+                        metadata: user.metadata
+                    });
+                    
+                    await sendEmailVerification(user);
+                    
+                    console.log('✅ [Register] ✅✅✅ sendEmailVerification SUCCESS! ✅✅✅');
+                    console.log('✅ [Register] Email should arrive at:', user.email);
+                    console.log('✅ [Register] Check: Inbox, Spam, Promotions, Updates folders');
+                    emailSent = true;
+                    
+                } catch (err) {
+                    console.error('❌ [Register] ❌❌❌ sendEmailVerification FAILED! ❌❌❌');
+                    console.error('❌ [Register] Error code:', err.code);
+                    console.error('❌ [Register] Error message:', err.message);
+                    console.error('❌ [Register] Full error:', JSON.stringify(err, Object.getOwnPropertyNames(err), 2));
+                    emailError = err;
+                    emailSent = false;
+                }
                 
-                // ✅ Create Firestore user document
+                // ✅ Step 4: Create Firestore document (ALWAYS runs, even if email fails)
+                console.log('📦 [Register] Step 4: Creating Firestore document...');
                 await setDoc(doc(db, 'users', user.uid), {
                     email: email,
                     nama_lengkap: namaLengkap,
                     nama_sekolah: namaSekolah,
                     jenjang_sekolah: jenjang,
                     no_hp: noHp || '',
-                    role: 'teacher',           // Default role
-                    kelas_diampu: [],          // Will be set by admin
+                    role: 'teacher',
+                    kelas_diampu: [],
                     isActive: true,
-                    isApproved: false,         // Need admin approval
-                    isEmailVerified: false,
+                    isApproved: false,
+                    isEmailVerified: user.emailVerified,
+                    emailSendStatus: emailSent ? 'sent' : 'failed',
+                    emailSendError: emailError ? { code: emailError.code, message: emailError.message } : null,
                     createdAt: serverTimestamp(),
                     updatedAt: serverTimestamp(),
                     lastLogin: serverTimestamp()
                 });
-                
                 console.log('✅ [Register] Firestore document created');
                 
-                // ✅ Success message
-                showMessage(
-                    `✅ Pendaftaran berhasil! Email verifikasi telah dikirim ke ${email}. ` +
-                    `Silakan cek inbox dan spam folder, lalu klik link verifikasi. ` +
-                    `Setelah verifikasi, akun Anda akan menunggu persetujuan admin (1-3 hari kerja).`,
-                    'success'
-                );
+                // ✅ Step 5: Show success message (with email status)
+                let successMsg = `✅ <strong>Pendaftaran berhasil!</strong><br><br>`;
+                
+                if (emailSent) {
+                    successMsg += `📧 Email verifikasi telah dikirim ke <strong>${email}</strong>.<br><br>
+                    <strong>Langkah selanjutnya:</strong><br>
+                    1️⃣ Buka email inbox Anda<br>
+                    2️⃣ Cek folder <strong>Spam</strong>, <strong>Promotions</strong>, atau <strong>Updates</strong><br>
+                    3️⃣ Cari email dari <strong>noreply@firebaseapp.com</strong><br>
+                    4️⃣ Klik link <strong>"Verify email"</strong><br>
+                    5️⃣ Login dengan password Anda<br>
+                    6️⃣ Tunggu persetujuan admin (1-3 hari kerja)<br><br>
+                    <small class="text-gray-500">⏰ Link verifikasi berlaku 1 jam. Jika expired, hubungi admin.</small>`;
+                } else {
+                    successMsg += `⚠️ <strong>Catatan:</strong> Email verifikasi <em>gagal terkirim</em>.<br><br>
+                    <strong>Akun Anda tetap dibuat</strong> dan bisa digunakan setelah admin memverifikasi manual.<br><br>
+                    <strong>Yang perlu dilakukan:</strong><br>
+                    1️⃣ Hubungi admin via: radiah.tifarahs@gmail.com<br>
+                    2️⃣ Sertakan email: <strong>${email}</strong><br>
+                    3️⃣ Admin akan verifikasi manual<br><br>
+                    <small class="text-gray-500">💡 Penyebab umum: domain tidak authorized, quota email habis, atau delay Firebase.</small>`;
+                }
+                
+                showMessage(successMsg, 'success');
+                
+                // ✅ Show debug info if email failed
+                if (!emailSent && debugInfo) {
+                    debugInfo.classList.remove('hidden');
+                    debugInfo.innerHTML = `
+                        <strong>Debug Info:</strong><br>
+                        Error Code: ${emailError?.code || 'N/A'}<br>
+                        Error Message: ${emailError?.message || 'N/A'}<br>
+                        Timestamp: ${new Date().toLocaleString('id-ID')}
+                    `;
+                }
                 
                 // ✅ Reset form
                 form.reset();
                 passwordStrength.className = 'password-strength-fill';
                 
-                // ✅ Redirect after 5 seconds
+                // ✅ Redirect after 8 seconds (longer for reading instructions)
                 setTimeout(() => {
-                    window.location.href = 'login.html?registered=true';
-                }, 5000);
+                    window.location.href = 'login.html?registered=true&emailSent=' + emailSent;
+                }, 8000);
+                
+                console.log('🎉 [Register] Registration flow completed');
+                console.log('═══════════════════════════════════');
                 
             } catch (error) {
-                console.error('❌ [Register] Error:', error);
+                console.error('❌ [Register] MAIN CATCH - Critical error:', error);
+                console.error('❌ [Register] Error code:', error.code);
+                console.error('❌ [Register] Error message:', error.message);
                 
-                let errorMessage = '❌ Gagal mendaftar. ';
+                let errorMessage = '❌ <strong>Gagal mendaftar.</strong><br><br>';
                 
                 if (error.code === 'auth/email-already-in-use') {
                     errorMessage += 'Email sudah terdaftar. Silakan login atau gunakan email lain.';
@@ -433,14 +528,16 @@
                     errorMessage += 'Format email tidak valid.';
                     showFieldError(emailInput, emailError, true);
                 } else if (error.code === 'auth/weak-password') {
-                    errorMessage += 'Password terlalu lemah. Gunakan minimal 6 karakter.';
+                    errorMessage += 'Password terlalu lemah. Gunakan minimal 6 karakter dengan kombinasi huruf dan angka.';
                     showFieldError(passwordInput, passwordError, true);
                 } else if (error.code === 'auth/operation-not-allowed') {
                     errorMessage += 'Pendaftaran sedang ditutup. Hubungi admin.';
                 } else if (error.code === 'firestore/unavailable') {
                     errorMessage += 'Database tidak tersedia. Coba lagi nanti.';
+                } else if (error.code === 'network-request-failed') {
+                    errorMessage += 'Koneksi internet bermasalah. Cek koneksi Anda.';
                 } else {
-                    errorMessage += error.message || 'Silakan coba lagi nanti.';
+                    errorMessage += `Error: ${error.message || 'Silakan coba lagi nanti.'}`;
                 }
                 
                 showMessage(errorMessage, 'error');
@@ -449,7 +546,7 @@
             }
         });
         
-        console.log('🟢 [Register] READY');
+        console.log('🟢 [Register] READY — Debug: window.debugRegister');
     </script>
 </body>
 </html>
