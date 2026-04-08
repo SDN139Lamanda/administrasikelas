@@ -21,6 +21,22 @@
     
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- ✅ TAMBAHAN: Style untuk alert approval -->
+    <style>
+        .alert-approval {
+            background: #fef3c7;
+            border: 1px solid #fcd34d;
+            color: #92400e;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+        .alert-approval a {
+            color: #7c3aed;
+            font-weight: 600;
+        }
+    </style>
 </head>
 <body class="bg-gray-50">
 
@@ -159,5 +175,96 @@
     <!-- Global JS -->
     <script type="module" src="js/main.js"></script>
     <script type="module" src="js/login.js"></script>
+    
+    <!-- ✅ TAMBAHAN: Approval Check Script (Minimal, Non-Intrusive) -->
+    <script type="module">
+        // ✅ Import Firebase functions
+        import { auth, db, doc, getDoc } from './modules/firebase-config.js';
+        import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        
+        console.log('🔴 [Approval Check] Script START');
+        
+        // ✅ Listen to auth state changes
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                console.log('✅ [Approval Check] User authenticated:', user.email);
+                
+                try {
+                    // ✅ Check isApproved from Firestore
+                    console.log('🔍 [Approval Check] Checking approval status...');
+                    const userDoc = await getDoc(doc(db, 'users', user.uid));
+                    
+                    if (userDoc.exists()) {
+                        const userData = userDoc.data();
+                        
+                        console.log('📋 [Approval Check] User ', {
+                            email: userData.email,
+                            isApproved: userData.isApproved,
+                            role: userData.role
+                        });
+                        
+                        // ✅ IF NOT APPROVED: Show message & block dashboard access
+                        if (userData.isApproved === false) {
+                            console.log('⚠️ [Approval Check] User NOT approved yet');
+                            
+                            // Show approval pending message
+                            const formAlert = document.getElementById('formAlert');
+                            if (formAlert) {
+                                formAlert.innerHTML = `
+                                    <div class="alert-approval">
+                                        <strong>⏳ Akun Anda Menunggu Persetujuan Admin</strong>
+                                        <br><br>
+                                        Admin akan meninjau akun Anda dalam 1-3 hari kerja.
+                                        <br><br>
+                                        Anda akan menerima email notifikasi setelah akun disetujui.
+                                        <br><br>
+                                        <small>
+                                            Jika sudah lebih dari 3 hari, hubungi: 
+                                            <a href="mailto:radiah.tifarahs@gmail.com">radiah.tifarahs@gmail.com</a>
+                                        </small>
+                                    </div>
+                                `;
+                                formAlert.classList.remove('hidden');
+                                formAlert.className = 'alert'; // Reset classes
+                            }
+                            
+                            // ✅ Block redirect to dashboard
+                            // Override any existing redirect by intercepting it
+                            const originalHref = window.location.href;
+                            const checkRedirect = setInterval(() => {
+                                if (window.location.href !== originalHref && 
+                                    !window.location.href.includes('login.html')) {
+                                    // User tried to navigate away - block it
+                                    window.location.href = originalHref;
+                                    clearInterval(checkRedirect);
+                                }
+                            }, 500);
+                            
+                            // Stop checking after 10 seconds
+                            setTimeout(() => clearInterval(checkRedirect), 10000);
+                            
+                            console.log('✅ [Approval Check] User blocked from dashboard');
+                            return;
+                        }
+                        
+                        // ✅ IF APPROVED: Let normal flow continue
+                        console.log('✅ [Approval Check] User approved, allowing normal flow');
+                        
+                    } else {
+                        console.warn('⚠️ [Approval Check] User document not found in Firestore');
+                    }
+                    
+                } catch (error) {
+                    console.error('❌ [Approval Check] Error checking approval:', error);
+                    // Don't block user if there's an error - let them proceed
+                    console.log('✅ [Approval Check] Error occurred, allowing normal flow');
+                }
+            } else {
+                console.log('ℹ️ [Approval Check] No user signed in');
+            }
+        });
+        
+        console.log('🟢 [Approval Check] Script READY');
+    </script>
 </body>
 </html>
