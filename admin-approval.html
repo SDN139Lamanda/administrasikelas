@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin — Approval User</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        .admin-card { background: white; border-radius: 12px; padding: 32px; max-width: 900px; width: 100%; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-top: 4px solid #7c3aed; }
+        .user-card { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin-bottom: 16px; }
+        .user-card:hover { border-color: #7c3aed; }
+        .btn-approve { background: #16a34a; color: white; padding: 8px 16px; border-radius: 6px; font-weight: 600; }
+        .btn-approve:hover { background: #15803d; }
+        .btn-reject { background: #dc2626; color: white; padding: 8px 16px; border-radius: 6px; font-weight: 600; }
+        .btn-reject:hover { background: #b91c1c; }
+        .message { padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; display: none; }
+        .message.success { background: #dcfce7; color: #166534; border: 1px solid #86efac; display: block; }
+        .message.error { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; display: block; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen p-4">
+
+    <div class="admin-card">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center w-12 h-12 bg-purple-100 rounded-full mb-4">
+                <i class="fas fa-user-check text-purple-600 text-xl"></i>
+            </div>
+            <h1 class="text-2xl font-bold text-gray-900">Approval User Pending</h1>
+            <p class="text-gray-600 mt-2">Tinjau dan setujui pendaftaran user baru</p>
+        </div>
+        
+        <!-- Message -->
+        <div id="message" class="message"></div>
+        
+        <!-- Loading -->
+        <div id="loading" class="text-center py-8">
+            <i class="fas fa-spinner fa-spin text-4xl text-purple-600"></i>
+            <p class="mt-4 text-gray-600">Loading user pending...</p>
+        </div>
+        
+        <!-- User List -->
+        <div id="userList" class="hidden"></div>
+        
+        <!-- Empty State -->
+        <div id="emptyState" class="hidden text-center py-8">
+            <i class="fas fa-check-circle text-6xl text-green-500 mb-4"></i>
+            <p class="text-gray-600">Tidak ada user pending. Semua user sudah di-approve!</p>
+        </div>
+        
+        <!-- Back Link -->
+        <a href="dashboard.html" class="inline-flex items-center gap-2 text-gray-600 hover:text-purple-600 mt-6">
+            <i class="fas fa-arrow-left"></i> Kembali ke Dashboard
+        </a>
+    </div>
+
+    <script type="module">
+        import { auth, db, collection, getDocs, updateDoc, doc } from './modules/firebase-config.js';
+        import { sendApprovalEmail } from './modules/approval-email.js';
+        import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        
+        console.log('🔴 [Admin Approval] Script START');
+        
+        const messageDiv = document.getElementById('message');
+        const loadingDiv = document.getElementById('loading');
+        const userListDiv = document.getElementById('userList');
+        const emptyStateDiv = document.getElementById('emptyState');
+        
+        // Check admin access
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                showMessage('❌ Anda harus login sebagai admin!', 'error');
+                setTimeout(() => location.href = 'login.html', 2000);
+                return;
+            }
+            
+            // Check if admin
+            const userDoc = await getDocs(collection(db, 'users'));
+            const userData = userDoc.docs.find(d => d.id === user.uid)?.data();
+            
+            if (userData?.role !== 'admin') {
+                showMessage('❌ Akses ditolak! Hanya admin yang bisa akses halaman ini.', 'error');
+                setTimeout(() => location.href = 'dashboard.html', 2000);
+                return;
+            }
+            
+            console.log('✅ [Admin Approval] Admin access granted');
+            loadPendingUsers();
+        });
+        
+        // Load pending users
+        async function loadPendingUsers() {
+            try {
+                console.log('🔍 [Admin Approval] Loading pending users...');
+                const snapshot = await getDocs(collection(db, 'users'));
+                const pendingUsers = snapshot.docs
+                    .filter(doc => doc.data().isApproved === false)
+                    .map(doc => ({ id: doc.id, ...doc.data() }));
+                
+                console.log(`📊 [Admin Approval] Found ${pendingUsers.length} pending user(s)`);
+                
+                loadingDiv.classList.add('hidden');
+                
+                if (pendingUsers.length === 0) {
+                    emptyStateDiv.classList.remove('hidden');
+                    return;
+                }
+                
+                userListDiv.classList.remove('hidden');
+                userListDiv.innerHTML = `
+                    <div class="mb-4 flex justify-between items-center">
+                        <h2 class="text-lg font-semibold text-gray-900">
+                            User Menunggu Persetujuan (${pendingUsers.length})
+                        </h2>
+                        <button onclick="location.reload()" class="text-sm text-purple-600 hover:text-purple-500">
+                            <i class="fas fa-refresh mr-1"></i> Refresh
+                        </button>
+                    </div>
+                `;
+                
+                pendingUsers.forEach(user => {
+                    const card = document.createElement('div');
+                    card.className = 'user-card';
+                    card.innerHTML = `
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <h3 class="font-semibold text-gray-900 text-lg">
+                                    <i class="fas fa-user mr-2 text-purple-600"></i>
+                                    ${user.nama_lengkap || 'N/A'}
+                                </h3>
+                                <div class="mt-2 space-y-1 text-sm text-gray-600">
+                                    <p><i class="fas fa-envelope mr-2"></i>${user.email || 'N/A'}</p>
+                                    <p><i class="fas fa-school mr-2"></i>${user.nama_sekolah || 'N/A'}</p>
+                                    <p><i class="fas fa-layer-group mr-2"></i>${user.jenjang_sekolah?.toUpperCase() || 'N/A'}</p>
+                                    <p><i class="fas fa-phone mr-2"></i>${user.no_hp || 'Tidak ada'}</p>
+                                    <p><i class="fas fa-calendar mr-2"></i>Daftar: ${formatDate(user.createdAt)}</p>
+                                </div>
+                            </div>
+                            <div class="flex flex-col gap-2 ml-4">
+                                <button onclick="approveUser('${user.id}', '${user.email}', '${user.nama_lengkap}', '${user.nama_sekolah}')" 
+                                        class="btn-approve">
+                                    <i class="fas fa-check mr-2"></i>Approve
+                                </button>
+                                <button onclick="rejectUser('${user.id}')" class="btn-reject">
+                                    <i class="fas fa-times mr-2"></i>Reject
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    userListDiv.appendChild(card);
+                });
+                
+            } catch (error) {
+                console.error('❌ [Admin Approval] Error loading users:', error);
+                showMessage('❌ Gagal load user pending. Coba lagi.', 'error');
+                loadingDiv.classList.add('hidden');
+            }
+        }
+        
+        // Approve user
+        window.approveUser = async (userId, email, nama, sekolah) => {
+            if (!confirm(`✅ Approve user:\n\n${nama}\n${email}\n\nUser akan bisa login setelah ini.`)) {
+                return;
+            }
+            
+            try {
+                console.log('✅ [Admin Approval] Approving user:', userId);
+                
+                // Update Firestore
+                await updateDoc(doc(db, 'users', userId), {
+                    isApproved: true,
+                    approvedAt: new Date(),
+                    approvedBy: auth.currentUser.uid
+                });
+                
+                console.log('✅ [Admin Approval] Firestore updated');
+                
+                // Send approval email
+                console.log('📧 [Admin Approval] Sending approval email...');
+                const emailResult = await sendApprovalEmail(email, nama, sekolah);
+                
+                if (emailResult.success) {
+                    console.log('✅ [Admin Approval] Email sent!');
+                } else {
+                    console.warn('⚠️ [Admin Approval] Email failed:', emailResult.message);
+                }
+                
+                showMessage(`✅ User <strong>${nama}</strong> berhasil di-approve!${emailResult.success ? ' Email notifikasi terkirim.' : ' Email gagal dikirim.'}`, 'success');
+                
+                // Reload list
+                setTimeout(() => location.reload(), 2000);
+                
+            } catch (error) {
+                console.error('❌ [Admin Approval] Error approving user:', error);
+                showMessage(`❌ Gagal approve user: ${error.message}`, 'error');
+            }
+        };
+        
+        // Reject user
+        window.rejectUser = async (userId) => {
+            if (!confirm(`❌ Reject user ini?\n\nUser akan dihapus dari sistem.\n\nTindakan ini tidak bisa dibatalkan!`)) {
+                return;
+            }
+            
+            try {
+                console.log('❌ [Admin Approval] Rejecting user:', userId);
+                await updateDoc(doc(db, 'users', userId), {
+                    isApproved: false,
+                    rejectedAt: new Date(),
+                    isActive: false
+                });
+                
+                showMessage('✅ User di-reject. User tidak bisa login.', 'success');
+                setTimeout(() => location.reload(), 2000);
+                
+            } catch (error) {
+                console.error('❌ [Admin Approval] Error rejecting user:', error);
+                showMessage(`❌ Gagal reject user: ${error.message}`, 'error');
+            }
+        };
+        
+        // Helper: Format date
+        function formatDate(timestamp) {
+            if (!timestamp) return 'N/A';
+            const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+            return date.toLocaleDateString('id-ID', { 
+                day: 'numeric', 
+                month: 'long', 
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+        
+        // Show message
+        function showMessage(text, type = 'success') {
+            messageDiv.innerHTML = text;
+            messageDiv.className = `message ${type}`;
+            messageDiv.style.display = 'block';
+        }
+        
+        console.log('🟢 [Admin Approval] READY');
+    </script>
+</body>
+</html>
