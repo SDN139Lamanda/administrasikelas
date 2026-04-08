@@ -277,13 +277,13 @@
         
         // ✅ Show message helper
         function showMessage(text, type = 'success') {
-            messageDiv.innerHTML = text; // Use innerHTML for line breaks
+            messageDiv.innerHTML = text;
             messageDiv.className = `message ${type}`;
             messageDiv.style.display = 'block';
             if (type === 'success') {
                 setTimeout(() => {
                     messageDiv.style.display = 'none';
-                }, 8000); // Longer for email instructions
+                }, 8000);
             }
         }
         
@@ -337,10 +337,12 @@
                 passwordInput.value !== confirmPasswordInput.value);
         });
         
+        // ✅ FIX 2: Email validation - only show error if user typed something AND it's invalid
         emailInput.addEventListener('input', () => {
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            showFieldError(emailInput, emailError, 
-                emailInput.value.length > 0 && !emailRegex.test(emailInput.value));
+            const value = emailInput.value.trim();
+            const shouldShowError = value.length > 0 && !emailRegex.test(value);
+            showFieldError(emailInput, emailError, shouldShowError);
         });
         
         // ✅ DEBUG HELPER: Expose to window for console testing
@@ -352,12 +354,10 @@
             testSendEmail: async (email) => {
                 try {
                     console.log('🧪 [Debug] Testing email send for:', email);
-                    // Create temp user for testing (will be deleted after)
                     const testPass = 'Test123!' + Date.now();
                     const cred = await createUserWithEmailAndPassword(auth, email, testPass);
                     await sendEmailVerification(cred.user);
                     console.log('✅ [Debug] Test email sent!');
-                    // Clean up: delete test user (requires admin)
                     return { success: true, uid: cred.user.uid };
                 } catch (e) {
                     console.error('❌ [Debug] Test failed:', e.code, e.message);
@@ -371,6 +371,11 @@
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             showMessage('', 'success');
+            
+            // ✅ FIX 1: Clear all field errors BEFORE new validation
+            showFieldError(emailInput, emailError, false);
+            showFieldError(passwordInput, passwordError, false);
+            showFieldError(confirmPasswordInput, confirmError, false);
             
             const namaLengkap = namaLengkapInput.value.trim();
             const email = emailInput.value.trim();
@@ -418,7 +423,6 @@
                 let emailError = null;
                 
                 try {
-                    // Add small delay to ensure user is fully ready
                     await new Promise(resolve => setTimeout(resolve, 500));
                     
                     console.log('📧 [Register] Calling sendEmailVerification...');
@@ -506,7 +510,7 @@
                 form.reset();
                 passwordStrength.className = 'password-strength-fill';
                 
-                // ✅ Redirect after 8 seconds (longer for reading instructions)
+                // ✅ Redirect after 8 seconds
                 setTimeout(() => {
                     window.location.href = 'login.html?registered=true&emailSent=' + emailSent;
                 }, 8000);
