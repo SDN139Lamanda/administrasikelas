@@ -24,6 +24,7 @@ import {
 import { 
   getFirestore,
   collection,
+  setDoc,
   addDoc,
   getDocs,
   getDoc,
@@ -73,6 +74,7 @@ export {
   // Firestore
   db,
   collection,
+  setDoc,
   addDoc,
   getDocs,
   getDoc,
