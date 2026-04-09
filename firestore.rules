@@ -2,165 +2,32 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // ============================================
-    // HELPER FUNCTIONS (UNCHANGED)
-    // ============================================
-    
-    function isAuthenticated() {
-      return request.auth != null;
-    }
-    
+    // ✅ HELPER: Cek login & admin
+    function isAuthenticated() { return request.auth != null; }
     function isAdmin() {
       return isAuthenticated() && 
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
     
-    function isOwnData(userId) {
-      return isAuthenticated() && request.auth.uid == userId;
+    // ✅ GLOBAL API KEY — SEMUA USER BISA BACA
+    match /settings/api_key {
+      allow read: if isAuthenticated();  // ← INI KUNCINYA!
+      allow write: if isAdmin();
     }
     
-    function getUserData(userId) {
-      return get(/databases/$(database)/documents/users/$(userId)).data;
-    }
-    
-    // ============================================
-    // ✅ NEW: SETTINGS COLLECTION (Global API Key)
-    // ============================================
-    
-    match /settings/{docId} {
-      // Admin: full access to all settings
-      allow read, write: if isAdmin();
-      
-      // Teacher/User: read-only access to api_key document ONLY
-      // This allows CTA Generator to fetch global API key
-      allow read: if isAuthenticated() && docId == 'api_key';
-      
-      // Users cannot write to settings
-      allow write: if false;
-    }
-    
-    // ============================================
-    // USERS COLLECTION (MAIN) - UNCHANGED
-    // ============================================
-    
+    // ✅ USERS — Standard rules
     match /users/{userId} {
-      allow create: if isAdmin() || (isAuthenticated() && request.auth.uid == userId);
-      
-      allow read: if isOwnData(userId) || 
-                  isAdmin() ||
-                  (isAuthenticated() && 
-                   getUserData(request.auth.uid).jenjang == getUserData(userId).jenjang &&
-                   getUserData(request.auth.uid).role == 'guru' &&
-                   getUserData(userId).role == 'guru');
-      
-      allow update: if isOwnData(userId) && 
-                    request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-                      'lastLogin', 'namaLengkap', 'noHp'
-                    ]) ||
-                    isAdmin();
-      
-      allow delete: if isAdmin();
+      allow read, write: if isAuthenticated() && request.auth.uid == userId;
+      allow write: if isAdmin();
     }
     
-    // ============================================
-    // APPROVAL_LOGS COLLECTION (Admin Only) - UNCHANGED
-    // ============================================
-    
-    match /approval_logs/{logId} {
-      allow read, write: if isAdmin();
-    }
-    
-    // ============================================
-    // CLASSES COLLECTION (Adm. Kelas) - UNCHANGED
-    // ============================================
-    
-    match /classes/{classId} {
-      allow read: if isAuthenticated() && (
-        isAdmin() || resource.data.userId == request.auth.uid
-      );
-      
-      allow write: if isAuthenticated() && (
-        isAdmin() || request.resource.data.userId == request.auth.uid
-      );
-    }
-    
-    // ============================================
-    // REFLECTIONS COLLECTION - UNCHANGED
-    // ============================================
-    
-    match /reflections/{reflectionId} {
-      allow read: if isAuthenticated() && (
-        isAdmin() || resource.data.guruId == request.auth.uid
-      );
-      
-      allow create: if isAuthenticated() && (
-        isAdmin() || request.resource.data.guruId == request.auth.uid
-      );
-      
-      allow update, delete: if isAuthenticated() && (
-        isAdmin() || resource.data.guruId == request.auth.uid
-      );
-    }
-    
-    // ============================================
-    // CP_TP_ATP COLLECTION (CTA Generator) - UNCHANGED
-    // ============================================
-    
+    // ✅ CP_TP_ATP — Standard rules
     match /cp_tp_atp/{docId} {
-      allow read: if isAuthenticated() && (
-        isAdmin() || resource.data.userId == request.auth.uid
-      );
-      
-      allow create: if isAuthenticated() && (
-        isAdmin() || request.resource.data.userId == request.auth.uid
-      );
-      
-      allow update, delete: if isAuthenticated() && (
-        isAdmin() || resource.data.userId == request.auth.uid
-      );
+      allow read, write: if isAuthenticated() && 
+        (isAdmin() || resource.data.userId == request.auth.uid);
     }
     
-    // ============================================
-    // MODUL_AJAR COLLECTION - UNCHANGED
-    // ============================================
-    
-    match /modul_ajar/{docId} {
-      allow read: if isAuthenticated() && (
-        isAdmin() || resource.data.userId == request.auth.uid
-      );
-      
-      allow create: if isAuthenticated() && (
-        isAdmin() || request.resource.data.userId == request.auth.uid
-      );
-      
-      allow update, delete: if isAuthenticated() && (
-        isAdmin() || resource.data.userId == request.auth.uid
-      );
-    }
-    
-    // ============================================
-    // PENILAIAN COLLECTION - UNCHANGED
-    // ============================================
-    
-    match /penilaian/{docId} {
-      allow read: if isAuthenticated() && (
-        isAdmin() ||
-        resource.data.userId == request.auth.uid ||
-        (getUserData(request.auth.uid).jenjang == 'sd' &&
-         getUserData(request.auth.uid).kelas == resource.data.kelas) ||
-        (getUserData(request.auth.uid).jenjang in ['smp', 'sma'] &&
-         getUserData(request.auth.uid).mataPelajaranSMP == resource.data.mataPelajaran)
-      );
-      
-      allow write: if isAuthenticated() && (
-        isAdmin() || resource.data.userId == request.auth.uid
-      );
-    }
-    
-    // ============================================
-    // DEFAULT: DENY ALL (Safety Net) - UNCHANGED
-    // ============================================
-    
+    // ✅ DEFAULT: DENY ALL
     match /{document=**} {
       allow read, write: if false;
     }
