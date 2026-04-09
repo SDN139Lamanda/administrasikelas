@@ -281,186 +281,177 @@
         console.log('🟢 [Global API Key] Module READY');
     </script>
 
-    <!-- ✅ TAMBAHAN: Profile Dropdown Script + DASHBOARD FILTERING LOGIC -->
-    <script>
-        (function() {
-            const profileMenuBtn = document.getElementById('profileMenuBtn');
-            const profileDropdown = document.getElementById('profileDropdown');
-            const profileName = document.getElementById('profileName');
-            const profileEmailSub = document.getElementById('profileEmailSub');
-            const userEmail = document.getElementById('userEmail');
-            const userAvatar = document.getElementById('userAvatar');
-            const userContextBadge = document.getElementById('userContextBadge');
-            const userContextText = document.getElementById('userContextText');
+    <!-- ✅ FIXED: Profile Dropdown + Dashboard Filtering (MODULE VERSION) -->
+    <script type="module">
+        // ✅ Import Firebase modules at TOP (required for module scripts)
+        import { auth, onAuthStateChanged, db, doc, getDoc } from './modules/firebase-config.js';
+        
+        console.log('🔴 [Dashboard Filter] Module START');
+        
+        // Wait for DOM to be fully loaded before accessing elements
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('✅ [Dashboard Filter] DOM loaded');
             
-            if (!profileMenuBtn) return;
+            // DOM Elements
+            const els = {
+                profileMenuBtn: document.getElementById('profileMenuBtn'),
+                profileDropdown: document.getElementById('profileDropdown'),
+                profileName: document.getElementById('profileName'),
+                profileEmailSub: document.getElementById('profileEmailSub'),
+                userEmail: document.getElementById('userEmail'),
+                userAvatar: document.getElementById('userAvatar'),
+                userContextBadge: document.getElementById('userContextBadge'),
+                userContextText: document.getElementById('userContextText')
+            };
             
-            // Toggle dropdown
-            profileMenuBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                profileDropdown.classList.toggle('hidden');
-                const isExpanded = profileMenuBtn.getAttribute('aria-expanded') === 'true';
-                profileMenuBtn.setAttribute('aria-expanded', !isExpanded);
-            });
-            
-            document.addEventListener('click', (e) => {
-                if (profileDropdown && !profileDropdown.contains(e.target) && !profileMenuBtn.contains(e.target)) {
-                    profileDropdown.classList.add('hidden');
-                    profileMenuBtn.setAttribute('aria-expanded', 'false');
-                }
-            });
-            
-            // ✅ NEW: Load user data from Firestore for filtering
-            async function loadUserDataForFiltering() {
-                const user = window.auth?.currentUser;
-                if (!user) return null;
-                try {
-                    const { db, doc, getDoc } = await import('./modules/firebase-config.js');
-                    const userDoc = await getDoc(doc(db, 'users', user.uid));
-                    if (userDoc.exists()) {
-                        const userData = userDoc.data();
-                        console.log('👤 [Dashboard] User data loaded:', {
-                            jenjang: userData.jenjang_sekolah,
-                            kelas_diampu: userData.kelas_diampu,
-                            role: userData.role
-                        });
-                        return userData;
+            // ✅ Profile Dropdown Toggle (simple)
+            if (els.profileMenuBtn && els.profileDropdown) {
+                els.profileMenuBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    els.profileDropdown.classList.toggle('hidden');
+                });
+                document.addEventListener('click', (e) => {
+                    if (!els.profileDropdown.contains(e.target) && !els.profileMenuBtn.contains(e.target)) {
+                        els.profileDropdown.classList.add('hidden');
                     }
-                } catch (e) {
-                    console.error('❌ [Dashboard] Failed to load user data:', e);
-                }
-                return null;
+                });
             }
             
-            // ✅ NEW: Filter dashboard based on user's jenjang & kelas_diampu
-            function filterDashboardSections(userData) {
-                if (!userData) return;
+            // ✅ Load user data from Firestore
+            async function loadUserData(userId) {
+                try {
+                    console.log('👤 [Filter] Loading user:', userId);
+                    const userDoc = await getDoc(doc(db, 'users', userId));
+                    if (userDoc.exists()) {
+                        const data = userDoc.data();
+                        console.log('✅ [Filter] User ', {
+                            jenjang: data.jenjang_sekolah,
+                            kelas_diampu: data.kelas_diampu,
+                            role: data.role,
+                            sd_mapel_type: data.sd_mapel_type
+                        });
+                        return data;
+                    }
+                    console.warn('⚠️ [Filter] User doc not found');
+                    return null;
+                } catch (e) {
+                    console.error('❌ [Filter] Error:', e);
+                    return null;
+                }
+            }
+            
+            // ✅ Apply filtering to dashboard
+            function applyFilter(userData) {
+                if (!userData) {
+                    console.log('⚠️ [Filter] No data, skip');
+                    return;
+                }
                 
                 const jenjang = userData.jenjang_sekolah;
                 const kelasDiampu = userData.kelas_diampu || [];
                 const role = userData.role || 'teacher';
                 const sdMapelType = userData.sd_mapel_type || 'kelas';
                 
-                console.log('🔍 [Dashboard] Filtering with:', { jenjang, kelasDiampu, role, sdMapelType });
+                console.log('🔍 [Filter] Applying:', { jenjang, kelasDiampu, role });
                 
-                // ✅ Update user context badge
-                if (userContextBadge && userContextText) {
-                    userContextBadge.classList.remove('hidden');
+                // Update context badge
+                if (els.userContextBadge && els.userContextText) {
+                    els.userContextBadge.classList.remove('hidden');
                     if (role === 'admin') {
-                        userContextText.innerHTML = '<i class="fas fa-crown text-yellow-500 mr-1"></i> Admin';
+                        els.userContextText.innerHTML = '<i class="fas fa-crown text-yellow-500 mr-1"></i> Admin';
                     } else if (jenjang) {
-                        const jenjangLabel = { sd: 'SD', smp: 'SMP', sma: 'SMA' }[jenjang] || jenjang.toUpperCase();
-                        let extra = '';
-                        if (jenjang === 'sd' && sdMapelType !== 'kelas') {
-                            extra = ` • ${sdMapelType.toUpperCase()}`;
-                        }
-                        userContextText.textContent = `Guru ${jenjangLabel}${extra}`;
-                    } else {
-                        userContextText.textContent = 'Guru';
+                        const label = {sd:'SD', smp:'SMP', sma:'SMA'}[jenjang] || jenjang.toUpperCase();
+                        const extra = (jenjang==='sd' && sdMapelType!=='kelas') ? ` • ${sdMapelType.toUpperCase()}` : '';
+                        els.userContextText.textContent = `Guru ${label}${extra}`;
                     }
                 }
                 
-                // ✅ Filter by jenjang (hide sections that don't match) - ONLY FOR TEACHERS
+                // Filter jenjang (teachers only)
                 if (jenjang && role === 'teacher') {
-                    // Hide all jenjang room cards first
-                    document.querySelectorAll('.room-card[data-jenjang]').forEach(card => {
-                        card.classList.add('hidden');
-                    });
-                    // Show only matching jenjang room card
-                    const matchingRoom = document.querySelector(`.room-card[data-jenjang="${jenjang}"]`);
-                    if (matchingRoom) {
-                        matchingRoom.classList.remove('hidden');
-                        console.log(`✅ [Dashboard] Showing ${jenjang.toUpperCase()} room only`);
+                    console.log(`🎯 Filter jenjang: ${jenjang}`);
+                    
+                    // Hide all jenjang rooms, show matching
+                    document.querySelectorAll('.room-card[data-jenjang]').forEach(el => el.classList.add('hidden'));
+                    const room = document.querySelector(`.room-card[data-jenjang="${jenjang}"]`);
+                    if (room) {
+                        room.classList.remove('hidden');
+                        console.log(`✅ Show room: ${jenjang}`);
                     }
                     
-                    // Hide all jenjang sections first
-                    document.getElementById('sd-section')?.classList.add('hidden');
-                    document.getElementById('smp-section')?.classList.add('hidden');
-                    document.getElementById('sma-section')?.classList.add('hidden');
-                    
-                    // Show only matching jenjang section
-                    const matchingSection = document.getElementById(`${jenjang}-section`);
-                    if (matchingSection) {
-                        matchingSection.classList.remove('hidden');
-                        console.log(`✅ [Dashboard] Showing ${jenjang.toUpperCase()} section only`);
+                    // Hide all jenjang sections, show matching
+                    ['sd','smp','sma'].forEach(j => {
+                        document.getElementById(`${j}-section`)?.classList.add('hidden');
+                    });
+                    const section = document.getElementById(`${jenjang}-section`);
+                    if (section) {
+                        section.classList.remove('hidden');
+                        console.log(`✅ Show section: ${jenjang}`);
                     }
                 }
                 
-                // ✅ Filter by kelas_diampu (for class cards) - ONLY FOR TEACHERS
+                // Filter kelas cards (teachers only)
                 if (kelasDiampu.length > 0 && role === 'teacher') {
-                    // Hide all class cards first, then show only matching ones
+                    console.log(`🎯 Filter kelas: ${kelasDiampu.join(', ')}`);
                     document.querySelectorAll('.kelas-card[data-kelas]').forEach(card => {
-                        const kelas = card.getAttribute('data-kelas');
-                        if (kelasDiampu.includes(kelas)) {
-                            card.classList.remove('hidden');
-                        } else {
-                            card.classList.add('hidden');
-                        }
+                        const k = card.getAttribute('data-kelas');
+                        card.classList.toggle('hidden', !kelasDiampu.includes(k));
                     });
-                    console.log('✅ [Dashboard] Showing only kelas:', kelasDiampu);
                 }
                 
-                // ✅ Special handling for SD guru PAI/PJOK: show ALL classes but with note
+                // SD Guru PAI/PJOK: show all classes
                 if (jenjang === 'sd' && sdMapelType !== 'kelas' && role === 'teacher') {
-                    document.querySelectorAll('.kelas-card[data-kelas]').forEach(card => {
-                        card.classList.remove('hidden'); // Show all classes for PAI/PJOK teachers
-                    });
-                    console.log('✅ [Dashboard] SD Guru PAI/PJOK: showing all classes');
+                    console.log('✅ SD Guru PAI/PJOK: show all classes');
+                    document.querySelectorAll('.kelas-card[data-kelas]').forEach(card => card.classList.remove('hidden'));
                 }
+                
+                console.log('🎉 [Filter] DONE!');
             }
             
-            // ✅ Load user info + apply filtering on auth state change
-            (async () => {
-                try {
-                    const { auth, onAuthStateChanged } = await import('./modules/firebase-config.js');
+            // ✅ Listen to auth state
+            onAuthStateChanged(auth, async (user) => {
+                console.log('🔐 Auth:', user ? `IN (${user.uid})` : 'OUT');
+                
+                if (user) {
+                    // Fast load from localStorage
+                    const nama = localStorage.getItem('user_nama_lengkap') || 'User';
+                    const email = localStorage.getItem('user_email') || '';
+                    if (els.profileName) els.profileName.textContent = nama;
+                    if (els.profileEmailSub) els.profileEmailSub.textContent = email;
+                    if (els.userEmail) els.userEmail.textContent = email;
+                    if (els.userAvatar) {
+                        els.userAvatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(nama)}&background=7c3aed&color=fff`;
+                    }
                     
-                    onAuthStateChanged(auth, async (user) => {
-                        if (user) {
-                            // Load from localStorage first (fast display)
-                            const namaLocal = localStorage.getItem('user_nama_lengkap') || 'User';
-                            const emailLocal = localStorage.getItem('user_email') || '';
-                            const jenjangLocal = localStorage.getItem('user_jenjang') || '';
-                            
-                            if (profileName) profileName.textContent = namaLocal;
-                            if (profileEmailSub) profileEmailSub.textContent = emailLocal;
-                            if (userEmail) userEmail.textContent = emailLocal;
-                            if (userAvatar) {
-                                userAvatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(namaLocal)}&background=7c3aed&color=fff`;
-                                userAvatar.alt = namaLocal;
-                            }
-                            
-                            // Load from Firestore for accurate data + filtering
-                            const userData = await loadUserDataForFiltering();
-                            if (userData) {
-                                const nama = userData.nama_lengkap || namaLocal;
-                                const email = user.email || emailLocal;
-                                
-                                if (profileName) profileName.textContent = nama;
-                                if (profileEmailSub) profileEmailSub.textContent = email;
-                                if (userEmail) userEmail.textContent = email;
-                                if (userAvatar) {
-                                    userAvatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(nama)}&background=7c3aed&color=fff`;
-                                }
-                                
-                                // ✅ Apply dashboard filtering based on user data
-                                filterDashboardSections(userData);
-                                
-                                // Save to localStorage for faster subsequent loads
-                                localStorage.setItem('user_jenjang', userData.jenjang_sekolah || '');
-                                localStorage.setItem('user_kelas_diampu', JSON.stringify(userData.kelas_diampu || []));
-                            }
-                        } else {
-                            // Not logged in
-                            if (profileName) profileName.textContent = 'User';
-                            if (profileEmailSub) profileEmailSub.textContent = '';
-                            if (userEmail) userEmail.textContent = '';
-                        }
+                    // Load from Firestore + filter
+                    const userData = await loadUserData(user.uid);
+                    if (userData) {
+                        // Update profile
+                        const namaFb = userData.nama_lengkap || nama;
+                        const emailFb = userData.email || email;
+                        if (els.profileName) els.profileName.textContent = namaFb;
+                        if (els.profileEmailSub) els.profileEmailSub.textContent = emailFb;
+                        if (els.userEmail) els.userEmail.textContent = emailFb;
+                        
+                        // ✅ APPLY FILTERING
+                        applyFilter(userData);
+                        
+                        // Save to localStorage
+                        localStorage.setItem('user_jenjang', userData.jenjang_sekolah || '');
+                        localStorage.setItem('user_kelas_diampu', JSON.stringify(userData.kelas_diampu || []));
+                    }
+                } else {
+                    // Logged out: reset
+                    if (els.profileName) els.profileName.textContent = 'User';
+                    if (els.profileEmailSub) els.profileEmailSub.textContent = '';
+                    if (els.userEmail) els.userEmail.textContent = '';
+                    ['sd','smp','sma'].forEach(j => {
+                        document.getElementById(`${j}-section`)?.classList.add('hidden');
                     });
-                } catch (error) {
-                    console.log('⚠️ [Profile] Using localStorage data only:', error);
                 }
-            })();
-        })();
+            });
+            
+            console.log('🟢 [Dashboard Filter] READY');
+        });
     </script>
 
     <!-- ✅ SCRIPT TAGS (UNCHANGED) -->
