@@ -7,23 +7,42 @@
 
 console.log('🔴 [Groq API] Script START');
 
+// ✅ TAMBAHAN: Import global API key manager
+import { getNextApiKey } from './global-api-key.js';
+
 // ✅ GROQ API CONFIG — UPDATED MODEL (2026)
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 const GROQ_MODEL = 'llama-3.1-8b-instant'; // ✅ Model aktif & stabil
 
 /**
- * Get Groq API key from localStorage
+ * ✅ UPDATED: Get Groq API key with global fallback
+ * Priority: Global Firestore Key → LocalStorage → null
  */
-export function getGroqApiKey() {
-  return localStorage.getItem('groq_api_key') || null;
+export async function getGroqApiKey() {
+  // Try global key first (Firestore-based)
+  const globalKey = await getNextApiKey();
+  if (globalKey) {
+    console.log('🌐 [Groq API] Using global API key');
+    return globalKey;
+  }
+  
+  // Fallback to localStorage (backward compatibility)
+  const localKey = localStorage.getItem('groq_api_key');
+  if (localKey) {
+    console.log('🔄 [Groq API] Using localStorage fallback');
+    return localKey;
+  }
+  
+  console.log('⚠️ [Groq API] No API key available');
+  return null;
 }
 
 /**
- * Save Groq API key to localStorage
+ * Save Groq API key to localStorage (for manual override)
  */
 export function saveGroqApiKey(key) {
   localStorage.setItem('groq_api_key', key);
-  console.log('✅ [Groq API] API key saved');
+  console.log('✅ [Groq API] API key saved to localStorage');
 }
 
 /**
@@ -31,14 +50,14 @@ export function saveGroqApiKey(key) {
  */
 export function clearGroqApiKey() {
   localStorage.removeItem('groq_api_key');
-  console.log('🗑️ [Groq API] API key cleared');
+  console.log('🗑️ [Groq API] API key cleared from localStorage');
 }
 
 /**
  * Check if Groq API key exists and valid
  */
 export function hasGroqApiKey() {
-  const key = getGroqApiKey();
+  const key = localStorage.getItem('groq_api_key');
   return key && key.length >= 20 && key.startsWith('gsk_');
 }
 
@@ -65,7 +84,7 @@ Bahasa Indonesia, total ~500 kata.`;
  * Test Groq API connection
  */
 export async function testGroqConnection() {
-  const apiKey = getGroqApiKey();
+  const apiKey = await getGroqApiKey(); // ✅ UPDATED: async
   if (!apiKey) return { success: false, error: 'API key tidak ditemukan' };
   
   try {
@@ -91,14 +110,14 @@ export async function testGroqConnection() {
  * Call Groq API to generate content
  */
 export async function generateWithGroq(inputData) {
-  const apiKey = getGroqApiKey();
+  const apiKey = await getGroqApiKey(); // ✅ UPDATED: async
   
   console.log('🤖 [Groq API] Starting generation...');
-  console.log('🔑 [Groq API] Key valid:', hasGroqApiKey());
+  console.log('🔑 [Groq API] Key valid:', await getGroqApiKey() ? true : false);
   console.log('🤖 [Groq API] Model:', GROQ_MODEL);
   
-  if (!apiKey || !hasGroqApiKey()) {
-    throw new Error('Groq API key tidak valid. Input ulang di modal profil.');
+  if (!apiKey) {
+    throw new Error('Groq API key tidak valid. Hubungi admin atau input di profil.');
   }
   
   // ✅ Test connection first
