@@ -3,38 +3,22 @@
  * MODULE: CTA GENERATOR (CP/TP/ATP)
  * Platform Administrasi Kelas Digital
  * ============================================
- * FITUR:
- * - AI-Powered Generation (Global API Key Support)
- * - Clean Commercial UI
- * - Role-Based Class Access (Teacher/Admin)
- * - Borderless result textareas
- * ============================================
  */
 
 console.log('🔴 [CTA Generator] Script START');
 
+// ✅ IMPORTS — Updated paths for reliability
 import {
   hasGroqApiKey,
   generateWithGroq,
-  getGroqApiKey  // ✅ TAMBAHAN: Import untuk cek global key
+  getGroqApiKey
 } from './groq-api.js';
 
-import { 
-  validateInput
-} from './cta-templates.js';
+import { validateInput } from './cta-templates.js';
 
 import { 
-  db, 
-  auth, 
-  collection, 
-  addDoc, 
-  query, 
-  where, 
-  orderBy, 
-  onSnapshot,
-  doc,
-  getDoc,
-  serverTimestamp 
+  db, auth, collection, addDoc, query, where, orderBy, 
+  onSnapshot, doc, getDoc, serverTimestamp 
 } from './firebase-config.js';
 
 console.log('✅ [CTA Generator] All imports successful');
@@ -42,15 +26,48 @@ console.log('✅ [CTA Generator] All imports successful');
 // ✅ GLOBAL STATE
 let userRole = 'teacher';
 let userKelasDiampu = [];
+let _aiReadyCache = null; // Cache for AI readiness check
 
-// ✅ UPDATED: Check if AI is ready (global key OR local key)
+// ✅ UPDATED: Robust AI readiness check with debug logging
 export async function isAiReady() {
-  // Check global key first
-  const globalKey = await getGroqApiKey();
-  if (globalKey) return true;
+  // Return cached if already checked
+  if (_aiReadyCache !== null) {
+    console.log('🔄 [CTA Generator] Using cached AI readiness:', _aiReadyCache);
+    return _aiReadyCache;
+  }
   
-  // Fallback to localStorage check
-  return hasGroqApiKey();
+  try {
+    console.log('🔍 [CTA Generator] Checking AI readiness...');
+    
+    // Try 1: Global key via getGroqApiKey (which calls getNextApiKey)
+    console.log('🔑 [CTA Generator] Trying global API key...');
+    const globalKey = await getGroqApiKey();
+    
+    if (globalKey) {
+      console.log('✅ [CTA Generator] Global API key found!');
+      _aiReadyCache = true;
+      return true;
+    }
+    
+    console.log('⚠️ [CTA Generator] Global key not found, trying localStorage...');
+    
+    // Try 2: LocalStorage fallback
+    const localKey = localStorage.getItem('groq_api_key');
+    if (localKey && localKey.startsWith('gsk_') && localKey.length >= 20) {
+      console.log('✅ [CTA Generator] LocalStorage API key found!');
+      _aiReadyCache = true;
+      return true;
+    }
+    
+    console.log('❌ [CTA Generator] No API key found (global or local)');
+    _aiReadyCache = false;
+    return false;
+    
+  } catch (error) {
+    console.error('❌ [CTA Generator] Error checking AI readiness:', error);
+    _aiReadyCache = false;
+    return false;
+  }
 }
 
 window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, semesterFromParam) {
@@ -65,11 +82,16 @@ window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, sem
   const userNama = localStorage.getItem('user_nama_lengkap') || '';
   const userSekolah = localStorage.getItem('user_nama_sekolah') || '';
   
-  // ✅ UPDATED: Check AI readiness (async)
+  // ✅ DEBUG: Log user info
+  console.log('👤 [CTA Generator] Current user:', user.email, user.uid);
+  
+  // ✅ UPDATED: Async AI readiness check with debug
+  console.log('🤖 [CTA Generator] Checking if AI is ready...');
   const aiReady = await isAiReady();
+  console.log('🤖 [CTA Generator] AI Ready:', aiReady);
   
   // ✅ LOAD USER DATA FROM FIRESTORE
-  console.log('👤 [CTA Generator] Loading user data...');
+  console.log('👤 [CTA Generator] Loading user data from Firestore...');
   try {
     const userDoc = await getDoc(doc(db, 'users', user.uid));
     if (userDoc.exists()) {
@@ -80,11 +102,12 @@ window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, sem
       console.log('👤 [CTA Generator] User Role:', userRole);
       console.log('👤 [CTA Generator] Kelas Diampu:', userKelasDiampu);
     } else {
+      console.warn('⚠️ [CTA Generator] User document not found in Firestore');
       userRole = 'teacher';
       userKelasDiampu = [];
     }
   } catch (e) {
-    console.error('❌ [CTA Generator] Failed to load user data:', e);
+    console.error('❌ [CTA Generator] Failed to load user ', e);
     userRole = 'teacher';
     userKelasDiampu = [];
   }
@@ -102,7 +125,6 @@ window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, sem
     console.log('🔓 [CTA Generator] Class unlocked (admin or no class assigned)');
   }
   
-  // ✅ DETERMINE DEFAULT CLASS
   let defaultClass = kelasFromParam || '';
   if (isClassLocked && availableClasses.length > 0) {
     defaultClass = availableClasses[0];
@@ -110,8 +132,8 @@ window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, sem
   
   console.log('📚 [CTA Generator] Available classes:', availableClasses);
   console.log('📚 [CTA Generator] Default class:', defaultClass);
-  console.log('📚 [CTA Generator] Is locked:', isClassLocked);
   
+  // ✅ RENDER UI
   container.innerHTML = `
     <style>
       .cta-generator-form { max-width: 950px; margin: auto; padding: 30px; background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
@@ -119,50 +141,11 @@ window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, sem
       .subtitle { text-align: center; color: #6b7280; margin-bottom: 30px; }
       .section-title { font-size: 18px; font-weight: 700; color: #374151; margin: 25px 0 15px 0; padding-bottom: 8px; border-bottom: 2px solid #e5e7eb; display: flex; align-items: center; gap: 8px; }
       .cta-generator-form label { display: block; margin-top: 12px; font-weight: 600; color: #374151; font-size: 14px; }
-      
-      .cta-generator-form input,
-      .cta-generator-form select {
-        width: 100%;
-        margin-top: 8px;
-        padding: 12px;
-        border-radius: 8px;
-        border: 1px solid #d1d5db;
-        font-size: 14px;
-        font-family: inherit;
-      }
-      .cta-generator-form input:focus,
-      .cta-generator-form select:focus {
-        outline: none;
-        border-color: #0891b2;
-      }
-      
-      /* ✅ Locked select styling */
-      .cta-generator-form select:disabled {
-        background: #f3f4f6;
-        color: #6b7280;
-        cursor: not-allowed;
-      }
-      
-      #result-cp, #result-tp, #result-atp {
-        width: 100%;
-        min-height: 200px;
-        padding: 16px;
-        border: NONE !important;
-        border-radius: 8px;
-        background: #f9fafb;
-        font-family: monospace;
-        font-size: 13px;
-        line-height: 1.6;
-        white-space: pre-wrap;
-        margin-top: 8px;
-        resize: vertical;
-        box-shadow: none !important;
-        outline: none !important;
-      }
-      #result-cp:focus, #result-tp:focus, #result-atp:focus {
-        background: white;
-      }
-      
+      .cta-generator-form input, .cta-generator-form select { width: 100%; margin-top: 8px; padding: 12px; border-radius: 8px; border: 1px solid #d1d5db; font-size: 14px; font-family: inherit; }
+      .cta-generator-form input:focus, .cta-generator-form select:focus { outline: none; border-color: #0891b2; }
+      .cta-generator-form select:disabled { background: #f3f4f6; color: #6b7280; cursor: not-allowed; }
+      #result-cp, #result-tp, #result-atp { width: 100%; min-height: 200px; padding: 16px; border: NONE !important; border-radius: 8px; background: #f9fafb; font-family: monospace; font-size: 13px; line-height: 1.6; white-space: pre-wrap; margin-top: 8px; resize: vertical; box-shadow: none !important; outline: none !important; }
+      #result-cp:focus, #result-tp:focus, #result-atp:focus { background: white; }
       .btn-generate, .btn-save, .btn-secondary { margin-top: 20px; padding: 14px 30px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; }
       .btn-generate { background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%); color: white; }
       .btn-generate:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(8,145,178,0.3); }
@@ -183,7 +166,6 @@ window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, sem
       .status-warning { background: #fef3c7; color: #92400e; }
       .status-info { background: #dbeafe; color: #1e40af; }
       .result-section { margin-top: 30px; }
-      .result-section h3 { color: #1f2937; margin-bottom: 16px; }
       .lock-indicator { font-size: 11px; color: #6b7280; margin-top: 4px; display: flex; align-items: center; gap: 4px; }
     </style>
     
@@ -199,7 +181,7 @@ window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, sem
         <div style="background:#fef3c7;padding:16px;border-radius:8px;margin-bottom:20px;color:#92400e;font-size:13px;border-left:4px solid #f59e0b;">
           <strong>⚠️ Setup AI Diperlukan</strong><br><br>
           ${userRole === 'admin' 
-            ? 'Silakan set Global API Key di Firestore: settings/api_key' 
+            ? '🔧 <strong>Untuk Admin:</strong><br>1. Pastikan Firestore document <code>settings/api_key</code> ada<br>2. Pastikan field <code>keys</code> array berisi minimal 1 key aktif<br>3. Cek Firestore Rules mengizinkan read ke <code>settings/*</code><br><br><button id="btn-test-global-key" style="background:#0891b2;color:white;padding:8px 16px;border:none;border-radius:6px;cursor:pointer;margin-top:8px;">🔍 Test Global Key</button>' 
             : 'Hubungi admin untuk aktivasi AI, atau input API key manual di profil.'}
         </div>
       ` : '<div style="background:#dcfce7;padding:12px;border-radius:8px;margin-bottom:20px;color:#166534;font-size:13px;border-left:4px solid #10b981;">✅ AI aktif dan siap digunakan</div>'}
@@ -210,12 +192,10 @@ window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, sem
       
       <form id="cta-form">
         <div class="section-title"><i class="fas fa-university"></i><span>1. Informasi Sekolah</span></div>
-        
         <div>
           <label for="kop-sekolah"><i class="fas fa-school mr-2"></i>Nama Sekolah</label>
           <input type="text" id="kop-sekolah" placeholder="Masukkan nama sekolah" value="${userSekolah}" class="${userSekolah ? 'auto-filled' : ''}" required>
         </div>
-        
         <div class="grid-cols-2">
           <div>
             <label for="kop-tahun"><i class="fas fa-calendar mr-2"></i>Tahun Ajaran</label>
@@ -228,7 +208,6 @@ window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, sem
         </div>
         
         <div class="section-title"><i class="fas fa-book-open"></i><span>2. Informasi Pembelajaran</span></div>
-        
         <div class="grid-cols-3">
           <div>
             <label for="cta-jenjang"><i class="fas fa-school mr-2"></i>Jenjang</label>
@@ -283,16 +262,12 @@ window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, sem
       
       <div id="cta-result" class="hidden result-section">
         <h3 class="text-xl font-bold mb-4 text-gray-800">📋 Hasil Generate</h3>
-        
         <label for="result-cp"><i class="fas fa-bullseye mr-2"></i>Capaian Pembelajaran (CP)</label>
         <textarea id="result-cp" placeholder="CP akan muncul setelah generate..." readonly></textarea>
-        
         <label for="result-tp"><i class="fas fa-flag-checkered mr-2"></i>Tujuan Pembelajaran (TP)</label>
         <textarea id="result-tp" placeholder="TP akan muncul setelah generate..." readonly></textarea>
-        
         <label for="result-atp"><i class="fas fa-stream mr-2"></i>Alur Tujuan Pembelajaran (ATP)</label>
         <textarea id="result-atp" placeholder="ATP akan muncul setelah generate..." readonly></textarea>
-        
         <div style="display: flex; gap: 12px; margin-top: 16px;">
           <button type="button" id="btn-save" class="btn-save" style="flex: 2;">
             <i class="fas fa-save"></i> Simpan ke Firestore
@@ -314,9 +289,30 @@ window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, sem
     </div>
   `;
   
+  // ✅ TAMBAHAN: Test Global Key Button Handler (for admin)
+  const testKeyBtn = document.getElementById('btn-test-global-key');
+  if (testKeyBtn && userRole === 'admin') {
+    testKeyBtn.addEventListener('click', async () => {
+      console.log('🔍 [CTA Generator] Testing global key manually...');
+      try {
+        const { getNextApiKey } = await import('./global-api-key.js');
+        const key = await getNextApiKey();
+        if (key) {
+          alert('✅ Global API Key ditemukan!\n\nKey prefix: ' + key.substring(0, 15) + '...');
+          // Refresh to update UI
+          location.reload();
+        } else {
+          alert('❌ Global API Key TIDAK ditemukan.\n\nCek:\n1. Document settings/api_key ada\n2. Field keys array tidak kosong\n3. Minimal 1 key dengan active:true');
+        }
+      } catch (e) {
+        console.error('❌ [CTA Generator] Test error:', e);
+        alert('❌ Error test global key: ' + e.message);
+      }
+    });
+  }
+  
   hideDashboardSections();
   container.classList.remove('hidden');
-  
   setupEventHandlers();
   loadCTAData();
   
@@ -360,14 +356,14 @@ async function handleGenerate() {
     return;
   }
   
-  // ✅ UPDATED: Check AI readiness (async)
+  // ✅ Re-check AI readiness before generate
   const aiReady = await isAiReady();
   if (!aiReady) {
     const userDoc = await getDoc(doc(db, 'users', user.uid));
     const isAdmin = userDoc.exists() && userDoc.data()?.role === 'admin';
     
     if (isAdmin) {
-      alert('⚠️ Global API Key belum diset. Silakan setup di Firestore: settings/api_key');
+      alert('⚠️ Global API Key belum terdeteksi.\n\nSilakan:\n1. Cek Firestore: settings/api_key\n2. Pastikan keys array berisi key aktif\n3. Klik "Test Global Key" untuk debug');
     } else {
       alert('⚠️ AI belum aktif. Hubungi admin untuk aktivasi.');
     }
@@ -384,7 +380,6 @@ async function handleGenerate() {
   
   try {
     console.log('🤖 [CTA Generator] Calling AI...');
-    
     const inputData = { sekolah, jenjang, kelas, semester, mapel, guru, topik, tahun };
     const result = await generateWithGroq(inputData);
     
@@ -487,8 +482,6 @@ function loadCTAData() {
       if (isAdmin) {
         q = query(collection(db, 'cp_tp_atp'), orderBy('createdAt', 'desc'));
       } else {
-        // ⚠️ NOTE: Query ini butuh composite index di Firestore
-        // Jika error "failed-precondition", buat index via link Firebase Console
         q = query(collection(db, 'cp_tp_atp'), where('userId', '==', user.uid), orderBy('createdAt', 'desc'));
       }
       
@@ -518,15 +511,11 @@ function loadCTAData() {
       });
     } catch (e) {
       console.error('❌ [CTA Generator] Load error:', e);
-      // ✅ Show helpful message for index error
       if (e.message?.includes('index')) {
-        list.innerHTML = `<div class="text-center py-8 text-yellow-600">
-          <p>⚠️ Index Firestore belum siap.</p>
-          <p class="text-sm mt-2">Admin: Buat index di Firebase Console → Firestore → Indexes</p>
-        </div>`;
+        list.innerHTML = `<div class="text-center py-8 text-yellow-600"><p>⚠️ Index Firestore belum siap.</p><p class="text-sm mt-2">Admin: Buat index di Firebase Console → Firestore → Indexes</p></div>`;
       }
     }
   })();
 }
 
-console.log('🟢 [CTA Generator] READY — Global API Key Support');
+console.log('🟢 [CTA Generator] READY — Global API Key Support + Debug Mode');
