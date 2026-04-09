@@ -4,7 +4,7 @@
  * Platform Administrasi Kelas Digital
  * ============================================
  * FITUR:
- * - AI-Powered Generation
+ * - AI-Powered Generation (Global API Key Support)
  * - Clean Commercial UI
  * - Role-Based Class Access (Teacher/Admin)
  * - Borderless result textareas
@@ -15,7 +15,8 @@ console.log('🔴 [CTA Generator] Script START');
 
 import {
   hasGroqApiKey,
-  generateWithGroq
+  generateWithGroq,
+  getGroqApiKey  // ✅ TAMBAHAN: Import untuk cek global key
 } from './groq-api.js';
 
 import { 
@@ -42,6 +43,16 @@ console.log('✅ [CTA Generator] All imports successful');
 let userRole = 'teacher';
 let userKelasDiampu = [];
 
+// ✅ UPDATED: Check if AI is ready (global key OR local key)
+export async function isAiReady() {
+  // Check global key first
+  const globalKey = await getGroqApiKey();
+  if (globalKey) return true;
+  
+  // Fallback to localStorage check
+  return hasGroqApiKey();
+}
+
 window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, semesterFromParam) {
   console.log('📝 [CTA Generator] renderCTAGenerator() called');
   
@@ -53,7 +64,9 @@ window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, sem
   
   const userNama = localStorage.getItem('user_nama_lengkap') || '';
   const userSekolah = localStorage.getItem('user_nama_sekolah') || '';
-  const aiReady = hasGroqApiKey();
+  
+  // ✅ UPDATED: Check AI readiness (async)
+  const aiReady = await isAiReady();
   
   // ✅ LOAD USER DATA FROM FIRESTORE
   console.log('👤 [CTA Generator] Loading user data...');
@@ -185,7 +198,9 @@ window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, sem
       ${!aiReady ? `
         <div style="background:#fef3c7;padding:16px;border-radius:8px;margin-bottom:20px;color:#92400e;font-size:13px;border-left:4px solid #f59e0b;">
           <strong>⚠️ Setup AI Diperlukan</strong><br><br>
-          Silakan input API key di modal profil untuk menggunakan fitur ini.
+          ${userRole === 'admin' 
+            ? 'Silakan set Global API Key di Firestore: settings/api_key' 
+            : 'Hubungi admin untuk aktivasi AI, atau input API key manual di profil.'}
         </div>
       ` : '<div style="background:#dcfce7;padding:12px;border-radius:8px;margin-bottom:20px;color:#166534;font-size:13px;border-left:4px solid #10b981;">✅ AI aktif dan siap digunakan</div>'}
       
@@ -345,9 +360,17 @@ async function handleGenerate() {
     return;
   }
   
-  const aiReady = hasGroqApiKey();
+  // ✅ UPDATED: Check AI readiness (async)
+  const aiReady = await isAiReady();
   if (!aiReady) {
-    alert('⚠️ Setup AI diperlukan. Silakan input API key di modal profil.');
+    const userDoc = await getDoc(doc(db, 'users', user.uid));
+    const isAdmin = userDoc.exists() && userDoc.data()?.role === 'admin';
+    
+    if (isAdmin) {
+      alert('⚠️ Global API Key belum diset. Silakan setup di Firestore: settings/api_key');
+    } else {
+      alert('⚠️ AI belum aktif. Hubungi admin untuk aktivasi.');
+    }
     return;
   }
   
@@ -375,12 +398,12 @@ async function handleGenerate() {
     console.error('❌ [CTA Generator] Error:', error);
     
     let errorMessage = error.message;
-    if (error.message.includes('API key')) {
-      errorMessage = 'Setup AI diperlukan. Input API key di modal profil.';
+    if (error.message.includes('API key') || error.message.includes('configured')) {
+      errorMessage = 'API Key tidak valid. Hubungi admin untuk update.';
     } else if (error.message.includes('quota') || error.message.includes('429')) {
-      errorMessage = 'Limit AI harian habis. Tunggu 24 jam.';
-    } else if (error.message.includes('koneksi') || error.message.includes('network')) {
-      errorMessage = 'Koneksi internet bermasalah.';
+      errorMessage = 'Limit AI harian habis. Tunggu 24 jam atau admin buat key baru.';
+    } else if (error.message.includes('koneksi') || error.message.includes('network') || error.message.includes('fetch')) {
+      errorMessage = 'Koneksi internet bermasalah. Cek koneksi Anda.';
     } else if (error.message.includes('decommissioned') || error.message.includes('model')) {
       errorMessage = 'Model AI sedang diupdate. Hubungi admin.';
     }
@@ -464,6 +487,8 @@ function loadCTAData() {
       if (isAdmin) {
         q = query(collection(db, 'cp_tp_atp'), orderBy('createdAt', 'desc'));
       } else {
+        // ⚠️ NOTE: Query ini butuh composite index di Firestore
+        // Jika error "failed-precondition", buat index via link Firebase Console
         q = query(collection(db, 'cp_tp_atp'), where('userId', '==', user.uid), orderBy('createdAt', 'desc'));
       }
       
@@ -493,8 +518,15 @@ function loadCTAData() {
       });
     } catch (e) {
       console.error('❌ [CTA Generator] Load error:', e);
+      // ✅ Show helpful message for index error
+      if (e.message?.includes('index')) {
+        list.innerHTML = `<div class="text-center py-8 text-yellow-600">
+          <p>⚠️ Index Firestore belum siap.</p>
+          <p class="text-sm mt-2">Admin: Buat index di Firebase Console → Firestore → Indexes</p>
+        </div>`;
+      }
     }
   })();
 }
 
-console.log('🟢 [CTA Generator] READY — Role-Based Class Access');
+console.log('🟢 [CTA Generator] READY — Global API Key Support');
