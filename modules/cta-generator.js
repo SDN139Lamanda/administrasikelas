@@ -167,6 +167,10 @@ window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, sem
       .status-info { background: #dbeafe; color: #1e40af; }
       .result-section { margin-top: 30px; }
       .lock-indicator { font-size: 11px; color: #6b7280; margin-top: 4px; display: flex; align-items: center; gap: 4px; }
+      /* ✅ TAMBAHAN: Debug box styles */
+      .debug-box { background: #fef3c7; padding: 16px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f59e0b; font-size: 13px; }
+      .debug-success { background: #dcfce7; border-left-color: #166534; }
+      .debug-error { background: #fef2f2; border-left-color: #ef4444; }
     </style>
     
     <div class="cta-generator-form">
@@ -185,6 +189,12 @@ window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, sem
             : 'Hubungi admin untuk aktivasi AI, atau input API key manual di profil.'}
         </div>
       ` : '<div style="background:#dcfce7;padding:12px;border-radius:8px;margin-bottom:20px;color:#166534;font-size:13px;border-left:4px solid #10b981;">✅ AI aktif dan siap digunakan</div>'}
+      
+      <!-- ✅ TAMBAHAN: Debug Box - Visible API Key Status (NO F12 NEEDED) -->
+      <div id="debug-api-status" class="debug-box">
+        <strong>🔍 Debug API Key Status:</strong><br>
+        <span id="debug-api-message">Checking...</span>
+      </div>
       
       <button class="btn-back" onclick="backToDashboard()">
         <i class="fas fa-arrow-left mr-2"></i>Kembali ke Dashboard
@@ -289,7 +299,7 @@ window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, sem
     </div>
   `;
   
-  // ✅ TAMBAHAN: Test Global Key Button Handler (for admin)
+  // ✅ TAMBAHAN: Test Global Key Button Handler (for admin) - YOUR EXISTING CODE
   const testKeyBtn = document.getElementById('btn-test-global-key');
   if (testKeyBtn && userRole === 'admin') {
     testKeyBtn.addEventListener('click', async () => {
@@ -310,6 +320,49 @@ window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, sem
       }
     });
   }
+  
+  // ✅ TAMBAHAN: Debug Box - Check API key and show visible status (NO F12 NEEDED!)
+  (async function showDebugStatus() {
+    const debugBox = document.getElementById('debug-api-status');
+    const debugMsg = document.getElementById('debug-api-message');
+    if (!debugBox || !debugMsg) return;
+    
+    try {
+      const { getGroqApiKey } = await import('./groq-api.js');
+      const key = await getGroqApiKey();
+      
+      if (key && key.startsWith('gsk_') && key.length >= 20) {
+        debugBox.className = 'debug-box debug-success';
+        debugMsg.innerHTML = `
+          <span style="color:#166534;"><strong>✅ API KEY FOUND!</strong></span><br>
+          Key: ${key.substring(0,15)}...<br>
+          Length: ${key.length} chars<br>
+          <small>Global API key dari Firestore bekerja!</small>
+        `;
+      } else if (key) {
+        debugBox.className = 'debug-box debug-error';
+        debugMsg.innerHTML = `
+          <span style="color:#991b1b;"><strong>⚠️ KEY INVALID</strong></span><br>
+          Key tidak dimulai dengan "gsk_" atau terlalu pendek<br>
+          <small>Cek Firestore: settings/api_key → keys array</small>
+        `;
+      } else {
+        debugBox.className = 'debug-box debug-error';
+        debugMsg.innerHTML = `
+          <span style="color:#991b1b;"><strong>❌ NO KEY FOUND</strong></span><br>
+          API key tidak ditemukan di Firestore atau localStorage<br>
+          <small>Cek: 1) Document settings/api_key ada, 2) keys array tidak kosong, 3) active:true</small>
+        `;
+      }
+    } catch (e) {
+      debugBox.className = 'debug-box debug-error';
+      debugMsg.innerHTML = `
+        <span style="color:#991b1b;"><strong>❌ ERROR</strong></span><br>
+        ${e.message}<br>
+        <small>Cek Firestore rules published?</small>
+      `;
+    }
+  })();
   
   hideDashboardSections();
   container.classList.remove('hidden');
@@ -518,4 +571,4 @@ function loadCTAData() {
   })();
 }
 
-console.log('🟢 [CTA Generator] READY — Global API Key Support + Debug Mode');
+console.log('🟢 [CTA Generator] READY — Global API Key Support + Debug Box');
