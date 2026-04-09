@@ -7,7 +7,6 @@
 
 console.log('🔴 [CTA Generator] Script START');
 
-// ✅ IMPORTS — Updated paths for reliability
 import {
   hasGroqApiKey,
   generateWithGroq,
@@ -23,43 +22,29 @@ import {
 
 console.log('✅ [CTA Generator] All imports successful');
 
-// ✅ GLOBAL STATE
 let userRole = 'teacher';
 let userKelasDiampu = [];
-let _aiReadyCache = null; // Cache for AI readiness check
+let _aiReadyCache = null;
 
-// ✅ UPDATED: Robust AI readiness check with debug logging
 export async function isAiReady() {
-  // Return cached if already checked
   if (_aiReadyCache !== null) {
-    console.log('🔄 [CTA Generator] Using cached AI readiness:', _aiReadyCache);
     return _aiReadyCache;
   }
   
   try {
-    console.log('🔍 [CTA Generator] Checking AI readiness...');
-    
-    // Try 1: Global key via getGroqApiKey (which calls getNextApiKey)
-    console.log('🔑 [CTA Generator] Trying global API key...');
     const globalKey = await getGroqApiKey();
     
     if (globalKey) {
-      console.log('✅ [CTA Generator] Global API key found!');
       _aiReadyCache = true;
       return true;
     }
     
-    console.log('⚠️ [CTA Generator] Global key not found, trying localStorage...');
-    
-    // Try 2: LocalStorage fallback
     const localKey = localStorage.getItem('groq_api_key');
     if (localKey && localKey.startsWith('gsk_') && localKey.length >= 20) {
-      console.log('✅ [CTA Generator] LocalStorage API key found!');
       _aiReadyCache = true;
       return true;
     }
     
-    console.log('❌ [CTA Generator] No API key found (global or local)');
     _aiReadyCache = false;
     return false;
     
@@ -82,37 +67,34 @@ window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, sem
   const userNama = localStorage.getItem('user_nama_lengkap') || '';
   const userSekolah = localStorage.getItem('user_nama_sekolah') || '';
   
-  // ✅ DEBUG: Log user info
   console.log('👤 [CTA Generator] Current user:', user.email, user.uid);
   
-  // ✅ UPDATED: Async AI readiness check with debug
-  console.log('🤖 [CTA Generator] Checking if AI is ready...');
   const aiReady = await isAiReady();
   console.log('🤖 [CTA Generator] AI Ready:', aiReady);
   
-  // ✅ LOAD USER DATA FROM FIRESTORE
+  // ✅ LOAD USER DATA FROM FIRESTORE (including kelas_diampu)
   console.log('👤 [CTA Generator] Loading user data from Firestore...');
   try {
     const userDoc = await getDoc(doc(db, 'users', user.uid));
     if (userDoc.exists()) {
       const userData = userDoc.data();
       userRole = userData.role || 'teacher';
+      // ✅ SYNC: Get kelas_diampu from Firestore (same as hide-user settings)
       userKelasDiampu = userData.kelas_diampu || [];
       
       console.log('👤 [CTA Generator] User Role:', userRole);
       console.log('👤 [CTA Generator] Kelas Diampu:', userKelasDiampu);
     } else {
-      console.warn('⚠️ [CTA Generator] User document not found in Firestore');
       userRole = 'teacher';
       userKelasDiampu = [];
     }
   } catch (e) {
-    console.error('❌ [CTA Generator] Failed to load user ', e);
+    console.error('❌ [CTA Generator] Failed to load user data:', e);
     userRole = 'teacher';
     userKelasDiampu = [];
   }
   
-  // ✅ DETERMINE CLASS OPTIONS
+  // ✅ DETERMINE CLASS OPTIONS (sync with kelas_diampu)
   const allClasses = ['1','2','3','4','5','6','7','8','9','10','11','12'];
   let availableClasses = allClasses;
   let isClassLocked = false;
@@ -144,13 +126,37 @@ window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, sem
       .cta-generator-form input, .cta-generator-form select { width: 100%; margin-top: 8px; padding: 12px; border-radius: 8px; border: 1px solid #d1d5db; font-size: 14px; font-family: inherit; }
       .cta-generator-form input:focus, .cta-generator-form select:focus { outline: none; border-color: #0891b2; }
       .cta-generator-form select:disabled { background: #f3f4f6; color: #6b7280; cursor: not-allowed; }
-      #result-cp, #result-tp, #result-atp { width: 100%; min-height: 200px; padding: 16px; border: NONE !important; border-radius: 8px; background: #f9fafb; font-family: monospace; font-size: 13px; line-height: 1.6; white-space: pre-wrap; margin-top: 8px; resize: vertical; box-shadow: none !important; outline: none !important; }
-      #result-cp:focus, #result-tp:focus, #result-atp:focus { background: white; }
-      .btn-generate, .btn-save, .btn-secondary { margin-top: 20px; padding: 14px 30px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; }
+      
+      /* ✅ NO BORDER - Clean seamless textareas */
+      #result-cp, #result-tp, #result-atp {
+        width: 100%;
+        min-height: 200px;
+        padding: 16px 0;
+        border: NONE !important;
+        border-radius: 0;
+        background: transparent;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-size: 14px;
+        line-height: 1.8;
+        white-space: pre-wrap;
+        margin-top: 8px;
+        resize: vertical;
+        box-shadow: none !important;
+        outline: none !important;
+        color: #1f2937;
+      }
+      #result-cp:focus, #result-tp:focus, #result-atp:focus {
+        background: transparent;
+        outline: none !important;
+      }
+      
+      .btn-generate, .btn-save, .btn-secondary, .btn-print { margin-top: 20px; padding: 14px 30px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; }
       .btn-generate { background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%); color: white; }
       .btn-generate:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(8,145,178,0.3); }
       .btn-save { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; }
       .btn-save:hover { background: linear-gradient(135deg, #059669 0%, #047857 100%); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(16,185,129,0.3); }
+      .btn-print { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white; }
+      .btn-print:hover { background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(99,102,241,0.3); }
       .btn-secondary { background: #6b7280; color: white; margin-top: 10px; }
       .btn-secondary:hover { background: #4b5563; transform: translateY(-2px); }
       .btn-back { margin-top: 20px; padding: 12px 30px; background: #6b7280; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; width: auto; }
@@ -167,10 +173,26 @@ window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, sem
       .status-info { background: #dbeafe; color: #1e40af; }
       .result-section { margin-top: 30px; }
       .lock-indicator { font-size: 11px; color: #6b7280; margin-top: 4px; display: flex; align-items: center; gap: 4px; }
-      /* ✅ TAMBAHAN: Debug box styles */
       .debug-box { background: #fef3c7; padding: 16px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f59e0b; font-size: 13px; }
       .debug-success { background: #dcfce7; border-left-color: #166534; }
       .debug-error { background: #fef2f2; border-left-color: #ef4444; }
+      .result-separator { border: none; border-top: 1px dashed #e5e7eb; margin: 24px 0; }
+      
+      /* ✅ PRINT STYLES */
+      @media print {
+        .cta-generator-form h2, .subtitle, .section-title, .cta-generator-form label, 
+        .btn-generate, .btn-save, .btn-secondary, .btn-print, .btn-back, 
+        .debug-box, #cta-form, .mt-12 { display: none !important; }
+        #cta-result { display: block !important; }
+        #result-cp, #result-tp, #result-atp { 
+          border: none !important; 
+          background: white !important;
+          color: black !important;
+          font-size: 12pt;
+          min-height: auto;
+        }
+        body { background: white; }
+      }
     </style>
     
     <div class="cta-generator-form">
@@ -185,12 +207,12 @@ window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, sem
         <div style="background:#fef3c7;padding:16px;border-radius:8px;margin-bottom:20px;color:#92400e;font-size:13px;border-left:4px solid #f59e0b;">
           <strong>⚠️ Setup AI Diperlukan</strong><br><br>
           ${userRole === 'admin' 
-            ? '🔧 <strong>Untuk Admin:</strong><br>1. Pastikan Firestore document <code>settings/api_key</code> ada<br>2. Pastikan field <code>keys</code> array berisi minimal 1 key aktif<br>3. Cek Firestore Rules mengizinkan read ke <code>settings/*</code><br><br><button id="btn-test-global-key" style="background:#0891b2;color:white;padding:8px 16px;border:none;border-radius:6px;cursor:pointer;margin-top:8px;">🔍 Test Global Key</button>' 
+            ? '🔧 <strong>Untuk Admin:</strong><br>1. Pastikan Firestore document <code>settings/api_key</code> ada<br>2. Pastikan field <code>keys</code> array berisi minimal 1 key aktif<br>3. Cek Firestore Rules mengizinkan read ke <code>settings/*</code>' 
             : 'Hubungi admin untuk aktivasi AI, atau input API key manual di profil.'}
         </div>
       ` : '<div style="background:#dcfce7;padding:12px;border-radius:8px;margin-bottom:20px;color:#166534;font-size:13px;border-left:4px solid #10b981;">✅ AI aktif dan siap digunakan</div>'}
       
-      <!-- ✅ TAMBAHAN: Debug Box - Visible API Key Status (NO F12 NEEDED) -->
+      <!-- Debug Box - Visible API Key Status -->
       <div id="debug-api-status" class="debug-box">
         <strong>🔍 Debug API Key Status:</strong><br>
         <span id="debug-api-message">Checking...</span>
@@ -272,13 +294,24 @@ window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, sem
       
       <div id="cta-result" class="hidden result-section">
         <h3 class="text-xl font-bold mb-4 text-gray-800">📋 Hasil Generate</h3>
+        
         <label for="result-cp"><i class="fas fa-bullseye mr-2"></i>Capaian Pembelajaran (CP)</label>
         <textarea id="result-cp" placeholder="CP akan muncul setelah generate..." readonly></textarea>
+        
+        <hr class="result-separator">
+        
         <label for="result-tp"><i class="fas fa-flag-checkered mr-2"></i>Tujuan Pembelajaran (TP)</label>
         <textarea id="result-tp" placeholder="TP akan muncul setelah generate..." readonly></textarea>
+        
+        <hr class="result-separator">
+        
         <label for="result-atp"><i class="fas fa-stream mr-2"></i>Alur Tujuan Pembelajaran (ATP)</label>
         <textarea id="result-atp" placeholder="ATP akan muncul setelah generate..." readonly></textarea>
+        
         <div style="display: flex; gap: 12px; margin-top: 16px;">
+          <button type="button" id="btn-print" class="btn-print" style="flex: 1;">
+            <i class="fas fa-print"></i> Print Hasil
+          </button>
           <button type="button" id="btn-save" class="btn-save" style="flex: 2;">
             <i class="fas fa-save"></i> Simpan ke Firestore
           </button>
@@ -299,29 +332,7 @@ window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, sem
     </div>
   `;
   
-  // ✅ TAMBAHAN: Test Global Key Button Handler (for admin) - YOUR EXISTING CODE
-  const testKeyBtn = document.getElementById('btn-test-global-key');
-  if (testKeyBtn && userRole === 'admin') {
-    testKeyBtn.addEventListener('click', async () => {
-      console.log('🔍 [CTA Generator] Testing global key manually...');
-      try {
-        const { getNextApiKey } = await import('./global-api-key.js');
-        const key = await getNextApiKey();
-        if (key) {
-          alert('✅ Global API Key ditemukan!\n\nKey prefix: ' + key.substring(0, 15) + '...');
-          // Refresh to update UI
-          location.reload();
-        } else {
-          alert('❌ Global API Key TIDAK ditemukan.\n\nCek:\n1. Document settings/api_key ada\n2. Field keys array tidak kosong\n3. Minimal 1 key dengan active:true');
-        }
-      } catch (e) {
-        console.error('❌ [CTA Generator] Test error:', e);
-        alert('❌ Error test global key: ' + e.message);
-      }
-    });
-  }
-  
-  // ✅ TAMBAHAN: Debug Box - Check API key and show visible status (NO F12 NEEDED!)
+  // Debug Box - Check API key and show visible status
   (async function showDebugStatus() {
     const debugBox = document.getElementById('debug-api-status');
     const debugMsg = document.getElementById('debug-api-message');
@@ -363,6 +374,44 @@ window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, sem
       `;
     }
   })();
+  
+  // ✅ NEW: Print Button Handler
+  const btnPrint = document.getElementById('btn-print');
+  if (btnPrint) {
+    btnPrint.addEventListener('click', () => {
+      const cp = document.getElementById('result-cp')?.value;
+      const tp = document.getElementById('result-tp')?.value;
+      const atp = document.getElementById('result-atp')?.value;
+      
+      if (!cp || cp.includes('⏳') || cp.includes('Error')) {
+        alert('⚠️ Generate data dulu sebelum print!');
+        return;
+      }
+      
+      window.print();
+    });
+  }
+  
+  // Test Global Key Button Handler (for admin)
+  const testKeyBtn = document.getElementById('btn-test-global-key');
+  if (testKeyBtn && userRole === 'admin') {
+    testKeyBtn.addEventListener('click', async () => {
+      console.log('🔍 [CTA Generator] Testing global key manually...');
+      try {
+        const { getNextApiKey } = await import('./global-api-key.js');
+        const key = await getNextApiKey();
+        if (key) {
+          alert('✅ Global API Key ditemukan!\n\nKey prefix: ' + key.substring(0, 15) + '...');
+          location.reload();
+        } else {
+          alert('❌ Global API Key TIDAK ditemukan.\n\nCek:\n1. Document settings/api_key ada\n2. Field keys array tidak kosong\n3. Minimal 1 key dengan active:true');
+        }
+      } catch (e) {
+        console.error('❌ [CTA Generator] Test error:', e);
+        alert('❌ Error test global key: ' + e.message);
+      }
+    });
+  }
   
   hideDashboardSections();
   container.classList.remove('hidden');
@@ -409,7 +458,6 @@ async function handleGenerate() {
     return;
   }
   
-  // ✅ Re-check AI readiness before generate
   const aiReady = await isAiReady();
   if (!aiReady) {
     const userDoc = await getDoc(doc(db, 'users', user.uid));
@@ -507,8 +555,9 @@ async function handleSave() {
     console.log('✅ [CTA Generator] Data saved!');
     alert('✅ Berhasil disimpan!');
     loadCTAData();
-    document.getElementById('cta-result').classList.add('hidden');
-    document.getElementById('cta-form').reset();
+    // ✅ UPDATED: DON'T hide result after save (user can still see/edit)
+    // document.getElementById('cta-result').classList.add('hidden'); // ← REMOVED
+    // document.getElementById('cta-form').reset(); // ← REMOVED
   } catch (error) {
     console.error('❌ [CTA Generator] Save error:', error);
     alert('❌ Gagal simpan: ' + error.message);
@@ -571,4 +620,4 @@ function loadCTAData() {
   })();
 }
 
-console.log('🟢 [CTA Generator] READY — Global API Key Support + Debug Box');
+console.log('🟢 [CTA Generator] READY — Clean Borderless + Print + Sync Kelas');
