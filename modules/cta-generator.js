@@ -29,7 +29,7 @@ export async function isAiReady() {
   } catch (error) { console.error('❌ [CTA Generator] Error checking AI readiness:', error); _aiReadyCache = false; return false; }
 }
 
-// ✅ NEW: Filter CTA options based on user's assigned classes/mapel
+// ✅ Filter CTA options based on user's assigned classes/mapel
 function filterCTAOptions(userData) {
   if (!userData) return;
   const { jenjang_sekolah, kelas_diampu, mapel_diampu, sd_mapel_type } = userData;
@@ -37,11 +37,9 @@ function filterCTAOptions(userData) {
   // Filter Kelas Dropdown
   const kelasSelect = document.getElementById('cta-kelas');
   if (kelasSelect && kelas_diampu?.length > 0) {
-    // SD Guru PAI/PJOK: show ALL classes 1-6
     if (jenjang_sekolah === 'sd' && sd_mapel_type !== 'kelas') {
       enableOptions(kelasSelect, ['1','2','3','4','5','6']);
     } else {
-      // Regular: show only assigned classes
       enableOptions(kelasSelect, kelas_diampu);
     }
   }
@@ -50,14 +48,11 @@ function filterCTAOptions(userData) {
   const mapelSelect = document.getElementById('cta-mapel');
   if (mapelSelect) {
     if (jenjang_sekolah === 'sd' && sd_mapel_type === 'kelas') {
-      // SD Guru Kelas: ALL mapel enabled
       enableOptions(mapelSelect, 'all');
     } else if (jenjang_sekolah === 'sd' && sd_mapel_type !== 'kelas') {
-      // SD Guru PAI/PJOK: ONLY pai or pjok enabled
       const allowed = sd_mapel_type === 'pai' ? ['pai'] : ['pjok'];
       enableOptions(mapelSelect, allowed);
     } else if (mapel_diampu?.length > 0) {
-      // SMP/SMA: ONLY assigned mapel enabled
       enableOptions(mapelSelect, mapel_diampu);
     }
   }
@@ -74,30 +69,55 @@ function enableOptions(selectEl, allowedValues) {
   });
 }
 
-// ✅ NEW: Setup jenjang dropdown auto-select + prevent change (Option B: Soft prevent)
+// ✅ FIXED: Setup jenjang dropdown auto-select + prevent change (Robust + Debug)
 function setupJenjangDropdown(userData) {
-  if (!userData || !userData.jenjang_sekolah) return;
-  
-  const jenjangSelect = document.getElementById('cta-jenjang');
-  if (!jenjangSelect) return;
+  if (!userData) {
+    console.warn('⚠️ [Jenjang] No userData, skip setup');
+    return;
+  }
   
   const userJenjang = userData.jenjang_sekolah;
+  console.log('🔍 [Jenjang] Setup called with:', { userJenjang });
   
-  // Auto-select user's jenjang
-  jenjangSelect.value = userJenjang;
+  if (!userJenjang) {
+    console.warn('⚠️ [Jenjang] userJenjang is empty, skip setup');
+    return;
+  }
   
-  // Add change listener to prevent switching jenjang
-  jenjangSelect.addEventListener('change', function(e) {
-    if (this.value !== userJenjang) {
-      e.preventDefault();
-      const label = {sd:'SD', smp:'SMP', sma:'SMA'}[userJenjang] || userJenjang.toUpperCase();
-      alert(`⚠️ Jenjang Terkunci\n\nAnda terdaftar sebagai Guru ${label}.\n\nJenjang tidak dapat diubah.`);
-      // Revert to user's jenjang
-      this.value = userJenjang;
+  // Wait for DOM to be fully rendered
+  setTimeout(() => {
+    const jenjangSelect = document.getElementById('cta-jenjang');
+    console.log('🔍 [Jenjang] Element found:', !!jenjangSelect);
+    
+    if (!jenjangSelect) {
+      console.error('❌ [Jenjang] #cta-jenjang not found!');
+      return;
     }
-  }, true);
-  
-  console.log(`✅ [Jenjang] Auto-selected: ${userJenjang} (soft lock enabled)`);
+    
+    // Auto-select user's jenjang
+    jenjangSelect.value = userJenjang;
+    console.log(`✅ [Jenjang] Auto-set to: ${userJenjang}`);
+    
+    // Remove existing listeners to avoid duplicates
+    const newSelect = jenjangSelect.cloneNode(true);
+    jenjangSelect.replaceWith(newSelect);
+    
+    // Add soft lock listener (Option B: alert + revert)
+    newSelect.addEventListener('change', function(e) {
+      console.log(`🖱️ [Jenjang] Change: ${this.value} vs ${userJenjang}`);
+      
+      if (this.value !== userJenjang) {
+        e.preventDefault();
+        e.stopPropagation();
+        const label = {sd:'SD', smp:'SMP', sma:'SMA'}[userJenjang] || userJenjang.toUpperCase();
+        alert(`⚠️ Jenjang Terkunci\n\nAnda: Guru ${label}\nJenjang tidak dapat diubah.`);
+        this.value = userJenjang;
+        console.log(`🔄 [Jenjang] Reverted to: ${userJenjang}`);
+      }
+    });
+    
+    console.log(`✅ [Jenjang] Setup complete: ${userJenjang} (soft lock)`);
+  }, 150); // Slightly longer delay for safety
 }
 
 window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, semesterFromParam) {
@@ -116,7 +136,7 @@ window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, sem
   // ✅ LOAD USER DATA + APPLY FILTERS
   console.log('👤 [CTA Generator] Loading user data...');
   try {
-    const userDoc = await getDoc(doc(db, 'users', user.uid));
+    const userDoc = await getDoc(doc(db, 'cp_tp_atp', user.uid)); // ← FIX: Collection name
     if (userDoc.exists()) {
       const userData = userDoc.data();
       userRole = userData.role || 'teacher';
@@ -128,10 +148,22 @@ window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, sem
       // ✅ APPLY FILTERING TO DROPDOWNS
       filterCTAOptions(userData);
       
-      // ✅ NEW: Setup jenjang dropdown auto-select + soft lock
+      // ✅ FIXED: Setup jenjang dropdown auto-select + soft lock
       setupJenjangDropdown(userData);
     } else {
-      userRole = 'teacher'; userKelasDiampu = []; userMapelDiampu = []; userSdMapelType = 'kelas';
+      // Fallback: load from users collection
+      const userProfile = await getDoc(doc(db, 'users', user.uid));
+      if (userProfile.exists()) {
+        const userData = userProfile.data();
+        userRole = userData.role || 'teacher';
+        userKelasDiampu = userData.kelas_diampu || [];
+        userMapelDiampu = userData.mapel_diampu || [];
+        userSdMapelType = userData.sd_mapel_type || 'kelas';
+        filterCTAOptions(userData);
+        setupJenjangDropdown(userData);
+      } else {
+        userRole = 'teacher'; userKelasDiampu = []; userMapelDiampu = []; userSdMapelType = 'kelas';
+      }
     }
   } catch (e) { console.error('❌ [CTA Generator] Failed to load user ', e); userRole = 'teacher'; userKelasDiampu = []; }
   
@@ -140,7 +172,6 @@ window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, sem
   let availableClasses = allClasses;
   let isClassLocked = false;
   if (userRole === 'teacher' && userKelasDiampu.length > 0) {
-    // SD Guru PAI/PJOK: show ALL classes
     if (userSdMapelType !== 'kelas') {
       availableClasses = ['1','2','3','4','5','6'];
     } else {
@@ -152,7 +183,7 @@ window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, sem
   if (isClassLocked && availableClasses.length > 0) defaultClass = availableClasses[0];
   console.log('📚 [CTA Generator] Available classes:', availableClasses);
   
-  // ✅ RENDER UI
+  // ✅ RENDER UI — UPDATED CSS: Remove ALL borders from result textareas
   container.innerHTML = `
     <style>
       .cta-generator-form { max-width: 950px; margin: auto; padding: 30px; background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
@@ -163,8 +194,35 @@ window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, sem
       .cta-generator-form input, .cta-generator-form select { width: 100%; margin-top: 8px; padding: 12px; border-radius: 8px; border: 1px solid #d1d5db; font-size: 14px; font-family: inherit; }
       .cta-generator-form input:focus, .cta-generator-form select:focus { outline: none; border-color: #0891b2; }
       .cta-generator-form select:disabled { background: #f3f4f6; color: #6b7280; cursor: not-allowed; }
-      #result-cp, #result-tp, #result-atp { width: 100%; min-height: 200px; padding: 16px 0; border: NONE !important; border-radius: 0; background: transparent; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 14px; line-height: 1.8; white-space: pre-wrap; margin-top: 8px; resize: vertical; box-shadow: none !important; outline: none !important; color: #1f2937; }
-      #result-cp:focus, #result-tp:focus, #result-atp:focus { background: transparent; outline: none !important; }
+      
+      /* ✅ FIXED: Remove ALL borders from result textareas — including left border */
+      #result-cp, #result-tp, #result-atp {
+        width: 100%;
+        min-height: 200px;
+        padding: 16px 0;
+        border: NONE !important;
+        border-left: NONE !important;
+        border-right: NONE !important;
+        border-top: NONE !important;
+        border-bottom: NONE !important;
+        border-radius: 0 !important;
+        background: transparent !important;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-size: 14px;
+        line-height: 1.8;
+        white-space: pre-wrap;
+        margin-top: 8px;
+        resize: vertical;
+        box-shadow: none !important;
+        outline: none !important;
+        color: #1f2937;
+      }
+      #result-cp:focus, #result-tp:focus, #result-atp:focus {
+        background: transparent !important;
+        outline: none !important;
+        border: none !important;
+      }
+      
       .btn-generate, .btn-save, .btn-secondary, .btn-print { margin-top: 20px; padding: 14px 30px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; }
       .btn-generate { background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%); color: white; }
       .btn-generate:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(8,145,178,0.3); }
@@ -181,7 +239,7 @@ window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, sem
       .grid-cols-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
       .grid-cols-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
       @media (max-width: 768px) { .grid-cols-2, .grid-cols-3 { grid-template-columns: 1fr; } }
-      .cta-item { background: white; padding: 20px; margin-top: 15px; border-radius: 8px; border-left: 4px solid #0891b2; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+      .cta-item { background: white; padding: 20px; margin-top: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
       .status-badge { display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 11px; font-weight: 600; margin-left: 8px; }
       .status-ready { background: #dcfce7; color: #166534; }
       .status-warning { background: #fef3c7; color: #92400e; }
@@ -271,7 +329,6 @@ async function handleGenerate() {
   const user = auth.currentUser; if (!user) { alert('⚠️ Silakan login dulu!'); return; }
   const jenjang = document.getElementById('cta-jenjang')?.value, kelas = document.getElementById('cta-kelas')?.value, semester = document.getElementById('cta-semester')?.value, mapel = document.getElementById('cta-mapel')?.value, sekolah = document.getElementById('kop-sekolah')?.value, tahun = document.getElementById('kop-tahun')?.value, guru = document.getElementById('cta-guru')?.value, topik = document.getElementById('cta-topik')?.value;
   
-  // ✅ Use validateInputWithFilter for user-specific validation
   const validation = validateInputWithFilter({ sekolah, jenjang, kelas, semester, mapel, topik }, { jenjang_sekolah: jenjang, kelas_diampu: userKelasDiampu, mapel_diampu: userMapelDiampu, sd_mapel_type: userSdMapelType });
   if (!validation.valid) { alert('⚠️ ' + validation.errors.join('\n')); return; }
   
@@ -326,4 +383,4 @@ function loadCTAData() {
   })();
 }
 
-console.log('🟢 [CTA Generator] READY — Filtered Dropdowns + Print + Sync');
+console.log('🟢 [CTA Generator] READY — Jenjang Filter + No Border Fix');
