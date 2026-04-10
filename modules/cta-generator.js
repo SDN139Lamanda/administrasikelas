@@ -155,6 +155,13 @@ function downloadCTAResult() {
   console.log('✅ [Download] File downloaded successfully');
 }
 
+// ✅ NEW: Auto-expand textarea to fit content
+function autoExpandTextarea(textarea) {
+  if (!textarea) return;
+  textarea.style.height = 'auto';
+  textarea.style.height = textarea.scrollHeight + 'px';
+}
+
 window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, semesterFromParam) {
   console.log('📝 [CTA Generator] renderCTAGenerator() called');
   const container = document.getElementById('module-container');
@@ -199,7 +206,7 @@ window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, sem
   if (isClassLocked && availableClasses.length > 0) defaultClass = availableClasses[0];
   console.log('📚 [CTA Generator] Available classes:', availableClasses);
   
-  // ✅ RENDER UI — UPDATED: Fix text wrap (no horizontal scroll)
+  // ✅ RENDER UI — UPDATED: Auto-expand textarea (no scroll at all)
   container.innerHTML = `
     <style>
       .cta-generator-form { max-width: 950px; margin: auto; padding: 30px; background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
@@ -211,32 +218,27 @@ window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, sem
       .cta-generator-form input:focus, .cta-generator-form select:focus { outline: none; border-color: #0891b2; }
       .cta-generator-form select:disabled { background: #f3f4f6; color: #6b7280; cursor: not-allowed; }
       
-      /* ✅ FIXED: Textarea — No border, no scrollbar, TEXT WRAPS PROPERLY */
+      /* ✅ FIXED: Textarea — AUTO-EXPAND, no scroll at all */
       #result-cp, #result-tp, #result-atp {
         width: 100%;
-        min-height: 200px;
+        min-height: 100px; /* Start small, will expand */
         padding: 16px 0;
         border: NONE !important;
-        border-left: NONE !important;
-        border-right: NONE !important;
-        border-top: NONE !important;
-        border-bottom: NONE !important;
         border-radius: 0 !important;
         background: transparent !important;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         font-size: 14px;
         line-height: 1.8;
-        /* ✅ TEXT WRAP FIX — No horizontal scroll */
         white-space: pre-wrap !important;
         word-wrap: break-word !important;
         overflow-wrap: break-word !important;
-        overflow-x: hidden !important; /* ← HIDE horizontal overflow */
-        max-width: 100% !important; /* ← Force max width */
-        /* No scrollbar */
+        overflow-x: hidden !important;
+        overflow-y: hidden !important; /* ← Hide vertical scroll */
+        max-width: 100% !important;
         scrollbar-width: none !important;
         -ms-overflow-style: none !important;
         margin-top: 8px;
-        resize: vertical;
+        resize: none !important; /* ← Disable manual resize */
         box-shadow: none !important;
         outline: none !important;
         color: #1f2937;
@@ -374,6 +376,14 @@ async function handleGenerate() {
     console.log('🤖 [CTA Generator] Calling AI...');
     const inputData = { sekolah, jenjang, kelas, semester, mapel, guru, topik, tahun }, result = await generateWithGroq(inputData);
     document.getElementById('result-cp').value = result.cp; document.getElementById('result-tp').value = result.tp; document.getElementById('result-atp').value = result.atp;
+    
+    // ✅ Auto-expand all textareas after content is loaded
+    setTimeout(() => {
+      autoExpandTextarea(document.getElementById('result-cp'));
+      autoExpandTextarea(document.getElementById('result-tp'));
+      autoExpandTextarea(document.getElementById('result-atp'));
+    }, 100);
+    
     console.log('✅ [CTA Generator] Generation complete!');
   } catch (error) {
     console.error('❌ [CTA Generator] Error:', error);
@@ -415,4 +425,4 @@ function loadCTAData() {
   })();
 }
 
-console.log('🟢 [CTA Generator] READY — Text Wrap Fixed (No Horizontal Scroll)');
+console.log('🟢 [CTA Generator] READY — Auto-Expand Textarea (No Scroll At All)');
