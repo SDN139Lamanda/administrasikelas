@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -282,7 +281,7 @@
         console.log('🟢 [Global API Key] Module READY');
     </script>
 
-    <!-- ✅ FIXED: Profile Dropdown + Dashboard Filtering (MODULE VERSION) -->
+    <!-- ✅ UPDATED: Profile Dropdown + Soft Block (Original + Minimal Addition) -->
     <script type="module">
         // ✅ Import Firebase modules at TOP (required for module scripts)
         import { auth, onAuthStateChanged, db, doc, getDoc } from './modules/firebase-config.js';
@@ -408,6 +407,36 @@
                 console.log('🎉 [Filter] DONE!');
             }
             
++           // ✅ NEW: SOFT BLOCK - Intercept room-card clicks (Minimal Addition)
++           function setupSoftBlock(userData) {
++               if (!userData) return;
++               const userJenjang = userData.jenjang_sekolah;
++               const role = userData.role || 'teacher';
++               console.log('🔒 [Soft Block] Setup for jenjang:', userJenjang);
++               
++               document.querySelectorAll('.room-card[data-jenjang] .room-link').forEach(link => {
++                   const cardJenjang = link.closest('.room-card')?.getAttribute('data-jenjang');
++                   if (!cardJenjang) return;
++                   
++                   link.addEventListener('click', function(e) {
++                       // Admin can access all - let original onclick run
++                       if (role === 'admin') return;
++                       
++                       // Teacher: check jenjang match
++                       if (cardJenjang !== userJenjang) {
++                           e.preventDefault();
++                           e.stopPropagation();
++                           const label = {sd:'SD', smp:'SMP', sma:'SMA'}[cardJenjang] || cardJenjang.toUpperCase();
++                           alert(`⚠️ Akses Ditolak\n\nFitur ${label} hanya untuk guru ${label}.\n\nAnda: Guru ${userJenjang?.toUpperCase()}`);
++                           return false;
++                       }
++                       // Match: let original onclick run
++                       console.log(`✅ [Soft Block] Access granted: ${cardJenjang}`);
++                   }, true); // Capturing phase = runs BEFORE inline onclick
++               });
++               console.log('✅ [Soft Block] Interceptors setup');
++           }
+            
             // ✅ Listen to auth state
             onAuthStateChanged(auth, async (user) => {
                 console.log('🔐 Auth:', user ? `IN (${user.uid})` : 'OUT');
@@ -435,6 +464,9 @@
                         
                         // ✅ APPLY FILTERING
                         applyFilter(userData);
+                        
++                       // ✅ NEW: Setup soft block interceptors (1 baris tambahan)
++                       setupSoftBlock(userData);
                         
                         // Save to localStorage
                         localStorage.setItem('user_jenjang', userData.jenjang_sekolah || '');
