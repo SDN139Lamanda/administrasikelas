@@ -6,7 +6,8 @@
  */
 console.log('🔴 [Penilaian] Module START');
 
-import { db, auth, collection, addDoc, query, where, orderBy, onSnapshot, doc, getDoc, getDocs, serverTimestamp } from '../firebase-config.js';
+// ✅ CHANGE 1/2: Added updateDoc to import
+import { db, auth, collection, addDoc, query, where, orderBy, onSnapshot, doc, getDoc, getDocs, serverTimestamp, updateDoc } from '../firebase-config.js';
 
 // Global state
 let currentSiswa = null;
@@ -33,7 +34,7 @@ window.renderPenilaian = async function() {
     if (userDoc.exists()) userData = userDoc.data();
   } catch (e) { console.error('❌ [Penilaian] Load user error:', e); }
   
-  // Load students from adm_kelas collection
+  // Load students from classes collection (using existing collection)
   const students = await loadStudents(userData);
   
   // Render UI
@@ -45,14 +46,15 @@ window.renderPenilaian = async function() {
   console.log('✅ [Penilaian] UI rendered');
 };
 
-// ✅ Load students from adm_kelas collection
+// ✅ Load students from classes collection (FIXED: adm_kelas → classes)
 async function loadStudents(userData) {
   const { jenjang_sekolah, kelas_diampu } = userData;
   if (!jenjang_sekolah || !kelas_diampu?.length) return [];
   
   try {
+    // ✅ CHANGE 2/2: Changed 'adm_kelas' to 'classes'
     const q = query(
-      collection(db, 'adm_kelas'),
+      collection(db, 'classes'),  // ← Changed from 'adm_kelas' to 'classes'
       where('jenjang', '==', jenjang_sekolah),
       where('kelas', 'in', kelas_diampu)
     );
