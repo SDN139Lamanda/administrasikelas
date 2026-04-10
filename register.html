@@ -212,7 +212,7 @@
                 </select>
             </div>
             
-            <!-- ✅ TAMBAHAN: Field Kondisional berdasarkan Jenjang -->
+            <!-- ✅ UPDATED: Field Kondisional berdasarkan Jenjang -->
             <div id="conditionalFields" class="hidden mb-4">
                 
                 <!-- 🟢 UNTUK SD: Kelas + Opsi Mapel Khusus -->
@@ -258,7 +258,7 @@
                         </label>
                         <select id="sdMapelType" class="register-input">
                             <option value="kelas">Guru Kelas (semua mapel)</option>
-                            <option value="pai">Guru PAIBD</option>
+                            <option value="pai">Guru PAI / BD</option>
                             <option value="pjok">Guru PJOK</option>
                         </select>
                         <p class="text-xs text-gray-500 mt-1">
@@ -267,43 +267,98 @@
                     </div>
                 </div>
                 
-                <!-- 🔵 UNTUK SMP/SMA: Mata Pelajaran -->
-                <div id="smpSmaFields" class="hidden">
+                <!-- 🔵 UNTUK SMP: Kelas + Mata Pelajaran -->
+                <div id="smpFields" class="hidden">
+                    <!-- Kelas Diampu (Checkbox 7,8,9) -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-users mr-2"></i>Kelas Diampu <span class="text-red-500">*</span>
+                        </label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="kelasDiampu" value="7">
+                                <span>Kelas 7</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="kelasDiampu" value="8">
+                                <span>Kelas 8</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="kelasDiampu" value="9">
+                                <span>Kelas 9</span>
+                            </label>
+                        </div>
+                        <p class="error-text" id="kelasError">Pilih minimal 1 kelas</p>
+                    </div>
+                    
+                    <!-- Mata Pelajaran -->
                     <div class="mb-4">
                         <label for="mapel" class="block text-sm font-medium text-gray-700 mb-2">
                             <i class="fas fa-book mr-2"></i>Mata Pelajaran <span class="text-red-500">*</span>
                         </label>
                         <select id="mapel" class="register-input">
                             <option value="">Pilih Mata Pelajaran</option>
-                            <optgroup label="SMP" id="mapelSmp" class="hidden">
-                                <option value="matematika">Matematika</option>
-                                <option value="ipa">IPA</option>
-                                <option value="ips">IPS</option>
-                                <option value="bahasa-indonesia">Bahasa Indonesia</option>
-                                <option value="bahasa-inggris">Bahasa Inggris</option>
-                                <option value="pai">Pendidikan Agama Islam</option>
-                                <option value="ppkn">PPKn</option>
-                                <option value="seni-budaya">Seni Budaya</option>
-                                <option value="pjok">PJOK</option>
-                                <option value="prakarya">Prakarya</option>
-                                <option value="tik">Informatika/TIK</option>
-                            </optgroup>
-                            <optgroup label="SMA" id="mapelSma" class="hidden">
-                                <option value="matematika">Matematika</option>
-                                <option value="fisika">Fisika</option>
-                                <option value="kimia">Kimia</option>
-                                <option value="biologi">Biologi</option>
-                                <option value="ekonomi">Ekonomi</option>
-                                <option value="sosiologi">Sosiologi</option>
-                                <option value="geografi">Geografi</option>
-                                <option value="sejarah">Sejarah</option>
-                                <option value="bahasa-indonesia">Bahasa Indonesia</option>
-                                <option value="bahasa-inggris">Bahasa Inggris</option>
-                                <option value="pai">Pendidikan Agama Islam</option>
-                                <option value="ppkn">PPKn</option>
-                                <option value="seni-budaya">Seni Budaya</option>
-                                <option value="pjok">PJOK</option>
-                            </optgroup>
+                            <option value="matematika">Matematika</option>
+                            <option value="ipa">IPA</option>
+                            <option value="ips">IPS</option>
+                            <option value="bahasa-indonesia">Bahasa Indonesia</option>
+                            <option value="bahasa-inggris">Bahasa Inggris</option>
+                            <option value="pai">Pendidikan Agama Islam</option>
+                            <option value="ppkn">PPKn</option>
+                            <option value="seni-budaya">Seni Budaya</option>
+                            <option value="pjok">PJOK</option>
+                            <option value="prakarya">Prakarya</option>
+                            <option value="tik">Informatika/TIK</option>
+                        </select>
+                        <p class="error-text" id="mapelError">Pilih mata pelajaran</p>
+                    </div>
+                </div>
+                
+                <!-- 🟣 UNTUK SMA: Kelas + Mata Pelajaran -->
+                <div id="smaFields" class="hidden">
+                    <!-- Kelas Diampu (Checkbox 10,11,12) -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-users mr-2"></i>Kelas Diampu <span class="text-red-500">*</span>
+                        </label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="kelasDiampu" value="10">
+                                <span>Kelas 10</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="kelasDiampu" value="11">
+                                <span>Kelas 11</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="kelasDiampu" value="12">
+                                <span>Kelas 12</span>
+                            </label>
+                        </div>
+                        <p class="error-text" id="kelasError">Pilih minimal 1 kelas</p>
+                    </div>
+                    
+                    <!-- Mata Pelajaran -->
+                    <div class="mb-4">
+                        <label for="mapel" class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-book mr-2"></i>Mata Pelajaran <span class="text-red-500">*</span>
+                        </label>
+                        <select id="mapel" class="register-input">
+                            <option value="">Pilih Mata Pelajaran</option>
+                            <option value="matematika">Matematika</option>
+                            <option value="fisika">Fisika</option>
+                            <option value="kimia">Kimia</option>
+                            <option value="biologi">Biologi</option>
+                            <option value="ekonomi">Ekonomi</option>
+                            <option value="sosiologi">Sosiologi</option>
+                            <option value="geografi">Geografi</option>
+                            <option value="sejarah">Sejarah</option>
+                            <option value="bahasa-indonesia">Bahasa Indonesia</option>
+                            <option value="bahasa-inggris">Bahasa Inggris</option>
+                            <option value="pai">Pendidikan Agama Islam</option>
+                            <option value="ppkn">PPKn</option>
+                            <option value="seni-budaya">Seni Budaya</option>
+                            <option value="pjok">PJOK</option>
                         </select>
                         <p class="error-text" id="mapelError">Pilih mata pelajaran</p>
                     </div>
@@ -349,7 +404,7 @@
             <i class="fas fa-arrow-left"></i> Kembali ke Beranda
         </a>
         
-        <!-- Debug Info (Hidden by default, show via console) -->
+        <!-- Debug Info (Hidden by default) -->
         <div id="debugInfo" class="debug-info hidden"></div>
     </div>
 
@@ -368,7 +423,6 @@
         } from './modules/firebase-config.js';
         
         console.log('🔴 [Register] Script START');
-        console.log('🔴 [Register] Firebase SDK version: 9.22.0');
         
         const form = document.getElementById('registerForm');
         const messageDiv = document.getElementById('message');
@@ -386,14 +440,13 @@
         const namaSekolahInput = document.getElementById('namaSekolah');
         const noHpInput = document.getElementById('noHp');
         
-        // ✅ NEW: Conditional fields elements
+        // Conditional fields elements
         const conditionalFields = document.getElementById('conditionalFields');
         const sdFields = document.getElementById('sdFields');
-        const smpSmaFields = document.getElementById('smpSmaFields');
+        const smpFields = document.getElementById('smpFields');
+        const smaFields = document.getElementById('smaFields');
         const sdMapelType = document.getElementById('sdMapelType');
         const mapelSelect = document.getElementById('mapel');
-        const mapelSmp = document.getElementById('mapelSmp');
-        const mapelSma = document.getElementById('mapelSma');
         const kelasError = document.getElementById('kelasError');
         const mapelError = document.getElementById('mapelError');
         
@@ -403,7 +456,7 @@
         const confirmError = document.getElementById('confirmError');
         const passwordStrength = document.getElementById('passwordStrength');
         
-        // ✅ Show message helper
+        // Show message helper
         function showMessage(text, type = 'success') {
             messageDiv.innerHTML = text;
             messageDiv.className = `message ${type}`;
@@ -415,14 +468,14 @@
             }
         }
         
-        // ✅ Set loading state
+        // Set loading state
         function setLoading(loading) {
             submitBtn.disabled = loading;
             btnText.textContent = loading ? 'Mendaftar...' : 'Daftar Sekarang';
             loadingIcon.classList.toggle('hidden', !loading);
         }
         
-        // ✅ Show field error
+        // Show field error
         function showFieldError(element, errorElement, show) {
             if (show) {
                 if (element) element.classList.add('error');
@@ -433,7 +486,7 @@
             }
         }
         
-        // ✅ Check password strength
+        // Check password strength
         function checkPasswordStrength(password) {
             let strength = 0;
             if (password.length >= 6) strength++;
@@ -453,7 +506,7 @@
             return strength;
         }
         
-        // ✅ Real-time validation
+        // Real-time validation
         passwordInput.addEventListener('input', () => {
             checkPasswordStrength(passwordInput.value);
             showFieldError(passwordInput, passwordError, passwordInput.value.length > 0 && passwordInput.value.length < 6);
@@ -472,67 +525,44 @@
             showFieldError(emailInput, emailError, shouldShowError);
         });
         
-        // ✅ NEW: Toggle conditional fields based on jenjang
+        // ✅ UPDATED: Toggle conditional fields based on jenjang
         jenjangSelect.addEventListener('change', function() {
             const jenjang = this.value;
             
             // Reset all conditional fields
             conditionalFields.classList.add('hidden');
             sdFields.classList.add('hidden');
-            smpSmaFields.classList.add('hidden');
-            
-            // Hide all mapel options first
-            if (mapelSmp) mapelSmp.classList.add('hidden');
-            if (mapelSma) mapelSma.classList.add('hidden');
+            smpFields.classList.add('hidden');
+            smaFields.classList.add('hidden');
             
             if (jenjang === 'sd') {
-                // Show SD fields
                 conditionalFields.classList.remove('hidden');
                 sdFields.classList.remove('hidden');
-                
-                // Clear mapel selection if switching to SD
                 if (mapelSelect) mapelSelect.value = '';
-                
             } else if (jenjang === 'smp') {
-                // Show SMP/SMA fields
                 conditionalFields.classList.remove('hidden');
-                smpSmaFields.classList.remove('hidden');
-                
-                // Show SMP mapel options only
-                if (mapelSmp) mapelSmp.classList.remove('hidden');
-                if (mapelSma) mapelSma.classList.add('hidden');
-                
-                // Clear kelas checkboxes if switching from SD
+                smpFields.classList.remove('hidden');
                 document.querySelectorAll('input[name="kelasDiampu"]').forEach(cb => cb.checked = false);
-                
             } else if (jenjang === 'sma') {
-                // Show SMP/SMA fields
                 conditionalFields.classList.remove('hidden');
-                smpSmaFields.classList.remove('hidden');
-                
-                // Show SMA mapel options only
-                if (mapelSma) mapelSma.classList.remove('hidden');
-                if (mapelSmp) mapelSmp.classList.add('hidden');
-                
-                // Clear kelas checkboxes if switching from SD
+                smaFields.classList.remove('hidden');
                 document.querySelectorAll('input[name="kelasDiampu"]').forEach(cb => cb.checked = false);
             }
             
-            // Clear errors when jenjang changes
             showFieldError(document.querySelector('[name="kelasDiampu"]'), kelasError, false);
             if (mapelSelect) showFieldError(mapelSelect, mapelError, false);
         });
         
-        // ✅ NEW: Real-time validation for kelas checkboxes (SD)
+        // Real-time validation for kelas checkboxes
         document.querySelectorAll('input[name="kelasDiampu"]').forEach(cb => {
             cb.addEventListener('change', function() {
                 const checked = document.querySelectorAll('input[name="kelasDiampu"]:checked');
-                const isSdVisible = !sdFields.classList.contains('hidden');
-                showFieldError(this, kelasError, checked.length === 0 && isSdVisible);
+                const isConditionalVisible = !conditionalFields.classList.contains('hidden');
+                showFieldError(this, kelasError, checked.length === 0 && isConditionalVisible);
             });
         });
         
-        // ✅ NEW: Real-time validation for mapel select (SMP/SMA)
+        // Real-time validation for mapel select
         if (mapelSelect) {
             mapelSelect.addEventListener('change', function() {
                 const jenjang = jenjangSelect.value;
@@ -542,34 +572,21 @@
             });
         }
         
-        // ✅ DEBUG HELPER
+        // DEBUG HELPER
         window.debugRegister = {
             auth,
             db,
             createUserWithEmailAndPassword,
-            sendEmailVerification,
-            testSendEmail: async (email) => {
-                try {
-                    console.log('🧪 [Debug] Testing email send for:', email);
-                    const testPass = 'Test123!' + Date.now();
-                    const cred = await createUserWithEmailAndPassword(auth, email, testPass);
-                    await sendEmailVerification(cred.user);
-                    console.log('✅ [Debug] Test email sent!');
-                    return { success: true, uid: cred.user.uid };
-                } catch (e) {
-                    console.error('❌ [Debug] Test failed:', e.code, e.message);
-                    return { success: false, error: e };
-                }
-            }
+            sendEmailVerification
         };
         console.log('💡 [Register] Debug helper available: window.debugRegister');
         
-        // ✅ Handle form submit
+        // Handle form submit
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             showMessage('', 'success');
             
-            // ✅ FIX 1: Clear all field errors BEFORE new validation
+            // Clear all field errors
             showFieldError(emailInput, emailError, false);
             showFieldError(passwordInput, passwordError, false);
             showFieldError(confirmPasswordInput, confirmError, false);
@@ -582,21 +599,23 @@
             const namaSekolah = namaSekolahInput.value.trim();
             const noHp = noHpInput.value.trim();
             
-            // ✅ Validate
+            // Validate
             let hasError = false;
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(email)) { showFieldError(emailInput, emailError, true); hasError = true; }
             if (password.length < 6) { showFieldError(passwordInput, passwordError, true); hasError = true; }
             if (password !== confirmPassword) { showFieldError(confirmPasswordInput, confirmError, true); hasError = true; }
             
-            // ✅ NEW: Validate conditional fields
-            if (jenjang === 'sd') {
+            // ✅ UPDATED: Validate conditional fields for ALL jenjang
+            if (jenjang === 'sd' || jenjang === 'smp' || jenjang === 'sma') {
                 const checkedKelas = document.querySelectorAll('input[name="kelasDiampu"]:checked');
                 if (checkedKelas.length === 0) {
                     showFieldError(document.querySelector('[name="kelasDiampu"]'), kelasError, true);
                     hasError = true;
                 }
-            } else if (jenjang === 'smp' || jenjang === 'sma') {
+            }
+            
+            if (jenjang === 'smp' || jenjang === 'sma') {
                 const mapel = mapelSelect?.value;
                 if (!mapel) {
                     showFieldError(mapelSelect, mapelError, true);
@@ -616,19 +635,16 @@
                 console.log('📝 [Register] Starting registration for:', email);
                 console.log('═══════════════════════════════════');
                 
-                // ✅ Step 1: Create Firebase Auth user
-                console.log('🔐 [Register] Step 1: Creating Auth account...');
+                // Step 1: Create Firebase Auth user
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
                 console.log('✅ [Register] Auth account created:', user.uid);
                 
-                // ✅ Step 2: Update profile
-                console.log('👤 [Register] Step 2: Updating profile...');
+                // Step 2: Update profile
                 await updateProfile(user, { displayName: namaLengkap });
                 console.log('✅ [Register] Profile updated:', namaLengkap);
                 
-                // ✅ Step 3: Send email verification
-                console.log('📧 [Register] Step 3: Sending verification email...');
+                // Step 3: Send email verification
                 let emailSent = false;
                 let emailError = null;
                 
@@ -643,13 +659,11 @@
                     emailSent = false;
                 }
                 
-                // ✅ Collect kelas_diampu from checkboxes (SD only)
+                // ✅ Collect kelas_diampu from checkboxes (ALL jenjang)
                 const kelasDiampu = [];
-                if (jenjang === 'sd') {
-                    document.querySelectorAll('input[name="kelasDiampu"]:checked').forEach(cb => {
-                        kelasDiampu.push(cb.value);
-                    });
-                }
+                document.querySelectorAll('input[name="kelasDiampu"]:checked').forEach(cb => {
+                    kelasDiampu.push(cb.value);
+                });
                 
                 // ✅ Collect mapel_diampu (SMP/SMA only)
                 const mapelDiampu = [];
@@ -660,8 +674,8 @@
                 // ✅ Collect sd_mapel_type (SD only)
                 const sdMapelTypeValue = sdMapelType?.value || 'kelas';
                 
-                // ✅ Step 4: Create Firestore document
-                console.log('📦 [Register] Step 4: Creating Firestore document...');
+                // Step 4: Create Firestore document
+                console.log('📦 [Register] Creating Firestore document...');
                 await setDoc(doc(db, 'users', user.uid), {
                     email: email,
                     nama_lengkap: namaLengkap,
@@ -669,10 +683,10 @@
                     jenjang_sekolah: jenjang,
                     no_hp: noHp || '',
                     
-                    // ✅ NEW FIELDS:
-                    kelas_diampu: kelasDiampu,
-                    mapel_diampu: mapelDiampu,
-                    sd_mapel_type: sdMapelTypeValue,
+                    // ✅ UPDATED FIELDS:
+                    kelas_diampu: kelasDiampu,           // Array: ["4"] or ["7","8"] or ["10","12"]
+                    mapel_diampu: mapelDiampu,           // Array: ["matematika"] for SMP/SMA
+                    sd_mapel_type: sdMapelTypeValue,     // String: "kelas" | "pai" | "pjok" (SD only)
                     
                     role: 'teacher',
                     isActive: true,
@@ -686,7 +700,7 @@
                 });
                 console.log('✅ [Register] Firestore document created');
                 
-                // ✅ Step 5: Show success message
+                // Step 5: Show success message
                 let successMsg = `✅ <strong>Pendaftaran berhasil!</strong><br><br>`;
                 
                 if (emailSent) {
@@ -698,66 +712,42 @@
                     4️⃣ Klik link <strong>"Verify email"</strong><br>
                     5️⃣ Login dengan password Anda<br>
                     6️⃣ Tunggu persetujuan admin (1-3 hari kerja)<br><br>
-                    <small class="text-gray-500">⏰ Link verifikasi berlaku 1 jam. Jika expired, hubungi admin.</small>`;
+                    <small class="text-gray-500">⏰ Link verifikasi berlaku 1 jam.</small>`;
                 } else {
                     successMsg += `⚠️ <strong>Catatan:</strong> Email verifikasi <em>gagal terkirim</em>.<br><br>
-                    <strong>Akun Anda tetap dibuat</strong> dan bisa digunakan setelah admin memverifikasi manual.<br><br>
-                    <strong>Yang perlu dilakukan:</strong><br>
-                    1️⃣ Hubungi admin via: radiah.tifarahs@gmail.com<br>
-                    2️⃣ Sertakan email: <strong>${email}</strong><br>
-                    3️⃣ Admin akan verifikasi manual<br><br>
-                    <small class="text-gray-500">💡 Penyebab umum: domain tidak authorized, quota email habis, atau delay Firebase.</small>`;
+                    <strong>Akun Anda tetap dibuat</strong>. Hubungi admin: radiah.tifarahs@gmail.com`;
                 }
                 
                 showMessage(successMsg, 'success');
                 
-                // ✅ Show debug info if email failed
-                if (!emailSent && debugInfo) {
-                    debugInfo.classList.remove('hidden');
-                    debugInfo.innerHTML = `
-                        <strong>Debug Info:</strong><br>
-                        Error Code: ${emailError?.code || 'N/A'}<br>
-                        Error Message: ${emailError?.message || 'N/A'}<br>
-                        Timestamp: ${new Date().toLocaleString('id-ID')}
-                    `;
-                }
-                
-                // ✅ Reset form
+                // Reset form
                 form.reset();
                 passwordStrength.className = 'password-strength-fill';
                 
-                // ✅ Redirect after 8 seconds
+                // Redirect after 8 seconds
                 setTimeout(() => {
                     window.location.href = 'login.html?registered=true&emailSent=' + emailSent;
                 }, 8000);
                 
-                console.log('🎉 [Register] Registration flow completed');
+                console.log('🎉 [Register] Registration completed');
                 console.log('═══════════════════════════════════');
                 
             } catch (error) {
-                console.error('❌ [Register] MAIN CATCH - Critical error:', error);
-                console.error('❌ [Register] Error code:', error.code);
-                console.error('❌ [Register] Error message:', error.message);
+                console.error('❌ [Register] Error:', error);
                 
                 let errorMessage = '❌ <strong>Gagal mendaftar.</strong><br><br>';
                 
                 if (error.code === 'auth/email-already-in-use') {
-                    errorMessage += 'Email sudah terdaftar. Silakan login atau gunakan email lain.';
+                    errorMessage += 'Email sudah terdaftar.';
                     showFieldError(emailInput, emailError, true);
                 } else if (error.code === 'auth/invalid-email') {
                     errorMessage += 'Format email tidak valid.';
                     showFieldError(emailInput, emailError, true);
                 } else if (error.code === 'auth/weak-password') {
-                    errorMessage += 'Password terlalu lemah. Gunakan minimal 6 karakter dengan kombinasi huruf dan angka.';
+                    errorMessage += 'Password terlalu lemah.';
                     showFieldError(passwordInput, passwordError, true);
-                } else if (error.code === 'auth/operation-not-allowed') {
-                    errorMessage += 'Pendaftaran sedang ditutup. Hubungi admin.';
-                } else if (error.code === 'firestore/unavailable') {
-                    errorMessage += 'Database tidak tersedia. Coba lagi nanti.';
-                } else if (error.code === 'network-request-failed') {
-                    errorMessage += 'Koneksi internet bermasalah. Cek koneksi Anda.';
                 } else {
-                    errorMessage += `Error: ${error.message || 'Silakan coba lagi nanti.'}`;
+                    errorMessage += error.message || 'Silakan coba lagi.';
                 }
                 
                 showMessage(errorMessage, 'error');
@@ -766,7 +756,7 @@
             }
         });
         
-        console.log('🟢 [Register] READY — Debug: window.debugRegister');
+        console.log('🟢 [Register] READY');
     </script>
 </body>
 </html>
