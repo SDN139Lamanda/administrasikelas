@@ -105,7 +105,7 @@
                 </h2>
                 
                 <div class="rooms-grid">
-                    <article class="room-card room-sd hidden" data-jenjang="sd" data-feature="sd">
+                    <article class="room-card room-sd" data-jenjang="sd" data-feature="sd">
                         <a href="javascript:void(0)" class="room-link" onclick="showSection('sd-section'); return false;">
                             <div class="room-icon bg-blue"><i class="fas fa-elementary"></i></div>
                             <h3 class="room-title">SD</h3>
@@ -113,7 +113,7 @@
                         </a>
                     </article>
                     
-                    <article class="room-card room-smp hidden" data-jenjang="smp" data-feature="smp">
+                    <article class="room-card room-smp" data-jenjang="smp" data-feature="smp">
                         <a href="javascript:void(0)" class="room-link" onclick="showSection('smp-section'); return false;">
                             <div class="room-icon bg-green"><i class="fas fa-school"></i></div>
                             <h3 class="room-title">SMP</h3>
@@ -121,7 +121,7 @@
                         </a>
                     </article>
                     
-                    <article class="room-card room-sma hidden" data-jenjang="sma" data-feature="sma">
+                    <article class="room-card room-sma" data-jenjang="sma" data-feature="sma">
                         <a href="javascript:void(0)" class="room-link" onclick="showSection('sma-section'); return false;">
                             <div class="room-icon bg-purple"><i class="fas fa-graduation-cap"></i></div>
                             <h3 class="room-title">SMA</h3>
@@ -232,7 +232,7 @@
         </div>
     </footer>
 
-    <!-- ✅ TAMBAHAN: Global API Key Loader (Firestore-based) -->
+    <!-- ✅ Global API Key Loader (UNCHANGED) -->
     <script type="module">
         console.log('🔴 [Global API Key] Module START');
         window.GLOBAL_API_KEY = null;
@@ -281,18 +281,15 @@
         console.log('🟢 [Global API Key] Module READY');
     </script>
 
-    <!-- ✅ UPDATED: Profile Dropdown + Soft Block (Original + Minimal Addition) -->
+    <!-- ✅ SIMPLE DASHBOARD SCRIPT (No Complex Filtering - Firestore Rules Handle Security) -->
     <script type="module">
-        // ✅ Import Firebase modules at TOP (required for module scripts)
         import { auth, onAuthStateChanged, db, doc, getDoc } from './modules/firebase-config.js';
         
-        console.log('🔴 [Dashboard Filter] Module START');
+        console.log('🔴 [Dashboard Simple] START');
         
-        // Wait for DOM to be fully loaded before accessing elements
         document.addEventListener('DOMContentLoaded', async () => {
-            console.log('✅ [Dashboard Filter] DOM loaded');
+            console.log('✅ [Dashboard] DOM loaded');
             
-            // DOM Elements
             const els = {
                 profileMenuBtn: document.getElementById('profileMenuBtn'),
                 profileDropdown: document.getElementById('profileDropdown'),
@@ -304,190 +301,61 @@
                 userContextText: document.getElementById('userContextText')
             };
             
-            // ✅ Profile Dropdown Toggle (simple)
+            // Profile dropdown toggle (PRESERVED)
             if (els.profileMenuBtn && els.profileDropdown) {
                 els.profileMenuBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     els.profileDropdown.classList.toggle('hidden');
                 });
                 document.addEventListener('click', (e) => {
-                    if (!els.profileDropdown.contains(e.target) && !els.profileMenuBtn.contains(e.target)) {
-                        els.profileDropdown.classList.add('hidden');
+                    if (!els.profileDropdown?.contains(e.target) && !els.profileMenuBtn?.contains(e.target)) {
+                        els.profileDropdown?.classList.add('hidden');
                     }
                 });
             }
             
-            // ✅ Load user data from Firestore
-            async function loadUserData(userId) {
+            // ✅ SIMPLE: Load user data & update badge only (NO hide/show logic)
+            onAuthStateChanged(auth, async (user) => {
+                console.log('🔐 [Dashboard] Auth:', user ? `IN (${user.uid})` : 'OUT');
+                
+                if (!user) return;
+                
                 try {
-                    console.log('👤 [Filter] Loading user:', userId);
-                    const userDoc = await getDoc(doc(db, 'users', userId));
+                    const userDoc = await getDoc(doc(db, 'users', user.uid));
                     if (userDoc.exists()) {
                         const data = userDoc.data();
-                        console.log('✅ [Filter] User ', {
-                            jenjang: data.jenjang_sekolah,
-                            kelas_diampu: data.kelas_diampu,
-                            role: data.role,
-                            sd_mapel_type: data.sd_mapel_type
-                        });
-                        return data;
+                        
+                        // Update profile display (PRESERVED)
+                        if (els.profileName) els.profileName.textContent = data.nama_lengkap || 'User';
+                        if (els.profileEmailSub) els.profileEmailSub.textContent = user.email || '';
+                        if (els.userEmail) els.userEmail.textContent = user.email || '';
+                        if (els.userAvatar) {
+                            els.userAvatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(data.nama_lengkap || 'User')}&background=7c3aed&color=fff`;
+                        }
+                        
+                        // Update context badge only (PRESERVED)
+                        if (els.userContextText) {
+                            const label = {sd:'SD', smp:'SMP', sma:'SMA'}[data.jenjang_sekolah] || 'Guru';
+                            els.userContextText.textContent = `Guru ${label}`;
+                        }
+                        
+                        // Save to localStorage for other modules (PRESERVED)
+                        localStorage.setItem('user_jenjang', data.jenjang_sekolah || '');
+                        localStorage.setItem('user_kelas_diampu', JSON.stringify(data.kelas_diampu || []));
+                        localStorage.setItem('user_role', data.role || 'teacher');
+                        
+                        console.log('✅ [Dashboard] User loaded:', data.jenjang_sekolah);
                     }
-                    console.warn('⚠️ [Filter] User doc not found');
-                    return null;
                 } catch (e) {
-                    console.error('❌ [Filter] Error:', e);
-                    return null;
-                }
-            }
-            
-            // ✅ Apply filtering to dashboard
-            function applyFilter(userData) {
-                if (!userData) {
-                    console.log('⚠️ [Filter] No data, skip');
-                    return;
-                }
-                
-                const jenjang = userData.jenjang_sekolah;
-                const kelasDiampu = userData.kelas_diampu || [];
-                const role = userData.role || 'teacher';
-                const sdMapelType = userData.sd_mapel_type || 'kelas';
-                
-                console.log('🔍 [Filter] Applying:', { jenjang, kelasDiampu, role });
-                
-                // Update context badge
-                if (els.userContextBadge && els.userContextText) {
-                    els.userContextBadge.classList.remove('hidden');
-                    if (role === 'admin') {
-                        els.userContextText.innerHTML = '<i class="fas fa-crown text-yellow-500 mr-1"></i> Admin';
-                    } else if (jenjang) {
-                        const label = {sd:'SD', smp:'SMP', sma:'SMA'}[jenjang] || jenjang.toUpperCase();
-                        const extra = (jenjang==='sd' && sdMapelType!=='kelas') ? ` • ${sdMapelType.toUpperCase()}` : '';
-                        els.userContextText.textContent = `Guru ${label}${extra}`;
-                    }
-                }
-                
-                // Filter jenjang (teachers only)
-                if (jenjang && role === 'teacher') {
-                    console.log(`🎯 Filter jenjang: ${jenjang}`);
-                    
-                    // Hide all jenjang rooms, show matching
-                    document.querySelectorAll('.room-card[data-jenjang]').forEach(el => el.classList.add('hidden'));
-                    const room = document.querySelector(`.room-card[data-jenjang="${jenjang}"]`);
-                    if (room) {
-                        room.classList.remove('hidden');
-                        console.log(`✅ Show room: ${jenjang}`);
-                    }
-                    
-                    // Hide all jenjang sections, show matching
-                    ['sd','smp','sma'].forEach(j => {
-                        document.getElementById(`${j}-section`)?.classList.add('hidden');
-                    });
-                    const section = document.getElementById(`${jenjang}-section`);
-                    if (section) {
-                        section.classList.remove('hidden');
-                        console.log(`✅ Show section: ${jenjang}`);
-                    }
-                }
-                
-                // Filter kelas cards (teachers only)
-                if (kelasDiampu.length > 0 && role === 'teacher') {
-                    console.log(`🎯 Filter kelas: ${kelasDiampu.join(', ')}`);
-                    document.querySelectorAll('.kelas-card[data-kelas]').forEach(card => {
-                        const k = card.getAttribute('data-kelas');
-                        card.classList.toggle('hidden', !kelasDiampu.includes(k));
-                    });
-                }
-                
-                // SD Guru PAI/PJOK: show all classes
-                if (jenjang === 'sd' && sdMapelType !== 'kelas' && role === 'teacher') {
-                    console.log('✅ SD Guru PAI/PJOK: show all classes');
-                    document.querySelectorAll('.kelas-card[data-kelas]').forEach(card => card.classList.remove('hidden'));
-                }
-                
-                console.log('🎉 [Filter] DONE!');
-            }
-            
-+           // ✅ NEW: SOFT BLOCK - Intercept room-card clicks (Minimal Addition)
-+           function setupSoftBlock(userData) {
-+               if (!userData) return;
-+               const userJenjang = userData.jenjang_sekolah;
-+               const role = userData.role || 'teacher';
-+               console.log('🔒 [Soft Block] Setup for jenjang:', userJenjang);
-+               
-+               document.querySelectorAll('.room-card[data-jenjang] .room-link').forEach(link => {
-+                   const cardJenjang = link.closest('.room-card')?.getAttribute('data-jenjang');
-+                   if (!cardJenjang) return;
-+                   
-+                   link.addEventListener('click', function(e) {
-+                       // Admin can access all - let original onclick run
-+                       if (role === 'admin') return;
-+                       
-+                       // Teacher: check jenjang match
-+                       if (cardJenjang !== userJenjang) {
-+                           e.preventDefault();
-+                           e.stopPropagation();
-+                           const label = {sd:'SD', smp:'SMP', sma:'SMA'}[cardJenjang] || cardJenjang.toUpperCase();
-+                           alert(`⚠️ Akses Ditolak\n\nFitur ${label} hanya untuk guru ${label}.\n\nAnda: Guru ${userJenjang?.toUpperCase()}`);
-+                           return false;
-+                       }
-+                       // Match: let original onclick run
-+                       console.log(`✅ [Soft Block] Access granted: ${cardJenjang}`);
-+                   }, true); // Capturing phase = runs BEFORE inline onclick
-+               });
-+               console.log('✅ [Soft Block] Interceptors setup');
-+           }
-            
-            // ✅ Listen to auth state
-            onAuthStateChanged(auth, async (user) => {
-                console.log('🔐 Auth:', user ? `IN (${user.uid})` : 'OUT');
-                
-                if (user) {
-                    // Fast load from localStorage
-                    const nama = localStorage.getItem('user_nama_lengkap') || 'User';
-                    const email = localStorage.getItem('user_email') || '';
-                    if (els.profileName) els.profileName.textContent = nama;
-                    if (els.profileEmailSub) els.profileEmailSub.textContent = email;
-                    if (els.userEmail) els.userEmail.textContent = email;
-                    if (els.userAvatar) {
-                        els.userAvatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(nama)}&background=7c3aed&color=fff`;
-                    }
-                    
-                    // Load from Firestore + filter
-                    const userData = await loadUserData(user.uid);
-                    if (userData) {
-                        // Update profile
-                        const namaFb = userData.nama_lengkap || nama;
-                        const emailFb = userData.email || email;
-                        if (els.profileName) els.profileName.textContent = namaFb;
-                        if (els.profileEmailSub) els.profileEmailSub.textContent = emailFb;
-                        if (els.userEmail) els.userEmail.textContent = emailFb;
-                        
-                        // ✅ APPLY FILTERING
-                        applyFilter(userData);
-                        
-+                       // ✅ NEW: Setup soft block interceptors (1 baris tambahan)
-+                       setupSoftBlock(userData);
-                        
-                        // Save to localStorage
-                        localStorage.setItem('user_jenjang', userData.jenjang_sekolah || '');
-                        localStorage.setItem('user_kelas_diampu', JSON.stringify(userData.kelas_diampu || []));
-                    }
-                } else {
-                    // Logged out: reset
-                    if (els.profileName) els.profileName.textContent = 'User';
-                    if (els.profileEmailSub) els.profileEmailSub.textContent = '';
-                    if (els.userEmail) els.userEmail.textContent = '';
-                    ['sd','smp','sma'].forEach(j => {
-                        document.getElementById(`${j}-section`)?.classList.add('hidden');
-                    });
+                    console.error('❌ [Dashboard] Error:', e);
                 }
             });
             
-            console.log('🟢 [Dashboard Filter] READY');
+            console.log('🟢 [Dashboard Simple] READY');
         });
     </script>
 
-    <!-- ✅ SCRIPT TAGS (UNCHANGED) -->
+    <!-- ✅ Module Scripts (UNCHANGED) -->
     <script type="module" src="modules/firebase-config.js"></script>
     <script type="module" src="js/main.js"></script>
     <script type="module" src="js/dashboard.js"></script>
