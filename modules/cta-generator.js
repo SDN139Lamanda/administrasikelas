@@ -66,7 +66,6 @@ function enableOptions(selectEl, allowedValues) {
   });
 }
 
-// ✅ FIXED: Setup jenjang dropdown auto-select + prevent change
 function setupJenjangDropdown(userData) {
   if (!userData) { console.warn('⚠️ [Jenjang] No userData, skip'); return; }
   const userJenjang = userData.jenjang_sekolah;
@@ -91,7 +90,6 @@ function setupJenjangDropdown(userData) {
   }, 150);
 }
 
-// ✅ NEW: Download function for CTA results
 function downloadCTAResult() {
   const cp = document.getElementById('result-cp')?.value || '';
   const tp = document.getElementById('result-tp')?.value || '';
@@ -201,7 +199,7 @@ window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, sem
   if (isClassLocked && availableClasses.length > 0) defaultClass = availableClasses[0];
   console.log('📚 [CTA Generator] Available classes:', availableClasses);
   
-  // ✅ RENDER UI — UPDATED: Hide scrollbar + Add Download button
+  // ✅ RENDER UI — UPDATED: Fix text wrap (no horizontal scroll)
   container.innerHTML = `
     <style>
       .cta-generator-form { max-width: 950px; margin: auto; padding: 30px; background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
@@ -209,11 +207,11 @@ window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, sem
       .subtitle { text-align: center; color: #6b7280; margin-bottom: 30px; }
       .section-title { font-size: 18px; font-weight: 700; color: #374151; margin: 25px 0 15px 0; padding-bottom: 8px; border-bottom: 2px solid #e5e7eb; display: flex; align-items: center; gap: 8px; }
       .cta-generator-form label { display: block; margin-top: 12px; font-weight: 600; color: #374151; font-size: 14px; }
-      .cta-generator-form input, .cta-generator-form select { width: 100%; margin-top: 8px; padding: 12px; border-radius: 8px; border: 1px solid #d1d5db; font-size: 14px; font-family: inherit; }
+      .cta-generator-form input, .cta-generator-form select { width: 100%; margin-top: 8px; padding: 12px; border-radius: 8px; border: 1px solid #d1d5db; font-size: 14px; font-family: inherit; box-sizing: border-box; }
       .cta-generator-form input:focus, .cta-generator-form select:focus { outline: none; border-color: #0891b2; }
       .cta-generator-form select:disabled { background: #f3f4f6; color: #6b7280; cursor: not-allowed; }
       
-      /* ✅ FIXED: Remove ALL borders + HIDE SCROLLBAR */
+      /* ✅ FIXED: Textarea — No border, no scrollbar, TEXT WRAPS PROPERLY */
       #result-cp, #result-tp, #result-atp {
         width: 100%;
         min-height: 200px;
@@ -228,20 +226,26 @@ window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, sem
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         font-size: 14px;
         line-height: 1.8;
-        white-space: pre-wrap;
+        /* ✅ TEXT WRAP FIX — No horizontal scroll */
+        white-space: pre-wrap !important;
+        word-wrap: break-word !important;
+        overflow-wrap: break-word !important;
+        overflow-x: hidden !important; /* ← HIDE horizontal overflow */
+        max-width: 100% !important; /* ← Force max width */
+        /* No scrollbar */
+        scrollbar-width: none !important;
+        -ms-overflow-style: none !important;
         margin-top: 8px;
         resize: vertical;
         box-shadow: none !important;
         outline: none !important;
         color: #1f2937;
-        /* Hide scrollbar */
-        scrollbar-width: none !important; /* Firefox */
-        -ms-overflow-style: none !important; /* IE/Edge */
+        box-sizing: border-box;
       }
       #result-cp::-webkit-scrollbar,
       #result-tp::-webkit-scrollbar,
       #result-atp::-webkit-scrollbar {
-        display: none !important; /* Chrome/Safari */
+        display: none !important;
       }
       #result-cp:focus, #result-tp:focus, #result-atp:focus {
         background: transparent !important;
@@ -338,15 +342,12 @@ window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, sem
     } catch (e) { debugBox.className = 'debug-box debug-error'; debugMsg.innerHTML = `<span style="color:#991b1b;"><strong>❌ ERROR</strong></span><br>${e.message}`; }
   })();
   
-  // Print Button
   const btnPrint = document.getElementById('btn-print');
   if (btnPrint) btnPrint.addEventListener('click', () => { const cp = document.getElementById('result-cp')?.value; if (!cp || cp.includes('⏳') || cp.includes('Error')) { alert('⚠️ Generate data dulu sebelum print!'); return; } window.print(); });
   
-  // ✅ NEW: Download Button
   const btnDownload = document.getElementById('btn-download');
   if (btnDownload) btnDownload.addEventListener('click', downloadCTAResult);
   
-  // Test Global Key Button (admin)
   const testKeyBtn = document.getElementById('btn-test-global-key');
   if (testKeyBtn && userRole === 'admin') testKeyBtn.addEventListener('click', async () => { try { const { getNextApiKey } = await import('./global-api-key.js'), key = await getNextApiKey(); if (key) { alert('✅ Global API Key ditemukan!'); location.reload(); } else alert('❌ Global API Key TIDAK ditemukan.'); } catch (e) { console.error('❌ [CTA Generator] Test error:', e); alert('❌ Error: ' + e.message); } });
   
@@ -414,4 +415,4 @@ function loadCTAData() {
   })();
 }
 
-console.log('🟢 [CTA Generator] READY — No Scrollbar + Download Feature');
+console.log('🟢 [CTA Generator] READY — Text Wrap Fixed (No Horizontal Scroll)');
