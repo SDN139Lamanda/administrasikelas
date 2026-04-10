@@ -6,204 +6,72 @@
     <title>Daftar Akun - Platform Guru SD/SMP/SMA</title>
     <meta name="description" content="Daftar akun baru untuk Platform Administrasi Kelas Digital">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <style>
-        .register-card {
-            background: white;
-            border-radius: 12px;
-            padding: 32px;
-            max-width: 560px;
-            width: 100%;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            border-top: 4px solid #7c3aed;
-        }
-        .register-input {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
-            font-size: 14px;
-            margin-bottom: 4px;
-            box-sizing: border-box;
-            transition: border-color 0.2s;
-        }
-        .register-input:focus {
-            outline: none;
-            border-color: #7c3aed;
-        }
-        .register-input.error {
-            border-color: #ef4444;
-        }
-        .error-text {
-            color: #ef4444;
-            font-size: 12px;
-            margin-top: 4px;
-            display: none;
-        }
-        .error-text.visible {
-            display: block;
-        }
-        .register-btn {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, #7c3aed 0%, #0891b2 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 16px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .register-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(124,58,237,0.3);
-        }
-        .register-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-        .message {
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin-bottom: 16px;
-            font-size: 14px;
-            display: none;
-            line-height: 1.5;
-        }
-        .message.success {
-            background: #dcfce7;
-            color: #166534;
-            border: 1px solid #86efac;
-            display: block;
-        }
-        .message.error {
-            background: #fee2e2;
-            color: #991b1b;
-            border: 1px solid #fca5a5;
-            display: block;
-        }
-        .message.warning {
-            background: #fef3c7;
-            color: #92400e;
-            border: 1px solid #fcd34d;
-            display: block;
-        }
-        .password-strength {
-            height: 4px;
-            background: #e5e7eb;
-            border-radius: 2px;
-            margin-top: 8px;
-            overflow: hidden;
-        }
-        .password-strength-fill {
-            height: 100%;
-            transition: width 0.3s, background 0.3s;
-        }
+        .register-card { background: white; border-radius: 12px; padding: 32px; max-width: 560px; width: 100%; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-top: 4px solid #7c3aed; }
+        .register-input { width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; margin-bottom: 4px; box-sizing: border-box; transition: border-color 0.2s; }
+        .register-input:focus { outline: none; border-color: #7c3aed; }
+        .register-input.error { border-color: #ef4444; }
+        .error-text { color: #ef4444; font-size: 12px; margin-top: 4px; display: none; }
+        .error-text.visible { display: block; }
+        .register-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, #7c3aed 0%, #0891b2 100%); color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: transform 0.2s, box-shadow 0.2s; }
+        .register-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(124,58,237,0.3); }
+        .register-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        .message { padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 14px; display: none; line-height: 1.5; }
+        .message.success { background: #dcfce7; color: #166534; border: 1px solid #86efac; display: block; }
+        .message.error { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; display: block; }
+        .message.warning { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; display: block; }
+        .password-strength { height: 4px; background: #e5e7eb; border-radius: 2px; margin-top: 8px; overflow: hidden; }
+        .password-strength-fill { height: 100%; transition: width 0.3s, background 0.3s; }
         .strength-weak { background: #ef4444; width: 33%; }
         .strength-medium { background: #f59e0b; width: 66%; }
         .strength-strong { background: #10b981; width: 100%; }
-        .debug-info {
-            background: #f3f4f6;
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-size: 11px;
-            color: #6b7280;
-            margin-top: 8px;
-            font-family: monospace;
-        }
-        .checkbox-group {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-        }
-        .checkbox-label {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 13px;
-            cursor: pointer;
-        }
-        .checkbox-label input[type="checkbox"] {
-            width: 16px;
-            height: 16px;
-            cursor: pointer;
-        }
+        .debug-info { background: #f3f4f6; padding: 8px 12px; border-radius: 6px; font-size: 11px; color: #6b7280; margin-top: 8px; font-family: monospace; }
+        .checkbox-group { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+        .checkbox-label { display: flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer; }
+        .checkbox-label input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; }
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen flex items-center justify-center p-4">
-
     <div class="register-card">
-        <!-- Header -->
         <div class="text-center mb-8">
-            <div class="inline-flex items-center justify-center w-12 h-12 bg-purple-100 rounded-full mb-4">
-                <i class="fas fa-user-plus text-purple-600 text-xl"></i>
-            </div>
+            <div class="inline-flex items-center justify-center w-12 h-12 bg-purple-100 rounded-full mb-4"><i class="fas fa-user-plus text-purple-600 text-xl"></i></div>
             <h1 class="text-2xl font-bold text-gray-900">Daftar Akun Baru</h1>
             <p class="text-gray-600 mt-2">Lengkapi form di bawah untuk membuat akun</p>
         </div>
-        
-        <!-- Message Display -->
         <div id="message" class="message" role="alert" aria-live="polite"></div>
-        
-        <!-- Form -->
         <form id="registerForm">
             <!-- Nama Lengkap -->
             <div class="mb-4">
-                <label for="namaLengkap" class="block text-sm font-medium text-gray-700 mb-2">
-                    <i class="fas fa-user mr-2"></i>Nama Lengkap <span class="text-red-500">*</span>
-                </label>
+                <label for="namaLengkap" class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-user mr-2"></i>Nama Lengkap <span class="text-red-500">*</span></label>
                 <input type="text" id="namaLengkap" class="register-input" placeholder="Contoh: Siti Rahayu, S.Pd" required autocomplete="name">
             </div>
-            
             <!-- Email -->
             <div class="mb-4">
-                <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
-                    <i class="fas fa-envelope mr-2"></i>Email <span class="text-red-500">*</span>
-                </label>
+                <label for="email" class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-envelope mr-2"></i>Email <span class="text-red-500">*</span></label>
                 <input type="email" id="email" class="register-input" placeholder="nama@sekolah.sch.id" required autocomplete="email">
                 <p class="error-text" id="emailError">Format email tidak valid</p>
             </div>
-            
             <!-- Password -->
             <div class="mb-4">
-                <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
-                    <i class="fas fa-lock mr-2"></i>Password <span class="text-red-500">*</span>
-                </label>
+                <label for="password" class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-lock mr-2"></i>Password <span class="text-red-500">*</span></label>
                 <input type="password" id="password" class="register-input" placeholder="Minimal 6 karakter" required minlength="6" autocomplete="new-password">
-                <div class="password-strength">
-                    <div id="passwordStrength" class="password-strength-fill"></div>
-                </div>
+                <div class="password-strength"><div id="passwordStrength" class="password-strength-fill"></div></div>
                 <p class="error-text" id="passwordError">Password minimal 6 karakter</p>
-                <p class="text-xs text-gray-500 mt-1">
-                    <i class="fas fa-info-circle mr-1"></i>Gunakan kombinasi huruf dan angka untuk keamanan
-                </p>
+                <p class="text-xs text-gray-500 mt-1"><i class="fas fa-info-circle mr-1"></i>Gunakan kombinasi huruf dan angka untuk keamanan</p>
             </div>
-            
             <!-- Konfirmasi Password -->
             <div class="mb-4">
-                <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-2">
-                    <i class="fas fa-lock mr-2"></i>Konfirmasi Password <span class="text-red-500">*</span>
-                </label>
+                <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-lock mr-2"></i>Konfirmasi Password <span class="text-red-500">*</span></label>
                 <input type="password" id="confirmPassword" class="register-input" placeholder="Ulangi password" required minlength="6" autocomplete="new-password">
                 <p class="error-text" id="confirmError">Password tidak sama</p>
             </div>
-            
             <!-- Jenjang -->
             <div class="mb-4">
-                <label for="jenjang" class="block text-sm font-medium text-gray-700 mb-2">
-                    <i class="fas fa-layer-group mr-2"></i>Jenjang <span class="text-red-500">*</span>
-                </label>
+                <label for="jenjang" class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-layer-group mr-2"></i>Jenjang <span class="text-red-500">*</span></label>
                 <select id="jenjang" class="register-input" required>
                     <option value="">Pilih Jenjang</option>
                     <option value="sd">SD (Sekolah Dasar)</option>
@@ -211,91 +79,45 @@
                     <option value="sma">SMA (Sekolah Menengah Atas)</option>
                 </select>
             </div>
-            
-            <!-- ✅ UPDATED: Field Kondisional berdasarkan Jenjang -->
+            <!-- ✅ CONDITIONAL FIELDS based on Jenjang -->
             <div id="conditionalFields" class="hidden mb-4">
-                
-                <!-- 🟢 UNTUK SD: Kelas + Opsi Mapel Khusus -->
+                <!-- 🟢 SD: Kelas 1-6 + Jenis Pengajaran -->
                 <div id="sdFields" class="hidden">
-                    <!-- Kelas Diampu (Checkbox 1-6) -->
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            <i class="fas fa-users mr-2"></i>Kelas Diampu <span class="text-red-500">*</span>
-                        </label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-users mr-2"></i>Kelas Diampu <span class="text-red-500">*</span></label>
                         <div class="checkbox-group">
-                            <label class="checkbox-label">
-                                <input type="checkbox" name="kelasDiampu" value="1">
-                                <span>Kelas 1</span>
-                            </label>
-                            <label class="checkbox-label">
-                                <input type="checkbox" name="kelasDiampu" value="2">
-                                <span>Kelas 2</span>
-                            </label>
-                            <label class="checkbox-label">
-                                <input type="checkbox" name="kelasDiampu" value="3">
-                                <span>Kelas 3</span>
-                            </label>
-                            <label class="checkbox-label">
-                                <input type="checkbox" name="kelasDiampu" value="4">
-                                <span>Kelas 4</span>
-                            </label>
-                            <label class="checkbox-label">
-                                <input type="checkbox" name="kelasDiampu" value="5">
-                                <span>Kelas 5</span>
-                            </label>
-                            <label class="checkbox-label">
-                                <input type="checkbox" name="kelasDiampu" value="6">
-                                <span>Kelas 6</span>
-                            </label>
+                            <label class="checkbox-label"><input type="checkbox" name="kelasDiampu" value="1"><span>Kelas 1</span></label>
+                            <label class="checkbox-label"><input type="checkbox" name="kelasDiampu" value="2"><span>Kelas 2</span></label>
+                            <label class="checkbox-label"><input type="checkbox" name="kelasDiampu" value="3"><span>Kelas 3</span></label>
+                            <label class="checkbox-label"><input type="checkbox" name="kelasDiampu" value="4"><span>Kelas 4</span></label>
+                            <label class="checkbox-label"><input type="checkbox" name="kelasDiampu" value="5"><span>Kelas 5</span></label>
+                            <label class="checkbox-label"><input type="checkbox" name="kelasDiampu" value="6"><span>Kelas 6</span></label>
                         </div>
                         <p class="error-text" id="kelasError">Pilih minimal 1 kelas</p>
                     </div>
-                    
-                    <!-- Opsi Mapel Khusus SD -->
                     <div class="mb-4">
-                        <label for="sdMapelType" class="block text-sm font-medium text-gray-700 mb-2">
-                            <i class="fas fa-book mr-2"></i>Jenis Pengajaran
-                        </label>
+                        <label for="sdMapelType" class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-book mr-2"></i>Jenis Pengajaran</label>
                         <select id="sdMapelType" class="register-input">
                             <option value="kelas">Guru Kelas (semua mapel)</option>
                             <option value="pai">Guru PAI / BD</option>
                             <option value="pjok">Guru PJOK</option>
                         </select>
-                        <p class="text-xs text-gray-500 mt-1">
-                            <i class="fas fa-info-circle mr-1"></i>Pilih jika Anda guru khusus PAI/BD atau PJOK
-                        </p>
+                        <p class="text-xs text-gray-500 mt-1"><i class="fas fa-info-circle mr-1"></i>Pilih jika Anda guru khusus PAI/BD atau PJOK</p>
                     </div>
                 </div>
-                
-                <!-- 🔵 UNTUK SMP: Kelas + Mata Pelajaran -->
+                <!-- 🔵 SMP: Kelas 7-9 + Mata Pelajaran -->
                 <div id="smpFields" class="hidden">
-                    <!-- Kelas Diampu (Checkbox 7,8,9) -->
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            <i class="fas fa-users mr-2"></i>Kelas Diampu <span class="text-red-500">*</span>
-                        </label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-users mr-2"></i>Kelas Diampu <span class="text-red-500">*</span></label>
                         <div class="checkbox-group">
-                            <label class="checkbox-label">
-                                <input type="checkbox" name="kelasDiampu" value="7">
-                                <span>Kelas 7</span>
-                            </label>
-                            <label class="checkbox-label">
-                                <input type="checkbox" name="kelasDiampu" value="8">
-                                <span>Kelas 8</span>
-                            </label>
-                            <label class="checkbox-label">
-                                <input type="checkbox" name="kelasDiampu" value="9">
-                                <span>Kelas 9</span>
-                            </label>
+                            <label class="checkbox-label"><input type="checkbox" name="kelasDiampu" value="7"><span>Kelas 7</span></label>
+                            <label class="checkbox-label"><input type="checkbox" name="kelasDiampu" value="8"><span>Kelas 8</span></label>
+                            <label class="checkbox-label"><input type="checkbox" name="kelasDiampu" value="9"><span>Kelas 9</span></label>
                         </div>
                         <p class="error-text" id="kelasError">Pilih minimal 1 kelas</p>
                     </div>
-                    
-                    <!-- Mata Pelajaran -->
                     <div class="mb-4">
-                        <label for="mapel" class="block text-sm font-medium text-gray-700 mb-2">
-                            <i class="fas fa-book mr-2"></i>Mata Pelajaran <span class="text-red-500">*</span>
-                        </label>
+                        <label for="mapel" class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-book mr-2"></i>Mata Pelajaran <span class="text-red-500">*</span></label>
                         <select id="mapel" class="register-input">
                             <option value="">Pilih Mata Pelajaran</option>
                             <option value="matematika">Matematika</option>
@@ -313,36 +135,19 @@
                         <p class="error-text" id="mapelError">Pilih mata pelajaran</p>
                     </div>
                 </div>
-                
-                <!-- 🟣 UNTUK SMA: Kelas + Mata Pelajaran -->
+                <!-- 🟣 SMA: Kelas 10-12 + Mata Pelajaran -->
                 <div id="smaFields" class="hidden">
-                    <!-- Kelas Diampu (Checkbox 10,11,12) -->
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            <i class="fas fa-users mr-2"></i>Kelas Diampu <span class="text-red-500">*</span>
-                        </label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-users mr-2"></i>Kelas Diampu <span class="text-red-500">*</span></label>
                         <div class="checkbox-group">
-                            <label class="checkbox-label">
-                                <input type="checkbox" name="kelasDiampu" value="10">
-                                <span>Kelas 10</span>
-                            </label>
-                            <label class="checkbox-label">
-                                <input type="checkbox" name="kelasDiampu" value="11">
-                                <span>Kelas 11</span>
-                            </label>
-                            <label class="checkbox-label">
-                                <input type="checkbox" name="kelasDiampu" value="12">
-                                <span>Kelas 12</span>
-                            </label>
+                            <label class="checkbox-label"><input type="checkbox" name="kelasDiampu" value="10"><span>Kelas 10</span></label>
+                            <label class="checkbox-label"><input type="checkbox" name="kelasDiampu" value="11"><span>Kelas 11</span></label>
+                            <label class="checkbox-label"><input type="checkbox" name="kelasDiampu" value="12"><span>Kelas 12</span></label>
                         </div>
                         <p class="error-text" id="kelasError">Pilih minimal 1 kelas</p>
                     </div>
-                    
-                    <!-- Mata Pelajaran -->
                     <div class="mb-4">
-                        <label for="mapel" class="block text-sm font-medium text-gray-700 mb-2">
-                            <i class="fas fa-book mr-2"></i>Mata Pelajaran <span class="text-red-500">*</span>
-                        </label>
+                        <label for="mapel" class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-book mr-2"></i>Mata Pelajaran <span class="text-red-500">*</span></label>
                         <select id="mapel" class="register-input">
                             <option value="">Pilih Mata Pelajaran</option>
                             <option value="matematika">Matematika</option>
@@ -363,399 +168,161 @@
                         <p class="error-text" id="mapelError">Pilih mata pelajaran</p>
                     </div>
                 </div>
-                
             </div>
-            <!-- ✅ END Conditional Fields -->
-            
             <!-- Nama Sekolah -->
             <div class="mb-4">
-                <label for="namaSekolah" class="block text-sm font-medium text-gray-700 mb-2">
-                    <i class="fas fa-school mr-2"></i>Nama Sekolah <span class="text-red-500">*</span>
-                </label>
+                <label for="namaSekolah" class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-school mr-2"></i>Nama Sekolah <span class="text-red-500">*</span></label>
                 <input type="text" id="namaSekolah" class="register-input" placeholder="Contoh: SDN 139 Lamanda" required>
             </div>
-            
-            <!-- Nomor HP (Optional) -->
+            <!-- Nomor HP -->
             <div class="mb-6">
-                <label for="noHp" class="block text-sm font-medium text-gray-700 mb-2">
-                    <i class="fas fa-phone mr-2"></i>Nomor HP <span class="text-gray-400">(Opsional)</span>
-                </label>
+                <label for="noHp" class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-phone mr-2"></i>Nomor HP <span class="text-gray-400">(Opsional)</span></label>
                 <input type="tel" id="noHp" class="register-input" placeholder="081234567890">
             </div>
-            
-            <!-- Submit Button -->
-            <button type="submit" id="submitBtn" class="register-btn">
-                <i class="fas fa-user-plus"></i>
-                <span id="btnText">Daftar Sekarang</span>
-                <i id="loadingIcon" class="fas fa-spinner fa-spin hidden"></i>
-            </button>
+            <!-- Submit -->
+            <button type="submit" id="submitBtn" class="register-btn"><i class="fas fa-user-plus"></i><span id="btnText">Daftar Sekarang</span><i id="loadingIcon" class="fas fa-spinner fa-spin hidden"></i></button>
         </form>
-        
-        <!-- Login Link -->
         <div class="text-center mt-6">
             <p class="text-gray-600 text-sm">Sudah punya akun?</p>
-            <a href="login.html" class="inline-block mt-2 text-purple-600 hover:text-purple-500 font-medium">
-                <i class="fas fa-sign-in-alt mr-2"></i>Login di sini
-            </a>
+            <a href="login.html" class="inline-block mt-2 text-purple-600 hover:text-purple-500 font-medium"><i class="fas fa-sign-in-alt mr-2"></i>Login di sini</a>
         </div>
-        
-        <!-- Back Link -->
-        <a href="index.html" class="back-link inline-flex items-center gap-2 text-gray-600 hover:text-purple-600 mt-6 text-sm">
-            <i class="fas fa-arrow-left"></i> Kembali ke Beranda
-        </a>
-        
-        <!-- Debug Info (Hidden by default) -->
+        <a href="index.html" class="back-link inline-flex items-center gap-2 text-gray-600 hover:text-purple-600 mt-6 text-sm"><i class="fas fa-arrow-left"></i> Kembali ke Beranda</a>
         <div id="debugInfo" class="debug-info hidden"></div>
     </div>
 
     <!-- Firebase + Logic Script -->
     <script type="module">
-        import { 
-            auth,
-            db,
-            createUserWithEmailAndPassword,
-            sendEmailVerification,
-            updateProfile,
-            collection,
-            doc,
-            setDoc,
-            serverTimestamp
-        } from './modules/firebase-config.js';
-        
+        import { auth, db, createUserWithEmailAndPassword, sendEmailVerification, updateProfile, doc, setDoc, serverTimestamp } from './modules/firebase-config.js';
         console.log('🔴 [Register] Script START');
         
-        const form = document.getElementById('registerForm');
-        const messageDiv = document.getElementById('message');
-        const submitBtn = document.getElementById('submitBtn');
-        const btnText = document.getElementById('btnText');
-        const loadingIcon = document.getElementById('loadingIcon');
-        const debugInfo = document.getElementById('debugInfo');
+        const form = document.getElementById('registerForm'), messageDiv = document.getElementById('message'), submitBtn = document.getElementById('submitBtn'), btnText = document.getElementById('btnText'), loadingIcon = document.getElementById('loadingIcon'), debugInfo = document.getElementById('debugInfo');
+        const namaLengkapInput = document.getElementById('namaLengkap'), emailInput = document.getElementById('email'), passwordInput = document.getElementById('password'), confirmPasswordInput = document.getElementById('confirmPassword'), jenjangSelect = document.getElementById('jenjang'), namaSekolahInput = document.getElementById('namaSekolah'), noHpInput = document.getElementById('noHp');
+        const conditionalFields = document.getElementById('conditionalFields'), sdFields = document.getElementById('sdFields'), smpFields = document.getElementById('smpFields'), smaFields = document.getElementById('smaFields'), sdMapelType = document.getElementById('sdMapelType'), mapelSelect = document.getElementById('mapel'), kelasError = document.getElementById('kelasError'), mapelError = document.getElementById('mapelError');
+        const emailError = document.getElementById('emailError'), passwordError = document.getElementById('passwordError'), confirmError = document.getElementById('confirmError'), passwordStrength = document.getElementById('passwordStrength');
         
-        // Form fields
-        const namaLengkapInput = document.getElementById('namaLengkap');
-        const emailInput = document.getElementById('email');
-        const passwordInput = document.getElementById('password');
-        const confirmPasswordInput = document.getElementById('confirmPassword');
-        const jenjangSelect = document.getElementById('jenjang');
-        const namaSekolahInput = document.getElementById('namaSekolah');
-        const noHpInput = document.getElementById('noHp');
-        
-        // Conditional fields elements
-        const conditionalFields = document.getElementById('conditionalFields');
-        const sdFields = document.getElementById('sdFields');
-        const smpFields = document.getElementById('smpFields');
-        const smaFields = document.getElementById('smaFields');
-        const sdMapelType = document.getElementById('sdMapelType');
-        const mapelSelect = document.getElementById('mapel');
-        const kelasError = document.getElementById('kelasError');
-        const mapelError = document.getElementById('mapelError');
-        
-        // Error elements
-        const emailError = document.getElementById('emailError');
-        const passwordError = document.getElementById('passwordError');
-        const confirmError = document.getElementById('confirmError');
-        const passwordStrength = document.getElementById('passwordStrength');
-        
-        // Show message helper
-        function showMessage(text, type = 'success') {
-            messageDiv.innerHTML = text;
-            messageDiv.className = `message ${type}`;
-            messageDiv.style.display = 'block';
-            if (type === 'success') {
-                setTimeout(() => {
-                    messageDiv.style.display = 'none';
-                }, 8000);
-            }
-        }
-        
-        // Set loading state
-        function setLoading(loading) {
-            submitBtn.disabled = loading;
-            btnText.textContent = loading ? 'Mendaftar...' : 'Daftar Sekarang';
-            loadingIcon.classList.toggle('hidden', !loading);
-        }
-        
-        // Show field error
-        function showFieldError(element, errorElement, show) {
-            if (show) {
-                if (element) element.classList.add('error');
-                if (errorElement) errorElement.classList.add('visible');
-            } else {
-                if (element) element.classList.remove('error');
-                if (errorElement) errorElement.classList.remove('visible');
-            }
-        }
-        
-        // Check password strength
-        function checkPasswordStrength(password) {
-            let strength = 0;
-            if (password.length >= 6) strength++;
-            if (password.length >= 10) strength++;
-            if (/[A-Z]/.test(password)) strength++;
-            if (/[0-9]/.test(password)) strength++;
-            if (/[^A-Za-z0-9]/.test(password)) strength++;
-            
-            passwordStrength.className = 'password-strength-fill';
-            if (strength <= 2) {
-                passwordStrength.classList.add('strength-weak');
-            } else if (strength <= 4) {
-                passwordStrength.classList.add('strength-medium');
-            } else {
-                passwordStrength.classList.add('strength-strong');
-            }
-            return strength;
-        }
+        function showMessage(text, type = 'success') { messageDiv.innerHTML = text; messageDiv.className = `message ${type}`; messageDiv.style.display = 'block'; if (type === 'success') setTimeout(() => { messageDiv.style.display = 'none'; }, 8000); }
+        function setLoading(loading) { submitBtn.disabled = loading; btnText.textContent = loading ? 'Mendaftar...' : 'Daftar Sekarang'; loadingIcon.classList.toggle('hidden', !loading); }
+        function showFieldError(element, errorElement, show) { if (show) { if (element) element.classList.add('error'); if (errorElement) errorElement.classList.add('visible'); } else { if (element) element.classList.remove('error'); if (errorElement) errorElement.classList.remove('visible'); } }
+        function checkPasswordStrength(password) { let strength = 0; if (password.length >= 6) strength++; if (password.length >= 10) strength++; if (/[A-Z]/.test(password)) strength++; if (/[0-9]/.test(password)) strength++; if (/[^A-Za-z0-9]/.test(password)) strength++; passwordStrength.className = 'password-strength-fill'; if (strength <= 2) passwordStrength.classList.add('strength-weak'); else if (strength <= 4) passwordStrength.classList.add('strength-medium'); else passwordStrength.classList.add('strength-strong'); return strength; }
         
         // Real-time validation
-        passwordInput.addEventListener('input', () => {
-            checkPasswordStrength(passwordInput.value);
-            showFieldError(passwordInput, passwordError, passwordInput.value.length > 0 && passwordInput.value.length < 6);
-        });
+        passwordInput.addEventListener('input', () => { checkPasswordStrength(passwordInput.value); showFieldError(passwordInput, passwordError, passwordInput.value.length > 0 && passwordInput.value.length < 6); });
+        confirmPasswordInput.addEventListener('input', () => { showFieldError(confirmPasswordInput, confirmError, confirmPasswordInput.value.length > 0 && passwordInput.value !== confirmPasswordInput.value); });
+        emailInput.addEventListener('input', () => { const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; const value = emailInput.value.trim(); showFieldError(emailInput, emailError, value.length > 0 && !emailRegex.test(value)); });
         
-        confirmPasswordInput.addEventListener('input', () => {
-            showFieldError(confirmPasswordInput, confirmError, 
-                confirmPasswordInput.value.length > 0 && 
-                passwordInput.value !== confirmPasswordInput.value);
-        });
-        
-        emailInput.addEventListener('input', () => {
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            const value = emailInput.value.trim();
-            const shouldShowError = value.length > 0 && !emailRegex.test(value);
-            showFieldError(emailInput, emailError, shouldShowError);
-        });
-        
-        // ✅ UPDATED: Toggle conditional fields based on jenjang
+        // ✅ Toggle conditional fields based on jenjang
         jenjangSelect.addEventListener('change', function() {
             const jenjang = this.value;
-            
-            // Reset all conditional fields
-            conditionalFields.classList.add('hidden');
-            sdFields.classList.add('hidden');
-            smpFields.classList.add('hidden');
-            smaFields.classList.add('hidden');
-            
-            if (jenjang === 'sd') {
-                conditionalFields.classList.remove('hidden');
-                sdFields.classList.remove('hidden');
-                if (mapelSelect) mapelSelect.value = '';
-            } else if (jenjang === 'smp') {
-                conditionalFields.classList.remove('hidden');
-                smpFields.classList.remove('hidden');
-                document.querySelectorAll('input[name="kelasDiampu"]').forEach(cb => cb.checked = false);
-            } else if (jenjang === 'sma') {
-                conditionalFields.classList.remove('hidden');
-                smaFields.classList.remove('hidden');
-                document.querySelectorAll('input[name="kelasDiampu"]').forEach(cb => cb.checked = false);
-            }
-            
+            conditionalFields.classList.add('hidden'); sdFields.classList.add('hidden'); smpFields.classList.add('hidden'); smaFields.classList.add('hidden');
+            if (jenjang === 'sd') { conditionalFields.classList.remove('hidden'); sdFields.classList.remove('hidden'); if (mapelSelect) mapelSelect.value = ''; }
+            else if (jenjang === 'smp') { conditionalFields.classList.remove('hidden'); smpFields.classList.remove('hidden'); document.querySelectorAll('input[name="kelasDiampu"]').forEach(cb => cb.checked = false); }
+            else if (jenjang === 'sma') { conditionalFields.classList.remove('hidden'); smaFields.classList.remove('hidden'); document.querySelectorAll('input[name="kelasDiampu"]').forEach(cb => cb.checked = false); }
             showFieldError(document.querySelector('[name="kelasDiampu"]'), kelasError, false);
             if (mapelSelect) showFieldError(mapelSelect, mapelError, false);
         });
         
-        // Real-time validation for kelas checkboxes
+        // Validate kelas checkboxes
         document.querySelectorAll('input[name="kelasDiampu"]').forEach(cb => {
             cb.addEventListener('change', function() {
                 const checked = document.querySelectorAll('input[name="kelasDiampu"]:checked');
-                const isConditionalVisible = !conditionalFields.classList.contains('hidden');
-                showFieldError(this, kelasError, checked.length === 0 && isConditionalVisible);
+                const isVisible = !conditionalFields.classList.contains('hidden');
+                showFieldError(this, kelasError, checked.length === 0 && isVisible);
             });
         });
         
-        // Real-time validation for mapel select
+        // Validate mapel select
         if (mapelSelect) {
             mapelSelect.addEventListener('change', function() {
                 const jenjang = jenjangSelect.value;
-                if (jenjang === 'smp' || jenjang === 'sma') {
-                    showFieldError(this, mapelError, !this.value);
-                }
+                if (jenjang === 'smp' || jenjang === 'sma') showFieldError(this, mapelError, !this.value);
             });
         }
         
-        // DEBUG HELPER
-        window.debugRegister = {
-            auth,
-            db,
-            createUserWithEmailAndPassword,
-            sendEmailVerification
-        };
-        console.log('💡 [Register] Debug helper available: window.debugRegister');
-        
-        // Handle form submit
+        // Form submit handler
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             showMessage('', 'success');
+            showFieldError(emailInput, emailError, false); showFieldError(passwordInput, passwordError, false); showFieldError(confirmPasswordInput, confirmError, false);
             
-            // Clear all field errors
-            showFieldError(emailInput, emailError, false);
-            showFieldError(passwordInput, passwordError, false);
-            showFieldError(confirmPasswordInput, confirmError, false);
+            const namaLengkap = namaLengkapInput.value.trim(), email = emailInput.value.trim(), password = passwordInput.value, confirmPassword = confirmPasswordInput.value, jenjang = jenjangSelect.value, namaSekolah = namaSekolahInput.value.trim(), noHp = noHpInput.value.trim();
             
-            const namaLengkap = namaLengkapInput.value.trim();
-            const email = emailInput.value.trim();
-            const password = passwordInput.value;
-            const confirmPassword = confirmPasswordInput.value;
-            const jenjang = jenjangSelect.value;
-            const namaSekolah = namaSekolahInput.value.trim();
-            const noHp = noHpInput.value.trim();
-            
-            // Validate
+            // Validate basic fields
             let hasError = false;
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(email)) { showFieldError(emailInput, emailError, true); hasError = true; }
             if (password.length < 6) { showFieldError(passwordInput, passwordError, true); hasError = true; }
             if (password !== confirmPassword) { showFieldError(confirmPasswordInput, confirmError, true); hasError = true; }
             
-            // ✅ UPDATED: Validate conditional fields for ALL jenjang
+            // ✅ Validate conditional fields for ALL jenjang
             if (jenjang === 'sd' || jenjang === 'smp' || jenjang === 'sma') {
                 const checkedKelas = document.querySelectorAll('input[name="kelasDiampu"]:checked');
-                if (checkedKelas.length === 0) {
-                    showFieldError(document.querySelector('[name="kelasDiampu"]'), kelasError, true);
-                    hasError = true;
-                }
+                if (checkedKelas.length === 0) { showFieldError(document.querySelector('[name="kelasDiampu"]'), kelasError, true); hasError = true; }
             }
-            
             if (jenjang === 'smp' || jenjang === 'sma') {
                 const mapel = mapelSelect?.value;
-                if (!mapel) {
-                    showFieldError(mapelSelect, mapelError, true);
-                    hasError = true;
-                }
+                if (!mapel) { showFieldError(mapelSelect, mapelError, true); hasError = true; }
             }
-            
-            if (hasError) {
-                showMessage('❌ Mohon perbaiki error di atas sebelum mendaftar.', 'error');
-                return;
-            }
+            if (hasError) { showMessage('❌ Mohon perbaiki error di atas sebelum mendaftar.', 'error'); return; }
             
             setLoading(true);
-            
             try {
-                console.log('═══════════════════════════════════');
-                console.log('📝 [Register] Starting registration for:', email);
-                console.log('═══════════════════════════════════');
-                
-                // Step 1: Create Firebase Auth user
+                console.log('📝 [Register] Starting for:', email);
+                // Create Auth user
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
-                console.log('✅ [Register] Auth account created:', user.uid);
-                
-                // Step 2: Update profile
                 await updateProfile(user, { displayName: namaLengkap });
-                console.log('✅ [Register] Profile updated:', namaLengkap);
                 
-                // Step 3: Send email verification
-                let emailSent = false;
-                let emailError = null;
+                // Send email verification
+                let emailSent = false, emailErr = null;
+                try { await new Promise(r => setTimeout(r, 500)); await sendEmailVerification(user); emailSent = true; }
+                catch (err) { console.error('Email verification failed:', err.code); emailErr = err; emailSent = false; }
                 
-                try {
-                    await new Promise(resolve => setTimeout(resolve, 500));
-                    await sendEmailVerification(user);
-                    console.log('✅ [Register] Email verification sent!');
-                    emailSent = true;
-                } catch (err) {
-                    console.error('❌ [Register] Email verification failed:', err.code, err.message);
-                    emailError = err;
-                    emailSent = false;
-                }
-                
-                // ✅ Collect kelas_diampu from checkboxes (ALL jenjang)
+                // Collect form data
                 const kelasDiampu = [];
-                document.querySelectorAll('input[name="kelasDiampu"]:checked').forEach(cb => {
-                    kelasDiampu.push(cb.value);
-                });
-                
-                // ✅ Collect mapel_diampu (SMP/SMA only)
+                document.querySelectorAll('input[name="kelasDiampu"]:checked').forEach(cb => kelasDiampu.push(cb.value));
                 const mapelDiampu = [];
-                if ((jenjang === 'smp' || jenjang === 'sma') && mapelSelect?.value) {
-                    mapelDiampu.push(mapelSelect.value);
-                }
-                
-                // ✅ Collect sd_mapel_type (SD only)
+                if ((jenjang === 'smp' || jenjang === 'sma') && mapelSelect?.value) mapelDiampu.push(mapelSelect.value);
                 const sdMapelTypeValue = sdMapelType?.value || 'kelas';
                 
-                // Step 4: Create Firestore document
-                console.log('📦 [Register] Creating Firestore document...');
+                // Save to Firestore
                 await setDoc(doc(db, 'users', user.uid), {
-                    email: email,
-                    nama_lengkap: namaLengkap,
-                    nama_sekolah: namaSekolah,
-                    jenjang_sekolah: jenjang,
-                    no_hp: noHp || '',
-                    
-                    // ✅ UPDATED FIELDS:
-                    kelas_diampu: kelasDiampu,           // Array: ["4"] or ["7","8"] or ["10","12"]
-                    mapel_diampu: mapelDiampu,           // Array: ["matematika"] for SMP/SMA
-                    sd_mapel_type: sdMapelTypeValue,     // String: "kelas" | "pai" | "pjok" (SD only)
-                    
-                    role: 'teacher',
-                    isActive: true,
-                    isApproved: false,
-                    isEmailVerified: user.emailVerified,
-                    emailSendStatus: emailSent ? 'sent' : 'failed',
-                    emailSendError: emailError ? { code: emailError.code, message: emailError.message } : null,
-                    createdAt: serverTimestamp(),
-                    updatedAt: serverTimestamp(),
-                    lastLogin: serverTimestamp()
+                    email: email, nama_lengkap: namaLengkap, nama_sekolah: namaSekolah, jenjang_sekolah: jenjang, no_hp: noHp || '',
+                    kelas_diampu: kelasDiampu,           // ✅ Array: ["4"] or ["7","8"] or ["10","12"]
+                    mapel_diampu: mapelDiampu,           // ✅ Array: ["matematika"] for SMP/SMA
+                    sd_mapel_type: sdMapelTypeValue,     // ✅ String: "kelas" | "pai" | "pjok" (SD only)
+                    role: 'teacher', isActive: true, isApproved: false, isEmailVerified: user.emailVerified,
+                    emailSendStatus: emailSent ? 'sent' : 'failed', emailSendError: emailErr ? { code: emailErr.code, message: emailErr.message } : null,
+                    createdAt: serverTimestamp(), updatedAt: serverTimestamp(), lastLogin: serverTimestamp()
                 });
-                console.log('✅ [Register] Firestore document created');
                 
-                // Step 5: Show success message
+                // Success message
                 let successMsg = `✅ <strong>Pendaftaran berhasil!</strong><br><br>`;
-                
                 if (emailSent) {
                     successMsg += `📧 Email verifikasi telah dikirim ke <strong>${email}</strong>.<br><br>
                     <strong>Langkah selanjutnya:</strong><br>
-                    1️⃣ Buka email inbox Anda<br>
-                    2️⃣ Cek folder <strong>Spam</strong>, <strong>Promotions</strong>, atau <strong>Updates</strong><br>
-                    3️⃣ Cari email dari <strong>noreply@firebaseapp.com</strong><br>
-                    4️⃣ Klik link <strong>"Verify email"</strong><br>
-                    5️⃣ Login dengan password Anda<br>
-                    6️⃣ Tunggu persetujuan admin (1-3 hari kerja)<br><br>
+                    1️⃣ Buka email inbox Anda<br>2️⃣ Cek folder <strong>Spam/Promotions/Updates</strong><br>
+                    3️⃣ Cari email dari <strong>noreply@firebaseapp.com</strong><br>4️⃣ Klik link <strong>"Verify email"</strong><br>
+                    5️⃣ Login dengan password Anda<br>6️⃣ Tunggu persetujuan admin (1-3 hari kerja)<br><br>
                     <small class="text-gray-500">⏰ Link verifikasi berlaku 1 jam.</small>`;
                 } else {
                     successMsg += `⚠️ <strong>Catatan:</strong> Email verifikasi <em>gagal terkirim</em>.<br><br>
                     <strong>Akun Anda tetap dibuat</strong>. Hubungi admin: radiah.tifarahs@gmail.com`;
                 }
-                
                 showMessage(successMsg, 'success');
-                
-                // Reset form
-                form.reset();
-                passwordStrength.className = 'password-strength-fill';
-                
-                // Redirect after 8 seconds
-                setTimeout(() => {
-                    window.location.href = 'login.html?registered=true&emailSent=' + emailSent;
-                }, 8000);
-                
-                console.log('🎉 [Register] Registration completed');
-                console.log('═══════════════════════════════════');
+                form.reset(); passwordStrength.className = 'password-strength-fill';
+                setTimeout(() => { window.location.href = 'login.html?registered=true&emailSent=' + emailSent; }, 8000);
+                console.log('🎉 [Register] Completed');
                 
             } catch (error) {
                 console.error('❌ [Register] Error:', error);
-                
                 let errorMessage = '❌ <strong>Gagal mendaftar.</strong><br><br>';
-                
-                if (error.code === 'auth/email-already-in-use') {
-                    errorMessage += 'Email sudah terdaftar.';
-                    showFieldError(emailInput, emailError, true);
-                } else if (error.code === 'auth/invalid-email') {
-                    errorMessage += 'Format email tidak valid.';
-                    showFieldError(emailInput, emailError, true);
-                } else if (error.code === 'auth/weak-password') {
-                    errorMessage += 'Password terlalu lemah.';
-                    showFieldError(passwordInput, passwordError, true);
-                } else {
-                    errorMessage += error.message || 'Silakan coba lagi.';
-                }
-                
+                if (error.code === 'auth/email-already-in-use') { errorMessage += 'Email sudah terdaftar.'; showFieldError(emailInput, emailError, true); }
+                else if (error.code === 'auth/invalid-email') { errorMessage += 'Format email tidak valid.'; showFieldError(emailInput, emailError, true); }
+                else if (error.code === 'auth/weak-password') { errorMessage += 'Password terlalu lemah.'; showFieldError(passwordInput, passwordError, true); }
+                else { errorMessage += error.message || 'Silakan coba lagi.'; }
                 showMessage(errorMessage, 'error');
-            } finally {
-                setLoading(false);
-            }
+            } finally { setLoading(false); }
         });
-        
         console.log('🟢 [Register] READY');
     </script>
 </body>
