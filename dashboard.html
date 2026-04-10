@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -5,9 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Platform Guru SD/SMP/SMA</title>
     <meta name="description" content="Dashboard Administrasi Kelas Digital">
+    
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/components.css">
@@ -15,67 +18,168 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="bg-gray-50">
-    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-purple-600 text-white px-4 py-2 rounded z-50">Lewati ke konten utama</a>
+
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-purple-600 text-white px-4 py-2 rounded z-50">
+        Lewati ke konten utama
+    </a>
+
     <nav class="navbar" role="navigation" aria-label="Navigasi Utama">
         <div class="container">
             <div class="nav-content">
                 <div class="nav-brand">
                     <a href="dashboard.html" class="flex items-center gap-3" aria-label="Kembali ke Dashboard">
                         <div class="nav-logo" aria-hidden="true"><i class="fas fa-school"></i></div>
-                        <div><h1 class="nav-title">Administrasi Kelas</h1><p class="nav-subtitle">Platform Guru SD/SMP/SMA</p></div>
+                        <div>
+                            <h1 class="nav-title">Administrasi Kelas</h1>
+                            <p class="nav-subtitle">Platform Guru SD/SMP/SMA</p>
+                        </div>
                     </a>
                 </div>
+                
+                <!-- ✅ NAV ACTIONS (UPDATED WITH PROFILE DROPDOWN) -->
                 <div class="nav-actions flex items-center gap-4">
+                    <!-- User Info (existing) -->
                     <div class="user-info hidden sm:flex items-center gap-2">
                         <span class="text-sm text-gray-600" id="userEmail">Loading...</span>
                         <img class="h-8 w-8 rounded-full" src="https://ui-avatars.com/api/?name=User&background=7c3aed&color=fff" alt="Profile" id="userAvatar">
                     </div>
+                    
+                    <!-- ✅ TAMBAHAN: Profile Dropdown Button -->
                     <div class="relative">
                         <button id="profileMenuBtn" class="btn btn-ghost flex items-center gap-2" aria-label="Menu Profil" aria-haspopup="true" aria-expanded="false">
-                            <i class="fas fa-user-circle text-xl"></i><i class="fas fa-chevron-down text-xs"></i>
+                            <i class="fas fa-user-circle text-xl"></i>
+                            <i class="fas fa-chevron-down text-xs"></i>
                         </button>
+                        
+                        <!-- ✅ TAMBAHAN: Dropdown Menu -->
                         <div id="profileDropdown" class="hidden absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50" role="menu">
                             <div class="px-4 py-2 border-b border-gray-100">
                                 <p class="text-sm font-medium text-gray-900" id="profileName">Loading...</p>
                                 <p class="text-xs text-gray-500" id="profileEmailSub">Loading...</p>
                             </div>
-                            <a href="change-password.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem"><i class="fas fa-lock mr-2"></i>Ganti Password</a>
-                            <a href="profile.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem"><i class="fas fa-user-edit mr-2"></i>Edit Profil</a>
+                            
+                            <!-- Menu Items -->
+                            <a href="change-password.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">
+                                <i class="fas fa-lock mr-2"></i>Ganti Password
+                            </a>
+                            
+                            <a href="profile.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">
+                                <i class="fas fa-user-edit mr-2"></i>Edit Profil
+                            </a>
+                            
                             <div class="border-t border-gray-100 my-1"></div>
-                            <button onclick="logout()" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50" role="menuitem"><i class="fas fa-sign-out-alt mr-2"></i>Logout</button>
+                            
+                            <button onclick="logout()" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50" role="menuitem">
+                                <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                            </button>
                         </div>
                     </div>
-                    <button onclick="logout()" class="btn btn-ghost sm:hidden" aria-label="Logout"><i class="fas fa-sign-out-alt mr-2" aria-hidden="true"></i>Keluar</button>
+                    
+                    <!-- Existing Logout Button (kept for mobile) -->
+                    <button onclick="logout()" class="btn btn-ghost sm:hidden" aria-label="Logout">
+                        <i class="fas fa-sign-out-alt mr-2" aria-hidden="true"></i>Keluar
+                    </button>
                 </div>
             </div>
         </div>
     </nav>
+
     <main id="main-content">
+        
         <section class="hero dashboard-hero" aria-labelledby="welcome-heading">
             <div class="container">
-                <h1 id="welcome-heading" class="hero-title text-white"><i class="fas fa-home mr-3" aria-hidden="true"></i>Dashboard</h1>
+                <h1 id="welcome-heading" class="hero-title text-white">
+                    <i class="fas fa-home mr-3" aria-hidden="true"></i>Dashboard
+                </h1>
                 <p class="hero-subtitle text-white">Selamat datang di Rumah Digital Anda</p>
-                <div class="user-context-badge" id="userContextBadge"><i class="fas fa-user-circle mr-2" aria-hidden="true"></i><span id="userContextText">Loading...</span></div>
-            </div>
-        </section>
-        <section class="section" aria-labelledby="rooms-heading">
-            <div class="container">
-                <h2 id="rooms-heading" class="section-title text-center mb-8"><i class="fas fa-door-open mr-2" aria-hidden="true"></i>8 Ruang Utama</h2>
-                <div class="rooms-grid">
-                    <article class="room-card room-sd hidden" data-jenjang="sd" data-feature="sd"><a href="javascript:void(0)" class="room-link" onclick="showSection('sd-section'); return false;"><div class="room-icon bg-blue"><i class="fas fa-elementary"></i></div><h3 class="room-title">SD</h3><p class="room-desc">Kelas 1-6</p></a></article>
-                    <article class="room-card room-smp hidden" data-jenjang="smp" data-feature="smp"><a href="javascript:void(0)" class="room-link" onclick="showSection('smp-section'); return false;"><div class="room-icon bg-green"><i class="fas fa-school"></i></div><h3 class="room-title">SMP</h3><p class="room-desc">Kelas 7-9</p></a></article>
-                    <article class="room-card room-sma hidden" data-jenjang="sma" data-feature="sma"><a href="javascript:void(0)" class="room-link" onclick="showSection('sma-section'); return false;"><div class="room-icon bg-purple"><i class="fas fa-graduation-cap"></i></div><h3 class="room-title">SMA</h3><p class="room-desc">Kelas 10-12</p></a></article>
-                    <article class="room-card room-adm-kelas" data-feature="adm-kelas"><a href="javascript:void(0)" class="room-link" onclick="renderAdmKelas(); return false;"><div class="room-icon bg-orange"><i class="fas fa-users"></i></div><h3 class="room-title">Adm. Kelas</h3><p class="room-desc">Data siswa & absensi</p></a></article>
-                    <article class="room-card room-adm-pembelajaran" data-feature="adm-pembelajaran"><a href="#adm-pembelajaran" class="room-link"><div class="room-icon bg-blue"><i class="fas fa-book-open"></i></div><h3 class="room-title">Adm. Pembelajaran</h3><p class="room-desc">Modul & RPP</p></a></article>
-                    <article class="room-card room-penilaian" data-feature="penilaian"><a href="#penilaian" class="room-link"><div class="room-icon bg-green"><i class="fas fa-chart-bar"></i></div><h3 class="room-title">Penilaian</h3><p class="room-desc">Nilai & Laporan</p></a></article>
-                    <article class="room-card room-refleksi" data-feature="refleksi"><a href="javascript:void(0)" class="room-link" onclick="renderRefleksiForm(); return false;"><div class="room-icon bg-purple"><i class="fas fa-pen-fancy"></i></div><h3 class="room-title">Refleksi</h3><p class="room-desc">Jurnal pembelajaran</p></a></article>
-                    <article class="room-card room-generator-modul" data-feature="generator-modul"><a href="javascript:void(0)" class="room-link" onclick="renderGeneratorModule(); return false;"><div class="room-icon bg-pink"><i class="fas fa-wand-magic-sparkles"></i></div><h3 class="room-title">Generator Modul</h3><p class="room-desc">Template Generator</p></a></article>
+                <div class="user-context-badge" id="userContextBadge">
+                    <i class="fas fa-user-circle mr-2" aria-hidden="true"></i>
+                    <span id="userContextText">Loading...</span>
                 </div>
             </div>
         </section>
+
+        <section class="section" aria-labelledby="rooms-heading">
+            <div class="container">
+                <h2 id="rooms-heading" class="section-title text-center mb-8">
+                    <i class="fas fa-door-open mr-2" aria-hidden="true"></i>8 Ruang Utama
+                </h2>
+                
+                <div class="rooms-grid">
+                    <article class="room-card room-sd hidden" data-jenjang="sd" data-feature="sd">
+                        <a href="javascript:void(0)" class="room-link" onclick="showSection('sd-section'); return false;">
+                            <div class="room-icon bg-blue"><i class="fas fa-elementary"></i></div>
+                            <h3 class="room-title">SD</h3>
+                            <p class="room-desc">Kelas 1-6</p>
+                        </a>
+                    </article>
+                    
+                    <article class="room-card room-smp hidden" data-jenjang="smp" data-feature="smp">
+                        <a href="javascript:void(0)" class="room-link" onclick="showSection('smp-section'); return false;">
+                            <div class="room-icon bg-green"><i class="fas fa-school"></i></div>
+                            <h3 class="room-title">SMP</h3>
+                            <p class="room-desc">Kelas 7-9</p>
+                        </a>
+                    </article>
+                    
+                    <article class="room-card room-sma hidden" data-jenjang="sma" data-feature="sma">
+                        <a href="javascript:void(0)" class="room-link" onclick="showSection('sma-section'); return false;">
+                            <div class="room-icon bg-purple"><i class="fas fa-graduation-cap"></i></div>
+                            <h3 class="room-title">SMA</h3>
+                            <p class="room-desc">Kelas 10-12</p>
+                        </a>
+                    </article>
+                    
+                    <article class="room-card room-adm-kelas" data-feature="adm-kelas">
+                        <a href="javascript:void(0)" class="room-link" onclick="renderAdmKelas(); return false;">
+                            <div class="room-icon bg-orange"><i class="fas fa-users"></i></div>
+                            <h3 class="room-title">Adm. Kelas</h3>
+                            <p class="room-desc">Data siswa & absensi</p>
+                        </a>
+                    </article>
+                    
+                    <article class="room-card room-adm-pembelajaran" data-feature="adm-pembelajaran">
+                        <a href="#adm-pembelajaran" class="room-link">
+                            <div class="room-icon bg-blue"><i class="fas fa-book-open"></i></div>
+                            <h3 class="room-title">Adm. Pembelajaran</h3>
+                            <p class="room-desc">Modul & RPP</p>
+                        </a>
+                    </article>
+                    
+                    <article class="room-card room-penilaian" data-feature="penilaian">
+                        <a href="#penilaian" class="room-link">
+                            <div class="room-icon bg-green"><i class="fas fa-chart-bar"></i></div>
+                            <h3 class="room-title">Penilaian</h3>
+                            <p class="room-desc">Nilai & Laporan</p>
+                        </a>
+                    </article>
+                    
+                    <article class="room-card room-refleksi" data-feature="refleksi">
+                        <a href="javascript:void(0)" class="room-link" onclick="renderRefleksiForm(); return false;">
+                            <div class="room-icon bg-purple"><i class="fas fa-pen-fancy"></i></div>
+                            <h3 class="room-title">Refleksi</h3>
+                            <p class="room-desc">Jurnal pembelajaran</p>
+                        </a>
+                    </article>
+                    
+                    <article class="room-card room-generator-modul" data-feature="generator-modul">
+                        <a href="javascript:void(0)" class="room-link" onclick="renderGeneratorModule(); return false;">
+                            <div class="room-icon bg-pink"><i class="fas fa-wand-magic-sparkles"></i></div>
+                            <h3 class="room-title">Generator Modul</h3>
+                            <p class="room-desc">Template Generator</p>
+                        </a>
+                    </article>
+                </div>
+            </div>
+        </section>
+
         <section id="sd-section" class="section bg-white hidden" data-jenjang="sd">
             <div class="container">
-                <div class="section-header"><h2 class="section-title"><i class="fas fa-elementary mr-2"></i>SD - Kamar Kelas</h2><p class="section-subtitle">Pilih kelas yang Anda ampu</p><button onclick="backToDashboard()" class="btn btn-ghost btn-sm"><i class="fas fa-arrow-left mr-2"></i>Kembali</button></div>
+                <div class="section-header">
+                    <h2 class="section-title"><i class="fas fa-elementary mr-2"></i>SD - Kamar Kelas</h2>
+                    <p class="section-subtitle">Pilih kelas yang Anda ampu</p>
+                    <button onclick="backToDashboard()" class="btn btn-ghost btn-sm"><i class="fas fa-arrow-left mr-2"></i>Kembali</button>
+                </div>
                 <div class="kelas-grid">
                     <article class="kelas-card" data-kelas="1"><a href="javascript:void(0)" class="kelas-link" onclick="loadSemester('sd', '1'); return false;"><div class="kelas-number">1</div><h3>Kelas 1</h3><p>Fase A</p></a></article>
                     <article class="kelas-card" data-kelas="2"><a href="javascript:void(0)" class="kelas-link" onclick="loadSemester('sd', '2'); return false;"><div class="kelas-number">2</div><h3>Kelas 2</h3><p>Fase A</p></a></article>
@@ -86,9 +190,14 @@
                 </div>
             </div>
         </section>
+
         <section id="smp-section" class="section bg-white hidden" data-jenjang="smp">
             <div class="container">
-                <div class="section-header"><h2 class="section-title"><i class="fas fa-school mr-2"></i>SMP - Kamar Kelas</h2><p class="section-subtitle">Pilih kelas yang Anda ampu</p><button onclick="backToDashboard()" class="btn btn-ghost btn-sm"><i class="fas fa-arrow-left mr-2"></i>Kembali</button></div>
+                <div class="section-header">
+                    <h2 class="section-title"><i class="fas fa-school mr-2"></i>SMP - Kamar Kelas</h2>
+                    <p class="section-subtitle">Pilih kelas yang Anda ampu</p>
+                    <button onclick="backToDashboard()" class="btn btn-ghost btn-sm"><i class="fas fa-arrow-left mr-2"></i>Kembali</button>
+                </div>
                 <div class="kelas-grid">
                     <article class="kelas-card" data-kelas="7"><a href="javascript:void(0)" class="kelas-link" onclick="loadSemester('smp', '7'); return false;"><div class="kelas-number">7</div><h3>Kelas 7</h3><p>Fase D</p></a></article>
                     <article class="kelas-card" data-kelas="8"><a href="javascript:void(0)" class="kelas-link" onclick="loadSemester('smp', '8'); return false;"><div class="kelas-number">8</div><h3>Kelas 8</h3><p>Fase D</p></a></article>
@@ -96,9 +205,14 @@
                 </div>
             </div>
         </section>
+
         <section id="sma-section" class="section bg-white hidden" data-jenjang="sma">
             <div class="container">
-                <div class="section-header"><h2 class="section-title"><i class="fas fa-graduation-cap mr-2"></i>SMA - Kamar Kelas</h2><p class="section-subtitle">Pilih kelas yang Anda ampu</p><button onclick="backToDashboard()" class="btn btn-ghost btn-sm"><i class="fas fa-arrow-left mr-2"></i>Kembali</button></div>
+                <div class="section-header">
+                    <h2 class="section-title"><i class="fas fa-graduation-cap mr-2"></i>SMA - Kamar Kelas</h2>
+                    <p class="section-subtitle">Pilih kelas yang Anda ampu</p>
+                    <button onclick="backToDashboard()" class="btn btn-ghost btn-sm"><i class="fas fa-arrow-left mr-2"></i>Kembali</button>
+                </div>
                 <div class="kelas-grid">
                     <article class="kelas-card" data-kelas="10"><a href="javascript:void(0)" class="kelas-link" onclick="loadSemester('sma', '10'); return false;"><div class="kelas-number">10</div><h3>Kelas 10</h3><p>Fase E</p></a></article>
                     <article class="kelas-card" data-kelas="11"><a href="javascript:void(0)" class="kelas-link" onclick="loadSemester('sma', '11'); return false;"><div class="kelas-number">11</div><h3>Kelas 11</h3><p>Fase F</p></a></article>
@@ -106,47 +220,78 @@
                 </div>
             </div>
         </section>
+
         <section id="module-container" class="section bg-gray-50"><div class="container"></div></section>
         <section id="refleksi-container" class="section bg-gray-50 hidden"></section>
-    </main>
-    <footer class="footer"><div class="container"><p>&copy; 2026 Platform Administrasi Kelas Digital.</p><p class="mt-2">Dibuat untuk Guru SD/SMP/SMA</p></div></footer>
 
-    <!-- ✅ Global API Key Loader (UNCHANGED) -->
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 Platform Administrasi Kelas Digital.</p>
+            <p class="mt-2">Dibuat untuk Guru SD/SMP/SMA</p>
+        </div>
+    </footer>
+
+    <!-- ✅ TAMBAHAN: Global API Key Loader (Firestore-based) -->
     <script type="module">
         console.log('🔴 [Global API Key] Module START');
         window.GLOBAL_API_KEY = null;
+        
         export async function loadGlobalApiKey() {
             try {
+                console.log('🔑 [Global API Key] Fetching from Firestore...');
                 const { db, doc, getDoc } = await import('./modules/firebase-config.js');
                 const keyDoc = await getDoc(doc(db, 'settings', 'api_key'));
+                
                 if (keyDoc.exists()) {
                     const keyData = keyDoc.data();
                     window.GLOBAL_API_KEY = keyData.groq_key || keyData.api_key || null;
-                    if (window.GLOBAL_API_KEY) { console.log('✅ [Global API Key] Loaded'); return { success: true, key: window.GLOBAL_API_KEY }; }
-                    return { success: false, error: 'No key in document' };
+                    if (window.GLOBAL_API_KEY) {
+                        console.log('✅ [Global API Key] Loaded successfully');
+                        console.log('🔑 [Global API Key] Key prefix:', window.GLOBAL_API_KEY.substring(0, 10) + '...');
+                        return { success: true, key: window.GLOBAL_API_KEY };
+                    } else {
+                        console.warn('⚠️ [Global API Key] Document exists but no key found');
+                        return { success: false, error: 'No key in document' };
+                    }
+                } else {
+                    console.warn('⚠️ [Global API Key] Document not found in Firestore');
+                    return { success: false, error: 'Document not found' };
                 }
-                return { success: false, error: 'Document not found' };
-            } catch (error) { return { success: false, error: error.message }; }
+            } catch (error) {
+                console.error('❌ [Global API Key] Error fetching:', error);
+                return { success: false, error: error.message };
+            }
         }
+        
         export async function getApiKey() {
             if (window.GLOBAL_API_KEY) return window.GLOBAL_API_KEY;
             const result = await loadGlobalApiKey();
             if (result.success) return result.key;
             const localKey = localStorage.getItem('groq_api_key');
-            if (localKey) return localKey;
+            if (localKey) {
+                console.log('🔄 [Global API Key] Using localStorage fallback');
+                return localKey;
+            }
+            console.warn('⚠️ [Global API Key] No key available');
             return null;
         }
+        
         loadGlobalApiKey();
         console.log('🟢 [Global API Key] Module READY');
     </script>
 
-    <!-- ✅ UPDATED: Soft Block + Profile Dropdown (Minimal Change) -->
+    <!-- ✅ FIXED: Profile Dropdown + Dashboard Filtering (MODULE VERSION) -->
     <script type="module">
+        // ✅ Import Firebase modules at TOP (required for module scripts)
         import { auth, onAuthStateChanged, db, doc, getDoc } from './modules/firebase-config.js';
-        console.log('🔴 [Dashboard Soft Block] START');
         
+        console.log('🔴 [Dashboard Filter] Module START');
+        
+        // Wait for DOM to be fully loaded before accessing elements
         document.addEventListener('DOMContentLoaded', async () => {
-            console.log('✅ [Soft Block] DOM loaded');
+            console.log('✅ [Dashboard Filter] DOM loaded');
             
             // DOM Elements
             const els = {
@@ -160,127 +305,157 @@
                 userContextText: document.getElementById('userContextText')
             };
             
-            // Profile dropdown toggle (PRESERVED EXACTLY)
+            // ✅ Profile Dropdown Toggle (simple)
             if (els.profileMenuBtn && els.profileDropdown) {
-                els.profileMenuBtn.addEventListener('click', (e) => { e.stopPropagation(); els.profileDropdown.classList.toggle('hidden'); });
-                document.addEventListener('click', (e) => { if (!els.profileDropdown?.contains(e.target) && !els.profileMenuBtn?.contains(e.target)) els.profileDropdown?.classList.add('hidden'); });
+                els.profileMenuBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    els.profileDropdown.classList.toggle('hidden');
+                });
+                document.addEventListener('click', (e) => {
+                    if (!els.profileDropdown.contains(e.target) && !els.profileMenuBtn.contains(e.target)) {
+                        els.profileDropdown.classList.add('hidden');
+                    }
+                });
             }
             
-            // ✅ Load user data from Firestore (PRESERVED)
+            // ✅ Load user data from Firestore
             async function loadUserData(userId) {
                 try {
+                    console.log('👤 [Filter] Loading user:', userId);
                     const userDoc = await getDoc(doc(db, 'users', userId));
                     if (userDoc.exists()) {
                         const data = userDoc.data();
-                        console.log('✅ [Soft Block] User ', { jenjang: data.jenjang_sekolah, kelas: data.kelas_diampu, role: data.role });
+                        console.log('✅ [Filter] User ', {
+                            jenjang: data.jenjang_sekolah,
+                            kelas_diampu: data.kelas_diampu,
+                            role: data.role,
+                            sd_mapel_type: data.sd_mapel_type
+                        });
                         return data;
                     }
+                    console.warn('⚠️ [Filter] User doc not found');
                     return null;
-                } catch (e) { console.error('❌ [Soft Block] Error:', e); return null; }
-            }
-            
-            // ✅ SOFT BLOCK: Intercept room-card clicks (NEW - Minimal Addition)
-            function setupSoftBlock(userData) {
-                if (!userData) return;
-                const userJenjang = userData.jenjang_sekolah;
-                const role = userData.role || 'teacher';
-                console.log('🔒 [Soft Block] Setup for jenjang:', userJenjang);
-                
-                // Add interceptor to each room-card link
-                document.querySelectorAll('.room-card[data-jenjang] .room-link').forEach(link => {
-                    const cardJenjang = link.closest('.room-card')?.getAttribute('data-jenjang');
-                    if (!cardJenjang) return;
-                    
-                    // Add capturing listener to run BEFORE inline onclick
-                    link.addEventListener('click', function(e) {
-                        // Admin can access all
-                        if (role === 'admin') return; // Let original onclick run
-                        // Teacher: check jenjang match
-                        if (cardJenjang !== userJenjang) {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            const label = {sd:'SD', smp:'SMP', sma:'SMA'}[cardJenjang] || cardJenjang.toUpperCase();
-                            alert(`⚠️ Akses Ditolak\n\nFitur ${label} hanya untuk guru ${label}.\n\nAnda: Guru ${userJenjang?.toUpperCase()}`);
-                            return false;
-                        }
-                        // Match: let original onclick run
-                        console.log(`✅ [Soft Block] Access granted: ${cardJenjang}`);
-                    }, true); // ✅ Capturing phase = runs BEFORE inline onclick
-                });
-                console.log('✅ [Soft Block] Interceptors setup');
-            }
-            
-            // ✅ Filter kelas cards inside sections (PRESERVED - for when section is shown)
-            function filterKelasCards(userData) {
-                if (!userData) return;
-                const jenjang = userData.jenjang_sekolah;
-                const kelasDiampu = userData.kelas_diampu || [];
-                const sdMapelType = userData.sd_mapel_type || 'kelas';
-                const role = userData.role || 'teacher';
-                if (kelasDiampu.length === 0 || role !== 'teacher') return;
-                
-                const section = document.getElementById(`${jenjang}-section`);
-                if (!section) return;
-                
-                section.querySelectorAll('.kelas-card[data-kelas]').forEach(card => {
-                    const k = card.getAttribute('data-kelas');
-                    if (jenjang === 'sd' && sdMapelType !== 'kelas') {
-                        card.classList.remove('hidden'); // PAI/PJOK: show all
-                    } else {
-                        card.classList.toggle('hidden', !kelasDiampu.includes(k));
-                    }
-                });
-            }
-            
-            // ✅ Update context badge (PRESERVED)
-            function updateContextBadge(userData) {
-                if (!els.userContextBadge || !els.userContextText) return;
-                const { jenjang_sekolah, role, sd_mapel_type } = userData;
-                els.userContextBadge.classList.remove('hidden');
-                if (role === 'admin') {
-                    els.userContextText.innerHTML = '<i class="fas fa-crown text-yellow-500 mr-1"></i> Admin';
-                } else if (jenjang_sekolah) {
-                    const label = {sd:'SD', smp:'SMP', sma:'SMA'}[jenjang_sekolah] || jenjang_sekolah.toUpperCase();
-                    const extra = (jenjang_sekolah==='sd' && sd_mapel_type!=='kelas') ? ` • ${sd_mapel_type.toUpperCase()}` : '';
-                    els.userContextText.textContent = `Guru ${label}${extra}`;
+                } catch (e) {
+                    console.error('❌ [Filter] Error:', e);
+                    return null;
                 }
             }
             
-            // ✅ Main: Auth state listener (PRESERVED + Added soft block call)
-            onAuthStateChanged(auth, async (user) => {
-                console.log('🔐 [Soft Block] Auth:', user ? `IN (${user.uid})` : 'OUT');
-                if (!user) return;
+            // ✅ Apply filtering to dashboard
+            function applyFilter(userData) {
+                if (!userData) {
+                    console.log('⚠️ [Filter] No data, skip');
+                    return;
+                }
                 
-                try {
-                    const userData = await loadUserData(user.uid);
-                    if (!userData || !userData.jenjang_sekolah) return;
+                const jenjang = userData.jenjang_sekolah;
+                const kelasDiampu = userData.kelas_diampu || [];
+                const role = userData.role || 'teacher';
+                const sdMapelType = userData.sd_mapel_type || 'kelas';
+                
+                console.log('🔍 [Filter] Applying:', { jenjang, kelasDiampu, role });
+                
+                // Update context badge
+                if (els.userContextBadge && els.userContextText) {
+                    els.userContextBadge.classList.remove('hidden');
+                    if (role === 'admin') {
+                        els.userContextText.innerHTML = '<i class="fas fa-crown text-yellow-500 mr-1"></i> Admin';
+                    } else if (jenjang) {
+                        const label = {sd:'SD', smp:'SMP', sma:'SMA'}[jenjang] || jenjang.toUpperCase();
+                        const extra = (jenjang==='sd' && sdMapelType!=='kelas') ? ` • ${sdMapelType.toUpperCase()}` : '';
+                        els.userContextText.textContent = `Guru ${label}${extra}`;
+                    }
+                }
+                
+                // Filter jenjang (teachers only)
+                if (jenjang && role === 'teacher') {
+                    console.log(`🎯 Filter jenjang: ${jenjang}`);
                     
-                    // ✅ NEW: Setup soft block interceptors
-                    setupSoftBlock(userData);
+                    // Hide all jenjang rooms, show matching
+                    document.querySelectorAll('.room-card[data-jenjang]').forEach(el => el.classList.add('hidden'));
+                    const room = document.querySelector(`.room-card[data-jenjang="${jenjang}"]`);
+                    if (room) {
+                        room.classList.remove('hidden');
+                        console.log(`✅ Show room: ${jenjang}`);
+                    }
                     
-                    // ✅ PRESERVED: Filter kelas cards + update badge + profile
-                    filterKelasCards(userData);
-                    updateContextBadge(userData);
-                    
-                    const nama = userData.nama_lengkap || 'User';
-                    const email = user.email || '';
+                    // Hide all jenjang sections, show matching
+                    ['sd','smp','sma'].forEach(j => {
+                        document.getElementById(`${j}-section`)?.classList.add('hidden');
+                    });
+                    const section = document.getElementById(`${jenjang}-section`);
+                    if (section) {
+                        section.classList.remove('hidden');
+                        console.log(`✅ Show section: ${jenjang}`);
+                    }
+                }
+                
+                // Filter kelas cards (teachers only)
+                if (kelasDiampu.length > 0 && role === 'teacher') {
+                    console.log(`🎯 Filter kelas: ${kelasDiampu.join(', ')}`);
+                    document.querySelectorAll('.kelas-card[data-kelas]').forEach(card => {
+                        const k = card.getAttribute('data-kelas');
+                        card.classList.toggle('hidden', !kelasDiampu.includes(k));
+                    });
+                }
+                
+                // SD Guru PAI/PJOK: show all classes
+                if (jenjang === 'sd' && sdMapelType !== 'kelas' && role === 'teacher') {
+                    console.log('✅ SD Guru PAI/PJOK: show all classes');
+                    document.querySelectorAll('.kelas-card[data-kelas]').forEach(card => card.classList.remove('hidden'));
+                }
+                
+                console.log('🎉 [Filter] DONE!');
+            }
+            
+            // ✅ Listen to auth state
+            onAuthStateChanged(auth, async (user) => {
+                console.log('🔐 Auth:', user ? `IN (${user.uid})` : 'OUT');
+                
+                if (user) {
+                    // Fast load from localStorage
+                    const nama = localStorage.getItem('user_nama_lengkap') || 'User';
+                    const email = localStorage.getItem('user_email') || '';
                     if (els.profileName) els.profileName.textContent = nama;
                     if (els.profileEmailSub) els.profileEmailSub.textContent = email;
                     if (els.userEmail) els.userEmail.textContent = email;
-                    if (els.userAvatar) els.userAvatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(nama)}&background=7c3aed&color=fff`;
+                    if (els.userAvatar) {
+                        els.userAvatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(nama)}&background=7c3aed&color=fff`;
+                    }
                     
-                    localStorage.setItem('user_jenjang', userData.jenjang_sekolah || '');
-                    localStorage.setItem('user_kelas_diampu', JSON.stringify(userData.kelas_diampu || []));
-                    console.log('🎉 [Soft Block] Setup complete!');
-                    
-                } catch (e) { console.error('❌ [Soft Block] Error:', e); }
+                    // Load from Firestore + filter
+                    const userData = await loadUserData(user.uid);
+                    if (userData) {
+                        // Update profile
+                        const namaFb = userData.nama_lengkap || nama;
+                        const emailFb = userData.email || email;
+                        if (els.profileName) els.profileName.textContent = namaFb;
+                        if (els.profileEmailSub) els.profileEmailSub.textContent = emailFb;
+                        if (els.userEmail) els.userEmail.textContent = emailFb;
+                        
+                        // ✅ APPLY FILTERING
+                        applyFilter(userData);
+                        
+                        // Save to localStorage
+                        localStorage.setItem('user_jenjang', userData.jenjang_sekolah || '');
+                        localStorage.setItem('user_kelas_diampu', JSON.stringify(userData.kelas_diampu || []));
+                    }
+                } else {
+                    // Logged out: reset
+                    if (els.profileName) els.profileName.textContent = 'User';
+                    if (els.profileEmailSub) els.profileEmailSub.textContent = '';
+                    if (els.userEmail) els.userEmail.textContent = '';
+                    ['sd','smp','sma'].forEach(j => {
+                        document.getElementById(`${j}-section`)?.classList.add('hidden');
+                    });
+                }
             });
             
-            console.log('🟢 [Dashboard Soft Block] READY');
+            console.log('🟢 [Dashboard Filter] READY');
         });
     </script>
 
-    <!-- ✅ Module Scripts (UNCHANGED) -->
+    <!-- ✅ SCRIPT TAGS (UNCHANGED) -->
     <script type="module" src="modules/firebase-config.js"></script>
     <script type="module" src="js/main.js"></script>
     <script type="module" src="js/dashboard.js"></script>
@@ -295,5 +470,6 @@
     <script type="module" src="modules/adm-kelas/storage.js"></script>
     <script type="module" src="modules/adm-kelas/adm-kelas-template.js"></script>
     <script type="module" src="modules/adm-kelas/adm-kelas.js"></script>
+    
 </body>
 </html>
