@@ -29,12 +29,10 @@ export async function isAiReady() {
   } catch (error) { console.error('❌ [CTA Generator] Error checking AI readiness:', error); _aiReadyCache = false; return false; }
 }
 
-// ✅ Filter CTA options based on user's assigned classes/mapel
 function filterCTAOptions(userData) {
   if (!userData) return;
   const { jenjang_sekolah, kelas_diampu, mapel_diampu, sd_mapel_type } = userData;
   
-  // Filter Kelas Dropdown
   const kelasSelect = document.getElementById('cta-kelas');
   if (kelasSelect && kelas_diampu?.length > 0) {
     if (jenjang_sekolah === 'sd' && sd_mapel_type !== 'kelas') {
@@ -44,7 +42,6 @@ function filterCTAOptions(userData) {
     }
   }
   
-  // Filter Mapel Dropdown
   const mapelSelect = document.getElementById('cta-mapel');
   if (mapelSelect) {
     if (jenjang_sekolah === 'sd' && sd_mapel_type === 'kelas') {
@@ -69,55 +66,95 @@ function enableOptions(selectEl, allowedValues) {
   });
 }
 
-// ✅ FIXED: Setup jenjang dropdown auto-select + prevent change (Robust + Debug)
+// ✅ FIXED: Setup jenjang dropdown auto-select + prevent change
 function setupJenjangDropdown(userData) {
-  if (!userData) {
-    console.warn('⚠️ [Jenjang] No userData, skip setup');
-    return;
-  }
-  
+  if (!userData) { console.warn('⚠️ [Jenjang] No userData, skip'); return; }
   const userJenjang = userData.jenjang_sekolah;
-  console.log('🔍 [Jenjang] Setup called with:', { userJenjang });
+  console.log('🔍 [Jenjang] Setup:', { userJenjang });
+  if (!userJenjang) { console.warn('⚠️ [Jenjang] userJenjang empty, skip'); return; }
   
-  if (!userJenjang) {
-    console.warn('⚠️ [Jenjang] userJenjang is empty, skip setup');
-    return;
-  }
-  
-  // Wait for DOM to be fully rendered
   setTimeout(() => {
     const jenjangSelect = document.getElementById('cta-jenjang');
-    console.log('🔍 [Jenjang] Element found:', !!jenjangSelect);
-    
-    if (!jenjangSelect) {
-      console.error('❌ [Jenjang] #cta-jenjang not found!');
-      return;
-    }
-    
-    // Auto-select user's jenjang
+    if (!jenjangSelect) { console.error('❌ [Jenjang] #cta-jenjang not found!'); return; }
     jenjangSelect.value = userJenjang;
-    console.log(`✅ [Jenjang] Auto-set to: ${userJenjang}`);
-    
-    // Remove existing listeners to avoid duplicates
     const newSelect = jenjangSelect.cloneNode(true);
     jenjangSelect.replaceWith(newSelect);
-    
-    // Add soft lock listener (Option B: alert + revert)
     newSelect.addEventListener('change', function(e) {
-      console.log(`🖱️ [Jenjang] Change: ${this.value} vs ${userJenjang}`);
-      
       if (this.value !== userJenjang) {
         e.preventDefault();
-        e.stopPropagation();
         const label = {sd:'SD', smp:'SMP', sma:'SMA'}[userJenjang] || userJenjang.toUpperCase();
         alert(`⚠️ Jenjang Terkunci\n\nAnda: Guru ${label}\nJenjang tidak dapat diubah.`);
         this.value = userJenjang;
-        console.log(`🔄 [Jenjang] Reverted to: ${userJenjang}`);
       }
     });
-    
-    console.log(`✅ [Jenjang] Setup complete: ${userJenjang} (soft lock)`);
-  }, 150); // Slightly longer delay for safety
+    console.log(`✅ [Jenjang] Setup complete: ${userJenjang}`);
+  }, 150);
+}
+
+// ✅ NEW: Download function for CTA results
+function downloadCTAResult() {
+  const cp = document.getElementById('result-cp')?.value || '';
+  const tp = document.getElementById('result-tp')?.value || '';
+  const atp = document.getElementById('result-atp')?.value || '';
+  
+  if (!cp || cp.includes('⏳') || cp.includes('Error')) {
+    alert('⚠️ Generate data dulu sebelum download!');
+    return;
+  }
+  
+  const jenjang = document.getElementById('cta-jenjang')?.value || '';
+  const kelas = document.getElementById('cta-kelas')?.value || '';
+  const semester = document.getElementById('cta-semester')?.value || '';
+  const mapel = document.getElementById('cta-mapel')?.value || '';
+  const topik = document.getElementById('cta-topik')?.value || '';
+  const sekolah = document.getElementById('kop-sekolah')?.value || '';
+  const guru = document.getElementById('cta-guru')?.value || '';
+  const tahun = document.getElementById('kop-tahun')?.value || '';
+  
+  const labelJenjang = {sd:'SD', smp:'SMP', sma:'SMA'}[jenjang] || jenjang.toUpperCase();
+  const labelSemester = semester === '1' ? 'Ganjil' : 'Genap';
+  
+  let content = `═══════════════════════════════════════════════════════════\n`;
+  content += `              CAPAIAN PEMBELAJARAN (CP/TP/ATP)\n`;
+  content += `                  KURIKULUM MERDEKA\n`;
+  content += `═══════════════════════════════════════════════════════════\n\n`;
+  content += `INFORMASI DOKUMEN\n`;
+  content += `───────────────────────────────────────────────────────────\n`;
+  content += `Nama Sekolah  : ${sekolah}\n`;
+  content += `Tahun Ajaran  : ${tahun}\n`;
+  content += `Jenjang       : ${labelJenjang}\n`;
+  content += `Kelas         : ${kelas}\n`;
+  content += `Semester      : ${labelSemester}\n`;
+  content += `Mata Pelajaran: ${mapel}\n`;
+  content += `Guru Pengampu : ${guru}\n`;
+  content += `Topik/Materi  : ${topik}\n\n`;
+  content += `═══════════════════════════════════════════════════════════\n`;
+  content += `                    CAPAIAN PEMBELAJARAN (CP)\n`;
+  content += `═══════════════════════════════════════════════════════════\n\n`;
+  content += `${cp}\n\n`;
+  content += `═══════════════════════════════════════════════════════════\n`;
+  content += `                    TUJUAN PEMBELAJARAN (TP)\n`;
+  content += `═══════════════════════════════════════════════════════════\n\n`;
+  content += `${tp}\n\n`;
+  content += `═══════════════════════════════════════════════════════════\n`;
+  content += `              ALUR TUJUAN PEMBELAJARAN (ATP)\n`;
+  content += `═══════════════════════════════════════════════════════════\n\n`;
+  content += `${atp}\n\n`;
+  content += `═══════════════════════════════════════════════════════════\n`;
+  content += `Dokumen ini dibuat dengan Platform Administrasi Kelas Digital\n`;
+  content += `© 2026 - Generated by AI\n`;
+  
+  const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `CP-TP-ATP_${labelJenjang}_Kelas${kelas}_${mapel}_${topik.replace(/\s+/g, '_')}.txt`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+  
+  console.log('✅ [Download] File downloaded successfully');
 }
 
 window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, semesterFromParam) {
@@ -133,41 +170,22 @@ window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, sem
   const aiReady = await isAiReady();
   console.log('🤖 [CTA Generator] AI Ready:', aiReady);
   
-  // ✅ LOAD USER DATA + APPLY FILTERS
-  console.log('👤 [CTA Generator] Loading user data...');
   try {
-    const userDoc = await getDoc(doc(db, 'cp_tp_atp', user.uid)); // ← FIX: Collection name
-    if (userDoc.exists()) {
-      const userData = userDoc.data();
+    const userProfile = await getDoc(doc(db, 'users', user.uid));
+    if (userProfile.exists()) {
+      const userData = userProfile.data();
       userRole = userData.role || 'teacher';
       userKelasDiampu = userData.kelas_diampu || [];
       userMapelDiampu = userData.mapel_diampu || [];
       userSdMapelType = userData.sd_mapel_type || 'kelas';
       console.log('👤 [CTA Generator] User:', { role: userRole, kelas: userKelasDiampu, mapel: userMapelDiampu, sdType: userSdMapelType });
-      
-      // ✅ APPLY FILTERING TO DROPDOWNS
       filterCTAOptions(userData);
-      
-      // ✅ FIXED: Setup jenjang dropdown auto-select + soft lock
       setupJenjangDropdown(userData);
     } else {
-      // Fallback: load from users collection
-      const userProfile = await getDoc(doc(db, 'users', user.uid));
-      if (userProfile.exists()) {
-        const userData = userProfile.data();
-        userRole = userData.role || 'teacher';
-        userKelasDiampu = userData.kelas_diampu || [];
-        userMapelDiampu = userData.mapel_diampu || [];
-        userSdMapelType = userData.sd_mapel_type || 'kelas';
-        filterCTAOptions(userData);
-        setupJenjangDropdown(userData);
-      } else {
-        userRole = 'teacher'; userKelasDiampu = []; userMapelDiampu = []; userSdMapelType = 'kelas';
-      }
+      userRole = 'teacher'; userKelasDiampu = []; userMapelDiampu = []; userSdMapelType = 'kelas';
     }
   } catch (e) { console.error('❌ [CTA Generator] Failed to load user ', e); userRole = 'teacher'; userKelasDiampu = []; }
   
-  // ✅ DETERMINE CLASS OPTIONS
   const allClasses = ['1','2','3','4','5','6','7','8','9','10','11','12'];
   let availableClasses = allClasses;
   let isClassLocked = false;
@@ -183,7 +201,7 @@ window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, sem
   if (isClassLocked && availableClasses.length > 0) defaultClass = availableClasses[0];
   console.log('📚 [CTA Generator] Available classes:', availableClasses);
   
-  // ✅ RENDER UI — UPDATED CSS: Remove ALL borders from result textareas
+  // ✅ RENDER UI — UPDATED: Hide scrollbar + Add Download button
   container.innerHTML = `
     <style>
       .cta-generator-form { max-width: 950px; margin: auto; padding: 30px; background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
@@ -195,7 +213,7 @@ window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, sem
       .cta-generator-form input:focus, .cta-generator-form select:focus { outline: none; border-color: #0891b2; }
       .cta-generator-form select:disabled { background: #f3f4f6; color: #6b7280; cursor: not-allowed; }
       
-      /* ✅ FIXED: Remove ALL borders from result textareas — including left border */
+      /* ✅ FIXED: Remove ALL borders + HIDE SCROLLBAR */
       #result-cp, #result-tp, #result-atp {
         width: 100%;
         min-height: 200px;
@@ -216,6 +234,14 @@ window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, sem
         box-shadow: none !important;
         outline: none !important;
         color: #1f2937;
+        /* Hide scrollbar */
+        scrollbar-width: none !important; /* Firefox */
+        -ms-overflow-style: none !important; /* IE/Edge */
+      }
+      #result-cp::-webkit-scrollbar,
+      #result-tp::-webkit-scrollbar,
+      #result-atp::-webkit-scrollbar {
+        display: none !important; /* Chrome/Safari */
       }
       #result-cp:focus, #result-tp:focus, #result-atp:focus {
         background: transparent !important;
@@ -223,13 +249,15 @@ window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, sem
         border: none !important;
       }
       
-      .btn-generate, .btn-save, .btn-secondary, .btn-print { margin-top: 20px; padding: 14px 30px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; }
+      .btn-generate, .btn-save, .btn-secondary, .btn-print, .btn-download { margin-top: 20px; padding: 14px 30px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; }
       .btn-generate { background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%); color: white; }
       .btn-generate:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(8,145,178,0.3); }
       .btn-save { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; }
       .btn-save:hover { background: linear-gradient(135deg, #059669 0%, #047857 100%); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(16,185,129,0.3); }
       .btn-print { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white; }
       .btn-print:hover { background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(99,102,241,0.3); }
+      .btn-download { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; }
+      .btn-download:hover { background: linear-gradient(135deg, #d97706 0%, #b45309 100%); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(245,158,11,0.3); }
       .btn-secondary { background: #6b7280; color: white; margin-top: 10px; }
       .btn-secondary:hover { background: #4b5563; transform: translateY(-2px); }
       .btn-back { margin-top: 20px; padding: 12px 30px; background: #6b7280; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; width: auto; }
@@ -251,7 +279,7 @@ window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, sem
       .debug-error { background: #fef2f2; border-left-color: #ef4444; }
       .result-separator { border: none; border-top: 1px dashed #e5e7eb; margin: 24px 0; }
       @media print {
-        .cta-generator-form h2, .subtitle, .section-title, .cta-generator-form label, .btn-generate, .btn-save, .btn-secondary, .btn-print, .btn-back, .debug-box, #cta-form, .mt-12 { display: none !important; }
+        .cta-generator-form h2, .subtitle, .section-title, .cta-generator-form label, .btn-generate, .btn-save, .btn-secondary, .btn-print, .btn-download, .btn-back, .debug-box, #cta-form, .mt-12 { display: none !important; }
         #cta-result { display: block !important; }
         #result-cp, #result-tp, #result-atp { border: none !important; background: white !important; color: black !important; font-size: 12pt; min-height: auto; }
         body { background: white; }
@@ -290,33 +318,37 @@ window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, sem
         <hr class="result-separator">
         <label for="result-atp"><i class="fas fa-stream mr-2"></i>Alur Tujuan Pembelajaran (ATP)</label><textarea id="result-atp" placeholder="ATP akan muncul setelah generate..." readonly></textarea>
         <div style="display: flex; gap: 12px; margin-top: 16px;">
-          <button type="button" id="btn-print" class="btn-print" style="flex: 1;"><i class="fas fa-print"></i> Print Hasil</button>
-          <button type="button" id="btn-save" class="btn-save" style="flex: 2;"><i class="fas fa-save"></i> Simpan ke Firestore</button>
-          <button type="button" id="btn-regenerate" class="btn-secondary" style="flex: 1;"><i class="fas fa-redo"></i> Generate Ulang</button>
+          <button type="button" id="btn-print" class="btn-print" style="flex: 1;"><i class="fas fa-print"></i> Print</button>
+          <button type="button" id="btn-download" class="btn-download" style="flex: 1;"><i class="fas fa-download"></i> Download</button>
+          <button type="button" id="btn-save" class="btn-save" style="flex: 1;"><i class="fas fa-save"></i> Simpan</button>
+          <button type="button" id="btn-regenerate" class="btn-secondary" style="flex: 1;"><i class="fas fa-redo"></i> Ulang</button>
         </div>
       </div>
       <div class="mt-12"><h3 class="text-xl font-bold mb-4 text-gray-800"><i class="fas fa-archive mr-2"></i>Dokumen Tersimpan (<span id="saved-count">0</span>)</h3><div id="cta-list" class="space-y-4"><div class="loading-spinner"><i class="fas fa-spinner fa-spin text-2xl mb-3"></i><p>Memuat...</p></div></div></div>
     </div>`;
   
-  // Debug Box
   (async function showDebugStatus() {
     const debugBox = document.getElementById('debug-api-status'), debugMsg = document.getElementById('debug-api-message');
     if (!debugBox || !debugMsg) return;
     try {
       const { getGroqApiKey } = await import('./groq-api.js'), key = await getGroqApiKey();
-      if (key && key.startsWith('gsk_') && key.length >= 20) { debugBox.className = 'debug-box debug-success'; debugMsg.innerHTML = `<span style="color:#166534;"><strong>✅ API KEY FOUND!</strong></span><br>Key: ${key.substring(0,15)}...<br>Length: ${key.length} chars<br><small>Global API key dari Firestore bekerja!</small>`; }
-      else if (key) { debugBox.className = 'debug-box debug-error'; debugMsg.innerHTML = `<span style="color:#991b1b;"><strong>⚠️ KEY INVALID</strong></span><br>Key tidak dimulai dengan "gsk_" atau terlalu pendek<br><small>Cek Firestore: settings/api_key → keys array</small>`; }
-      else { debugBox.className = 'debug-box debug-error'; debugMsg.innerHTML = `<span style="color:#991b1b;"><strong>❌ NO KEY FOUND</strong></span><br>API key tidak ditemukan di Firestore atau localStorage<br><small>Cek: 1) Document settings/api_key ada, 2) keys array tidak kosong, 3) active:true</small>`; }
-    } catch (e) { debugBox.className = 'debug-box debug-error'; debugMsg.innerHTML = `<span style="color:#991b1b;"><strong>❌ ERROR</strong></span><br>${e.message}<br><small>Cek Firestore rules published?</small>`; }
+      if (key && key.startsWith('gsk_') && key.length >= 20) { debugBox.className = 'debug-box debug-success'; debugMsg.innerHTML = `<span style="color:#166534;"><strong>✅ API KEY FOUND!</strong></span><br>Key: ${key.substring(0,15)}...<br>Length: ${key.length} chars`; }
+      else if (key) { debugBox.className = 'debug-box debug-error'; debugMsg.innerHTML = `<span style="color:#991b1b;"><strong>⚠️ KEY INVALID</strong></span>`; }
+      else { debugBox.className = 'debug-box debug-error'; debugMsg.innerHTML = `<span style="color:#991b1b;"><strong>❌ NO KEY FOUND</strong></span>`; }
+    } catch (e) { debugBox.className = 'debug-box debug-error'; debugMsg.innerHTML = `<span style="color:#991b1b;"><strong>❌ ERROR</strong></span><br>${e.message}`; }
   })();
   
   // Print Button
   const btnPrint = document.getElementById('btn-print');
   if (btnPrint) btnPrint.addEventListener('click', () => { const cp = document.getElementById('result-cp')?.value; if (!cp || cp.includes('⏳') || cp.includes('Error')) { alert('⚠️ Generate data dulu sebelum print!'); return; } window.print(); });
   
+  // ✅ NEW: Download Button
+  const btnDownload = document.getElementById('btn-download');
+  if (btnDownload) btnDownload.addEventListener('click', downloadCTAResult);
+  
   // Test Global Key Button (admin)
   const testKeyBtn = document.getElementById('btn-test-global-key');
-  if (testKeyBtn && userRole === 'admin') testKeyBtn.addEventListener('click', async () => { try { const { getNextApiKey } = await import('./global-api-key.js'), key = await getNextApiKey(); if (key) { alert('✅ Global API Key ditemukan!\n\nKey prefix: ' + key.substring(0, 15) + '...'); location.reload(); } else alert('❌ Global API Key TIDAK ditemukan.\n\nCek:\n1. Document settings/api_key ada\n2. Field keys array tidak kosong\n3. Minimal 1 key dengan active:true'); } catch (e) { console.error('❌ [CTA Generator] Test error:', e); alert('❌ Error test global key: ' + e.message); } });
+  if (testKeyBtn && userRole === 'admin') testKeyBtn.addEventListener('click', async () => { try { const { getNextApiKey } = await import('./global-api-key.js'), key = await getNextApiKey(); if (key) { alert('✅ Global API Key ditemukan!'); location.reload(); } else alert('❌ Global API Key TIDAK ditemukan.'); } catch (e) { console.error('❌ [CTA Generator] Test error:', e); alert('❌ Error: ' + e.message); } });
   
   hideDashboardSections(); container.classList.remove('hidden'); setupEventHandlers(); loadCTAData(); console.log('✅ [CTA Generator] UI rendered');
 };
@@ -332,7 +364,7 @@ async function handleGenerate() {
   const validation = validateInputWithFilter({ sekolah, jenjang, kelas, semester, mapel, topik }, { jenjang_sekolah: jenjang, kelas_diampu: userKelasDiampu, mapel_diampu: userMapelDiampu, sd_mapel_type: userSdMapelType });
   if (!validation.valid) { alert('⚠️ ' + validation.errors.join('\n')); return; }
   
-  const aiReady = await isAiReady(); if (!aiReady) { const userDoc = await getDoc(doc(db, 'users', user.uid)), isAdmin = userDoc.exists() && userDoc.data()?.role === 'admin'; if (isAdmin) alert('⚠️ Global API Key belum terdeteksi.\n\nSilakan:\n1. Cek Firestore: settings/api_key\n2. Pastikan keys array berisi key aktif\n3. Klik "Test Global Key" untuk debug'); else alert('⚠️ AI belum aktif. Hubungi admin untuk aktivasi.'); return; }
+  const aiReady = await isAiReady(); if (!aiReady) { const userDoc = await getDoc(doc(db, 'users', user.uid)), isAdmin = userDoc.exists() && userDoc.data()?.role === 'admin'; if (isAdmin) alert('⚠️ Global API Key belum terdeteksi.'); else alert('⚠️ AI belum aktif. Hubungi admin.'); return; }
   
   const resultDiv = document.getElementById('cta-result'); if (resultDiv) resultDiv.classList.remove('hidden');
   document.getElementById('result-cp').value = `⏳ Generating CP...`; document.getElementById('result-tp').value = `⏳ Generating TP...`; document.getElementById('result-atp').value = `⏳ Generating ATP...`; resultDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -345,10 +377,9 @@ async function handleGenerate() {
   } catch (error) {
     console.error('❌ [CTA Generator] Error:', error);
     let errorMessage = error.message;
-    if (error.message.includes('API key') || error.message.includes('configured')) errorMessage = 'API Key tidak valid. Hubungi admin untuk update.';
-    else if (error.message.includes('quota') || error.message.includes('429')) errorMessage = 'Limit AI harian habis. Tunggu 24 jam atau admin buat key baru.';
-    else if (error.message.includes('koneksi') || error.message.includes('network') || error.message.includes('fetch')) errorMessage = 'Koneksi internet bermasalah. Cek koneksi Anda.';
-    else if (error.message.includes('decommissioned') || error.message.includes('model')) errorMessage = 'Model AI sedang diupdate. Hubungi admin.';
+    if (error.message.includes('API key')) errorMessage = 'API Key tidak valid.';
+    else if (error.message.includes('quota') || error.message.includes('429')) errorMessage = 'Limit AI harian habis.';
+    else if (error.message.includes('koneksi') || error.message.includes('network')) errorMessage = 'Koneksi internet bermasalah.';
     document.getElementById('result-cp').value = `❌ Error: ${errorMessage}`; document.getElementById('result-tp').value = ''; document.getElementById('result-atp').value = '';
     alert('❌ Gagal generate:\n\n' + errorMessage);
   }
@@ -379,8 +410,8 @@ function loadCTAData() {
         if (countSpan) countSpan.textContent = snapshot.docs.length;
         list.innerHTML = snapshot.docs.map(docSnap => { const d = docSnap.data(), date = d.createdAt?.toDate?.()?.toLocaleString('id-ID') || '-'; return `<div class="cta-item"><div class="flex justify-between items-start mb-2"><div><strong class="text-lg">${d.mapel?.toUpperCase() || '-'} - Kelas ${d.kelas}</strong><br><small class="text-gray-500">${d.userName} • ${d.sekolah || '-'}</small></div><small class="text-gray-400">${date}</small></div><p class="text-gray-700 mt-2"><strong>📋 Topik:</strong> ${d.topik || '-'}</p><p class="text-gray-600 text-sm">${d.cp?.substring(0, 150) || '-'}...</p></div>`; }).join('');
       });
-    } catch (e) { console.error('❌ [CTA Generator] Load error:', e); if (e.message?.includes('index')) list.innerHTML = `<div class="text-center py-8 text-yellow-600"><p>⚠️ Index Firestore belum siap.</p><p class="text-sm mt-2">Admin: Buat index di Firebase Console → Firestore → Indexes</p></div>`; }
+    } catch (e) { console.error('❌ [CTA Generator] Load error:', e); if (e.message?.includes('index')) list.innerHTML = `<div class="text-center py-8 text-yellow-600"><p>⚠️ Index Firestore belum siap.</p></div>`; }
   })();
 }
 
-console.log('🟢 [CTA Generator] READY — Jenjang Filter + No Border Fix');
+console.log('🟢 [CTA Generator] READY — No Scrollbar + Download Feature');
