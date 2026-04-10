@@ -74,6 +74,32 @@ function enableOptions(selectEl, allowedValues) {
   });
 }
 
+// ✅ NEW: Setup jenjang dropdown auto-select + prevent change (Option B: Soft prevent)
+function setupJenjangDropdown(userData) {
+  if (!userData || !userData.jenjang_sekolah) return;
+  
+  const jenjangSelect = document.getElementById('cta-jenjang');
+  if (!jenjangSelect) return;
+  
+  const userJenjang = userData.jenjang_sekolah;
+  
+  // Auto-select user's jenjang
+  jenjangSelect.value = userJenjang;
+  
+  // Add change listener to prevent switching jenjang
+  jenjangSelect.addEventListener('change', function(e) {
+    if (this.value !== userJenjang) {
+      e.preventDefault();
+      const label = {sd:'SD', smp:'SMP', sma:'SMA'}[userJenjang] || userJenjang.toUpperCase();
+      alert(`⚠️ Jenjang Terkunci\n\nAnda terdaftar sebagai Guru ${label}.\n\nJenjang tidak dapat diubah.`);
+      // Revert to user's jenjang
+      this.value = userJenjang;
+    }
+  }, true);
+  
+  console.log(`✅ [Jenjang] Auto-selected: ${userJenjang} (soft lock enabled)`);
+}
+
 window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, semesterFromParam) {
   console.log('📝 [CTA Generator] renderCTAGenerator() called');
   const container = document.getElementById('module-container');
@@ -101,6 +127,9 @@ window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, sem
       
       // ✅ APPLY FILTERING TO DROPDOWNS
       filterCTAOptions(userData);
+      
+      // ✅ NEW: Setup jenjang dropdown auto-select + soft lock
+      setupJenjangDropdown(userData);
     } else {
       userRole = 'teacher'; userKelasDiampu = []; userMapelDiampu = []; userSdMapelType = 'kelas';
     }
