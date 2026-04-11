@@ -1,9 +1,12 @@
 /**
  * STORAGE: Simple Firebase + LocalStorage
- * Firebase SDK: 9.22.0 (match firebase-config.js)
+ * FIX: Dynamic db getter to avoid import timing issues
  */
 
-import { db } from '../firebase-config.js';
+// ✅ IMPORT firebase-config sebagai module, bukan langsung db
+import * as firebaseConfig from '../firebase-config.js';
+
+// ✅ FIRESTORE functions dari versi yang sama (9.22.0)
 import { 
   collection, addDoc, getDocs, updateDoc, deleteDoc, 
   doc, query, where, setDoc 
@@ -12,22 +15,34 @@ import {
 const DB_KEY = 'eduDBProV6';
 const USE_FIREBASE = true;
 
-// ✅ SIMPLE: Cek Firebase mode setiap kali
+// ✅ HELPER: Get valid db object (dynamic)
+function getDb() {
+  const db = firebaseConfig.db;
+  if (!db || typeof db !== 'object' || !db.constructor?.name?.includes('Firestore')) {
+    console.error('❌ [Storage] db is not valid:', { 
+      db, 
+      type: typeof db, 
+      constructor: db?.constructor?.name 
+    });
+    return null;
+  }
+  return db;
+}
+
+// ✅ HELPER: Cek Firebase mode
 function isFirebaseMode(userId) {
   return USE_FIREBASE && userId;
 }
 
-// ✅ Storage object (bukan class)
+// ✅ STORAGE OBJECT
 export const storage = {
   userId: null,
   
-  // Set userId secara eksplisit
   setUserId: function(uid) {
     this.userId = uid;
     console.log('🔧 [Storage] setUserId:', uid, '→ Firebase:', isFirebaseMode(uid));
   },
   
-  // Load classes
   loadClasses: async function() {
     console.log('📦 [Storage] loadClasses, userId:', this.userId);
     
@@ -40,7 +55,6 @@ export const storage = {
     return JSON.parse(localStorage.getItem(DB_KEY) || '[]');
   },
   
-  // Save classes
   saveClasses: async function(classes) {
     if (isFirebaseMode(this.userId)) {
       return await this._saveToFirebase('classes', classes);
@@ -48,7 +62,6 @@ export const storage = {
     localStorage.setItem(DB_KEY, JSON.stringify(classes));
   },
   
-  // Add class
   addClass: async function(classData) {
     console.log('➕ [Storage] addClass:', classData.nama, 'userId:', this.userId);
     
@@ -63,6 +76,15 @@ export const storage = {
     };
     
     if (isFirebaseMode(this.userId)) {
+      const db = getDb();
+      if (!db) {
+        console.error('❌ [Storage] Cannot addClass: db is invalid');
+        // Fallback to LocalStorage
+        const classes = await this.loadClasses();
+        classes.push(newClass);
+        await this.saveClasses(classes);
+        return newClass;
+      }
       const docRef = await addDoc(collection(db, 'classes'), newClass);
       console.log('✅ [Storage] Saved to Firebase:', docRef.id);
       return { id: docRef.id, ...newClass };
@@ -74,9 +96,10 @@ export const storage = {
     return newClass;
   },
   
-  // Update class
   updateClass: async function(classId, updates) {
     if (isFirebaseMode(this.userId)) {
+      const db = getDb();
+      if (!db) return { id: classId, ...updates };
       const classRef = doc(db, 'classes', classId);
       await updateDoc(classRef, { ...updates, userId: this.userId, updatedAt: new Date().toISOString() });
       return { id: classId, ...updates };
@@ -90,9 +113,10 @@ export const storage = {
     return classes[idx];
   },
   
-  // Delete class
   deleteClass: async function(classId) {
     if (isFirebaseMode(this.userId)) {
+      const db = getDb();
+      if (!db) return;
       return await deleteDoc(doc(db, 'classes', classId));
     }
     let classes = await this.loadClasses();
@@ -100,9 +124,23 @@ export const storage = {
     await this.saveClasses(classes);
   },
   
-  // Add student
   addStudent: async function(classId, studentData) {
     if (isFirebaseMode(this.userId)) {
+      const db = getDb();
+      if (!db) {
+        // Fallback to LocalStorage
+        const classes = await this.loadClasses();
+        const idx = classes.findIndex(c => c.id === classId);
+        if (idx === -1) throw new Error('Class not found');
+        classes[idx].siswa.push({
+          id: studentData.id || `stu_${Date.now()}`,
+          nama: studentData.nama,
+          gender: studentData.gender || 'L'
+        });
+        await this.saveClasses(classes);
+        return studentData;
+      }
+      
       const classRef = doc(db, 'classes', classId);
       const classSnap = await getDocs(query(collection(db, 'classes'), where('id', '==', classId), where('userId', '==', this.userId)));
       if (!classSnap.empty) {
@@ -131,9 +169,18 @@ export const storage = {
     return studentData;
   },
   
-  // Delete student
   deleteStudent: async function(classId, studentId) {
     if (isFirebaseMode(this.userId)) {
+      const db = getDb();
+      if (!db) {
+        const classes = await this.loadClasses();
+        const idx = classes.findIndex(c => c.id === classId);
+        if (idx === -1) throw new Error('Class not found');
+        classes[idx].siswa = classes[idx].siswa.filter(s => s.id !== studentId);
+        await this.saveClasses(classes);
+        return;
+      }
+      
       const classRef = doc(db, 'classes', classId);
       const classSnap = await getDocs(query(collection(db, 'classes'), where('id', '==', classId), where('userId', '==', this.userId)));
       if (!classSnap.empty) {
@@ -151,9 +198,19 @@ export const storage = {
     await this.saveClasses(classes);
   },
   
-  // Save attendance
   saveAttendance: async function(classId, date, attendanceData) {
     if (isFirebaseMode(this.userId)) {
+      const db = getDb();
+      if (!db) {
+        const classes = await this.loadClasses();
+        const idx = classes.findIndex(c => c.id === classId);
+        if (idx === -1) throw new Error('Class not found');
+        classes[idx].absen = classes[idx].absen.filter(a => a.tanggal !== date);
+        classes[idx].absen.push({ tanggal: date, data: attendanceData, savedAt: new Date().toISOString() });
+        await this.saveClasses(classes);
+        return;
+      }
+      
       const classRef = doc(db, 'classes', classId);
       const classSnap = await getDocs(query(collection(db, 'classes'), where('id', '==', classId), where('userId', '==', this.userId)));
       if (!classSnap.empty) {
@@ -169,22 +226,39 @@ export const storage = {
     const idx = classes.findIndex(c => c.id === classId);
     if (idx === -1) throw new Error('Class not found');
     classes[idx].absen = classes[idx].absen.filter(a => a.tanggal !== date);
-    classes[idx].absen.push({ tanggal: date,  attendanceData, savedAt: new Date().toISOString() });
+    classes[idx].absen.push({ tanggal: date, data: attendanceData, savedAt: new Date().toISOString() });
     await this.saveClasses(classes);
   },
   
-  // Load from Firebase
   _loadFromFirebase: async function(collectionName) {
     if (!this.userId) return [];
-    const q = query(collection(db, collectionName), where('userId', '==', this.userId));
-    const snapshot = await getDocs(q);
-    console.log('📊 [Storage] Firebase query result:', snapshot.size, 'docs');
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    
+    const db = getDb();
+    if (!db) {
+      console.error('❌ [Storage] _loadFromFirebase: db is invalid');
+      return [];
+    }
+    
+    try {
+      const q = query(collection(db, collectionName), where('userId', '==', this.userId));
+      const snapshot = await getDocs(q);
+      console.log('📊 [Storage] Firebase query result:', snapshot.size, 'docs');
+      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    } catch (e) {
+      console.error('❌ [Storage] Query error:', e.message);
+      return [];
+    }
   },
   
-  // Save to Firebase
   _saveToFirebase: async function(collectionName, data) {
     if (!this.userId) return;
+    
+    const db = getDb();
+    if (!db) {
+      console.error('❌ [Storage] _saveToFirebase: db is invalid');
+      return;
+    }
+    
     for (const item of data) {
       const itemRef = doc(db, collectionName, item.id);
       await setDoc(itemRef, { ...item, userId: this.userId, updatedAt: new Date().toISOString() }, { merge: true });
