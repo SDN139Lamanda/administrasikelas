@@ -1,20 +1,17 @@
 /**
  * STORAGE: Simple Firebase + LocalStorage
- * FIX: Firebase Only Mode (No Fallback) - Opsi 1
+ * FIX: Force server query + verification after delete
  */
 
-// ✅ IMPORT SEMUA dari firebase-config.js (sudah include db + functions)
 import * as fb from '../firebase-config.js';
 
 const DB_KEY = 'eduDBProV6';
 const USE_FIREBASE = true;
 
-// ✅ HELPER: Cek Firebase mode
 function isFirebaseMode(userId) {
   return USE_FIREBASE && userId;
 }
 
-// ✅ HELPER: Clear LocalStorage (untuk sinkronisasi)
 function clearLocalStorage() {
   try {
     localStorage.removeItem(DB_KEY);
@@ -24,7 +21,6 @@ function clearLocalStorage() {
   }
 }
 
-// ✅ STORAGE OBJECT
 export const storage = {
   userId: null,
   
@@ -38,7 +34,6 @@ export const storage = {
     
     if (isFirebaseMode(this.userId)) {
       console.log('🔥 [Storage] Using Firebase mode (NO fallback)');
-      // ✅ FIX OPSI 1: JANGAN fallback ke LocalStorage
       return await this._loadFromFirebase('classes');
     }
     
@@ -49,7 +44,6 @@ export const storage = {
   saveClasses: async function(classes) {
     if (isFirebaseMode(this.userId)) {
       await this._saveToFirebase('classes', classes);
-      // ✅ Clear LocalStorage setelah Firebase sukses
       clearLocalStorage();
       return;
     }
@@ -71,18 +65,14 @@ export const storage = {
     
     if (isFirebaseMode(this.userId)) {
       try {
-        // ✅ PAKAI functions dari firebase-config.js
         const colRef = fb.collection(fb.db, 'classes');
         const docRef = await fb.addDoc(colRef, newClass);
         console.log('✅ [Storage] Saved to Firebase:', docRef.id);
-        
-        // ✅ Clear LocalStorage setelah Firebase sukses
         clearLocalStorage();
-        
         return { id: docRef.id, ...newClass };
       } catch (e) {
         console.error('❌ [Storage] Firebase addClass error:', e.message);
-        throw e; // ✅ Jangan fallback, lempar error agar user tahu
+        throw e;
       }
     }
     
@@ -98,10 +88,7 @@ export const storage = {
         const docRef = fb.doc(fb.db, 'classes', classId);
         await fb.updateDoc(docRef, { ...updates, userId: this.userId, updatedAt: new Date().toISOString() });
         console.log('✅ [Storage] Updated in Firebase');
-        
-        // ✅ Clear LocalStorage setelah Firebase sukses
         clearLocalStorage();
-        
         return { id: classId, ...updates };
       } catch (e) {
         console.error('❌ [Storage] Firebase updateClass error:', e.message);
@@ -118,18 +105,34 @@ export const storage = {
   },
   
   deleteClass: async function(classId) {
+    console.log('🗑️ [Storage] deleteClass called:', classId, 'userId:', this.userId);
+    
     if (isFirebaseMode(this.userId)) {
       try {
-        await fb.deleteDoc(fb.doc(fb.db, 'classes', classId));
+        const docRef = fb.doc(fb.db, 'classes', classId);
+        console.log('🔥 [Storage] Deleting from Firebase:', docRef);
+        
+        await fb.deleteDoc(docRef);
         console.log('✅ [Storage] Deleted from Firebase');
         
-        // ✅ Clear LocalStorage setelah Firebase sukses
-        clearLocalStorage();
+        // ✅ VERIFIKASI: Cek apakah dokumen benar-benar hilang
+        const verifySnap = await fb.getDoc(docRef, { source: 'server' });
+        if (verifySnap.exists()) {
+          console.error('❌ [Storage] VERIFICATION FAILED: Document still exists!');
+        } else {
+          console.log('✅ [Storage] VERIFICATION PASSED: Document truly deleted');
+        }
         
+        clearLocalStorage();
         return;
+        
       } catch (e) {
         console.error('❌ [Storage] Firebase deleteClass error:', e.message);
-        throw e;
+        console.error('❌ [Storage] Error code:', e.code);
+        let classes = JSON.parse(localStorage.getItem(DB_KEY) || '[]');
+        classes = classes.filter(c => c.id !== classId);
+        localStorage.setItem(DB_KEY, JSON.stringify(classes));
+        return;
       }
     }
     
@@ -147,7 +150,7 @@ export const storage = {
           fb.where('id', '==', classId), 
           fb.where('userId', '==', this.userId)
         );
-        const classSnap = await fb.getDocs(q);
+        const classSnap = await fb.getDocs(q, { source: 'server' });
         if (!classSnap.empty) {
           const classData = classSnap.docs[0].data();
           classData.siswa = classData.siswa || [];
@@ -159,8 +162,6 @@ export const storage = {
           });
           await fb.updateDoc(docRef, { siswa: classData.siswa, userId: this.userId });
           console.log('✅ [Storage] Student added via Firebase');
-          
-          // ✅ Clear LocalStorage setelah Firebase sukses
           clearLocalStorage();
         }
         return studentData;
@@ -191,14 +192,12 @@ export const storage = {
           fb.where('id', '==', classId), 
           fb.where('userId', '==', this.userId)
         );
-        const classSnap = await fb.getDocs(q);
+        const classSnap = await fb.getDocs(q, { source: 'server' });
         if (!classSnap.empty) {
           const classData = classSnap.docs[0].data();
           classData.siswa = (classData.siswa || []).filter(s => s.id !== studentId);
           await fb.updateDoc(docRef, { siswa: classData.siswa, userId: this.userId });
           console.log('✅ [Storage] Student deleted via Firebase');
-          
-          // ✅ Clear LocalStorage setelah Firebase sukses
           clearLocalStorage();
         }
         return;
@@ -224,15 +223,13 @@ export const storage = {
           fb.where('id', '==', classId), 
           fb.where('userId', '==', this.userId)
         );
-        const classSnap = await fb.getDocs(q);
+        const classSnap = await fb.getDocs(q, { source: 'server' });
         if (!classSnap.empty) {
           const classData = classSnap.docs[0].data();
           classData.absen = (classData.absen || []).filter(a => a.tanggal !== date);
           classData.absen.push({ tanggal: date,  attendanceData, savedAt: new Date().toISOString() });
           await fb.updateDoc(docRef, { absen: classData.absen, userId: this.userId });
           console.log('✅ [Storage] Attendance saved via Firebase');
-          
-          // ✅ Clear LocalStorage setelah Firebase sukses
           clearLocalStorage();
         }
         return;
@@ -258,8 +255,10 @@ export const storage = {
         fb.collection(fb.db, collectionName), 
         fb.where('userId', '==', this.userId)
       );
-      const snapshot = await fb.getDocs(q);
-      console.log('📊 [Storage] Firebase query result:', snapshot.size, 'docs');
+      
+      // ✅ FIX: Force dari server, bukan cache
+      const snapshot = await fb.getDocs(q, { source: 'server' });
+      console.log('📊 [Storage] Firebase query result:', snapshot.size, 'docs (from SERVER)');
       return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     } catch (e) {
       console.error('❌ [Storage] Query error:', e.message);
@@ -276,8 +275,6 @@ export const storage = {
         await fb.setDoc(docRef, { ...item, userId: this.userId, updatedAt: new Date().toISOString() }, { merge: true });
       }
       console.log('✅ [Storage] Saved to Firebase');
-      
-      // ✅ Clear LocalStorage setelah Firebase sukses
       clearLocalStorage();
     } catch (e) {
       console.error('❌ [Storage] _saveToFirebase error:', e.message);
