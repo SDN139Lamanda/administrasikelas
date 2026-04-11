@@ -16,13 +16,17 @@ export class DataStorage {
   constructor(userId = null) {
     this.userId = userId;
     this.useFirebase = USE_FIREBASE && userId;
+    console.log('🔧 [Storage] Constructor:', { userId, useFirebase: this.useFirebase });
   }
 
   async loadClasses() {
+    console.log('📦 [Storage] loadClasses() called, useFirebase:', this.useFirebase, 'userId:', this.userId);
     if (this.useFirebase) {
       return await this._loadFromFirebase('classes');
     }
-    return JSON.parse(localStorage.getItem(DB_KEY) || '[]');
+    const local = JSON.parse(localStorage.getItem(DB_KEY) || '[]');
+    console.log('📦 [Storage] Loaded from LocalStorage:', local.length, 'classes');
+    return local;
   }
 
   async saveClasses(classes) {
@@ -34,6 +38,7 @@ export class DataStorage {
   }
 
   async addClass(classData) {
+    console.log('➕ [Storage] addClass:', classData.nama, 'userId:', this.userId);
     const newClass = {
       id: classData.id || `class_${Date.now()}`,
       nama: classData.nama,
@@ -46,6 +51,7 @@ export class DataStorage {
     
     if (this.useFirebase) {
       const docRef = await addDoc(collection(db, 'classes'), newClass);
+      console.log('✅ [Storage] Class saved to Firebase, docId:', docRef.id);
       return { id: docRef.id, ...newClass };
     }
     
@@ -204,24 +210,56 @@ export class DataStorage {
   }
 
   async _loadFromFirebase(collectionName) {
-    if (!this.userId) return [];
+    console.log('🔍 [Storage] _loadFromFirebase:', collectionName, 'userId:', this.userId);
+    if (!this.userId) {
+      console.warn('⚠️ [Storage] userId is null, returning empty array');
+      return [];
+    }
+    
     const q = query(collection(db, collectionName), where('userId', '==', this.userId));
-    const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    console.log('🔍 [Storage] Query:', q);
+    
+    try {
+      const snapshot = await getDocs(q);
+      console.log('📊 [Storage] Query result:', snapshot.size, 'documents');
+      
+      if (snapshot.empty) {
+        console.warn('⚠️ [Storage] No documents found. Possible causes:');
+        console.warn('  1. No data with userId =', this.userId);
+        console.warn('  2. Old data saved without userId field');
+        console.warn('  3. Firestore Rules blocking read');
+      }
+      
+      const result = snapshot.docs.map(doc => {
+        const data = doc.data();
+        console.log('📄 [Storage] Doc ', doc.id, 'has userId:', data.userId);
+        return { id: doc.id, ...data };
+      });
+      
+      return result;
+    } catch (e) {
+      console.error('❌ [Storage] Query error:', e);
+      return [];
+    }
   }
 
   async _saveToFirebase(collectionName, data) {
-    if (!this.userId) return;
+    if (!this.userId) {
+      console.warn('⚠️ [Storage] userId is null, skipping Firebase save');
+      return;
+    }
+    
+    console.log('💾 [Storage] _saveToFirebase:', collectionName, 'items:', data.length, 'userId:', this.userId);
     
     for (const item of data) {
       const itemRef = doc(db, collectionName, item.id);
-      // ✅ FIX: setDoc dengan { merge: true } handle create & update
       await setDoc(itemRef, { 
         ...item, 
         userId: this.userId,
         updatedAt: new Date().toISOString() 
       }, { merge: true });
     }
+    console.log('✅ [Storage] Save complete');
   }
 }
 
