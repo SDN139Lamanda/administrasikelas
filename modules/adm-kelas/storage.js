@@ -1,6 +1,6 @@
 /**
  * STORAGE: Simple Firebase + LocalStorage
- * FIX: Force server query + verification after delete
+ * FIX: Force server query + verification after delete + ID conflict fix
  */
 
 import * as fb from '../firebase-config.js';
@@ -50,11 +50,13 @@ export const storage = {
     localStorage.setItem(DB_KEY, JSON.stringify(classes));
   },
   
+  // ✅ FIX 2: Jangan include field 'id' di data yang disimpan ke Firestore
   addClass: async function(classData) {
     console.log('➕ [Storage] addClass:', classData.nama, 'userId:', this.userId);
     
+    // ✅ FIX: Firestore doc ID adalah source of truth, jangan simpan field 'id' di data
     const newClass = {
-      id: classData.id || `class_${Date.now()}`,
+      // id: classData.id || `class_${Date.now()}`, ← DIHAPUS
       nama: classData.nama,
       siswa: classData.siswa || [],
       absen: classData.absen || [],
@@ -69,6 +71,7 @@ export const storage = {
         const docRef = await fb.addDoc(colRef, newClass);
         console.log('✅ [Storage] Saved to Firebase:', docRef.id);
         clearLocalStorage();
+        // Return dengan Firestore doc ID sebagai id
         return { id: docRef.id, ...newClass };
       } catch (e) {
         console.error('❌ [Storage] Firebase addClass error:', e.message);
@@ -248,6 +251,7 @@ export const storage = {
     await this.saveClasses(classes);
   },
   
+  // ✅ FIX 1: Exclude field 'id' dari doc.data() agar tidak override doc.id
   _loadFromFirebase: async function(collectionName) {
     if (!this.userId) return [];
     
@@ -260,7 +264,13 @@ export const storage = {
       // ✅ FIX: Force dari server, bukan cache
       const snapshot = await fb.getDocs(q, { source: 'server' });
       console.log('📊 [Storage] Firebase query result:', snapshot.size, 'docs (from SERVER)');
-      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      
+      // ✅ FIX: Exclude 'id' field from doc.data() to prevent override
+      return snapshot.docs.map(doc => {
+        const data = doc.data();
+        const { id: _, ...rest } = data;
+        return { id: doc.id, ...rest };
+      });
     } catch (e) {
       console.error('❌ [Storage] Query error:', e.message);
       return [];
