@@ -10,6 +10,7 @@
  * - Profil Pancasila included
  * - Clean result display (no scroll frame)
  * - Kop format sesuai standar modul ajar
+ * - ✅ NEW: Field lengkap sesuai komposisi Kurikulum Merdeka
  * ============================================
  */
 
@@ -176,8 +177,41 @@ window.renderGeneratorModule = function() {
           <input type="text" id="modul-topik" placeholder="Contoh: Pecahan Sederhana" required>
         </div>
         
-        <!-- ✅ SECTION 4: PROFIL PELAJAR PANCASILA (RESTORED) -->
-        <div class="section-title"><i class="fas fa-star"></i><span>4. Profil Pelajar Pancasila</span></div>
+        <!-- ✅ SECTION 4: INFORMASI UMUM (NEW - Sesuai Komposisi) -->
+        <div class="section-title"><i class="fas fa-info-circle"></i><span>4. Informasi Umum (Lengkap)</span></div>
+        
+        <div>
+          <label for="modul-kompetensi-awal"><i class="fas fa-brain mr-2"></i>Kompetensi Awal</label>
+          <textarea id="modul-kompetensi-awal" placeholder="Pengetahuan/keterampilan yang perlu dimiliki siswa sebelum mempelajari topik ini..." rows="3"></textarea>
+        </div>
+        
+        <div>
+          <label for="modul-sarana"><i class="fas fa-tools mr-2"></i>Sarana dan Prasarana</label>
+          <textarea id="modul-sarana" placeholder="Fasilitas dan media yang dibutuhkan (laptop, proyektor, alat peraga, lingkungan sekitar)..." rows="3"></textarea>
+        </div>
+        
+        <div class="grid-cols-2">
+          <div>
+            <label for="modul-target"><i class="fas fa-bullseye mr-2"></i>Target Peserta Didik</label>
+            <select id="modul-target">
+              <option value="reguler">Siswa Reguler</option>
+              <option value="kesulitan">Siswa dengan Kesulitan Belajar</option>
+              <option value="pencapaian-tinggi">Siswa dengan Pencapaian Tinggi</option>
+            </select>
+          </div>
+          <div>
+            <label for="modul-model"><i class="fas fa-cogs mr-2"></i>Model Pembelajaran</label>
+            <select id="modul-model">
+              <option value="pbl">Problem Based Learning (PBL)</option>
+              <option value="pjbl">Project Based Learning (PjBL)</option>
+              <option value="tatap-muka">Tatap Muka</option>
+              <option value="lainnya">Lainnya</option>
+            </select>
+          </div>
+        </div>
+        
+        <!-- ✅ SECTION 5: PROFIL PELAJAR PANCASILA (EXISTING) -->
+        <div class="section-title"><i class="fas fa-star"></i><span>5. Profil Pelajar Pancasila</span></div>
         
         <div class="grid-cols-3">
           <div><label><input type="checkbox" id="ppp-1" value="Beriman, Bertakwa"> Beriman, Bertakwa</label></div>
@@ -186,6 +220,29 @@ window.renderGeneratorModule = function() {
           <div><label><input type="checkbox" id="ppp-4" value="Mandiri"> Mandiri</label></div>
           <div><label><input type="checkbox" id="ppp-5" value="Bernalar Kritis"> Bernalar Kritis</label></div>
           <div><label><input type="checkbox" id="ppp-6" value="Kreatif"> Kreatif</label></div>
+        </div>
+        
+        <!-- ✅ SECTION 6: LAMPIRAN (NEW - Sesuai Komposisi) -->
+        <div class="section-title"><i class="fas fa-paperclip"></i><span>6. Lampiran</span></div>
+        
+        <div>
+          <label for="modul-lkpd"><i class="fas fa-file-alt mr-2"></i>Lembar Kerja Peserta Didik (LKPD)</label>
+          <textarea id="modul-lkpd" placeholder="Deskripsi atau konten LKPD..." rows="3"></textarea>
+        </div>
+        
+        <div>
+          <label for="modul-bahan-bacaan"><i class="fas fa-book-reader mr-2"></i>Bahan Bacaan Guru & Peserta Didik</label>
+          <textarea id="modul-bahan-bacaan" placeholder="Materi tambahan atau rangkuman teori..." rows="3"></textarea>
+        </div>
+        
+        <div>
+          <label for="modul-glosarium"><i class="fas fa-spell-check mr-2"></i>Glosarium</label>
+          <textarea id="modul-glosarium" placeholder="Daftar istilah penting: Istilah - Definisi..." rows="3"></textarea>
+        </div>
+        
+        <div>
+          <label for="modul-pustaka"><i class="fas fa-list mr-2"></i>Daftar Pustaka</label>
+          <textarea id="modul-pustaka" placeholder="Sumber referensi (buku, situs web, jurnal)..." rows="3"></textarea>
         </div>
         
         <button type="button" id="btn-generate" class="btn-generate">
@@ -245,14 +302,33 @@ function setupEventHandlers() {
   if (btnRegenerate) btnRegenerate.addEventListener('click', handleGenerate);
 }
 
-// ✅ MOCK GENERATE — RESTORED: Profil Pancasila + Kop Tanpa Kepsek
-async function mockGenerateModul(guru, nip, sekolah, tahun, jenjang, kelas, mapel, topik, alokasi, profilPancasila) {
+// ✅ MOCK GENERATE — UPDATED: Include all fields from komposisi
+async function mockGenerateModul(data) {
   console.log('📝 [Asisten Modul] Generating mock modul...');
   await new Promise(resolve => setTimeout(resolve, 2000));
   
-  const jenjangCapital = jenjang.toUpperCase();
-  const mapelCapital = mapel.toUpperCase();
-  const pppList = profilPancasila.filter(p => p.checked).map(p => p.value).join(', ') || '-';
+  const {
+    guru, nip, sekolah, tahun, jenjang, kelas, mapel, topik, alokasi,
+    kompetensiAwal, sarana, targetPesertaDidik, modelPembelajaran,
+    profilPancasila,
+    lkpd, bahanBacaan, glosarium, daftarPustaka,
+    userKepsek, userNIPKepsek
+  } = data;
+  
+  const jenjangCapital = jenjang?.toUpperCase() || '-';
+  const mapelCapital = mapel?.toUpperCase() || '-';
+  const pppList = profilPancasila?.filter(p => p.checked).map(p => p.value).join(', ') || '-';
+  const targetLabel = {
+    'reguler': 'Siswa Reguler',
+    'kesulitan': 'Siswa dengan Kesulitan Belajar',
+    'pencapaian-tinggi': 'Siswa dengan Pencapaian Tinggi'
+  }[targetPesertaDidik] || 'Siswa Reguler';
+  const modelLabel = {
+    'pbl': 'Problem Based Learning (PBL)',
+    'pjbl': 'Project Based Learning (PjBL)',
+    'tatap-muka': 'Tatap Muka',
+    'lainnya': 'Lainnya'
+  }[modelPembelajaran] || 'Problem Based Learning (PBL)';
   
   return `
 ═══════════════════════════════════════════════════════════
@@ -270,6 +346,11 @@ Jenjang/Kelas      : ${jenjangCapital} / Kelas ${kelas}
 Mata Pelajaran     : ${mapelCapital}
 Topik/Materi       : ${topik || '-'}
 Alokasi Waktu      : ${alokasi || '-'}
+
+Kompetensi Awal    : ${kompetensiAwal || 'Siswa telah memahami konsep dasar terkait topik ini.'}
+Sarana/Prasarana   : ${sarana || 'Laptop, proyektor, alat peraga, lingkungan sekitar'}
+Target Peserta     : ${targetLabel}
+Model Pembelajaran : ${modelLabel}
 
 II. PROFIL PELAJAR PANCASILA
 ───────────────────────────────────────────────────────────
@@ -326,10 +407,26 @@ F. PENGAYAAN DAN REMEDIAL
    • Pengayaan: Tugas proyek tambahan
    • Remedial: Pembelajaran ulang dengan metode berbeda
 
-G. LAMPIRAN
-   • Lembar Kerja Peserta Didik (LKPD)
-   • Rubrik Penilaian
-   • Bahan Bacaan Guru dan Peserta Didik
+G. REFLEKSI
+   • Peserta Didik: Apa yang paling menarik dari pembelajaran ini?
+   • Guru: Apa yang perlu diperbaiki untuk pembelajaran berikutnya?
+
+═══════════════════════════════════════════════════════════
+
+IV. LAMPIRAN
+───────────────────────────────────────────────────────────
+
+📄 LEMBAR KERJA PESERTA DIDIK (LKPD)
+${lkpd || '• Aktivitas 1: Eksplorasi konsep\n• Aktivitas 2: Diskusi kelompok\n• Aktivitas 3: Presentasi hasil'}
+
+📚 BAHAN BACAAN GURU & PESERTA DIDIK
+${bahanBacaan || '• Rangkuman materi\n• Contoh soal dan pembahasan\n• Referensi tambahan'}
+
+📖 GLOSARIUM
+${glosarium || '• Istilah 1: Definisi\n• Istilah 2: Definisi\n• Istilah 3: Definisi'}
+
+📋 DAFTAR PUSTAKA
+${daftarPustaka || '• Kementerian Pendidikan. (2022). Panduan Kurikulum Merdeka.\n• Sumber online terpercaya terkait topik.'}
 
 ═══════════════════════════════════════════════════════════
 Mengetahui,
@@ -354,28 +451,49 @@ async function handleGenerate() {
   const user = auth.currentUser;
   if (!user) { alert('⚠️ Silakan login dulu!'); return; }
   
-  const guru = document.getElementById('modul-guru')?.value;
-  const nip = document.getElementById('modul-nip')?.value;
-  const sekolah = document.getElementById('modul-sekolah')?.value;
-  const tahun = document.getElementById('modul-tahun')?.value;
-  const jenjang = document.getElementById('modul-jenjang')?.value;
-  const kelas = document.getElementById('modul-kelas')?.value;
-  const mapel = document.getElementById('modul-mapel')?.value;
-  const topik = document.getElementById('modul-topik')?.value;
-  const alokasi = document.getElementById('modul-alokasi')?.value;
+  // ✅ Ambil semua field dari form (existing + new)
+  const data = {
+    // Existing fields
+    guru: document.getElementById('modul-guru')?.value,
+    nip: document.getElementById('modul-nip')?.value,
+    sekolah: document.getElementById('modul-sekolah')?.value,
+    tahun: document.getElementById('modul-tahun')?.value,
+    jenjang: document.getElementById('modul-jenjang')?.value,
+    kelas: document.getElementById('modul-kelas')?.value,
+    mapel: document.getElementById('modul-mapel')?.value,
+    topik: document.getElementById('modul-topik')?.value,
+    alokasi: document.getElementById('modul-alokasi')?.value,
+    
+    // ✅ NEW: Fields from komposisi - Informasi Umum
+    kompetensiAwal: document.getElementById('modul-kompetensi-awal')?.value,
+    sarana: document.getElementById('modul-sarana')?.value,
+    targetPesertaDidik: document.getElementById('modul-target')?.value,
+    modelPembelajaran: document.getElementById('modul-model')?.value,
+    
+    // ✅ Profil Pancasila (existing)
+    profilPancasila: [
+      { id: 'ppp-1', value: 'Beriman, Bertakwa' },
+      { id: 'ppp-2', value: 'Berkebinekaan Global' },
+      { id: 'ppp-3', value: 'Bergotong Royong' },
+      { id: 'ppp-4', value: 'Mandiri' },
+      { id: 'ppp-5', value: 'Bernalar Kritis' },
+      { id: 'ppp-6', value: 'Kreatif' }
+    ].map(p => ({ checked: document.getElementById(p.id)?.checked, value: p.value })),
+    
+    // ✅ NEW: Fields from komposisi - Lampiran
+    lkpd: document.getElementById('modul-lkpd')?.value,
+    bahanBacaan: document.getElementById('modul-bahan-bacaan')?.value,
+    glosarium: document.getElementById('modul-glosarium')?.value,
+    daftarPustaka: document.getElementById('modul-pustaka')?.value,
+    
+    // User data for signature
+    userKepsek: localStorage.getItem('user_nama_kepsek') || '',
+    userNIPKepsek: localStorage.getItem('user_nip_kepsek') || ''
+  };
   
-  // ✅ Ambil Profil Pancasila
-  const profilPancasila = [
-    { id: 'ppp-1', value: 'Beriman, Bertakwa' },
-    { id: 'ppp-2', value: 'Berkebinekaan Global' },
-    { id: 'ppp-3', value: 'Bergotong Royong' },
-    { id: 'ppp-4', value: 'Mandiri' },
-    { id: 'ppp-5', value: 'Bernalar Kritis' },
-    { id: 'ppp-6', value: 'Kreatif' }
-  ].map(p => ({ checked: document.getElementById(p.id)?.checked, value: p.value }));
-  
-  if (!sekolah) { alert('⚠️ Nama Sekolah wajib diisi!'); return; }
-  if (!jenjang || !kelas || !mapel || !topik) { alert('⚠️ Lengkapi Informasi Modul!'); return; }
+  // Validation (existing + new required fields)
+  if (!data.sekolah) { alert('⚠️ Nama Sekolah wajib diisi!'); return; }
+  if (!data.jenjang || !data.kelas || !data.mapel || !data.topik) { alert('⚠️ Lengkapi Informasi Modul!'); return; }
   
   const resultDiv = document.getElementById('modul-result');
   if (resultDiv) resultDiv.classList.remove('hidden');
@@ -384,7 +502,7 @@ async function handleGenerate() {
   resultDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
   
   try {
-    const result = await mockGenerateModul(guru, nip, sekolah, tahun, jenjang, kelas, mapel, topik, alokasi, profilPancasila);
+    const result = await mockGenerateModul(data);
     document.getElementById('result-modul').value = result;
     console.log('✅ [Asisten Modul] Generate complete!');
   } catch (error) {
@@ -409,7 +527,9 @@ async function handleSave() {
     const userDoc = await getDoc(doc(db, 'users', user.uid));
     const isAdmin = userDoc.exists() && userDoc.data()?.role === 'admin';
     
+    // ✅ Save ALL fields (existing + new) to Firestore
     await addDoc(collection(db, 'modul_ajar'), {
+      // Existing fields
       userId: user.uid,
       userEmail: user.email,
       userName: user.displayName || 'Guru',
@@ -423,6 +543,20 @@ async function handleSave() {
       topik: document.getElementById('modul-topik')?.value,
       alokasi: document.getElementById('modul-alokasi')?.value,
       profilPancasila: Array.from(document.querySelectorAll('#modul-form input[type="checkbox"]:checked')).map(cb => cb.value),
+      
+      // ✅ NEW: Fields from komposisi - Informasi Umum
+      kompetensiAwal: document.getElementById('modul-kompetensi-awal')?.value || '',
+      sarana: document.getElementById('modul-sarana')?.value || '',
+      targetPesertaDidik: document.getElementById('modul-target')?.value || 'reguler',
+      modelPembelajaran: document.getElementById('modul-model')?.value || 'pbl',
+      
+      // ✅ NEW: Fields from komposisi - Lampiran
+      lkpd: document.getElementById('modul-lkpd')?.value || '',
+      bahanBacaan: document.getElementById('modul-bahan-bacaan')?.value || '',
+      glosarium: document.getElementById('modul-glosarium')?.value || '',
+      daftarPustaka: document.getElementById('modul-pustaka')?.value || '',
+      
+      // Content & metadata
       modul: modul,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
@@ -493,4 +627,4 @@ function loadModulData() {
   })();
 }
 
-console.log('🟢 [Asisten Modul] READY — AUTO-FILL + PROFIL PANCASILA + CLEAN RESULT');
+console.log('🟢 [Asisten Modul] READY — KOMPOSISI LENGKAP + FIRESTORE SYNC');
