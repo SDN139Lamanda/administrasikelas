@@ -233,7 +233,7 @@ async function handleSubmit(event) {
     
     console.log('✅ [Refleksi] Data sent successfully!');
     alert('✅ Refleksi berhasil disimpan!');
-    form.reset();
+    event.target.reset();
     
   } catch (error) {
     console.error('❌ [Refleksi] Error sending ', error);
