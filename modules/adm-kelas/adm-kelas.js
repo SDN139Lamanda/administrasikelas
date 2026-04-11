@@ -591,11 +591,16 @@ window.admKelas = {
 };
 
 // ============================================
-// ✅ CONFIRM MODULE LOADED
+// ✅ CONFIRM MODULE LOADED + DEBUG HELPER
 // ============================================
 console.log('🟢 [AdmKelas] window.renderAdmKelas:', typeof window.renderAdmKelas);
 console.log('🟢 [AdmKelas] window.admKelas:', typeof window.admKelas);
 console.log('🟢 [AdmKelas] window.admKelas.renderClassesGrid:', typeof window.admKelas?.renderClassesGrid);
 console.log('🟢 [AdmKelas] window.admKelas.saveClass:', typeof window.admKelas?.saveClass);
 console.log('🟢 [AdmKelas] window.admKelas.backToDashboard:', typeof window.admKelas?.backToDashboard);
+
+// ✅ DEBUG: Cek di Console ketik: window.renderAdmKelas
+// Jika 'function' → module loaded successfully
+// Jika 'undefined' → module belum load / ada error import
+
 console.log('🟢 [AdmKelas] Module FINISHED - Ready to use!');
