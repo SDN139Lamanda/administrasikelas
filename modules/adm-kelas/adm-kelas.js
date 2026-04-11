@@ -18,7 +18,7 @@ let activeClassIndex = null;
 let currentUser = null;
 
 // ============================================
-// ✅ GLOBAL FUNCTION: Render Module to Container
+// ✅ GLOBAL FUNCTION: Render Module to Container (FIX: Wait for auth)
 // ============================================
 window.renderAdmKelas = async function() {
   console.log('📦 [AdmKelas] renderAdmKelas() called');
@@ -29,16 +29,39 @@ window.renderAdmKelas = async function() {
     return;
   }
   
+  // ✅ FIX: Wait for auth to be ready before setting userId
+  let authUser = null;
   try {
-    const { auth } = await import('../firebase-config.js');
-    currentUser = auth.currentUser;
+    const { auth, onAuthStateChanged } = await import('../firebase-config.js');
+    
+    // Jika sudah login, pakai langsung
+    if (auth.currentUser) {
+      authUser = auth.currentUser;
+      console.log('🔐 [AdmKelas] Auth ready (sync):', authUser.uid);
+    } else {
+      // Jika belum, tunggu state change (max 3 detik)
+      console.log('⏳ [AdmKelas] Waiting for auth state...');
+      authUser = await new Promise((resolve) => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+          unsubscribe();
+          resolve(user);
+        });
+        // Fallback timeout agar tidak hang
+        setTimeout(() => resolve(null), 3000);
+      });
+      console.log('🔐 [AdmKelas] Auth ready (async):', authUser?.uid || 'null');
+    }
   } catch (e) {
     console.log('⚠️ Auth not available, using LocalStorage mode');
   }
   
-  storage.userId = currentUser?.uid || null;
+  // ✅ Set userId BEFORE load/save (PENTING!)
+  storage.userId = authUser?.uid || null;
+  console.log('🔧 [AdmKelas] storage.userId:', storage.userId, 'useFirebase:', storage.useFirebase);
+  
+  // ✅ Load classes with correct userId
   classes = await storage.loadClasses();
-  console.log('✅ [AdmKelas] Classes loaded:', classes.length);
+  console.log('✅ [AdmKelas] Classes loaded:', classes.length, 'from', storage.useFirebase ? 'Firebase' : 'LocalStorage');
   
   container.innerHTML = getMainTemplate();
   container.classList.remove('hidden');
@@ -214,8 +237,7 @@ window.admKelas = {
       <div class="p-4 bg-emerald-50 rounded-xl text-center"><p class="text-[10px] font-medium text-emerald-600">HADIR</p><p class="text-xl font-bold">${tH}</p></div>
       <div class="p-4 bg-blue-50 rounded-xl text-center"><p class="text-[10px] font-medium text-blue-600">IZIN</p><p class="text-xl font-bold">${tI}</p></div>
       <div class="p-4 bg-amber-50 rounded-xl text-center"><p class="text-[10px] font-medium text-amber-600">SAKIT</p><p class="text-xl font-bold">${tS}</p></div>
-      <div class="p-4 bg-rose-50 rounded-xl text-center"><p class="text-[10px] font-medium text-rose-600">ALPA</p><p class="text-xl font-bold">${tA}</p></div>
-      <div class="p-4 bg-slate-900 rounded-xl text-center"><p class="text-[10px] font-medium text-slate-400">BOLOS</p><p class="text-xl font-bold text-white">${tB}</p></div>
+      <div class="p-4 bg-rose-50 rounded-xl text-center"><p class="text-[10px] font-medium text-rose-600">ALPA</p><p class="text-xl font-bold text-white">${tB}</p></div>
     `;
   },
   
