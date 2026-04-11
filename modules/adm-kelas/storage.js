@@ -15,8 +15,13 @@ const USE_FIREBASE = true;
 export class DataStorage {
   constructor(userId = null) {
     this.userId = userId;
-    this.useFirebase = USE_FIREBASE && userId;
-    console.log('🔧 [Storage] Constructor:', { userId, useFirebase: this.useFirebase });
+    // ✅ FIX: HAPUS this.useFirebase = ... (diganti dengan getter di bawah)
+    console.log('🔧 [Storage] Constructor:', { userId });
+  }
+
+  // ✅ FIX: Getter dinamis untuk useFirebase (selalu hitung ulang)
+  get useFirebase() {
+    return USE_FIREBASE && this.userId;
   }
 
   async loadClasses() {
@@ -201,7 +206,7 @@ export class DataStorage {
     classes[classIdx].absen = classes[classIdx].absen.filter(a => a.tanggal !== date);
     classes[classIdx].absen.push({
       tanggal: date,
-      data: attendanceData,
+       attendanceData,
       savedAt: new Date().toISOString()
     });
     classes[classIdx].updatedAt = new Date().toISOString();
@@ -265,4 +270,4 @@ export class DataStorage {
 
 export const storage = new DataStorage();
 
-console.log('✅ [AdmKelas Storage] Loaded - Mode:', USE_FIREBASE ? 'Firebase (with userId isolation)' : 'LocalStorage');
+console.log('✅ [AdmKelas Storage] Loaded - USE_FIREBASE:', USE_FIREBASE);
