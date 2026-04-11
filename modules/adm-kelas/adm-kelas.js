@@ -387,18 +387,35 @@ window.admKelas = {
     this.openClassModal();
   },
   
+  // ✅ FIX: deleteClass dengan error handling yang benar
   deleteClass: async function(index) {
     if (!confirm('Hapus kelas ini beserta semua data siswa dan absensi?')) return;
     
-    const classId = classes[index].id;
-    await storage.deleteClass(classId);
-    
-    classes = await storage.loadClasses();
-    if (activeClassIndex === index) activeClassIndex = null;
-    
-    this.renderClassesGrid();
-    this.populateClassSelects();
-    alert('✅ Kelas dihapus!');
+    try {
+      const classId = classes[index].id;
+      console.log('🗑️ [AdmKelas] Deleting class:', {
+        index,
+        classId,
+        className: classes[index].nama,
+        storageUserId: storage.userId
+      });
+      
+      await storage.deleteClass(classId);
+      
+      // ✅ Reload classes setelah delete sukses
+      classes = await storage.loadClasses();
+      console.log('✅ [AdmKelas] Classes after delete:', classes.length);
+      
+      if (activeClassIndex === index) activeClassIndex = null;
+      
+      this.renderClassesGrid();
+      this.populateClassSelects();
+      alert('✅ Kelas berhasil dihapus!');
+      
+    } catch (e) {
+      console.error('❌ [AdmKelas] Delete class error:', e.message);
+      alert('❌ Gagal menghapus kelas: ' + e.message + '\n\nCek Console untuk detail.');
+    }
   },
   
   openClassDetail: function(index) {
