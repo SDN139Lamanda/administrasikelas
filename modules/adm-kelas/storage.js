@@ -1,6 +1,6 @@
 /**
  * STORAGE: Simple Firebase + LocalStorage
- * FIX: Import ALL from firebase-config.js to ensure compatibility
+ * FIX: Use ONLY exports from firebase-config.js (no CDN imports)
  */
 
 // ✅ IMPORT SEMUA dari firebase-config.js (sudah include db + functions)
@@ -57,8 +57,9 @@ export const storage = {
     
     if (isFirebaseMode(this.userId)) {
       try {
-        // ✅ PAKAI functions dari firebase-config.js (bukan CDN)
-        const docRef = await fb.addDoc(fb.collection(fb.db, 'classes'), newClass);
+        // ✅ PAKAI functions dari firebase-config.js (BUKAN CDN)
+        const colRef = fb.collection(fb.db, 'classes');
+        const docRef = await fb.addDoc(colRef, newClass);
         console.log('✅ [Storage] Saved to Firebase:', docRef.id);
         return { id: docRef.id, ...newClass };
       } catch (e) {
@@ -80,12 +81,11 @@ export const storage = {
   updateClass: async function(classId, updates) {
     if (isFirebaseMode(this.userId)) {
       try {
-        const classRef = fb.doc(fb.db, 'classes', classId);
-        await fb.updateDoc(classRef, { ...updates, userId: this.userId, updatedAt: new Date().toISOString() });
+        const docRef = fb.doc(fb.db, 'classes', classId);
+        await fb.updateDoc(docRef, { ...updates, userId: this.userId, updatedAt: new Date().toISOString() });
         return { id: classId, ...updates };
       } catch (e) {
         console.error('❌ [Storage] Firebase updateClass error:', e.message);
-        // Fallback ke LocalStorage
         const classes = await this.loadClasses();
         const idx = classes.findIndex(c => c.id === classId);
         if (idx === -1) throw new Error('Class not found');
@@ -120,7 +120,7 @@ export const storage = {
   addStudent: async function(classId, studentData) {
     if (isFirebaseMode(this.userId)) {
       try {
-        const classRef = fb.doc(fb.db, 'classes', classId);
+        const docRef = fb.doc(fb.db, 'classes', classId);
         const q = fb.query(
           fb.collection(fb.db, 'classes'), 
           fb.where('id', '==', classId), 
@@ -136,12 +136,11 @@ export const storage = {
             gender: studentData.gender || 'L',
             createdAt: new Date().toISOString()
           });
-          await fb.updateDoc(classRef, { siswa: classData.siswa, userId: this.userId });
+          await fb.updateDoc(docRef, { siswa: classData.siswa, userId: this.userId });
         }
         return studentData;
       } catch (e) {
         console.error('❌ [Storage] Firebase addStudent error:', e.message);
-        // Fallback ke LocalStorage
         const classes = await this.loadClasses();
         const idx = classes.findIndex(c => c.id === classId);
         if (idx === -1) throw new Error('Class not found');
@@ -170,7 +169,7 @@ export const storage = {
   deleteStudent: async function(classId, studentId) {
     if (isFirebaseMode(this.userId)) {
       try {
-        const classRef = fb.doc(fb.db, 'classes', classId);
+        const docRef = fb.doc(fb.db, 'classes', classId);
         const q = fb.query(
           fb.collection(fb.db, 'classes'), 
           fb.where('id', '==', classId), 
@@ -180,12 +179,11 @@ export const storage = {
         if (!classSnap.empty) {
           const classData = classSnap.docs[0].data();
           classData.siswa = (classData.siswa || []).filter(s => s.id !== studentId);
-          await fb.updateDoc(classRef, { siswa: classData.siswa, userId: this.userId });
+          await fb.updateDoc(docRef, { siswa: classData.siswa, userId: this.userId });
         }
         return;
       } catch (e) {
         console.error('❌ [Storage] Firebase deleteStudent error:', e.message);
-        // Fallback ke LocalStorage
         const classes = await this.loadClasses();
         const idx = classes.findIndex(c => c.id === classId);
         if (idx === -1) throw new Error('Class not found');
@@ -205,7 +203,7 @@ export const storage = {
   saveAttendance: async function(classId, date, attendanceData) {
     if (isFirebaseMode(this.userId)) {
       try {
-        const classRef = fb.doc(fb.db, 'classes', classId);
+        const docRef = fb.doc(fb.db, 'classes', classId);
         const q = fb.query(
           fb.collection(fb.db, 'classes'), 
           fb.where('id', '==', classId), 
@@ -216,12 +214,11 @@ export const storage = {
           const classData = classSnap.docs[0].data();
           classData.absen = (classData.absen || []).filter(a => a.tanggal !== date);
           classData.absen.push({ tanggal: date,  attendanceData, savedAt: new Date().toISOString() });
-          await fb.updateDoc(classRef, { absen: classData.absen, userId: this.userId });
+          await fb.updateDoc(docRef, { absen: classData.absen, userId: this.userId });
         }
         return;
       } catch (e) {
         console.error('❌ [Storage] Firebase saveAttendance error:', e.message);
-        // Fallback ke LocalStorage
         const classes = await this.loadClasses();
         const idx = classes.findIndex(c => c.id === classId);
         if (idx === -1) throw new Error('Class not found');
@@ -262,8 +259,8 @@ export const storage = {
     
     try {
       for (const item of data) {
-        const itemRef = fb.doc(fb.db, collectionName, item.id);
-        await fb.setDoc(itemRef, { ...item, userId: this.userId, updatedAt: new Date().toISOString() }, { merge: true });
+        const docRef = fb.doc(fb.db, collectionName, item.id);
+        await fb.setDoc(docRef, { ...item, userId: this.userId, updatedAt: new Date().toISOString() }, { merge: true });
       }
       console.log('✅ [Storage] Saved to Firebase');
     } catch (e) {
