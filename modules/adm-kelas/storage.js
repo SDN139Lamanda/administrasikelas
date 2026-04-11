@@ -10,7 +10,7 @@ import { db } from '../firebase-config.js';
 import { collection, addDoc, getDocs, updateDoc, deleteDoc, doc, query, where } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
 const DB_KEY = 'eduDBProV6';
-const USE_FIREBASE = false; // 🔴 Set true setelah Firebase siap
+const USE_FIREBASE = true; // 🔴 Set true setelah Firebase siap
 
 export class DataStorage {
   constructor(userId = null) {
