@@ -104,6 +104,7 @@ export const storage = {
     return classes[idx];
   },
   
+  // ✅ FIX: Throw error agar UI bisa handle, hapus fallback LocalStorage di Firebase mode
   deleteClass: async function(classId) {
     console.log('🗑️ [Storage] deleteClass called:', classId, 'userId:', this.userId);
     
@@ -119,6 +120,7 @@ export const storage = {
         const verifySnap = await fb.getDoc(docRef, { source: 'server' });
         if (verifySnap.exists()) {
           console.error('❌ [Storage] VERIFICATION FAILED: Document still exists!');
+          throw new Error('Verification failed: document still exists after deletion');
         } else {
           console.log('✅ [Storage] VERIFICATION PASSED: Document truly deleted');
         }
@@ -129,13 +131,12 @@ export const storage = {
       } catch (e) {
         console.error('❌ [Storage] Firebase deleteClass error:', e.message);
         console.error('❌ [Storage] Error code:', e.code);
-        let classes = JSON.parse(localStorage.getItem(DB_KEY) || '[]');
-        classes = classes.filter(c => c.id !== classId);
-        localStorage.setItem(DB_KEY, JSON.stringify(classes));
-        return;
+        // ✅ FIX: Throw error agar UI bisa catch & tampilkan alert ke user
+        throw e;
       }
     }
     
+    // LocalStorage mode (hanya jika bukan Firebase mode)
     let classes = await this.loadClasses();
     classes = classes.filter(c => c.id !== classId);
     await this.saveClasses(classes);
