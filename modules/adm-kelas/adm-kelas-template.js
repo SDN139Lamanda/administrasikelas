@@ -139,6 +139,16 @@ export function getMainTemplate() {
           </table>
         </div>
         <p id="countRealtime" class="text-xs text-slate-500"></p>
+        ${classes?.length > 0 && classes[activeClassIndex]?.siswa?.length === 0 ? `
+          <div class="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+            <p class="text-sm text-amber-700">
+              ⚠️ <strong>Belum ada siswa di kelas ini!</strong><br>
+              Klik tombol "Tambah Siswa" di atas untuk menambah siswa sebelum bisa input absensi.
+            </p>
+          </div>
+        ` : ''}
+      </div>
+
       <div id="modalKelas" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
         <div class="bg-white rounded-2xl p-6 w-full max-w-md mx-4">
           <h3 class="text-lg font-bold mb-4">📝 Kelas Baru</h3>
