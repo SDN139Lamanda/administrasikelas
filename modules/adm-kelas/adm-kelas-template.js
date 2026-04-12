@@ -1,6 +1,6 @@
 /**
  * TEMPLATE: UI templates for adm-kelas module
- * FINAL: No ?. on CRUD buttons
+ * FINAL: No ?. on CRUD buttons + Word Export Button
  */
 
 import { escapeHtml } from './utils.js';
@@ -112,8 +112,8 @@ export function getMainTemplate() {
           <button onclick="window.admKelas.printRecap()" class="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition">
             🖨️ Print / Cetak
           </button>
-          <button onclick="window.admKelas.downloadPDF()" class="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-medium transition">
-            📄 Download PDF
+          <button onclick="window.admKelas.downloadWord()" class="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-medium transition">
+            📝 Download Word
           </button>
         </div>
       </div>
@@ -283,4 +283,4 @@ export function renderRecapRow(s, stats, total) {
   `;
 }
 
-console.log('✅ [Template] Loaded - adm-kelas UI templates (FINAL)');
+console.log('✅ [Template] Loaded - adm-kelas UI templates (FINAL + Word Export)');
