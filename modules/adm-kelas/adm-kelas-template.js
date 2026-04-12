@@ -1,6 +1,6 @@
 /**
  * TEMPLATE: UI templates for adm-kelas module
- * FIX: Remove ?. from critical CRUD buttons
+ * FINAL: No ?. on CRUD buttons
  */
 
 import { escapeHtml } from './utils.js';
@@ -283,4 +283,4 @@ export function renderRecapRow(s, stats, total) {
   `;
 }
 
-console.log('✅ [Template] Loaded - adm-kelas UI templates (FINAL - Delete Fix)');
+console.log('✅ [Template] Loaded - adm-kelas UI templates (FINAL)');
