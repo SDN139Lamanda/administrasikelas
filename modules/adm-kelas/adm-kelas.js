@@ -1,6 +1,6 @@
 /**
  * MODULE: ADM. KELAS (Complete - All Features)
- * FIX: downloadPDF with show-capture-hide (reliable PDF content)
+ * FIX: downloadWord (.docx) instead of PDF - Editable for Teachers
  */
 
 console.log('🔴 [AdmKelas Module] Script START');
@@ -221,7 +221,7 @@ window.admKelas = {
     }
   },
   
-  // ✅ PRINT: Buka dialog print browser (UNCHANGED)
+  // ✅ PRINT: Buka dialog print browser (UNCHANGED - for PDF via browser)
   printRecap: function() {
     const printContent = document.getElementById('tableToPDF').outerHTML;
     const kelasNama = document.getElementById('judulKelasSiswa')?.innerText || 'Rekap Absensi';
@@ -251,74 +251,138 @@ window.admKelas = {
     printWindow.print();
   },
   
-  // ✅ DOWNLOAD: Auto download PDF via html2pdf (FIX: show-capture-hide approach)
-  downloadPDF: async function() {
-    const originalTable = document.getElementById('tableToPDF');
-    if (!originalTable) return alert('❌ Tabel rekap tidak ditemukan!');
+  // ✅ DOWNLOAD WORD: Generate .docx editable (REPLACES downloadPDF)
+  downloadWord: async function() {
+    if (activeClassIndex === null) return alert('Pilih kelas dulu!');
     
-    const kelasNama = (document.getElementById('judulKelasSiswa')?.innerText || 'Rekap').replace(/[^a-z0-9]/gi, '_');
-    const periode = (document.getElementById('infoPeriode')?.innerText || '').replace(/[^a-z0-9]/gi, '_');
-    const filename = `Rekap_${kelasNama}_${periode}_${new Date().toISOString().split('T')[0]}.pdf`;
+    const kelasNama = (document.getElementById('judulKelasSiswa')?.innerText || 'Rekap Absensi').trim();
+    const periode = document.getElementById('infoPeriode')?.innerText || '';
+    const filename = `Rekap_${kelasNama.replace(/[^a-z0-9]/gi, '_')}_${new Date().toISOString().split('T')[0]}.docx`;
     
-    // ✅ FIX: Temporarily show viewRekap for capture (if hidden)
-    const viewRekap = document.getElementById('viewRekap');
-    const wasHidden = viewRekap?.classList.contains('hidden');
-    
-    if (wasHidden && viewRekap) {
-      viewRekap.classList.remove('hidden');
-      // Force browser reflow to ensure styles are applied
-      void viewRekap.offsetWidth;
+    // Cek library loaded (global dari dashboard.html)
+    if (typeof docx === 'undefined' || typeof saveAs === 'undefined') {
+      alert('⚠️ Library Word belum loaded. Silakan refresh halaman.');
+      return;
     }
     
-    // Wait for DOM to fully render with styles
-    await new Promise(resolve => setTimeout(resolve, 300));
-    
-    // Cek html2pdf loaded
-    if (typeof html2pdf === 'undefined') {
-      const script = document.createElement('script');
-      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
-      script.crossOrigin = 'anonymous';
-      document.head.appendChild(script);
-      await new Promise((resolve, reject) => {
-        script.onload = resolve;
-        script.onerror = () => reject(new Error('Gagal load html2pdf library'));
-      });
-    }
-    
-    const opt = {
-      margin: 10,
-      filename: filename,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { 
-        scale: 2, 
-        useCORS: true, 
-        logging: false,
-        // Ensure canvas captures full content
-        windowWidth: originalTable.scrollWidth,
-        windowHeight: originalTable.scrollHeight
-      },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
-    };
+    // ✅ Show loading state
+    const originalBtnText = event?.target?.innerText || '📝 Download Word';
+    if (event?.target) event.target.innerText = '⏳ Memproses...';
+    event?.target?.setAttribute('disabled', 'true');
     
     try {
-      // Show loading state
-      const originalBtnText = event?.target?.innerText || '📄 Download PDF';
-      if (event?.target) event.target.innerText = '⏳ Memproses...';
-      event?.target?.setAttribute('disabled', 'true');
+      // ✅ Hitung stats sama seperti renderRecap
+      const tipe = document.getElementById('tipeRekap').value;
+      let filteredAbsen = [];
       
-      // ✅ Capture from ORIGINAL table (now visible)
-      await html2pdf().set(opt).from(originalTable).save();
-      
-      alert('✅ PDF berhasil didownload!\n\nFile: ' + filename);
-    } catch (e) {
-      console.error('❌ Download PDF error:', e);
-      alert('❌ Gagal download PDF.\n\nCoba: Print → Save as PDF');
-    } finally {
-      // ✅ RESTORE: Hide viewRekap if it was hidden before
-      if (wasHidden && viewRekap) {
-        viewRekap.classList.add('hidden');
+      if (tipe === 'hari') {
+        const val = document.getElementById('fHari')?.value;
+        filteredAbsen = classes[activeClassIndex].absen?.filter(a => a.tanggal === val) || [];
+      } else if (tipe === 'bulan') {
+        const val = document.getElementById('fBulan')?.value;
+        filteredAbsen = classes[activeClassIndex].absen?.filter(a => a.tanggal?.startsWith(val)) || [];
+      } else {
+        filteredAbsen = classes[activeClassIndex].absen || [];
       }
-      // Restore button state
+      
+      const totalPertemuan = filteredAbsen.length;
+      const siswa = classes[activeClassIndex].siswa || [];
+      
+      // ✅ Siapkan data tabel
+      const tableRows = [];
+      
+      // Header row
+      tableRows.push(new docx.TableRow({
+        children: ['Nama', 'H', 'I', 'S', 'A', '%'].map(text => 
+          new docx.TableCell({
+            children: [new docx.Paragraph({ 
+              text, 
+              alignment: docx.AlignmentType.CENTER,
+              style: { bold: true }
+            })],
+            shading: { fill: 'E7E9EB' },
+            verticalAlign: docx.VerticalAlignType.CENTER
+          })
+        )
+      }));
+      
+      // Data rows
+      siswa.forEach(s => {
+        let stats = { H:0, I:0, S:0, A:0 };
+        
+        filteredAbsen.forEach(log => {
+          const record = log.attendanceData?.find(r => r.studentId === s.id || r.nama === s.nama);
+          if (record) {
+            if (record.status === 'H') stats.H++;
+            else if (record.status === 'I') stats.I++;
+            else if (record.status === 'S') stats.S++;
+            else if (record.status === 'A') stats.A++;
+          }
+        });
+        
+        const total = stats.H + stats.I + stats.S + stats.A;
+        const pct = total > 0 ? Math.round((stats.H / total) * 100) : 0;
+        
+        tableRows.push(new docx.TableRow({
+          children: [
+            new docx.TableCell({ children: [new docx.Paragraph({ text: s.nama })] }),
+            new docx.TableCell({ children: [new docx.Paragraph({ text: String(stats.H), alignment: docx.AlignmentType.CENTER })] }),
+            new docx.TableCell({ children: [new docx.Paragraph({ text: String(stats.I), alignment: docx.AlignmentType.CENTER })] }),
+            new docx.TableCell({ children: [new docx.Paragraph({ text: String(stats.S), alignment: docx.AlignmentType.CENTER })] }),
+            new docx.TableCell({ children: [new docx.Paragraph({ text: String(stats.A), alignment: docx.AlignmentType.CENTER })] }),
+            new docx.TableCell({ children: [new docx.Paragraph({ text: pct + '%', alignment: docx.AlignmentType.CENTER })] })
+          ]
+        }));
+      });
+      
+      // ✅ Buat dokumen Word
+      const doc = new docx.Document({
+        sections: [{
+          properties: {},
+          children: [
+            // Header
+            new docx.Paragraph({ 
+              text: kelasNama + ' - Laporan Absensi', 
+              heading: docx.HeadingLevel.HEADING_1, 
+              alignment: docx.AlignmentType.CENTER,
+              spacing: { after: 200 }
+            }),
+            // Periode
+            new docx.Paragraph({ 
+              text: periode, 
+              alignment: docx.AlignmentType.CENTER,
+              style: { italic: true },
+              spacing: { after: 300 }
+            }),
+            // Tabel
+            new docx.Table({
+              rows: tableRows,
+              width: { size: 100, type: docx.WidthType.PERCENTAGE }
+            }),
+            // Footer info
+            new docx.Paragraph({ 
+              text: '', 
+              spacing: { before: 400 }
+            }),
+            new docx.Paragraph({ 
+              text: 'Dicetak pada: ' + new Date().toLocaleString('id-ID'), 
+              alignment: docx.AlignmentType.RIGHT,
+              style: { italic: true, size: 20 }
+            })
+          ]
+        }]
+      });
+      
+      // ✅ Download file
+      const blob = await docx.Packer.toBlob(doc);
+      saveAs(blob, filename);
+      
+      alert('✅ File Word berhasil didownload!\n\nFile: ' + filename + '\n\n💡 File dapat diedit di Microsoft Word atau Google Docs.');
+    } catch (e) {
+      console.error('❌ Download Word error:', e);
+      alert('❌ Gagal download Word.\n\nError: ' + e.message);
+    } finally {
+      // ✅ Restore button state
       if (event?.target) {
         event.target.innerText = originalBtnText;
         event.target.removeAttribute('disabled');
@@ -567,4 +631,4 @@ window.admKelas = {
   }
 };
 
-console.log('🟢 [AdmKelas] Module FINISHED - Complete Features + Print/Download');
+console.log('🟢 [AdmKelas] Module FINISHED - Complete Features + Word Export');
