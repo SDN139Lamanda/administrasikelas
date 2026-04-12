@@ -1,6 +1,6 @@
 /**
  * MODULE: ADM. KELAS (Complete - All Features)
- * FIX: downloadWord (.docx) instead of PDF - Editable for Teachers
+ * FIX: downloadWord (.docx) with proper docx.js destructuring - Editable for Teachers
  */
 
 console.log('🔴 [AdmKelas Module] Script START');
@@ -251,19 +251,26 @@ window.admKelas = {
     printWindow.print();
   },
   
-  // ✅ DOWNLOAD WORD: Generate .docx editable (REPLACES downloadPDF)
+  // ✅ DOWNLOAD WORD: Generate .docx editable (FIXED: proper docx.js destructuring)
   downloadWord: async function() {
     if (activeClassIndex === null) return alert('Pilih kelas dulu!');
+    
+    // ✅ FIX: Destructure docx exports properly for CDN usage
+    const docxLib = window.docx;
+    if (!docxLib || !docxLib.Document || !docxLib.Packer) {
+      alert('⚠️ Library Word belum loaded. Silakan refresh halaman.');
+      return;
+    }
+    
+    // Destructure needed classes for cleaner code
+    const { 
+      Document, Paragraph, Table, TableCell, TableRow,
+      AlignmentType, Packer, WidthType, VerticalAlignType, HeadingLevel
+    } = docxLib;
     
     const kelasNama = (document.getElementById('judulKelasSiswa')?.innerText || 'Rekap Absensi').trim();
     const periode = document.getElementById('infoPeriode')?.innerText || '';
     const filename = `Rekap_${kelasNama.replace(/[^a-z0-9]/gi, '_')}_${new Date().toISOString().split('T')[0]}.docx`;
-    
-    // Cek library loaded (global dari dashboard.html)
-    if (typeof docx === 'undefined' || typeof saveAs === 'undefined') {
-      alert('⚠️ Library Word belum loaded. Silakan refresh halaman.');
-      return;
-    }
     
     // ✅ Show loading state
     const originalBtnText = event?.target?.innerText || '📝 Download Word';
@@ -291,17 +298,17 @@ window.admKelas = {
       // ✅ Siapkan data tabel
       const tableRows = [];
       
-      // Header row
-      tableRows.push(new docx.TableRow({
+      // Header row - FIX: use destructured AlignmentType
+      tableRows.push(new TableRow({
         children: ['Nama', 'H', 'I', 'S', 'A', '%'].map(text => 
-          new docx.TableCell({
-            children: [new docx.Paragraph({ 
+          new TableCell({
+            children: [new Paragraph({ 
               text, 
-              alignment: docx.AlignmentType.CENTER,
+              alignment: AlignmentType.CENTER,
               style: { bold: true }
             })],
             shading: { fill: 'E7E9EB' },
-            verticalAlign: docx.VerticalAlignType.CENTER
+            verticalAlign: VerticalAlignType.CENTER
           })
         )
       }));
@@ -323,59 +330,56 @@ window.admKelas = {
         const total = stats.H + stats.I + stats.S + stats.A;
         const pct = total > 0 ? Math.round((stats.H / total) * 100) : 0;
         
-        tableRows.push(new docx.TableRow({
+        tableRows.push(new TableRow({
           children: [
-            new docx.TableCell({ children: [new docx.Paragraph({ text: s.nama })] }),
-            new docx.TableCell({ children: [new docx.Paragraph({ text: String(stats.H), alignment: docx.AlignmentType.CENTER })] }),
-            new docx.TableCell({ children: [new docx.Paragraph({ text: String(stats.I), alignment: docx.AlignmentType.CENTER })] }),
-            new docx.TableCell({ children: [new docx.Paragraph({ text: String(stats.S), alignment: docx.AlignmentType.CENTER })] }),
-            new docx.TableCell({ children: [new docx.Paragraph({ text: String(stats.A), alignment: docx.AlignmentType.CENTER })] }),
-            new docx.TableCell({ children: [new docx.Paragraph({ text: pct + '%', alignment: docx.AlignmentType.CENTER })] })
+            new TableCell({ children: [new Paragraph({ text: s.nama })] }),
+            new TableCell({ children: [new Paragraph({ text: String(stats.H), alignment: AlignmentType.CENTER })] }),
+            new TableCell({ children: [new Paragraph({ text: String(stats.I), alignment: AlignmentType.CENTER })] }),
+            new TableCell({ children: [new Paragraph({ text: String(stats.S), alignment: AlignmentType.CENTER })] }),
+            new TableCell({ children: [new Paragraph({ text: String(stats.A), alignment: AlignmentType.CENTER })] }),
+            new TableCell({ children: [new Paragraph({ text: pct + '%', alignment: AlignmentType.CENTER })] })
           ]
         }));
       });
       
-      // ✅ Buat dokumen Word
-      const doc = new docx.Document({
+      // ✅ Buat dokumen Word - FIX: use destructured classes
+      const doc = new Document({
         sections: [{
           properties: {},
           children: [
             // Header
-            new docx.Paragraph({ 
+            new Paragraph({ 
               text: kelasNama + ' - Laporan Absensi', 
-              heading: docx.HeadingLevel.HEADING_1, 
-              alignment: docx.AlignmentType.CENTER,
+              heading: HeadingLevel.HEADING_1, 
+              alignment: AlignmentType.CENTER,
               spacing: { after: 200 }
             }),
             // Periode
-            new docx.Paragraph({ 
+            new Paragraph({ 
               text: periode, 
-              alignment: docx.AlignmentType.CENTER,
+              alignment: AlignmentType.CENTER,
               style: { italic: true },
               spacing: { after: 300 }
             }),
             // Tabel
-            new docx.Table({
+            new Table({
               rows: tableRows,
-              width: { size: 100, type: docx.WidthType.PERCENTAGE }
+              width: { size: 100, type: WidthType.PERCENTAGE }
             }),
             // Footer info
-            new docx.Paragraph({ 
-              text: '', 
-              spacing: { before: 400 }
-            }),
-            new docx.Paragraph({ 
+            new Paragraph({ text: '', spacing: { before: 400 } }),
+            new Paragraph({ 
               text: 'Dicetak pada: ' + new Date().toLocaleString('id-ID'), 
-              alignment: docx.AlignmentType.RIGHT,
+              alignment: AlignmentType.RIGHT,
               style: { italic: true, size: 20 }
             })
           ]
         }]
       });
       
-      // ✅ Download file
-      const blob = await docx.Packer.toBlob(doc);
-      saveAs(blob, filename);
+      // ✅ Download file - FIX: use destructured Packer + explicit window.saveAs
+      const blob = await Packer.toBlob(doc);
+      window.saveAs(blob, filename);
       
       alert('✅ File Word berhasil didownload!\n\nFile: ' + filename + '\n\n💡 File dapat diedit di Microsoft Word atau Google Docs.');
     } catch (e) {
@@ -631,4 +635,4 @@ window.admKelas = {
   }
 };
 
-console.log('🟢 [AdmKelas] Module FINISHED - Complete Features + Word Export');
+console.log('🟢 [AdmKelas] Module FINISHED - Complete Features + Word Export (Fixed)');
