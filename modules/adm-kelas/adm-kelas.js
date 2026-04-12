@@ -1,6 +1,6 @@
 /**
  * MODULE: ADM. KELAS (Complete - All Features)
- * FIX: renderRecap attendanceData sync
+ * FIX: attendanceData sync + Print & Download Support
  */
 
 console.log('🔴 [AdmKelas Module] Script START');
@@ -149,7 +149,7 @@ window.admKelas = {
     tbody.innerHTML = siswa.map((s, i) => renderAttendanceRow(s, i)).join('');
   },
   
-  // ✅ FIX: attendanceData (bukan data)
+  // ✅ FIX: attendanceData (bukan data) - CRITICAL FOR REKAP
   renderRecap: function() {
     if (activeClassIndex === null) return alert('Pilih kelas dulu!');
     
@@ -183,7 +183,7 @@ window.admKelas = {
       let stats = { H:0, I:0, S:0, A:0, total:0 };
       
       filteredAbsen.forEach(log => {
-        // ✅ FIX INI SAJA: attendanceData bukan data
+        // ✅ CRITICAL FIX: attendanceData bukan data
         const record = log.attendanceData?.find(r => r.studentId === s.id || r.nama === s.nama);
         if (record) {
           if (record.status === 'H') stats.H++;
@@ -219,6 +219,40 @@ window.admKelas = {
     } else {
       container.innerHTML = '';
     }
+  },
+  
+  // ✅ NEW: PRINT REKAP
+  printRecap: function() {
+    const printContent = document.getElementById('tableToPDF').outerHTML;
+    const kelasNama = document.getElementById('judulKelasSiswa')?.innerText || 'Rekap Absensi';
+    const periode = document.getElementById('infoPeriode')?.innerText || '';
+    
+    const printWindow = window.open('', '', 'height=600,width=800');
+    printWindow.document.write(`
+      <html><head><title>${kelasNama}</title>
+      <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        h2 { text-align: center; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        th { background-color: #f3f4f6; }
+        .info { margin-bottom: 20px; }
+      </style>
+      </head><body>
+        <h2>${kelasNama} - Laporan Absensi</h2>
+        <div class="info">${periode}</div>
+        ${printContent}
+        <p style="margin-top:30px;">Dicetak pada: ${new Date().toLocaleString('id-ID')}</p>
+      </body></html>
+    `);
+    printWindow.document.close();
+    printWindow.print();
+  },
+  
+  // ✅ NEW: DOWNLOAD PDF (via Print-to-PDF)
+  downloadPDF: function() {
+    this.printRecap();
+    alert('💡 Tips: Pada dialog print, pilih "Save as PDF" sebagai destination untuk download PDF.');
   },
   
   openClassModal: function() {
@@ -268,6 +302,7 @@ window.admKelas = {
     this.openClassModal();
   },
   
+  // ✅ DELETE CLASS
   deleteClass: async function(index) {
     if (!confirm('Hapus kelas ini beserta semua data siswa dan absensi?')) return;
     
@@ -417,11 +452,6 @@ window.admKelas = {
     }
   },
   
-  // ✅ EXPORT
-  downloadPDF: async function() {
-    alert('🚧 Fitur export PDF akan segera hadir!');
-  },
-  
   deleteAllData: async function() {
     if (!confirm('⚠️ HAPUS SEMUA DATA?')) return;
     if (!confirm('Apakah Anda BENAR-BENAR yakin?')) return;
@@ -466,4 +496,4 @@ window.admKelas = {
   }
 };
 
-console.log('🟢 [AdmKelas] Module FINISHED - Complete Features');
+console.log('🟢 [AdmKelas] Module FINISHED - Complete Features + Print/Download');
