@@ -1,6 +1,6 @@
 /**
  * MODULE: ADM. KELAS (Complete - All Features)
- * FIX: downloadPDF with visible container clone (fix blank PDF)
+ * FIX: downloadPDF with show-capture-hide (reliable PDF content)
  */
 
 console.log('🔴 [AdmKelas Module] Script START');
@@ -251,7 +251,7 @@ window.admKelas = {
     printWindow.print();
   },
   
-  // ✅ DOWNLOAD: Auto download PDF via html2pdf (FIX: visible container clone)
+  // ✅ DOWNLOAD: Auto download PDF via html2pdf (FIX: show-capture-hide approach)
   downloadPDF: async function() {
     const originalTable = document.getElementById('tableToPDF');
     if (!originalTable) return alert('❌ Tabel rekap tidak ditemukan!');
@@ -260,39 +260,18 @@ window.admKelas = {
     const periode = (document.getElementById('infoPeriode')?.innerText || '').replace(/[^a-z0-9]/gi, '_');
     const filename = `Rekap_${kelasNama}_${periode}_${new Date().toISOString().split('T')[0]}.pdf`;
     
-    // ✅ FIX: Clone table ke temporary container yang VISIBLE (bukan hidden)
-    const tempContainer = document.createElement('div');
-    tempContainer.style.cssText = 'position:fixed;top:0;left:-9999px;width:800px;background:white;padding:20px;font-family:Arial,sans-serif;visibility:visible;display:block;z-index:-1;';
+    // ✅ FIX: Temporarily show viewRekap for capture (if hidden)
+    const viewRekap = document.getElementById('viewRekap');
+    const wasHidden = viewRekap?.classList.contains('hidden');
     
-    const tableClone = originalTable.cloneNode(true);
-    tableClone.style.width = '100%';
-    tableClone.style.borderCollapse = 'collapse';
+    if (wasHidden && viewRekap) {
+      viewRekap.classList.remove('hidden');
+      // Force browser reflow to ensure styles are applied
+      void viewRekap.offsetWidth;
+    }
     
-    // Apply styling for PDF capture
-    tableClone.querySelectorAll('th').forEach(th => {
-      th.style.border = '1px solid #ddd';
-      th.style.padding = '8px';
-      th.style.backgroundColor = '#f3f4f6';
-      th.style.textAlign = 'center';
-      th.style.fontSize = '12px';
-    });
-    tableClone.querySelectorAll('td').forEach(td => {
-      td.style.border = '1px solid #ddd';
-      td.style.padding = '8px';
-      td.style.textAlign = 'center';
-      td.style.fontSize = '12px';
-    });
-    
-    // Add header
-    const headerDiv = document.createElement('div');
-    headerDiv.innerHTML = `<h2 style="text-align:center;margin-bottom:20px;font-size:18px;">${kelasNama} - Laporan Absensi</h2><p style="margin-bottom:20px;font-size:14px;">${periode}</p>`;
-    
-    tempContainer.appendChild(headerDiv);
-    tempContainer.appendChild(tableClone);
-    document.body.appendChild(tempContainer);
-    
-    // Wait for DOM update
-    await new Promise(resolve => setTimeout(resolve, 100));
+    // Wait for DOM to fully render with styles
+    await new Promise(resolve => setTimeout(resolve, 300));
     
     // Cek html2pdf loaded
     if (typeof html2pdf === 'undefined') {
@@ -302,7 +281,7 @@ window.admKelas = {
       document.head.appendChild(script);
       await new Promise((resolve, reject) => {
         script.onload = resolve;
-        script.onerror = () => reject(new Error('Gagal load html2pdf'));
+        script.onerror = () => reject(new Error('Gagal load html2pdf library'));
       });
     }
     
@@ -310,25 +289,36 @@ window.admKelas = {
       margin: 10,
       filename: filename,
       image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, logging: false },
+      html2canvas: { 
+        scale: 2, 
+        useCORS: true, 
+        logging: false,
+        // Ensure canvas captures full content
+        windowWidth: originalTable.scrollWidth,
+        windowHeight: originalTable.scrollHeight
+      },
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
     };
     
     try {
+      // Show loading state
       const originalBtnText = event?.target?.innerText || '📄 Download PDF';
       if (event?.target) event.target.innerText = '⏳ Memproses...';
       event?.target?.setAttribute('disabled', 'true');
       
-      // ✅ Generate dari tempContainer (VISIBLE)
-      await html2pdf().set(opt).from(tempContainer).save();
+      // ✅ Capture from ORIGINAL table (now visible)
+      await html2pdf().set(opt).from(originalTable).save();
       
       alert('✅ PDF berhasil didownload!\n\nFile: ' + filename);
     } catch (e) {
       console.error('❌ Download PDF error:', e);
       alert('❌ Gagal download PDF.\n\nCoba: Print → Save as PDF');
     } finally {
-      // ✅ Cleanup temp container
-      if (tempContainer.parentNode) tempContainer.parentNode.removeChild(tempContainer);
+      // ✅ RESTORE: Hide viewRekap if it was hidden before
+      if (wasHidden && viewRekap) {
+        viewRekap.classList.add('hidden');
+      }
+      // Restore button state
       if (event?.target) {
         event.target.innerText = originalBtnText;
         event.target.removeAttribute('disabled');
