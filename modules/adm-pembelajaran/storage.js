@@ -1,6 +1,6 @@
 /**
  * STORAGE: Firebase Only (Adm.Pembelajaran)
- * Shared storage for Section 1 (CTA + Asisten Modul), Section 2, Section 3
+ * Shared storage for Section 1, Section 2, Section 3
  */
 
 import * as fb from '../firebase-config.js';
@@ -14,7 +14,6 @@ function isFirebaseMode(userId) {
 export const storage = {
   userId: null,
   
-  // ✅ Set userId (called from adm-pembelajaran.js)
   setUserId: function(uid) {
     if (uid && typeof uid === 'string' && uid.length > 0) {
       this.userId = uid;
@@ -25,7 +24,6 @@ export const storage = {
     }
   },
   
-  // ✅ LOAD all pembelajaran documents for current user
   loadDokumen: async function() {
     if (!isFirebaseMode(this.userId)) return [];
     try {
@@ -35,17 +33,13 @@ export const storage = {
         fb.orderBy('createdAt', 'desc')
       );
       const snapshot = await fb.getDocs(q, { source: 'server' });
-      return snapshot.docs.map(doc => {
-        const data = doc.data();
-        return { id: doc.id, ...data };
-      });
+      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     } catch (e) {
       console.error('❌ [Storage-Pembelajaran] loadDokumen error:', e.message);
       return [];
     }
   },
   
-  // ✅ LOAD by jenis (cta or modul_ajar)
   loadDokumenByJenis: async function(jenis) {
     if (!isFirebaseMode(this.userId)) return [];
     try {
@@ -56,32 +50,28 @@ export const storage = {
         fb.orderBy('createdAt', 'desc')
       );
       const snapshot = await fb.getDocs(q, { source: 'server' });
-      return snapshot.docs.map(doc => {
-        const data = doc.data();
-        return { id: doc.id, ...data };
-      });
+      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     } catch (e) {
       console.error('❌ [Storage-Pembelajaran] loadDokumenByJenis error:', e.message);
       return [];
     }
   },
   
-  // ✅ SAVE document (for CTA Generator & Asisten Modul auto-save)
   saveDokumen: async function(docData) {
     if (!isFirebaseMode(this.userId)) throw new Error('saveDokumen: userId not set');
     if (!docData?.judul?.trim()) throw new Error('saveDokumen: judul is required');
-    if (!docData?.jenis) throw new Error('saveDokumen: jenis is required (cta/modul_ajar)');
+    if (!docData?.jenis) throw new Error('saveDokumen: jenis is required');
     
     try {
       const newDoc = {
         userId: this.userId,
-        jenis: docData.jenis,           // 'cta' or 'modul_ajar'
-        jenjang: docData.jenjang || '', // 'sd', 'smp', 'sma'
-        kelas: docData.kelas || '',     // '1', '2', ..., '12'
-        mapel: docData.mapel || '',     // 'Matematika', 'IPA', etc.
+        jenis: docData.jenis,
+        jenjang: docData.jenjang || '',
+        kelas: docData.kelas || '',
+        mapel: docData.mapel || '',
         judul: docData.judul.trim(),
-        konten: docData.konten || '',   // Full HTML/text content
-        tags: docData.tags || [],       // Optional tags for search
+        konten: docData.konten || '',
+        tags: docData.tags || [],
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };
@@ -96,18 +86,13 @@ export const storage = {
     }
   },
   
-  // ✅ UPDATE document (for edit feature)
   updateDokumen: async function(docId, updates) {
     if (!isFirebaseMode(this.userId)) throw new Error('updateDokumen: userId not set');
     if (!docId) throw new Error('updateDokumen: docId is required');
     
     try {
       const docRef = fb.doc(fb.db, 'pembelajaran', docId);
-      await fb.updateDoc(docRef, {
-        ...updates,
-        userId: this.userId,
-        updatedAt: new Date().toISOString()
-      });
+      await fb.updateDoc(docRef, { ...updates, userId: this.userId, updatedAt: new Date().toISOString() });
       console.log('✅ [Storage-Pembelajaran] updateDokumen:', docId);
       return { id: docId, ...updates };
     } catch (e) {
@@ -116,23 +101,19 @@ export const storage = {
     }
   },
   
-  // ✅ DELETE document
   deleteDokumen: async function(docId) {
     if (!isFirebaseMode(this.userId)) throw new Error('deleteDokumen: userId not set');
     if (!docId) throw new Error('deleteDokumen: docId is required');
     
     try {
       const docRef = fb.doc(fb.db, 'pembelajaran', docId);
-      
-      // ✅ Verify ownership before delete
       const docSnap = await fb.getDoc(docRef);
       if (docSnap.exists()) {
         const docData = docSnap.data();
         if (docData.userId && docData.userId !== this.userId) {
-          throw new Error(`Permission denied: doc userId (${docData.userId}) != current user (${this.userId})`);
+          throw new Error(`Permission denied`);
         }
       }
-      
       await fb.deleteDoc(docRef);
       console.log('✅ [Storage-Pembelajaran] deleteDokumen:', docId);
     } catch (e) {
@@ -141,19 +122,15 @@ export const storage = {
     }
   },
   
-  // ✅ GET single document by ID
   getDokumenById: async function(docId) {
     if (!docId) throw new Error('getDokumenById: docId is required');
-    
     try {
       const docRef = fb.doc(fb.db, 'pembelajaran', docId);
       const docSnap = await fb.getDoc(docRef);
-      
       if (docSnap.exists()) {
         const data = docSnap.data();
-        // Verify ownership
         if (data.userId && data.userId !== this.userId) {
-          throw new Error('Permission denied: document not owned by current user');
+          throw new Error('Permission denied');
         }
         return { id: docSnap.id, ...data };
       }
@@ -165,4 +142,4 @@ export const storage = {
   }
 };
 
-console.log('✅ [Storage-Pembelajaran] Loaded - Firebase Only (Shared for 3 Sections)');
+console.log('✅ [Storage-Pembelajaran] Loaded - Firebase Only (Shared)');
