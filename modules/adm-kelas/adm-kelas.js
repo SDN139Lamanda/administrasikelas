@@ -1,5 +1,6 @@
 /**
  * MODULE: ADM. KELAS (Complete - All Features)
+ * FIX: Recap attendanceData mismatch
  */
 
 console.log('🔴 [AdmKelas Module] Script START');
@@ -148,6 +149,7 @@ window.admKelas = {
     tbody.innerHTML = siswa.map((s, i) => renderAttendanceRow(s, i)).join('');
   },
   
+  // ✅ FIX: attendanceData bukan data
   renderRecap: function() {
     if (activeClassIndex === null) return alert('Pilih kelas dulu!');
     
@@ -181,7 +183,8 @@ window.admKelas = {
       let stats = { H:0, I:0, S:0, A:0, total:0 };
       
       filteredAbsen.forEach(log => {
-        const record = log.data?.find(r => r.studentId === s.id || r.nama === s.nama);
+        // ✅ FIX: attendanceData bukan data
+        const record = log.attendanceData?.find(r => r.studentId === s.id || r.nama === s.nama);
         if (record) {
           if (record.status === 'H') stats.H++;
           else if (record.status === 'I') stats.I++;
@@ -196,7 +199,7 @@ window.admKelas = {
       tbody.innerHTML += renderRecapRow(s, stats, totalPertemuan || 1);
     });
     
-    // Update stats cards
+    // ✅ Update stats cards
     document.getElementById('statH').innerText = tH;
     document.getElementById('statI').innerText = tI;
     document.getElementById('statS').innerText = tS;
