@@ -137,11 +137,12 @@
                         </a>
                     </article>
                     
+                    <!-- ✅ FIX: Adm.Pembelajaran card - Added onclick handler -->
                     <article class="room-card room-adm-pembelajaran" data-feature="adm-pembelajaran">
-                        <a href="#adm-pembelajaran" class="room-link">
-                            <div class="room-icon bg-blue"><i class="fas fa-book-open"></i></div>
+                        <a href="javascript:void(0)" class="room-link" onclick="safeRenderAdmPembelajaran(event); return false;">
+                            <div class="room-icon bg-teal"><i class="fas fa-book-open"></i></div>
                             <h3 class="room-title">Adm. Pembelajaran</h3>
-                            <p class="room-desc">Modul & RPP</p>
+                            <p class="room-desc">Modul & RPP Tersimpan</p>
                         </a>
                     </article>
                     
@@ -359,7 +360,7 @@
         });
     </script>
 
-    <!-- ✅ SAFE MODULE WRAPPERS (NEW - Prevents "is not defined" errors) -->
+    <!-- ✅ SAFE MODULE WRAPPERS (UPDATED - Added Adm.Pembelajaran) -->
     <script>
         // ✅ Wrapper functions for safe module calling
         // These wait for the actual function to be available before calling
@@ -407,6 +408,46 @@
             }
         };
         
+        // ✅ NEW: Safe wrapper for Adm.Pembelajaran
+        window.safeRenderAdmPembelajaran = async function(e) {
+            if (e) e.preventDefault();
+            console.log('🔄 [Dashboard] Loading adm-pembelajaran module...');
+            
+            if (typeof window.renderAdmPembelajaran === 'function') {
+                console.log('✅ [Dashboard] adm-pembelajaran already loaded');
+                await window.renderAdmPembelajaran();
+                return;
+            }
+            
+            const container = document.getElementById('module-container');
+            if (container) {
+                container.innerHTML = '<div class="text-center py-8"><i class="fas fa-spinner fa-spin text-2xl text-indigo-600"></i><p class="mt-2 text-slate-600">Memuat modul...</p></div>';
+                container.classList.remove('hidden');
+            }
+            
+            try {
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                if (typeof window.renderAdmPembelajaran === 'function') {
+                    await window.renderAdmPembelajaran();
+                } else {
+                    console.warn('⚠️ [Dashboard] renderAdmPembelajaran not ready, trying dynamic import...');
+                    await import('./modules/adm-pembelajaran/adm-pembelajaran.js');
+                    if (typeof window.renderAdmPembelajaran === 'function') {
+                        await window.renderAdmPembelajaran();
+                    } else {
+                        throw new Error('renderAdmPembelajaran not found after import');
+                    }
+                }
+            } catch (err) {
+                console.error('❌ [Dashboard] Failed to load adm-pembelajaran:', err);
+                if (container) {
+                    container.innerHTML = `<div class="text-center py-8 text-rose-600"><i class="fas fa-exclamation-circle text-2xl"></i><p class="mt-2">Gagal memuat modul: ${err.message}</p><button onclick="location.reload()" class="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg">Refresh</button></div>`;
+                }
+                alert('❌ Gagal memuat modul Adm. Pembelajaran. Silakan refresh halaman.');
+            }
+        };
+        
         window.safeRenderPenilaian = async function(e) {
             if (e) e.preventDefault();
             if (typeof window.renderPenilaian === 'function') {
@@ -444,9 +485,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" crossorigin="anonymous"></script>
 
     <!-- ✅ Docx.js + FileSaver for Word Export (Global) - NEW -->
-<script src="https://cdn.jsdelivr.net/npm/docx@7.8.2/build/index.js" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js" crossorigin="anonymous"></script>
-    <!-- ✅ Module Scripts (UNCHANGED + All adm-kelas imports) -->
+    <script src="https://cdn.jsdelivr.net/npm/docx@7.8.2/build/index.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js" crossorigin="anonymous"></script>
+
+    <!-- ✅ Module Scripts (UPDATED - Added Adm.Pembelajaran imports) -->
     <script type="module" src="modules/firebase-config.js"></script>
     <script type="module" src="js/main.js"></script>
     <script type="module" src="js/dashboard.js"></script>
@@ -461,6 +503,19 @@
     <script type="module" src="modules/adm-kelas/storage.js"></script>
     <script type="module" src="modules/adm-kelas/adm-kelas-template.js"></script>
     <script type="module" src="modules/adm-kelas/adm-kelas.js"></script>
+    
+    <!-- ✅ Adm.Pembelajaran Module Imports (NEW) -->
+    <script type="module" src="modules/adm-pembelajaran/utils.js"></script>
+    <script type="module" src="modules/adm-pembelajaran/storage.js"></script>
+    <script type="module" src="modules/adm-pembelajaran/section1/section1.js"></script>
+    <script type="module" src="modules/adm-pembelajaran/section1/section1-template.js"></script>
+    <script type="module" src="modules/adm-pembelajaran/section2/section2.js"></script>
+    <script type="module" src="modules/adm-pembelajaran/section2/section2-template.js"></script>
+    <script type="module" src="modules/adm-pembelajaran/section3/section3.js"></script>
+    <script type="module" src="modules/adm-pembelajaran/section3/section3-template.js"></script>
+    <script type="module" src="modules/adm-pembelajaran/adm-pembelajaran-template.js"></script>
+    <script type="module" src="modules/adm-pembelajaran/adm-pembelajaran.js"></script>
+    
     <!-- ✅ Penilaian module import -->
     <script type="module" src="modules/penilaian/penilaian.js"></script>
     
