@@ -2,7 +2,6 @@
  * UTILS: Helper functions for adm-kelas module
  */
 
-// ✅ Escape HTML untuk mencegah XSS
 export function escapeHtml(str) {
   if (!str) return '';
   const div = document.createElement('div');
@@ -10,19 +9,16 @@ export function escapeHtml(str) {
   return div.innerHTML;
 }
 
-// ✅ Generate ID unik sederhana
 export function generateId(prefix = 'id') {
   return `${prefix}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 }
 
-// ✅ Format tanggal ke YYYY-MM-DD
 export function formatDate(date) {
   if (!date) return '';
   const d = new Date(date);
   return d.toISOString().split('T')[0];
 }
 
-// ✅ Parse gender value (L/P)
 export function parseGender(value) {
   const v = String(value || '').toLowerCase().trim();
   if (['l', 'laki-laki', 'pria', 'male'].includes(v)) return 'L';
@@ -30,13 +26,11 @@ export function parseGender(value) {
   return 'L';
 }
 
-// ✅ Hitung persentase
 export function calculatePercentage(part, total) {
   if (!total || total === 0) return 0;
   return Math.round((part / total) * 100);
 }
 
-// ✅ Get color class untuk status
 export function getStatusColor(status) {
   const map = {
     'H': 'bg-emerald-100 text-emerald-700',
