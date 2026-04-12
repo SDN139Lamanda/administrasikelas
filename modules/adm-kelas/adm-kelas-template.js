@@ -2,6 +2,9 @@
  * TEMPLATE: UI templates for adm-kelas module
  */
 
+// ✅ FIX: Import escapeHtml dari utils.js
+import { escapeHtml } from './utils.js';
+
 // ✅ Main container template
 export function getMainTemplate() {
   return `
@@ -109,7 +112,7 @@ export function getMainTemplate() {
   `;
 }
 
-// ✅ Render helpers
+// ✅ Render helpers (semua pakai escapeHtml yang sudah di-import)
 export function renderClassCard(k, index) {
   return `<div class="bg-white rounded-2xl shadow-sm border p-4 hover:shadow-md transition cursor-pointer" onclick="window.admKelas.openClassDetail(${index})"><div class="flex items-start justify-between"><div><h4 class="font-semibold text-slate-800">${escapeHtml(k.nama)}</h4><p class="text-xs text-slate-500 mt-1">${k.siswa?.length || 0} siswa</p></div><div class="flex gap-1"><button onclick="event.stopPropagation(); window.admKelas.editClass(${index})" class="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition" title="Edit"><i class="fas fa-pen"></i></button><button onclick="event.stopPropagation(); window.admKelas.deleteClass(${index})" class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition" title="Hapus"><i class="fas fa-trash"></i></button></div></div><div class="mt-3 flex gap-2"><button onclick="event.stopPropagation(); window.admKelas.navigateToAttendance()" class="flex-1 py-2 text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg font-medium transition">📋 Absensi</button><button onclick="event.stopPropagation(); window.admKelas.navigateToRecap()" class="flex-1 py-2 text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg font-medium transition">📊 Rekap</button></div></div>`;
 }
