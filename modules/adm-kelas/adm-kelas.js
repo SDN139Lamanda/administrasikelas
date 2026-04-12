@@ -1,6 +1,6 @@
 /**
  * MODULE: ADM. KELAS (Complete - All Features)
- * FIX: attendanceData sync + Print & Download Support
+ * FIX: downloadPDF with html2pdf (auto download, not print)
  */
 
 console.log('🔴 [AdmKelas Module] Script START');
@@ -221,7 +221,7 @@ window.admKelas = {
     }
   },
   
-  // ✅ NEW: PRINT REKAP
+  // ✅ PRINT: Buka dialog print browser (UNCHANGED)
   printRecap: function() {
     const printContent = document.getElementById('tableToPDF').outerHTML;
     const kelasNama = document.getElementById('judulKelasSiswa')?.innerText || 'Rekap Absensi';
@@ -237,6 +237,7 @@ window.admKelas = {
         th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
         th { background-color: #f3f4f6; }
         .info { margin-bottom: 20px; }
+        @media print { button { display: none; } }
       </style>
       </head><body>
         <h2>${kelasNama} - Laporan Absensi</h2>
@@ -246,13 +247,60 @@ window.admKelas = {
       </body></html>
     `);
     printWindow.document.close();
+    printWindow.focus();
     printWindow.print();
   },
   
-  // ✅ NEW: DOWNLOAD PDF (via Print-to-PDF)
-  downloadPDF: function() {
-    this.printRecap();
-    alert('💡 Tips: Pada dialog print, pilih "Save as PDF" sebagai destination untuk download PDF.');
+  // ✅ DOWNLOAD: Auto download PDF via html2pdf library (FIXED)
+  downloadPDF: async function() {
+    const element = document.getElementById('tableToPDF');
+    if (!element) return alert('❌ Tabel rekap tidak ditemukan!');
+    
+    const kelasNama = (document.getElementById('judulKelasSiswa')?.innerText || 'Rekap').replace(/[^a-z0-9]/gi, '_');
+    const periode = (document.getElementById('infoPeriode')?.innerText || '').replace(/[^a-z0-9]/gi, '_');
+    const filename = `Rekap_${kelasNama}_${periode}_${new Date().toISOString().split('T')[0]}.pdf`;
+    
+    // Cek apakah html2pdf sudah loaded
+    if (typeof html2pdf === 'undefined') {
+      // Load library dynamically
+      const script = document.createElement('script');
+      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+      script.crossOrigin = 'anonymous';
+      document.head.appendChild(script);
+      
+      await new Promise((resolve, reject) => {
+        script.onload = resolve;
+        script.onerror = () => reject(new Error('Gagal load html2pdf library'));
+      });
+    }
+    
+    const opt = {
+      margin: 10,
+      filename: filename,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true, logging: false },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+    };
+    
+    try {
+      // Show loading state
+      const originalBtnText = event?.target?.innerText || '📄 Download PDF';
+      if (event?.target) event.target.innerText = '⏳ Memproses...';
+      event?.target?.setAttribute('disabled', 'true');
+      
+      await html2pdf().set(opt).from(element).save();
+      
+      alert('✅ PDF berhasil didownload!\n\nFile: ' + filename);
+    } catch (e) {
+      console.error('❌ Download PDF error:', e);
+      alert('❌ Gagal download PDF.\n\nCoba gunakan: Print → Save as PDF');
+    } finally {
+      // Restore button state
+      if (event?.target) {
+        event.target.innerText = originalBtnText;
+        event.target.removeAttribute('disabled');
+      }
+    }
   },
   
   openClassModal: function() {
