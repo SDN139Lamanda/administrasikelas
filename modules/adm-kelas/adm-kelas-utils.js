@@ -1,6 +1,5 @@
 /**
  * UTILS: Helper functions for adm-kelas module
- * Minimal & focused - only what's needed
  */
 
 // ✅ Escape HTML untuk mencegah XSS
@@ -28,7 +27,7 @@ export function parseGender(value) {
   const v = String(value || '').toLowerCase().trim();
   if (['l', 'laki-laki', 'pria', 'male'].includes(v)) return 'L';
   if (['p', 'perempuan', 'wanita', 'female'].includes(v)) return 'P';
-  return 'L'; // default
+  return 'L';
 }
 
 // ✅ Hitung persentase
