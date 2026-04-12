@@ -1,6 +1,6 @@
 /**
  * TEMPLATE: UI templates for adm-kelas module
- * FINAL: Student management as foundation
+ * FINAL: Student management as foundation + layout fix
  */
 
 import { escapeHtml } from './utils.js';
@@ -139,6 +139,8 @@ export function getMainTemplate() {
           </table>
         </div>
         <p id="countRealtime" class="text-xs text-slate-500"></p>
+      </div> <!-- ✅ FIX ADDED: Close viewSiswa section -->
+
       <div id="modalKelas" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
         <div class="bg-white rounded-2xl p-6 w-full max-w-md mx-4">
           <h3 class="text-lg font-bold mb-4">📝 Kelas Baru</h3>
