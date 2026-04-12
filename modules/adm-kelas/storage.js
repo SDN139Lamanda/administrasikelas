@@ -1,6 +1,6 @@
 /**
  * STORAGE: Firebase Only (Clean Architecture)
- * FIX: __name__ untuk query document ID
+ * FIX: deleteClass validation for rules compliance
  */
 
 import * as fb from '../firebase-config.js';
@@ -76,13 +76,37 @@ export const storage = {
     }
   },
   
+  // ✅ FIX: deleteClass dengan validasi userId match
   deleteClass: async function(classId) {
     if (!isFirebaseMode(this.userId)) throw new Error('deleteClass: userId not set');
     if (!classId) throw new Error('deleteClass: classId is required');
+    
     try {
       const docRef = fb.doc(fb.db, 'classes', classId);
+      
+      // ✅ FIX: Cek document sebelum delete
+      const docSnap = await fb.getDoc(docRef);
+      if (docSnap.exists()) {
+        const docData = docSnap.data();
+        
+        // ✅ Debug log (bisa dihapus nanti)
+        console.log('🔍 [Storage] deleteClass debug:', {
+          classId,
+          docUserId: docData.userId,
+          currentUserId: this.userId,
+          match: docData.userId === this.userId
+        });
+        
+        // ✅ FIX: Validasi userId match
+        if (docData.userId && docData.userId !== this.userId) {
+          throw new Error(`Permission denied: class userId (${docData.userId}) != current user (${this.userId})`);
+        }
+      }
+      
+      // ✅ Lanjut delete
       await fb.deleteDoc(docRef);
       console.log('✅ [Storage] deleteClass:', classId);
+      
     } catch (e) {
       console.error('❌ [Storage] deleteClass error:', e.message);
       throw e;
@@ -93,7 +117,6 @@ export const storage = {
     if (!isFirebaseMode(this.userId)) throw new Error('addStudent: userId not set');
     try {
       const docRef = fb.doc(fb.db, 'classes', classId);
-      // ✅ FIX: Pakai '__name__' bukan fb.documentId()
       const q = fb.query(fb.collection(fb.db, 'classes'), fb.where('userId', '==', this.userId), fb.where('__name__', '==', classId));
       const classSnap = await fb.getDocs(q, { source: 'server' });
       if (classSnap.empty) throw new Error('Class not found or not owned by user');
@@ -115,7 +138,6 @@ export const storage = {
     if (!isFirebaseMode(this.userId)) throw new Error('deleteStudent: userId not set');
     try {
       const docRef = fb.doc(fb.db, 'classes', classId);
-      // ✅ FIX: Pakai '__name__' bukan fb.documentId()
       const q = fb.query(fb.collection(fb.db, 'classes'), fb.where('userId', '==', this.userId), fb.where('__name__', '==', classId));
       const classSnap = await fb.getDocs(q, { source: 'server' });
       if (!classSnap.empty) {
@@ -134,7 +156,6 @@ export const storage = {
     if (!isFirebaseMode(this.userId)) throw new Error('saveAttendance: userId not set');
     try {
       const docRef = fb.doc(fb.db, 'classes', classId);
-      // ✅ FIX: Pakai '__name__' bukan fb.documentId()
       const q = fb.query(fb.collection(fb.db, 'classes'), fb.where('userId', '==', this.userId), fb.where('__name__', '==', classId));
       const classSnap = await fb.getDocs(q, { source: 'server' });
       if (!classSnap.empty) {
