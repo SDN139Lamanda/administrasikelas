@@ -1,6 +1,6 @@
 /**
  * TEMPLATE: UI templates for adm-kelas module
- * FIX: Null check untuk semua window.admKelas calls
+ * FIX: Remove ?. from critical CRUD buttons
  */
 
 import { escapeHtml } from './utils.js';
@@ -10,7 +10,7 @@ export function getMainTemplate() {
     <div class="adm-kelas-module">
       <div class="flex items-center justify-between mb-6 pb-4 border-b">
         <h2 class="text-xl font-bold text-slate-800">📚 Administrasi Kelas</h2>
-        <button onclick="window.admKelas?.backToDashboard()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl text-sm font-medium transition">
+        <button onclick="window.admKelas.backToDashboard()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl text-sm font-medium transition">
           ← Kembali ke Dashboard
         </button>
       </div>
@@ -18,7 +18,7 @@ export function getMainTemplate() {
       <div id="viewDaftarKelas" class="view-section">
         <div class="flex items-center justify-between mb-4">
           <h3 class="font-semibold text-slate-700">📋 Daftar Kelas Anda</h3>
-          <button onclick="window.admKelas?.openClassModal()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition">
+          <button onclick="window.admKelas.openClassModal()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition">
             + Tambah Kelas Baru
           </button>
         </div>
@@ -28,18 +28,18 @@ export function getMainTemplate() {
       <div id="viewPresensi" class="view-section hidden">
         <div class="flex items-center justify-between mb-4">
           <h3 class="font-semibold text-slate-700">📝 Input Absensi</h3>
-          <button onclick="window.admKelas?.showView('viewDaftarKelas')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-sm font-medium transition">
+          <button onclick="window.admKelas.showView('viewDaftarKelas')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-sm font-medium transition">
             ← Kembali
           </button>
         </div>
         <div class="bg-white rounded-2xl shadow-sm border p-4 mb-4">
           <label class="text-sm font-medium text-slate-700">Pilih Kelas:</label>
-          <select id="selectKelasAbsen" onchange="window.admKelas?.changeAttendanceClass(this.value)" class="ml-2 px-3 py-2 border rounded-lg text-sm w-64"></select>
+          <select id="selectKelasAbsen" onchange="window.admKelas.changeAttendanceClass(this.value)" class="ml-2 px-3 py-2 border rounded-lg text-sm w-64"></select>
         </div>
         <div class="bg-white rounded-2xl shadow-sm border p-4 mb-4">
           <label class="text-sm font-medium text-slate-700">Tanggal:</label>
           <input type="date" id="inputTgl" class="ml-2 px-3 py-2 border rounded-lg text-sm">
-          <button onclick="window.admKelas?.markAllPresent()" class="ml-4 px-4 py-2 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 rounded-lg text-sm font-medium transition">
+          <button onclick="window.admKelas.markAllPresent()" class="ml-4 px-4 py-2 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 rounded-lg text-sm font-medium transition">
             ✓ Tandai Semua Hadir
           </button>
         </div>
@@ -58,7 +58,7 @@ export function getMainTemplate() {
             <tbody id="tabelPresensi" class="divide-y"></tbody>
           </table>
         </div>
-        <button onclick="window.admKelas?.saveAttendance()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium transition">
+        <button onclick="window.admKelas.saveAttendance()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium transition">
           💾 Simpan Absensi
         </button>
       </div>
@@ -66,23 +66,23 @@ export function getMainTemplate() {
       <div id="viewRekap" class="view-section hidden">
         <div class="flex items-center justify-between mb-4">
           <h3 class="font-semibold text-slate-700">📊 Laporan / Rekap Absensi</h3>
-          <button onclick="window.admKelas?.showView('viewDaftarKelas')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-sm font-medium transition">
+          <button onclick="window.admKelas.showView('viewDaftarKelas')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-sm font-medium transition">
             ← Kembali
           </button>
         </div>
         <div class="bg-white rounded-2xl shadow-sm border p-4 mb-4">
           <label class="text-sm font-medium text-slate-700">Pilih Kelas:</label>
-          <select id="selectKelasRekap" onchange="window.admKelas?.changeRecapClass(this.value)" class="ml-2 px-3 py-2 border rounded-lg text-sm w-64"></select>
+          <select id="selectKelasRekap" onchange="window.admKelas.changeRecapClass(this.value)" class="ml-2 px-3 py-2 border rounded-lg text-sm w-64"></select>
         </div>
         <div class="bg-white rounded-2xl shadow-sm border p-4 mb-4">
           <label class="text-sm font-medium text-slate-700 mr-2">Periode:</label>
-          <select id="tipeRekap" onchange="window.admKelas?.toggleFilterView()" class="px-3 py-2 border rounded-lg text-sm mr-2">
+          <select id="tipeRekap" onchange="window.admKelas.toggleFilterView()" class="px-3 py-2 border rounded-lg text-sm mr-2">
             <option value="hari">Harian</option>
             <option value="bulan">Bulanan</option>
             <option value="semester">Semester</option>
           </select>
           <span id="filterInputs" class="inline-flex items-center gap-2"></span>
-          <button onclick="window.admKelas?.renderRecap()" class="ml-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition">
+          <button onclick="window.admKelas.renderRecap()" class="ml-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition">
             Tampilkan
           </button>
         </div>
@@ -108,19 +108,24 @@ export function getMainTemplate() {
             <tbody id="tabelRekap" class="divide-y"></tbody>
           </table>
         </div>
-        <button onclick="window.admKelas?.downloadPDF()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-medium transition">
-          📄 Export PDF
-        </button>
+        <div class="flex gap-2 mt-4">
+          <button onclick="window.admKelas.printRecap()" class="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition">
+            🖨️ Print / Cetak
+          </button>
+          <button onclick="window.admKelas.downloadPDF()" class="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-medium transition">
+            📄 Download PDF
+          </button>
+        </div>
       </div>
 
       <div id="viewSiswa" class="view-section hidden">
         <div class="flex items-center justify-between mb-4">
           <h3 id="judulKelasSiswa" class="font-semibold text-slate-700">👥 Daftar Siswa</h3>
           <div class="flex gap-2">
-            <button onclick="window.admKelas?.openStudentModal()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium transition">
+            <button onclick="window.admKelas.openStudentModal()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium transition">
               + Tambah Siswa
             </button>
-            <button onclick="window.admKelas?.showView('viewDaftarKelas')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-sm font-medium transition">
+            <button onclick="window.admKelas.showView('viewDaftarKelas')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-sm font-medium transition">
               ← Kembali
             </button>
           </div>
@@ -147,8 +152,8 @@ export function getMainTemplate() {
           <input type="hidden" id="editClassIdx">
           <input type="text" id="namaKelas" placeholder="Nama kelas (contoh: 4A)" class="w-full px-4 py-3 border rounded-xl mb-4" autofocus>
           <div class="flex gap-3">
-            <button onclick="window.admKelas?.closeModal('modalKelas')" class="flex-1 py-3 bg-slate-100 hover:bg-slate-200 rounded-xl font-medium transition">Batal</button>
-            <button onclick="window.admKelas?.saveClass()" class="flex-1 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium transition">Simpan</button>
+            <button onclick="window.admKelas.closeModal('modalKelas')" class="flex-1 py-3 bg-slate-100 hover:bg-slate-200 rounded-xl font-medium transition">Batal</button>
+            <button onclick="window.admKelas.saveClass()" class="flex-1 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium transition">Simpan</button>
           </div>
         </div>
       </div>
@@ -162,8 +167,8 @@ export function getMainTemplate() {
             <option value="P">Perempuan</option>
           </select>
           <div class="flex gap-3">
-            <button onclick="window.admKelas?.closeModal('modalSiswa')" class="flex-1 py-3 bg-slate-100 hover:bg-slate-200 rounded-xl font-medium transition">Batal</button>
-            <button onclick="window.admKelas?.saveStudent()" class="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-medium transition">Tambah</button>
+            <button onclick="window.admKelas.closeModal('modalSiswa')" class="flex-1 py-3 bg-slate-100 hover:bg-slate-200 rounded-xl font-medium transition">Batal</button>
+            <button onclick="window.admKelas.saveStudent()" class="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-medium transition">Tambah</button>
           </div>
         </div>
       </div>
@@ -173,7 +178,7 @@ export function getMainTemplate() {
 
 export function renderClassCard(k, index) {
   return `
-    <div class="bg-white rounded-2xl shadow-sm border p-4 hover:shadow-md transition cursor-pointer" onclick="window.admKelas?.openClassDetail(${index})">
+    <div class="bg-white rounded-2xl shadow-sm border p-4 hover:shadow-md transition cursor-pointer" onclick="window.admKelas.openClassDetail(${index})">
       <div class="flex items-start justify-between">
         <div>
           <h4 class="font-semibold text-slate-800">${escapeHtml(k.nama)}</h4>
@@ -181,22 +186,22 @@ export function renderClassCard(k, index) {
           ${k.siswa?.length === 0 ? '<p class="text-xs text-amber-600 mt-1">⚠️ Belum ada siswa</p>' : ''}
         </div>
         <div class="flex gap-1">
-          <button onclick="event.stopPropagation(); window.admKelas?.editClass(${index})" class="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition" title="Edit">
+          <button onclick="event.stopPropagation(); window.admKelas.editClass(${index})" class="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition" title="Edit">
             <i class="fas fa-pen"></i>
           </button>
-          <button onclick="event.stopPropagation(); window.admKelas?.deleteClass(${index})" class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition" title="Hapus">
+          <button onclick="event.stopPropagation(); window.admKelas.deleteClass(${index})" class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition" title="Hapus">
             <i class="fas fa-trash"></i>
           </button>
         </div>
       </div>
       <div class="mt-3 flex gap-2">
-        <button onclick="event.stopPropagation(); window.admKelas?.openClassDetail(${index})" class="flex-1 py-2 text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg font-medium transition">
+        <button onclick="event.stopPropagation(); window.admKelas.openClassDetail(${index})" class="flex-1 py-2 text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg font-medium transition">
           👥 Kelola Siswa
         </button>
-        <button onclick="event.stopPropagation(); window.admKelas?.navigateToAttendance()" class="flex-1 py-2 text-xs ${k.siswa?.length > 0 ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-400 cursor-not-allowed'} rounded-lg font-medium transition" ${k.siswa?.length === 0 ? 'disabled' : ''}>
+        <button onclick="event.stopPropagation(); window.admKelas.navigateToAttendance()" class="flex-1 py-2 text-xs ${k.siswa?.length > 0 ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-400 cursor-not-allowed'} rounded-lg font-medium transition" ${k.siswa?.length === 0 ? 'disabled' : ''}>
           📋 Absensi
         </button>
-        <button onclick="event.stopPropagation(); window.admKelas?.navigateToRecap()" class="flex-1 py-2 text-xs ${k.siswa?.length > 0 ? 'bg-indigo-50 hover:bg-indigo-100 text-indigo-700' : 'bg-slate-100 text-slate-400 cursor-not-allowed'} rounded-lg font-medium transition" ${k.siswa?.length === 0 ? 'disabled' : ''}>
+        <button onclick="event.stopPropagation(); window.admKelas.navigateToRecap()" class="flex-1 py-2 text-xs ${k.siswa?.length > 0 ? 'bg-indigo-50 hover:bg-indigo-100 text-indigo-700' : 'bg-slate-100 text-slate-400 cursor-not-allowed'} rounded-lg font-medium transition" ${k.siswa?.length === 0 ? 'disabled' : ''}>
           📊 Rekap
         </button>
       </div>
@@ -219,7 +224,7 @@ export function renderStudentRow(s, index) {
       <td class="px-4 py-3 text-sm font-medium text-slate-800">${escapeHtml(s.nama)}</td>
       <td class="px-4 py-3 text-sm text-slate-600">${s.gender === 'L' ? 'Laki-laki' : 'Perempuan'}</td>
       <td class="px-4 py-3 text-right">
-        <button onclick="window.admKelas?.deleteStudent(${index})" class="px-3 py-1 text-xs bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg font-medium transition">
+        <button onclick="window.admKelas.deleteStudent(${index})" class="px-3 py-1 text-xs bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg font-medium transition">
           Hapus
         </button>
       </td>
@@ -278,4 +283,4 @@ export function renderRecapRow(s, stats, total) {
   `;
 }
 
-console.log('✅ [Template] Loaded - adm-kelas UI templates (FINAL - Null Check Fix)');
+console.log('✅ [Template] Loaded - adm-kelas UI templates (FINAL - Delete Fix)');
