@@ -1,6 +1,6 @@
 /**
  * MODULE: ADM. KELAS (Complete - All Features)
- * FIX: downloadWord (.docx) with proper docx.js destructuring - Editable for Teachers
+ * FIX: downloadWord (.docx) with proper CDN + destructuring - Editable for Teachers
  */
 
 console.log('🔴 [AdmKelas Module] Script START');
@@ -251,22 +251,61 @@ window.admKelas = {
     printWindow.print();
   },
   
-  // ✅ DOWNLOAD WORD: Generate .docx editable (FIXED: proper docx.js destructuring)
+  // ✅ DOWNLOAD WORD: Generate .docx editable (FIXED: proper CDN + checking)
   downloadWord: async function() {
     if (activeClassIndex === null) return alert('Pilih kelas dulu!');
     
-    // ✅ FIX: Destructure docx exports properly for CDN usage
-    const docxLib = window.docx;
-    if (!docxLib || !docxLib.Document || !docxLib.Packer) {
-      alert('⚠️ Library Word belum loaded. Silakan refresh halaman.');
+    // ✅ FIX: Debug - check what's actually loaded
+    console.log('🔍 [DownloadWord] Checking library...');
+    console.log('🔍 window.docx:', typeof window.docx);
+    console.log('🔍 window.saveAs:', typeof window.saveAs);
+    
+    // Check library loaded - docx might be exposed directly on window
+    const docxLib = window.docx || window.docxjs;
+    
+    if (!docxLib) {
+      console.error('❌ [DownloadWord] docx library not found on window');
+      alert('⚠️ Library Word belum loaded. Silakan refresh halaman.\n\nJika masih gagal, cek koneksi internet.');
       return;
     }
     
-    // Destructure needed classes for cleaner code
-    const { 
-      Document, Paragraph, Table, TableCell, TableRow,
-      AlignmentType, Packer, WidthType, VerticalAlignType, HeadingLevel
-    } = docxLib;
+    console.log('🔍 [DownloadWord] docxLib keys:', Object.keys(docxLib).slice(0, 10));
+    
+    // Destructure with fallback - different CDN versions expose differently
+    const Document = docxLib.Document || docxLib.default?.Document;
+    const Paragraph = docxLib.Paragraph || docxLib.default?.Paragraph;
+    const Table = docxLib.Table || docxLib.default?.Table;
+    const TableCell = docxLib.TableCell || docxLib.default?.TableCell;
+    const TableRow = docxLib.TableRow || docxLib.default?.TableRow;
+    const Packer = docxLib.Packer || docxLib.default?.Packer;
+    const WidthType = docxLib.WidthType || docxLib.default?.WidthType;
+    const VerticalAlignType = docxLib.VerticalAlignType || docxLib.default?.VerticalAlignType;
+    const HeadingLevel = docxLib.HeadingLevel || docxLib.default?.HeadingLevel;
+    
+    // AlignmentType might be nested differently
+    let AlignmentType = docxLib.AlignmentType;
+    if (!AlignmentType) {
+      AlignmentType = docxLib.default?.AlignmentType;
+    }
+    if (!AlignmentType) {
+      // Fallback: create simple object with common values
+      AlignmentType = {
+        CENTER: 'center',
+        LEFT: 'left',
+        RIGHT: 'right',
+        JUSTIFY: 'both'
+      };
+      console.log('⚠️ [DownloadWord] Using fallback AlignmentType');
+    }
+    
+    console.log('🔍 [DownloadWord] AlignmentType:', AlignmentType);
+    console.log('🔍 [DownloadWord] AlignmentType.CENTER:', AlignmentType.CENTER);
+    
+    if (!Document || !Paragraph || !Table || !Packer) {
+      console.error('❌ [DownloadWord] Required docx classes not found');
+      alert('⚠️ Library Word tidak lengkap. Silakan refresh halaman.');
+      return;
+    }
     
     const kelasNama = (document.getElementById('judulKelasSiswa')?.innerText || 'Rekap Absensi').trim();
     const periode = document.getElementById('infoPeriode')?.innerText || '';
@@ -298,7 +337,7 @@ window.admKelas = {
       // ✅ Siapkan data tabel
       const tableRows = [];
       
-      // Header row - FIX: use destructured AlignmentType
+      // Header row
       tableRows.push(new TableRow({
         children: ['Nama', 'H', 'I', 'S', 'A', '%'].map(text => 
           new TableCell({
@@ -308,7 +347,7 @@ window.admKelas = {
               style: { bold: true }
             })],
             shading: { fill: 'E7E9EB' },
-            verticalAlign: VerticalAlignType.CENTER
+            verticalAlign: VerticalAlignType?.CENTER || 'center'
           })
         )
       }));
@@ -342,7 +381,7 @@ window.admKelas = {
         }));
       });
       
-      // ✅ Buat dokumen Word - FIX: use destructured classes
+      // ✅ Buat dokumen Word
       const doc = new Document({
         sections: [{
           properties: {},
@@ -350,7 +389,7 @@ window.admKelas = {
             // Header
             new Paragraph({ 
               text: kelasNama + ' - Laporan Absensi', 
-              heading: HeadingLevel.HEADING_1, 
+              heading: HeadingLevel?.HEADING_1 || 'heading1', 
               alignment: AlignmentType.CENTER,
               spacing: { after: 200 }
             }),
@@ -364,7 +403,7 @@ window.admKelas = {
             // Tabel
             new Table({
               rows: tableRows,
-              width: { size: 100, type: WidthType.PERCENTAGE }
+              width: { size: 100, type: WidthType?.PERCENTAGE || 'pct' }
             }),
             // Footer info
             new Paragraph({ text: '', spacing: { before: 400 } }),
@@ -377,14 +416,15 @@ window.admKelas = {
         }]
       });
       
-      // ✅ Download file - FIX: use destructured Packer + explicit window.saveAs
+      // ✅ Download file
       const blob = await Packer.toBlob(doc);
       window.saveAs(blob, filename);
       
       alert('✅ File Word berhasil didownload!\n\nFile: ' + filename + '\n\n💡 File dapat diedit di Microsoft Word atau Google Docs.');
     } catch (e) {
       console.error('❌ Download Word error:', e);
-      alert('❌ Gagal download Word.\n\nError: ' + e.message);
+      console.error('❌ Stack:', e.stack);
+      alert('❌ Gagal download Word.\n\nError: ' + e.message + '\n\nCoba refresh halaman atau gunakan Print → Save as PDF.');
     } finally {
       // ✅ Restore button state
       if (event?.target) {
@@ -635,4 +675,4 @@ window.admKelas = {
   }
 };
 
-console.log('🟢 [AdmKelas] Module FINISHED - Complete Features + Word Export (Fixed)');
+console.log('🟢 [AdmKelas] Module FINISHED - Complete Features + Word Export (Fixed CDN)');
