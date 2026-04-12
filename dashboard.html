@@ -130,7 +130,7 @@
                     </article>
                     
                     <article class="room-card room-adm-kelas" data-feature="adm-kelas">
-                        <a href="javascript:void(0)" class="room-link" onclick="renderAdmKelas(); return false;">
+                        <a href="javascript:void(0)" class="room-link" onclick="safeRenderAdmKelas(event); return false;">
                             <div class="room-icon bg-orange"><i class="fas fa-users"></i></div>
                             <h3 class="room-title">Adm. Kelas</h3>
                             <p class="room-desc">Data siswa & absensi</p>
@@ -147,7 +147,7 @@
                     
                     <!-- ✅ CHANGE 1/3: Added onclick to Penilaian card -->
                     <article class="room-card room-penilaian" data-feature="penilaian">
-                        <a href="javascript:void(0)" class="room-link" onclick="renderPenilaian(); return false;">
+                        <a href="javascript:void(0)" class="room-link" onclick="safeRenderPenilaian(event); return false;">
                             <div class="room-icon bg-green"><i class="fas fa-chart-bar"></i></div>
                             <h3 class="room-title">Penilaian</h3>
                             <p class="room-desc">Nilai & Laporan</p>
@@ -155,7 +155,7 @@
                     </article>
                     
                     <article class="room-card room-refleksi" data-feature="refleksi">
-                        <a href="javascript:void(0)" class="room-link" onclick="renderRefleksiForm(); return false;">
+                        <a href="javascript:void(0)" class="room-link" onclick="safeRenderRefleksiForm(event); return false;">
                             <div class="room-icon bg-purple"><i class="fas fa-pen-fancy"></i></div>
                             <h3 class="room-title">Refleksi</h3>
                             <p class="room-desc">Jurnal pembelajaran</p>
@@ -163,7 +163,7 @@
                     </article>
                     
                     <article class="room-card room-generator-modul" data-feature="generator-modul">
-                        <a href="javascript:void(0)" class="room-link" onclick="renderGeneratorModule(); return false;">
+                        <a href="javascript:void(0)" class="room-link" onclick="safeRenderGeneratorModule(event); return false;">
                             <div class="room-icon bg-pink"><i class="fas fa-wand-magic-sparkles"></i></div>
                             <h3 class="room-title">Generator Modul</h3>
                             <p class="room-desc">Template Generator</p>
@@ -359,7 +359,88 @@
         });
     </script>
 
-    <!-- ✅ Module Scripts (UNCHANGED + CHANGE 3/3: Added Penilaian import) -->
+    <!-- ✅ SAFE MODULE WRAPPERS (NEW - Prevents "is not defined" errors) -->
+    <script>
+        // ✅ Wrapper functions for safe module calling
+        // These wait for the actual function to be available before calling
+        
+        window.safeRenderAdmKelas = async function(e) {
+            if (e) e.preventDefault();
+            console.log('🔄 [Dashboard] Loading adm-kelas module...');
+            
+            // If already loaded, call directly
+            if (typeof window.renderAdmKelas === 'function') {
+                console.log('✅ [Dashboard] adm-kelas already loaded');
+                await window.renderAdmKelas();
+                return;
+            }
+            
+            // Show loading state
+            const container = document.getElementById('module-container');
+            if (container) {
+                container.innerHTML = '<div class="text-center py-8"><i class="fas fa-spinner fa-spin text-2xl text-indigo-600"></i><p class="mt-2 text-slate-600">Memuat modul...</p></div>';
+                container.classList.remove('hidden');
+            }
+            
+            try {
+                // Wait a bit for modules to initialize, then retry
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                if (typeof window.renderAdmKelas === 'function') {
+                    await window.renderAdmKelas();
+                } else {
+                    console.warn('⚠️ [Dashboard] renderAdmKelas still not ready, trying dynamic import...');
+                    // Fallback: try dynamic import
+                    await import('./modules/adm-kelas/adm-kelas.js');
+                    if (typeof window.renderAdmKelas === 'function') {
+                        await window.renderAdmKelas();
+                    } else {
+                        throw new Error('renderAdmKelas not found after import');
+                    }
+                }
+            } catch (err) {
+                console.error('❌ [Dashboard] Failed to load adm-kelas:', err);
+                if (container) {
+                    container.innerHTML = `<div class="text-center py-8 text-rose-600"><i class="fas fa-exclamation-circle text-2xl"></i><p class="mt-2">Gagal memuat modul: ${err.message}</p><button onclick="location.reload()" class="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg">Refresh</button></div>`;
+                }
+                alert('❌ Gagal memuat modul Adm. Kelas. Silakan refresh halaman.');
+            }
+        };
+        
+        window.safeRenderPenilaian = async function(e) {
+            if (e) e.preventDefault();
+            if (typeof window.renderPenilaian === 'function') {
+                await window.renderPenilaian();
+            } else {
+                console.warn('⚠️ renderPenilaian not ready yet');
+                alert('⚠️ Modul Penilaian sedang dimuat. Silakan coba lagi dalam beberapa detik.');
+            }
+        };
+        
+        window.safeRenderRefleksiForm = async function(e) {
+            if (e) e.preventDefault();
+            if (typeof window.renderRefleksiForm === 'function') {
+                await window.renderRefleksiForm();
+            } else {
+                console.warn('⚠️ renderRefleksiForm not ready yet');
+                alert('⚠️ Modul Refleksi sedang dimuat. Silakan coba lagi dalam beberapa detik.');
+            }
+        };
+        
+        window.safeRenderGeneratorModule = async function(e) {
+            if (e) e.preventDefault();
+            if (typeof window.renderGeneratorModule === 'function') {
+                await window.renderGeneratorModule();
+            } else {
+                console.warn('⚠️ renderGeneratorModule not ready yet');
+                alert('⚠️ Modul Generator sedang dimuat. Silakan coba lagi dalam beberapa detik.');
+            }
+        };
+        
+        console.log('✅ [Dashboard] Safe module wrappers loaded');
+    </script>
+
+    <!-- ✅ Module Scripts (UNCHANGED + All adm-kelas imports) -->
     <script type="module" src="modules/firebase-config.js"></script>
     <script type="module" src="js/main.js"></script>
     <script type="module" src="js/dashboard.js"></script>
@@ -374,7 +455,7 @@
     <script type="module" src="modules/adm-kelas/storage.js"></script>
     <script type="module" src="modules/adm-kelas/adm-kelas-template.js"></script>
     <script type="module" src="modules/adm-kelas/adm-kelas.js"></script>
-    <!-- ✅ CHANGE 3/3: Added Penilaian module import -->
+    <!-- ✅ Penilaian module import -->
     <script type="module" src="modules/penilaian/penilaian.js"></script>
     
 </body>
