@@ -1,15 +1,13 @@
 /**
  * TEMPLATE: UI templates for adm-kelas module
- * FIX: Semua view lengkap (Kelas, Presensi, Rekap, Siswa)
+ * FINAL: Student management as foundation
  */
 
 import { escapeHtml } from './utils.js';
 
-// ✅ Main container template
 export function getMainTemplate() {
   return `
     <div class="adm-kelas-module">
-      <!-- Header -->
       <div class="flex items-center justify-between mb-6 pb-4 border-b">
         <h2 class="text-xl font-bold text-slate-800">📚 Administrasi Kelas</h2>
         <button onclick="window.admKelas.backToDashboard()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl text-sm font-medium transition">
@@ -17,7 +15,6 @@ export function getMainTemplate() {
         </button>
       </div>
 
-      <!-- VIEW 1: DAFTAR KELAS (Default) -->
       <div id="viewDaftarKelas" class="view-section">
         <div class="flex items-center justify-between mb-4">
           <h3 class="font-semibold text-slate-700">📋 Daftar Kelas Anda</h3>
@@ -28,7 +25,6 @@ export function getMainTemplate() {
         <div id="gridKelas" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
       </div>
 
-      <!-- VIEW 2: INPUT PRESENSI -->
       <div id="viewPresensi" class="view-section hidden">
         <div class="flex items-center justify-between mb-4">
           <h3 class="font-semibold text-slate-700">📝 Input Absensi</h3>
@@ -53,10 +49,10 @@ export function getMainTemplate() {
               <tr>
                 <th class="px-4 py-3 text-left text-xs font-semibold text-slate-600">No</th>
                 <th class="px-4 py-3 text-left text-xs font-semibold text-slate-600">Nama Siswa</th>
-                <th class="px-4 py-3 text-center text-xs font-semibold text-slate-600">Hadir</th>
-                <th class="px-4 py-3 text-center text-xs font-semibold text-slate-600">Izin</th>
-                <th class="px-4 py-3 text-center text-xs font-semibold text-slate-600">Sakit</th>
-                <th class="px-4 py-3 text-center text-xs font-semibold text-slate-600">Alpa</th>
+                <th class="px-4 py-3 text-center text-xs font-semibold text-slate-600">H</th>
+                <th class="px-4 py-3 text-center text-xs font-semibold text-slate-600">I</th>
+                <th class="px-4 py-3 text-center text-xs font-semibold text-slate-600">S</th>
+                <th class="px-4 py-3 text-center text-xs font-semibold text-slate-600">A</th>
               </tr>
             </thead>
             <tbody id="tabelPresensi" class="divide-y"></tbody>
@@ -67,7 +63,6 @@ export function getMainTemplate() {
         </button>
       </div>
 
-      <!-- VIEW 3: REKAP / LAPORAN -->
       <div id="viewRekap" class="view-section hidden">
         <div class="flex items-center justify-between mb-4">
           <h3 class="font-semibold text-slate-700">📊 Laporan / Rekap Absensi</h3>
@@ -102,7 +97,7 @@ export function getMainTemplate() {
           <table class="w-full" id="tableToPDF">
             <thead class="bg-slate-50">
               <tr>
-                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-600">Nama Siswa</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-600">Nama</th>
                 <th class="px-4 py-3 text-center text-xs font-semibold text-slate-600">H</th>
                 <th class="px-4 py-3 text-center text-xs font-semibold text-slate-600">I</th>
                 <th class="px-4 py-3 text-center text-xs font-semibold text-slate-600">S</th>
@@ -118,7 +113,6 @@ export function getMainTemplate() {
         </button>
       </div>
 
-      <!-- VIEW 4: DAFTAR SISWA -->
       <div id="viewSiswa" class="view-section hidden">
         <div class="flex items-center justify-between mb-4">
           <h3 id="judulKelasSiswa" class="font-semibold text-slate-700">👥 Daftar Siswa</h3>
@@ -145,9 +139,16 @@ export function getMainTemplate() {
           </table>
         </div>
         <p id="countRealtime" class="text-xs text-slate-500"></p>
+        ${classes?.length > 0 && classes[activeClassIndex]?.siswa?.length === 0 ? `
+          <div class="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+            <p class="text-sm text-amber-700">
+              ⚠️ <strong>Belum ada siswa di kelas ini!</strong><br>
+              Klik tombol "Tambah Siswa" di atas untuk menambah siswa sebelum bisa input absensi.
+            </p>
+          </div>
+        ` : ''}
       </div>
 
-      <!-- MODAL: TAMBAH/EDIT KELAS -->
       <div id="modalKelas" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
         <div class="bg-white rounded-2xl p-6 w-full max-w-md mx-4">
           <h3 class="text-lg font-bold mb-4">📝 Kelas Baru</h3>
@@ -160,7 +161,6 @@ export function getMainTemplate() {
         </div>
       </div>
 
-      <!-- MODAL: TAMBAH SISWA -->
       <div id="modalSiswa" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
         <div class="bg-white rounded-2xl p-6 w-full max-w-md mx-4">
           <h3 class="text-lg font-bold mb-4">👤 Tambah Siswa</h3>
@@ -179,7 +179,6 @@ export function getMainTemplate() {
   `;
 }
 
-// ✅ Render class card
 export function renderClassCard(k, index) {
   return `
     <div class="bg-white rounded-2xl shadow-sm border p-4 hover:shadow-md transition cursor-pointer" onclick="window.admKelas.openClassDetail(${index})">
@@ -187,6 +186,7 @@ export function renderClassCard(k, index) {
         <div>
           <h4 class="font-semibold text-slate-800">${escapeHtml(k.nama)}</h4>
           <p class="text-xs text-slate-500 mt-1">${k.siswa?.length || 0} siswa</p>
+          ${k.siswa?.length === 0 ? '<p class="text-xs text-amber-600 mt-1">⚠️ Belum ada siswa</p>' : ''}
         </div>
         <div class="flex gap-1">
           <button onclick="event.stopPropagation(); window.admKelas.editClass(${index})" class="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition" title="Edit">
@@ -198,18 +198,28 @@ export function renderClassCard(k, index) {
         </div>
       </div>
       <div class="mt-3 flex gap-2">
-        <button onclick="event.stopPropagation(); window.admKelas.navigateToAttendance()" class="flex-1 py-2 text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg font-medium transition">
+        <button onclick="event.stopPropagation(); window.admKelas.openClassDetail(${index})" class="flex-1 py-2 text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg font-medium transition">
+          👥 Kelola Siswa
+        </button>
+        <button onclick="event.stopPropagation(); window.admKelas.navigateToAttendance()" class="flex-1 py-2 text-xs ${k.siswa?.length > 0 ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-400 cursor-not-allowed'} rounded-lg font-medium transition" ${k.siswa?.length === 0 ? 'disabled' : ''}>
           📋 Absensi
         </button>
-        <button onclick="event.stopPropagation(); window.admKelas.navigateToRecap()" class="flex-1 py-2 text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg font-medium transition">
+        <button onclick="event.stopPropagation(); window.admKelas.navigateToRecap()" class="flex-1 py-2 text-xs ${k.siswa?.length > 0 ? 'bg-indigo-50 hover:bg-indigo-100 text-indigo-700' : 'bg-slate-100 text-slate-400 cursor-not-allowed'} rounded-lg font-medium transition" ${k.siswa?.length === 0 ? 'disabled' : ''}>
           📊 Rekap
         </button>
       </div>
+      ${k.siswa?.length === 0 ? `
+        <div class="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+          <p class="text-xs text-amber-700">
+            ⚠️ <strong>Belum ada siswa!</strong><br>
+            Klik "Kelola Siswa" untuk menambah siswa sebelum bisa input absensi.
+          </p>
+        </div>
+      ` : ''}
     </div>
   `;
 }
 
-// ✅ Render student row
 export function renderStudentRow(s, index) {
   return `
     <tr class="hover:bg-slate-50 transition">
@@ -225,7 +235,6 @@ export function renderStudentRow(s, index) {
   `;
 }
 
-// ✅ Render attendance row
 export function renderAttendanceRow(s, index) {
   return `
     <tr class="hover:bg-slate-50 transition">
@@ -259,7 +268,6 @@ export function renderAttendanceRow(s, index) {
   `;
 }
 
-// ✅ Render recap row
 export function renderRecapRow(s, stats, total) {
   const pct = total > 0 ? Math.round((stats.H / total) * 100) : 0;
   return `
@@ -278,4 +286,4 @@ export function renderRecapRow(s, stats, total) {
   `;
 }
 
-console.log('✅ [Template] Loaded - adm-kelas UI templates (COMPLETE)');
+console.log('✅ [Template] Loaded - adm-kelas UI templates (FINAL - Student Foundation)');
