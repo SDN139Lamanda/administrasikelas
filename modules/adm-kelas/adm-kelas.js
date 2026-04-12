@@ -1,6 +1,6 @@
 /**
  * MODULE: ADM. KELAS (Complete - All Features)
- * FIX: downloadPDF with html2pdf (auto download, not print)
+ * FIX: downloadPDF with visible container clone (fix blank PDF)
  */
 
 console.log('🔴 [AdmKelas Module] Script START');
@@ -251,26 +251,58 @@ window.admKelas = {
     printWindow.print();
   },
   
-  // ✅ DOWNLOAD: Auto download PDF via html2pdf library (FIXED)
+  // ✅ DOWNLOAD: Auto download PDF via html2pdf (FIX: visible container clone)
   downloadPDF: async function() {
-    const element = document.getElementById('tableToPDF');
-    if (!element) return alert('❌ Tabel rekap tidak ditemukan!');
+    const originalTable = document.getElementById('tableToPDF');
+    if (!originalTable) return alert('❌ Tabel rekap tidak ditemukan!');
     
     const kelasNama = (document.getElementById('judulKelasSiswa')?.innerText || 'Rekap').replace(/[^a-z0-9]/gi, '_');
     const periode = (document.getElementById('infoPeriode')?.innerText || '').replace(/[^a-z0-9]/gi, '_');
     const filename = `Rekap_${kelasNama}_${periode}_${new Date().toISOString().split('T')[0]}.pdf`;
     
-    // Cek apakah html2pdf sudah loaded
+    // ✅ FIX: Clone table ke temporary container yang VISIBLE (bukan hidden)
+    const tempContainer = document.createElement('div');
+    tempContainer.style.cssText = 'position:fixed;top:0;left:-9999px;width:800px;background:white;padding:20px;font-family:Arial,sans-serif;visibility:visible;display:block;z-index:-1;';
+    
+    const tableClone = originalTable.cloneNode(true);
+    tableClone.style.width = '100%';
+    tableClone.style.borderCollapse = 'collapse';
+    
+    // Apply styling for PDF capture
+    tableClone.querySelectorAll('th').forEach(th => {
+      th.style.border = '1px solid #ddd';
+      th.style.padding = '8px';
+      th.style.backgroundColor = '#f3f4f6';
+      th.style.textAlign = 'center';
+      th.style.fontSize = '12px';
+    });
+    tableClone.querySelectorAll('td').forEach(td => {
+      td.style.border = '1px solid #ddd';
+      td.style.padding = '8px';
+      td.style.textAlign = 'center';
+      td.style.fontSize = '12px';
+    });
+    
+    // Add header
+    const headerDiv = document.createElement('div');
+    headerDiv.innerHTML = `<h2 style="text-align:center;margin-bottom:20px;font-size:18px;">${kelasNama} - Laporan Absensi</h2><p style="margin-bottom:20px;font-size:14px;">${periode}</p>`;
+    
+    tempContainer.appendChild(headerDiv);
+    tempContainer.appendChild(tableClone);
+    document.body.appendChild(tempContainer);
+    
+    // Wait for DOM update
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    // Cek html2pdf loaded
     if (typeof html2pdf === 'undefined') {
-      // Load library dynamically
       const script = document.createElement('script');
       script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
       script.crossOrigin = 'anonymous';
       document.head.appendChild(script);
-      
       await new Promise((resolve, reject) => {
         script.onload = resolve;
-        script.onerror = () => reject(new Error('Gagal load html2pdf library'));
+        script.onerror = () => reject(new Error('Gagal load html2pdf'));
       });
     }
     
@@ -283,19 +315,20 @@ window.admKelas = {
     };
     
     try {
-      // Show loading state
       const originalBtnText = event?.target?.innerText || '📄 Download PDF';
       if (event?.target) event.target.innerText = '⏳ Memproses...';
       event?.target?.setAttribute('disabled', 'true');
       
-      await html2pdf().set(opt).from(element).save();
+      // ✅ Generate dari tempContainer (VISIBLE)
+      await html2pdf().set(opt).from(tempContainer).save();
       
       alert('✅ PDF berhasil didownload!\n\nFile: ' + filename);
     } catch (e) {
       console.error('❌ Download PDF error:', e);
-      alert('❌ Gagal download PDF.\n\nCoba gunakan: Print → Save as PDF');
+      alert('❌ Gagal download PDF.\n\nCoba: Print → Save as PDF');
     } finally {
-      // Restore button state
+      // ✅ Cleanup temp container
+      if (tempContainer.parentNode) tempContainer.parentNode.removeChild(tempContainer);
       if (event?.target) {
         event.target.innerText = originalBtnText;
         event.target.removeAttribute('disabled');
