@@ -383,6 +383,39 @@ async function handleGenerate() {
     }, 100);
     
     console.log('✅ [CTA Generator] Generation complete!');
+    
+    // ✅ AUTO-SAVE TO ADM.PEMBELAJARAN (NEW - Non-blocking)
+    try {
+      const { storage } = await import('./adm-pembelajaran/storage.js');
+      storage.setUserId(user.uid);
+      
+      const docData = {
+        jenis: 'cta',
+        jenjang: jenjang || '',
+        kelas: kelas || '',
+        mapel: mapel || '',
+        judul: `${mapel?.toUpperCase() || 'CTA'} - Kelas ${kelas || ''} - ${topik || ''}`.trim(),
+        konten: `CP:\n${result.cp}\n\nTP:\n${result.tp}\n\nATP:\n${result.atp}`,
+        tags: ['cta', mapel?.toLowerCase()],
+        source: 'cta-generator',
+        metadata: { sekolah, tahun, guru, semester }
+      };
+      
+      await storage.saveDokumen(docData);
+      console.log('✅ [CTA Generator] Auto-save to Adm.Pembelajaran successful');
+      
+      // Show non-blocking notification
+      const notification = document.createElement('div');
+      notification.className = 'fixed bottom-4 right-4 bg-emerald-600 text-white px-4 py-3 rounded-xl shadow-lg z-50 animate-fade-in';
+      notification.innerHTML = `<div class="flex items-center gap-2"><i class="fas fa-check-circle"></i><span>Tersimpan di Adm.Pembelajaran!</span></div>`;
+      document.body.appendChild(notification);
+      setTimeout(() => { notification.style.opacity = '0'; setTimeout(() => notification.remove(), 300); }, 3000);
+      
+    } catch (autoSaveError) {
+      // Non-blocking: log but don't alert user
+      console.warn('⚠️ [CTA Generator] Auto-save skipped:', autoSaveError.message);
+    }
+    
   } catch (error) {
     console.error('❌ [CTA Generator] Error:', error);
     let errorMessage = error.message;
@@ -423,4 +456,76 @@ function loadCTAData() {
   })();
 }
 
-console.log('🟢 [CTA Generator] READY — Auto-Expand Textarea (No Scroll At All)');
+// ============================================
+// ✅ AUTO-SAVE TO ADM.PEMBELAJARAN (NEW)
+// ============================================
+
+/**
+ * Auto-save generated CTA to Adm.Pembelajaran
+ * Call this after successful generation
+ * Non-blocking: errors don't affect user experience
+ */
+export async function autoSaveCTA(generatedContent, metadata) {
+  console.log('💾 [CTA Generator] Auto-saving to Adm.Pembelajaran...');
+  
+  try {
+    // Import storage from adm-pembelajaran
+    const { storage } = await import('./adm-pembelajaran/storage.js');
+    
+    // Get current user from Firebase auth
+    const { auth } = await import('./firebase-config.js');
+    const currentUser = auth.currentUser;
+    
+    if (!currentUser) {
+      console.warn('⚠️ [CTA Generator] No authenticated user, skipping auto-save');
+      return null;
+    }
+    
+    // Set userId for storage
+    storage.setUserId(currentUser.uid);
+    
+    // Prepare document data
+    const docData = {
+      jenis: 'cta',                      // ← Identifier untuk Section 1
+      jenjang: metadata.jenjang || '',   // 'sd', 'smp', 'sma'
+      kelas: metadata.kelas || '',       // '1', '2', ..., '12'
+      mapel: metadata.mapel || '',       // 'Matematika', 'IPA', etc.
+      judul: metadata.judul || `CTA ${metadata.mapel || ''} Kelas ${metadata.kelas || ''}`.trim(),
+      konten: generatedContent,          // Full HTML/text content
+      tags: metadata.tags || ['cta'],    // Optional tags
+      source: 'cta-generator',           // Track source
+      createdAt: new Date().toISOString()
+    };
+    
+    // Save to Firestore
+    const savedDoc = await storage.saveDokumen(docData);
+    
+    console.log('✅ [CTA Generator] Auto-save successful:', savedDoc.id);
+    
+    // Show notification to user (non-blocking)
+    if (typeof document !== 'undefined') {
+      const notification = document.createElement('div');
+      notification.className = 'fixed bottom-4 right-4 bg-emerald-600 text-white px-4 py-3 rounded-xl shadow-lg z-50 animate-fade-in';
+      notification.innerHTML = `
+        <div class="flex items-center gap-2">
+          <i class="fas fa-check-circle"></i>
+          <span>Tersimpan di Adm.Pembelajaran!</span>
+        </div>
+      `;
+      document.body.appendChild(notification);
+      setTimeout(() => {
+        notification.style.opacity = '0';
+        setTimeout(() => notification.remove(), 300);
+      }, 3000);
+    }
+    
+    return savedDoc;
+    
+  } catch (e) {
+    console.error('❌ [CTA Generator] Auto-save error:', e.message);
+    // Don't block user - auto-save is optional
+    return null;
+  }
+}
+
+console.log('🟢 [CTA Generator] READY — Auto-Expand Textarea + Auto-Save Integration');
