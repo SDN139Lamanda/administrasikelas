@@ -1,5 +1,6 @@
 /**
  * STORAGE: Firebase Only (Clean Architecture)
+ * FIX: __name__ untuk query document ID
  */
 
 import * as fb from '../firebase-config.js';
@@ -92,7 +93,8 @@ export const storage = {
     if (!isFirebaseMode(this.userId)) throw new Error('addStudent: userId not set');
     try {
       const docRef = fb.doc(fb.db, 'classes', classId);
-      const q = fb.query(fb.collection(fb.db, 'classes'), fb.where('userId', '==', this.userId), fb.where(fb.documentId(), '==', classId));
+      // ✅ FIX: Pakai '__name__' bukan fb.documentId()
+      const q = fb.query(fb.collection(fb.db, 'classes'), fb.where('userId', '==', this.userId), fb.where('__name__', '==', classId));
       const classSnap = await fb.getDocs(q, { source: 'server' });
       if (classSnap.empty) throw new Error('Class not found or not owned by user');
       const classData = classSnap.docs[0].data();
@@ -113,7 +115,8 @@ export const storage = {
     if (!isFirebaseMode(this.userId)) throw new Error('deleteStudent: userId not set');
     try {
       const docRef = fb.doc(fb.db, 'classes', classId);
-      const q = fb.query(fb.collection(fb.db, 'classes'), fb.where('userId', '==', this.userId), fb.where(fb.documentId(), '==', classId));
+      // ✅ FIX: Pakai '__name__' bukan fb.documentId()
+      const q = fb.query(fb.collection(fb.db, 'classes'), fb.where('userId', '==', this.userId), fb.where('__name__', '==', classId));
       const classSnap = await fb.getDocs(q, { source: 'server' });
       if (!classSnap.empty) {
         const classData = classSnap.docs[0].data();
@@ -131,7 +134,8 @@ export const storage = {
     if (!isFirebaseMode(this.userId)) throw new Error('saveAttendance: userId not set');
     try {
       const docRef = fb.doc(fb.db, 'classes', classId);
-      const q = fb.query(fb.collection(fb.db, 'classes'), fb.where('userId', '==', this.userId), fb.where(fb.documentId(), '==', classId));
+      // ✅ FIX: Pakai '__name__' bukan fb.documentId()
+      const q = fb.query(fb.collection(fb.db, 'classes'), fb.where('userId', '==', this.userId), fb.where('__name__', '==', classId));
       const classSnap = await fb.getDocs(q, { source: 'server' });
       if (!classSnap.empty) {
         const classData = classSnap.docs[0].data();
