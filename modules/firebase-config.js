@@ -86,6 +86,14 @@ export {
   onSnapshot,
   serverTimestamp,
   where
-};
+};// ... existing firebase config code ...
 
+// ============================================
+// ✅ RE-EXPORTS FOR BROWSER ES MODULES
+// ============================================
+// Re-export Firestore functions so other modules can import locally
+export { doc, setDoc, getDoc, collection, addDoc, query, where, orderBy, onSnapshot, serverTimestamp, deleteDoc, updateDoc } from 'firebase/firestore';
+export { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword } from 'firebase/auth';
+
+console.log('✅ [Firebase Config] Re-exports ready for browser modules');
 console.log('✅ Firebase initialized');
