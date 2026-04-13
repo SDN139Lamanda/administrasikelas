@@ -52,4 +52,14 @@ window.getPenilaianTemplate = function() {
                         <thead id="tabelHead" class="bg-slate-50 text-slate-400 text-[10px] font-bold uppercase tracking-widest border-b">
                         </thead>
                         <tbody id="tabelNilaiBody" class="divide-y divide-slate-100">
-                            <tr><td colspan="6" class="p-20`
+                            <tr><td colspan="6" class="p-20 text-center text-slate-300 font-bold italic">Pilih kelas untuk mengaktifkan tabel</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+    `;
+};
+
+console.log('✅ [Penilaian Templates] Module loaded - getPenilaianTemplate tersedia di window');
