@@ -14,6 +14,8 @@
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/dashboard.css">
+    <!-- ✅ UPDATE 1: Tambah CSS Link untuk Penilaian -->
+    <link rel="stylesheet" href="css/penilaian.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="bg-gray-50">
@@ -448,13 +450,36 @@
             }
         };
         
+        // ✅ UPDATE 3: Ganti function safeRenderPenilaian dengan versi yang lebih robust
         window.safeRenderPenilaian = async function(e) {
             if (e) e.preventDefault();
+            console.log('🔄 [Dashboard] Loading penilaian module...');
+            
             if (typeof window.renderPenilaian === 'function') {
+                console.log('✅ [Dashboard] penilaian already loaded');
                 await window.renderPenilaian();
-            } else {
-                console.warn('⚠️ renderPenilaian not ready yet');
-                alert('⚠️ Modul Penilaian sedang dimuat. Silakan coba lagi dalam beberapa detik.');
+                return;
+            }
+            
+            const container = document.getElementById('penilaian-container');
+            if (container) {
+                container.innerHTML = '<div class="text-center py-8"><i class="fas fa-spinner fa-spin text-2xl text-indigo-600"></i><p class="mt-2 text-slate-600">Memuat modul...</p></div>';
+                container.classList.remove('hidden');
+            }
+            
+            try {
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                if (typeof window.renderPenilaian === 'function') {
+                    await window.renderPenilaian();
+                } else {
+                    throw new Error('renderPenilaian not found');
+                }
+            } catch (err) {
+                console.error('❌ [Dashboard] Failed to load penilaian:', err);
+                if (container) {
+                    container.innerHTML = `<div class="text-center py-8 text-rose-600"><i class="fas fa-exclamation-circle text-2xl"></i><p class="mt-2">Gagal memuat modul: ${err.message}</p><button onclick="location.reload()" class="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg">Refresh</button></div>`;
+                }
             }
         };
         
@@ -516,8 +541,10 @@
     <script type="module" src="modules/adm-pembelajaran/adm-pembelajaran-template.js"></script>
     <script type="module" src="modules/adm-pembelajaran/adm-pembelajaran.js"></script>
     
-    <!-- ✅ Penilaian module import -->
+    <!-- ✅ Penilaian module imports -->
     <script type="module" src="modules/penilaian/penilaian.js"></script>
+    <!-- ✅ UPDATE 2: Tambah script import untuk penilaian-templates.js -->
+    <script type="module" src="modules/penilaian/penilaian-templates.js"></script>
     
 </body>
 </html>
