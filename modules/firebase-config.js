@@ -3,7 +3,7 @@
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
 
-// ✅ TAMBAHAN: Import lebih banyak Auth functions
+// ✅ Import semua Auth functions yang dibutuhkan
 import { 
   getAuth, 
   signInWithEmailAndPassword, 
@@ -11,7 +11,7 @@ import {
   GoogleAuthProvider,
   signOut,
   onAuthStateChanged,
-  // ✅ TAMBAHAN UNTUK REGISTER & RESET PASSWORD:
+  // ✅ Functions untuk register & reset password:
   createUserWithEmailAndPassword,
   sendEmailVerification,
   updateProfile,
@@ -54,7 +54,7 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const googleProvider = new GoogleAuthProvider();
 
-// ✅ TAMBAHAN: Export semua fungsi yang dibutuhkan
+// ✅ Export semua instances dan functions yang dibutuhkan module lain
 export { 
   auth, 
   googleProvider,
@@ -63,7 +63,7 @@ export {
   signInWithPopup,
   signOut,
   onAuthStateChanged,
-  // ✅ TAMBAHAN: Auth functions untuk register & reset password
+  // Auth functions untuk register & reset password
   createUserWithEmailAndPassword,
   sendEmailVerification,
   updateProfile,
@@ -71,7 +71,7 @@ export {
   updatePassword,
   EmailAuthProvider,
   reauthenticateWithCredential,
-  // Firestore
+  // Firestore instances & functions
   db,
   collection,
   setDoc,
@@ -87,13 +87,5 @@ export {
   serverTimestamp,
   where
 };
-// ... existing firebase config code ...
-// ============================================
-// ✅ RE-EXPORTS FOR BROWSER ES MODULES
-// ============================================
-// Re-export Firestore functions so other modules can import locally
-export { doc, setDoc, getDoc, collection, addDoc, query, where, orderBy, onSnapshot, serverTimestamp, deleteDoc, updateDoc } from 'firebase/firestore';
-export { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword } from 'firebase/auth';
 
-console.log('✅ [Firebase Config] Re-exports ready for browser modules');
 console.log('✅ Firebase initialized');
