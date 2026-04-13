@@ -541,11 +541,14 @@
     <script type="module" src="modules/adm-pembelajaran/adm-pembelajaran-template.js"></script>
     <script type="module" src="modules/adm-pembelajaran/adm-pembelajaran.js"></script>
     
-    <!-- ✅ PENILAIAN MODULE IMPORTS - URUTAN PENTING! -->
-    <!-- ✅ Load templates DULU sebelum penilaian.js -->
-    <script type="module" src="modules/penilaian/penilaian-templates.js"></script>
-    <!-- ✅ Baru load logic/functionality -->
-    <script type="module" src="modules/penilaian/penilaian.js"></script>
+  <!-- ✅ PENILAIAN MODULE IMPORTS - URUTAN PENTING! -->
+
+<!-- 1️⃣ Template DULU (IIFE pattern - attach ke window) -->
+<script type="module" src="modules/penilaian/penilaian-template.js"></script>
+<!-- 2️⃣ Storage (ES Module - di-import oleh penilaian.js) -->
+<script type="module" src="modules/penilaian/penilaian-storage.js"></script>
+<!-- 3️⃣ Main module logic (TERAKHIR - butuh 2 file di atas) -->
+<script type="module" src="modules/penilaian/penilaian.js"></script> 
     
 </body>
 </html>
