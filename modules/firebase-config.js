@@ -86,8 +86,8 @@ export {
   onSnapshot,
   serverTimestamp,
   where
-};// ... existing firebase config code ...
-
+};
+// ... existing firebase config code ...
 // ============================================
 // ✅ RE-EXPORTS FOR BROWSER ES MODULES
 // ============================================
