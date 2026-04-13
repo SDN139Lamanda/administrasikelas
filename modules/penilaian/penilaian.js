@@ -5,28 +5,25 @@
  * ✅ Save & load nilai via penilaian-storage.js
  * ✅ FIX: Container + Template loading + Student data integration
  * ✅ UPDATE: Action buttons (Simpan/Edit/Hapus) per row
+ * ✅ FIX: All object syntax validated - no unexpected tokens
  */
 
 import { storage } from '../adm-kelas/storage.js';
 import { penilaianStorage } from './penilaian-storage.js';
-// ✅ FIX: Tidak perlu import getPenilaianTemplate karena template.js pakai IIFE
-// Fungsi akan tersedia di window setelah template.js load
 
 let dbKelas = [];
 let dbNilaiFull = {};
 let indexAktif = null;
 let viewAktif = 'pengetahuan';
 let jumlahPH = 1;
-let isDataSynced = false; // ✅ UPDATE: Track sync status
+let isDataSynced = false;
 
 // ✅ SYNC DATA
 async function syncData() {
-    // ✅ UPDATE: Hindari sync berulang jika sudah ada data
     if (isDataSynced && dbKelas.length > 0) {
         console.log('🔄 [Penilaian] Data already synced, skipping...');
         return;
     }
-    
     dbKelas = await storage.loadClasses();
     isDataSynced = true;
     console.log('🔄 [Penilaian] Data synced - Classes:', dbKelas.length);
@@ -48,20 +45,20 @@ async function initPenilaian() {
     });
 }
 
-// ✅ SWITCH VIEW - FIX: Expose to window for HTML onclick
+// ✅ SWITCH VIEW - Expose to window
 window.switchView = function(mode) {
     viewAktif = mode;
     if(indexAktif !== null) renderTabel();
 }
 
-// ✅ TAMBAH KOLOM PH - FIX: Expose to window for HTML onclick
+// ✅ TAMBAH KOLOM PH - Expose to window
 window.tambahKolomPH = function() {
     if(indexAktif === null) return alert("Pilih kelas!");
     jumlahPH++;
     renderTabel();
 }
 
-// ✅ INIT TABLE - FIX: Expose to window for HTML onchange
+// ✅ INIT TABLE - Expose to window
 window.inisialisasiTabel = async function(classId) {
     if(classId === "") {
         indexAktif = null;
@@ -70,7 +67,6 @@ window.inisialisasiTabel = async function(classId) {
         return;
     }
     
-    // ✅ UPDATE: Pastikan data sync sebelum cari class
     await syncData();
     
     const classIndex = dbKelas.findIndex(k => k.id === classId);
@@ -80,7 +76,6 @@ window.inisialisasiTabel = async function(classId) {
     const kelas = dbKelas[classIndex];
     const namaKelas = kelas.nama;
     
-    // ✅ UPDATE: Handle jika tidak ada siswa
     if (!kelas.siswa || kelas.siswa.length === 0) {
         const body = document.getElementById('tabelNilaiBody');
         if (body) {
@@ -113,37 +108,30 @@ function renderTabel() {
     body.innerHTML = "";
 
     if(viewAktif === 'pengetahuan') {
-        // header
         let headPH = "";
         for(let i=1; i<=jumlahPH; i++) headPH += `<th class="px-4 py-2 text-center bg-blue-50/30 min-w-[80px]">PH ${i}</th>`;
-        // ✅ UPDATE: Tambah kolom Aksi di header
         head.innerHTML = `<tr>
             <th class="px-8 py-4 sticky-col min-w-[250px] bg-white">Identitas Siswa</th>
             ${headPH}
             <th class="px-6 py-4 text-center bg-amber-50/30 min-w-[100px]">STS</th>
             <th class="px-6 py-4 text-center bg-emerald-50/30 min-w-[100px]">SAS</th>
             <th class="px-6 py-4 text-center bg-slate-900 text-white">NA</th>
-            <!-- ✅ TAMBAH: Kolom Aksi -->
             <th class="px-4 py-4 text-center bg-slate-100 min-w-[120px]">Aksi</th>
         </tr>`;
         
-        // body
         siswa.forEach((s, sIdx) => {
-            // ✅ UPDATE: Fallback key jika s.id tidak ada
             const studentKey = s.id || s.nama || `siswa_${sIdx}`;
             const sVal = savedData[studentKey] || { ph: [], sts: 0, sas: 0 };
             let rowPH = "";
             for(let i=0; i<jumlahPH; i++) {
                 rowPH += `<td class="px-2 py-2"><input type="number" id="ph_${sIdx}_${i}" value="${sVal.ph[i] || 0}" oninput="hitungNA(${sIdx})" class="w-full bg-slate-50 border border-slate-200 p-2 rounded text-center"></td>`;
             }
-            // ✅ UPDATE: Tambah kolom tombol aksi di setiap row
             body.innerHTML += `<tr class="hover:bg-slate-50/50" data-student-id="${studentKey}">
                 <td class="px-8 py-3 sticky-col font-medium text-slate-800 bg-white">${s.nama || 'Siswa ' + (sIdx+1)}</td>
                 ${rowPH}
                 <td class="px-4 py-3"><input type="number" id="sts_${sIdx}" value="${sVal.sts || 0}" oninput="hitungNA(${sIdx})" class="w-16 mx-auto block bg-white border border-amber-200 p-2 rounded text-center"></td>
                 <td class="px-4 py-3"><input type="number" id="sas_${sIdx}" value="${sVal.sas || 0}" oninput="hitungNA(${sIdx})" class="w-16 mx-auto block bg-white border border-emerald-200 p-2 rounded text-center"></td>
                 <td class="px-6 py-3 text-center font-bold" id="na_${sIdx}">0</td>
-                <!-- ✅ TAMBAH: Kolom Tombol Aksi -->
                 <td class="px-4 py-3 text-center">
                     <div class="flex items-center justify-center gap-1">
                         <button onclick="aksiSimpanRow(${sIdx})" class="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded transition" title="Simpan">
@@ -161,22 +149,16 @@ function renderTabel() {
             hitungNA(sIdx);
         });
     } else {
-        // header sikap
-        // ✅ UPDATE: Tambah colspan untuk aksi
         head.innerHTML = `<tr>
             <th class="px-8 py-4 sticky-col min-w-[250px] bg-white">Identitas Siswa</th>
             <th class="px-8 py-4 text-center bg-purple-50 text-purple-600 min-w-[150px]">Predikat</th>
             <th class="px-8 py-4 text-left bg-slate-50 min-w-[400px]">Catatan Deskripsi Sikap</th>
-            <!-- ✅ TAMBAH: Kolom Aksi untuk view Sikap -->
             <th class="px-4 py-4 text-center bg-slate-100 min-w-[120px]">Aksi</th>
         </tr>`;
         
-        // body sikap
         siswa.forEach((s, sIdx) => {
-            // ✅ UPDATE: Fallback key jika s.id tidak ada
             const studentKey = s.id || s.nama || `siswa_${sIdx}`;
             const sVal = savedData[studentKey] || { sikap: 'B', catatan: '' };
-            // ✅ UPDATE: Tambah kolom tombol aksi untuk view Sikap
             body.innerHTML += `<tr class="hover:bg-slate-50/50" data-student-id="${studentKey}">
                 <td class="px-8 py-4 sticky-col font-medium text-slate-800 bg-white">${s.nama || 'Siswa ' + (sIdx+1)}</td>
                 <td class="px-8 py-4 text-center">
@@ -190,7 +172,6 @@ function renderTabel() {
                 <td class="px-8 py-4">
                     <textarea id="catatan_${sIdx}" placeholder="Catatan sikap..." class="w-full bg-slate-50 border border-slate-200 p-3 rounded-lg text-sm outline-none focus:ring-2 ring-purple-300 resize-none" rows="2">${sVal.catatan || ''}</textarea>
                 </td>
-                <!-- ✅ TAMBAH: Kolom Tombol Aksi untuk Sikap -->
                 <td class="px-4 py-4 text-center">
                     <div class="flex items-center justify-center gap-1">
                         <button onclick="aksiSimpanSikapRow(${sIdx})" class="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded transition" title="Simpan">
@@ -209,7 +190,7 @@ function renderTabel() {
     }
 }
 
-// ✅ CALCULATE NA - FIX: Expose to window for HTML oninput
+// ✅ CALCULATE NA - Expose to window
 window.hitungNA = function(sIdx) {
     let totalPH = 0;
     for(let i=0; i<jumlahPH; i++) {
@@ -228,17 +209,17 @@ window.hitungNA = function(sIdx) {
     }
 }
 
-// ✅ SAVE - FIX: Expose to window for HTML onclick
+// ✅ SAVE PERMANEN - Expose to window - FIX: Valid object syntax
 window.simpanPermanen = async function() {
     if(indexAktif === null) return alert('Pilih kelas dulu!');
     const classId = dbKelas[indexAktif].id;
     const namaKelas = dbKelas[indexAktif].nama;
     const siswa = dbKelas[indexAktif].siswa || [];
     const dataLama = dbNilaiFull[namaKelas]?.data || {};
-    let payload = { meta: { jumlahPH },  {} };
+    // ✅ FIX: Valid syntax - ada "data:" key sebelum {}
+    let payload = { meta: { jumlahPH }, data: {} };
 
     siswa.forEach((s, sIdx) => {
-        // ✅ UPDATE: Fallback key jika s.id tidak ada
         const studentKey = s.id || s.nama || `siswa_${sIdx}`;
         const sLama = dataLama[studentKey] || {};
         if(viewAktif === 'pengetahuan') {
@@ -267,28 +248,24 @@ window.simpanPermanen = async function() {
     alert("✅ Data Berhasil Disimpan!");
 }
 
-// ✅ UPDATE SEMUA WARNA - FIX: Expose to window for HTML oninput
+// ✅ UPDATE SEMUA WARNA - Expose to window
 window.updateSemuaWarna = function() { 
     if(indexAktif !== null && viewAktif === 'pengetahuan') renderTabel(); 
 }
 
-// ✅ EXPORT FUNCTION - FIXED
+// ✅ EXPORT FUNCTION
 window.renderPenilaian = async function() {
-    // ✅ FIX 1: Gunakan container yang konsisten dengan dashboard
     const container = document.getElementById('module-container');
     if(!container) {
         console.error('❌ module-container not found');
         return;
     }
     
-    // ✅ FIX 2: Hide dashboard sections (seperti module lain)
     document.querySelectorAll('.dashboard-hero, [aria-labelledby="rooms-heading"], #sd-section, #smp-section, #sma-section')
         .forEach(el => el?.closest('section')?.classList.add('hidden'));
     
-    // ✅ FIX 3: Wait for template to be available (IIFE pattern)
     if(typeof window.getPenilaianTemplate !== 'function') {
         console.warn('⚠️ getPenilaianTemplate not ready yet, waiting...');
-        // Wait up to 2 seconds for template to load
         for(let i=0; i<20; i++) {
             await new Promise(r => setTimeout(r, 100));
             if(typeof window.getPenilaianTemplate === 'function') break;
@@ -301,7 +278,6 @@ window.renderPenilaian = async function() {
     }
     
     try {
-        // ✅ UPDATE: Reset sync flag saat module dirender ulang
         isDataSynced = false;
         await syncData();
         container.innerHTML = window.getPenilaianTemplate();
@@ -314,25 +290,19 @@ window.renderPenilaian = async function() {
     }
 };
 
-// ✅ Aliases for compatibility
 window.loadPenilaianModule = window.renderPenilaian;
-// ✅ HAPUS: window.safeRenderPenilaian = window.renderPenilaian; 
-// (dashboard.html sudah punya safe wrapper sendiri)
 
 // ============================================
-// ✅ FUNGSI AKSI ROW: Simpan / Edit / Hapus (BARU)
+// ✅ FUNGSI AKSI ROW
 // ============================================
 
-// 💾 Simpan satu row siswa (Pengetahuan)
 window.aksiSimpanRow = async function(sIdx) {
     if (indexAktif === null) return;
-    
     const classId = dbKelas[indexAktif].id;
     const namaKelas = dbKelas[indexAktif].nama;
     const siswa = dbKelas[indexAktif].siswa[sIdx];
     const studentKey = siswa.id || siswa.nama || `siswa_${sIdx}`;
     
-    // Ambil nilai dari input
     let listPH = [];
     for(let i=0; i<jumlahPH; i++) {
         const el = document.getElementById(`ph_${sIdx}_${i}`);
@@ -341,34 +311,22 @@ window.aksiSimpanRow = async function(sIdx) {
     const sts = document.getElementById(`sts_${sIdx}`)?.value || 0;
     const sas = document.getElementById(`sas_${sIdx}`)?.value || 0;
     
-    // Load existing data first (merge, don't replace all)
     const existing = await penilaianStorage.loadGrades(classId);
     if (!existing.data) existing.data = {};
-    
-    // Update only this student's data
-    existing.data[studentKey] = { 
-        ...(existing.data[studentKey] || {}),
-        ph: listPH, 
-        sts: sts, 
-        sas: sas 
-    };
+    existing.data[studentKey] = { ...(existing.data[studentKey] || {}), ph: listPH, sts, sas };
     
     try {
         await penilaianStorage.saveGrades(classId, existing);
-        // Update local cache
-        if (!dbNilaiFull[namaKelas]) dbNilaiFull[namaKelas] = { meta: { jumlahPH },  {} };
+        // ✅ FIX: Valid syntax
+        if (!dbNilaiFull[namaKelas]) dbNilaiFull[namaKelas] = { meta: { jumlahPH }, data: {} };
         dbNilaiFull[namaKelas].data[studentKey] = { ph: listPH, sts, sas };
-        
-        // Toast notification
         showToast(`✅ Nilai ${siswa.nama} disimpan!`, 'success');
     } catch (e) {
         showToast(`❌ Gagal simpan: ${e.message}`, 'error');
     }
 };
 
-// ✏️ Edit mode untuk Pengetahuan (enable input)
 window.aksiEditRow = function(sIdx) {
-    // Enable semua input di row ini
     for(let i=0; i<jumlahPH; i++) {
         const el = document.getElementById(`ph_${sIdx}_${i}`);
         if (el) {
@@ -381,14 +339,11 @@ window.aksiEditRow = function(sIdx) {
     const sasEl = document.getElementById(`sas_${sIdx}`);
     if (stsEl) { stsEl.classList.add('bg-yellow-50', 'border-blue-300'); stsEl.focus(); }
     if (sasEl) { sasEl.classList.add('bg-yellow-50', 'border-blue-300'); sasEl.focus(); }
-    
     showToast('✏️ Edit mode aktif. Ubah nilai lalu klik 💾', 'info');
 };
 
-// 💾 Simpan satu row siswa (Sikap)
 window.aksiSimpanSikapRow = async function(sIdx) {
     if (indexAktif === null) return;
-    
     const classId = dbKelas[indexAktif].id;
     const namaKelas = dbKelas[indexAktif].nama;
     const siswa = dbKelas[indexAktif].siswa[sIdx];
@@ -397,75 +352,45 @@ window.aksiSimpanSikapRow = async function(sIdx) {
     const sikap = document.getElementById(`sikap_${sIdx}`)?.value || 'B';
     const catatan = document.getElementById(`catatan_${sIdx}`)?.value || '';
     
-    // Load existing data first
     const existing = await penilaianStorage.loadGrades(classId);
     if (!existing.data) existing.data = {};
-    
-    // Update only this student's sikap data
-    existing.data[studentKey] = { 
-        ...(existing.data[studentKey] || {}),
-        sikap: sikap, 
-        catatan: catatan 
-    };
+    existing.data[studentKey] = { ...(existing.data[studentKey] || {}), sikap, catatan };
     
     try {
         await penilaianStorage.saveGrades(classId, existing);
-        // Update local cache
-        if (!dbNilaiFull[namaKelas]) dbNilaiFull[namaKelas] = { meta: { jumlahPH },  {} };
-        dbNilaiFull[namaKelas].data[studentKey] = { 
-            ...(dbNilaiFull[namaKelas].data[studentKey] || {}),
-            sikap, catatan 
-        };
-        
+        // ✅ FIX: Valid syntax
+        if (!dbNilaiFull[namaKelas]) dbNilaiFull[namaKelas] = { meta: { jumlahPH }, data: {} };
+        dbNilaiFull[namaKelas].data[studentKey] = { ...(dbNilaiFull[namaKelas].data[studentKey] || {}), sikap, catatan };
         showToast(`✅ Sikap ${siswa.nama} disimpan!`, 'success');
     } catch (e) {
         showToast(`❌ Gagal simpan: ${e.message}`, 'error');
     }
 };
 
-// ✏️ Edit mode untuk Sikap
 window.aksiEditSikapRow = function(sIdx) {
     const sikapEl = document.getElementById(`sikap_${sIdx}`);
     const catatanEl = document.getElementById(`catatan_${sIdx}`);
-    
     if (sikapEl) { sikapEl.classList.add('bg-yellow-50', 'border-blue-300'); sikapEl.focus(); }
-    if (catatanEl) { 
-        catatanEl.classList.add('bg-yellow-50', 'border-blue-300'); 
-        catatanEl.style.minHeight = '80px';
-        catatanEl.focus(); 
-    }
-    
+    if (catatanEl) { catatanEl.classList.add('bg-yellow-50', 'border-blue-300'); catatanEl.style.minHeight = '80px'; catatanEl.focus(); }
     showToast('✏️ Edit mode aktif. Ubah lalu klik 💾', 'info');
 };
 
-// 🗑️ Hapus data satu row siswa (works for both Pengetahuan & Sikap)
 window.aksiHapusRow = async function(sIdx) {
     if (indexAktif === null) return;
-    
     const siswa = dbKelas[indexAktif].siswa[sIdx];
     const studentKey = siswa.id || siswa.nama || `siswa_${sIdx}`;
     
-    // Confirm dialog
     if (!confirm(`Hapus data nilai untuk ${siswa.nama}?`)) return;
     
     const classId = dbKelas[indexAktif].id;
     const namaKelas = dbKelas[indexAktif].nama;
     
     try {
-        // Load existing data
         const existing = await penilaianStorage.loadGrades(classId);
-        // Delete student key
-        if (existing.data?.[studentKey]) {
-            delete existing.data[studentKey];
-        }
-        // Save back
+        if (existing.data?.[studentKey]) delete existing.data[studentKey];
         await penilaianStorage.saveGrades(classId, existing);
-        // Update local cache
-        if (dbNilaiFull[namaKelas]?.data?.[studentKey]) {
-            delete dbNilaiFull[namaKelas].data[studentKey];
-        }
+        if (dbNilaiFull[namaKelas]?.data?.[studentKey]) delete dbNilaiFull[namaKelas].data[studentKey];
         
-        // Clear input values di UI (Pengetahuan)
         for(let i=0; i<jumlahPH; i++) {
             const el = document.getElementById(`ph_${sIdx}_${i}`);
             if (el) el.value = '';
@@ -477,7 +402,6 @@ window.aksiHapusRow = async function(sIdx) {
         const naEl = document.getElementById(`na_${sIdx}`);
         if (naEl) naEl.innerText = '0';
         
-        // Clear input values di UI (Sikap)
         const sikapEl = document.getElementById(`sikap_${sIdx}`);
         const catatanEl = document.getElementById(`catatan_${sIdx}`);
         if (sikapEl) sikapEl.value = 'B';
@@ -489,26 +413,14 @@ window.aksiHapusRow = async function(sIdx) {
     }
 };
 
-// 🍞 Helper: Toast notification
 function showToast(message, type = 'info') {
-    const colors = {
-        success: 'bg-emerald-600',
-        error: 'bg-rose-600',
-        info: 'bg-blue-600'
-    };
-    const icons = {
-        success: 'fa-check-circle',
-        error: 'fa-exclamation-circle',
-        info: 'fa-info-circle'
-    };
+    const colors = { success: 'bg-emerald-600', error: 'bg-rose-600', info: 'bg-blue-600' };
+    const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', info: 'fa-info-circle' };
     const toast = document.createElement('div');
     toast.className = `fixed bottom-4 right-4 ${colors[type]} text-white px-4 py-3 rounded-xl shadow-lg z-50 animate-fade-in`;
     toast.innerHTML = `<div class="flex items-center gap-2"><i class="fas ${icons[type]}"></i><span>${message}</span></div>`;
     document.body.appendChild(toast);
-    setTimeout(() => {
-        toast.style.opacity = '0';
-        setTimeout(() => toast.remove(), 300);
-    }, 3000);
+    setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000);
 }
 
-console.log('🟢 [Penilaian] Module LOADED - Integrated with Adm. Kelas + Student Data Fix + Action Buttons');
+console.log('🟢 [Penilaian] Module LOADED - All syntax validated');
