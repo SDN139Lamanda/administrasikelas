@@ -1,111 +1,71 @@
-/**
- * ============================================
- * MODULE: RAPOR TEMPLATES
- * Kurikulum Merdeka Format
- * ============================================
- */
-console.log('🔴 [Rapor Templates] START');
+function getPenilaianTemplate() {
+    return `
+    <div class="penilaian-container">
+        <aside class="w-full md:w-72 sidebar-gradient text-slate-300 p-8 shadow-2xl z-20">
+            <div class="flex items-center space-x-3 mb-12">
+                <div class="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center text-white shadow-lg">
+                    <i class="fas fa-award"></i>
+                </div>
+                <h2 class="text-2xl font-extrabold text-white tracking-tight">EduAdmin</h2>
+            </div>
+            <nav class="space-y-4">
+                <div class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 ml-4">Menu Penilaian</div>
+                <button onclick="switchView('pengetahuan')" id="btnPengetahuan" class="w-full flex items-center space-x-4 px-4 py-3 rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-500/30 transition-all">
+                    <i class="fas fa-brain w-5"></i> <span class="font-bold">Pengetahuan</span>
+                </button>
+                <button onclick="switchView('sikap')" id="btnSikap" class="w-full flex items-center space-x-4 px-4 py-3 rounded-2xl hover:bg-white/5 transition-all">
+                    <i class="fas fa-heart w-5 text-rose-400"></i> <span class="font-bold">Sikap</span>
+                </button>
+            </nav>
+        </aside>
 
-// ✅ HTML Template for Rapor (Kurikulum Merdeka)
-export function getRaporHtmlTemplate(data) {
-  const { siswa, userData, semester, nilai, absen, deskripsi, catatan } = data;
-  const labelJenjang = {sd:'SD', smp:'SMP', sma:'SMA'}[userData.jenjang_sekolah] || userData.jenjang_sekolah.toUpperCase();
-  const labelSemester = semester === '1' ? 'Ganjil' : 'Genap';
-  
-  return `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="utf-8">
-      <title>Rapor - ${siswa.nama}</title>
-      <style>
-        body { font-family: 'Times New Roman', serif; line-height: 1.6; margin: 40px; color: #000; }
-        .header { text-align: center; border-bottom: 3px double #000; padding-bottom: 16px; margin-bottom: 24px; }
-        .header h1 { font-size: 18px; font-weight: bold; margin: 0; }
-        .header p { margin: 4px 0; font-size: 14px; }
-        .section { margin-bottom: 24px; }
-        .section h3 { font-size: 16px; font-weight: bold; border-bottom: 1px solid #000; padding-bottom: 8px; margin-bottom: 12px; }
-        table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        th, td { border: 1px solid #000; padding: 8px; text-align: left; }
-        th { background: #f3f4f6; }
-        .signature { margin-top: 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
-        .signature div { text-align: center; }
-        .footer { margin-top: 40px; text-align: center; font-size: 12px; color: #666; }
-        @media print { body { margin: 20px; } }
-      </style>
-    </head>
-    <body>
-      <div class="header">
-        <h1>RAPOR HASIL BELAJAR PESERTA DIDIK</h1>
-        <p>KURIKULUM MERDEKA</p>
-        <p style="margin-top: 8px;"><strong>${userData.nama_sekolah || 'Nama Sekolah'}</strong></p>
-        <p>${labelJenjang} • Kelas ${siswa.kelas} • Semester ${labelSemester}</p>
-      </div>
-      
-      <div class="section">
-        <h3>IDENTITAS PESERTA DIDIK</h3>
-        <table>
-          <tr><td width="150">Nama Peserta Didik</td><td>: ${siswa.nama}</td></tr>
-          <tr><td>NIS</td><td>: ${siswa.nis}</td></tr>
-          <tr><td>Kelas</td><td>: ${siswa.kelas}</td></tr>
-          <tr><td>Semester</td><td>: ${labelSemester}</td></tr>
-          <tr><td>Tahun Ajaran</td><td>: 2025/2026</td></tr>
-        </table>
-      </div>
-      
-      <div class="section">
-        <h3>HASIL BELAJAR</h3>
-        <table>
-          <thead>
-            <tr><th width="30%">Komponen</th><th width="15%">Nilai</th><th width="25%">Predikat</th><th>Deskripsi</th></tr>
-          </thead>
-          <tbody>
-            <tr><td>Pengetahuan (KI-3)</td><td>${nilai.pengetahuan}</td><td>${calculatePredikat(nilai.pengetahuan)}</td><td>${deskripsi.pengetahuan}</td></tr>
-            <tr><td>Keterampilan (KI-4)</td><td>${nilai.keterampilan}</td><td>${calculatePredikat(nilai.keterampilan)}</td><td>${deskripsi.keterampilan}</td></tr>
-            <tr><td>Sikap Spiritual</td><td>${nilai.spiritual}</td><td>${calculatePredikat(nilai.spiritual)}</td><td>${deskripsi.spiritual}</td></tr>
-            <tr><td>Sikap Sosial</td><td>${nilai.sosial}</td><td>${calculatePredikat(nilai.sosial)}</td><td>${deskripsi.sosial}</td></tr>
-          </tbody>
-        </table>
-      </div>
-      
-      <div class="section">
-        <h3>KEHADIRAN</h3>
-        <table>
-          <tr><td width="150">Sakit</td><td>: ${absen.sakit} hari</td></tr>
-          <tr><td>Izin</td><td>: ${absen.izin} hari</td></tr>
-          <tr><td>Tanpa Keterangan</td><td>: ${absen.tk} hari</td></tr>
-        </table>
-      </div>
-      
-      <div class="section">
-        <h3>CATATAN WALI KELAS</h3>
-        <p style="margin-top: 8px; min-height: 60px;">${catatan}</p>
-      </div>
-      
-      <div class="signature">
-        <div>
-          <p>Mengetahui,</p>
-          <p style="margin-top: 40px;"><strong>Orang Tua/Wali</strong></p>
-        </div>
-        <div>
-          <p>${userData.nama_sekolah?.split(',')[0] || 'Kota'}, ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
-          <p style="margin-top: 40px;"><strong>${userData.nama_lengkap || 'Nama Guru'}</strong><br>Guru Kelas</p>
-        </div>
-      </div>
-      
-      <p class="footer">Dokumen ini dibuat dengan Platform Administrasi Kelas Digital © 2026</p>
-    </body>
-    </html>
-  `;
+        <main class="flex-1 p-6 md:p-12 overflow-x-hidden">
+            <header class="flex flex-col xl:flex-row justify-between items-start xl:items-center mb-10 gap-6">
+                <div>
+                    <h1 id="mainTitle" class="text-3xl font-extrabold text-slate-800 tracking-tight">Penilaian Pengetahuan</h1>
+                    <p id="mainDesc" class="text-slate-500 font-medium text-sm">Input Nilai PH, STS, dan SAS</p>
+                </div>
+                <div class="flex flex-wrap gap-3">
+                    <select id="selectKelasNilai" onchange="inisialisasiTabel(this.value)" class="bg-white border-2 border-slate-100 px-6 py-3 rounded-xl font-bold text-slate-700 outline-none shadow-sm focus:border-blue-500 transition-all">
+                        <option value="">-- Pilih Kelas --</option>
+                    </select>
+                    <button onclick="simpanPermanen()" class="bg-slate-900 text-white px-8 py-3 rounded-xl font-bold shadow-lg hover:bg-slate-800 transition-all">
+                        <i class="fas fa-save mr-2 text-blue-400"></i> Simpan Data
+                    </button>
+                </div>
+            </header>
+
+            <div id="kontrolPengetahuan" class="flex flex-wrap gap-4 mb-8">
+                <button onclick="tambahKolomPH()" class="bg-blue-50 text-blue-600 px-5 py-3 rounded-xl font-bold hover:bg-blue-100 transition-all">
+                    <i class="fas fa-plus-circle mr-2"></i> Tambah PH
+                </button>
+                <div class="flex items-center space-x-2 px-4 py-3 bg-slate-100 rounded-xl">
+                    <span class="text-xs font-black text-slate-400 uppercase">KKM:</span>
+                    <input type="number" id="inputKKM" value="75" oninput="updateSemuaWarna()" class="w-12 bg-transparent border-none text-center font-bold text-rose-600 outline-none">
+                </div>
+            </div>
+
+            <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-200 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table id="tabelUtama" class="w-full text-left border-collapse">
+                        <thead id="tabelHead" class="bg-slate-50 text-slate-400 text-[10px] font-bold uppercase tracking-widest border-b">
+                        </thead>
+                        <tbody id="tabelNilaiBody" class="divide-y divide-slate-100">
+                            <tr><td colspan="6" class="p-20 text-center text-slate-300 font-bold italic">Pilih kelas untuk mengaktifkan tabel</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+    `;
 }
 
-// ✅ Helper: Calculate predikat
-function calculatePredikat(nilai) {
-  if (nilai >= 90) return 'A (Sangat Baik)';
-  if (nilai >= 80) return 'B (Baik)';
-  if (nilai >= 70) return 'C (Cukup)';
-  if (nilai >= 60) return 'D (Kurang)';
-  return 'E (Sangat Kurang)';
+// Function untuk load template ke dalam container
+function loadPenilaianModule() {
+    const container = document.getElementById('penilaian-module'); // Sesuaikan dengan ID container di dashboard Anda
+    if(container) {
+        container.innerHTML = getPenilaianTemplate();
+        initPenilaian();
+    }
 }
-
-console.log('🟢 [Rapor Templates] READY');
