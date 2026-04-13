@@ -48,20 +48,21 @@ async function initPenilaian() {
     });
 }
 
-// ✅ SWITCH VIEW
-function switchView(mode) {
+// ✅ SWITCH VIEW - FIX: Expose to window for HTML onclick
+window.switchView = function(mode) {
     viewAktif = mode;
     if(indexAktif !== null) renderTabel();
 }
 
-function tambahKolomPH() {
+// ✅ TAMBAH KOLOM PH - FIX: Expose to window for HTML onclick
+window.tambahKolomPH = function() {
     if(indexAktif === null) return alert("Pilih kelas!");
     jumlahPH++;
     renderTabel();
 }
 
-// ✅ INIT TABLE
-async function inisialisasiTabel(classId) {
+// ✅ INIT TABLE - FIX: Expose to window for HTML onchange
+window.inisialisasiTabel = async function(classId) {
     if(classId === "") {
         indexAktif = null;
         const body = document.getElementById('tabelNilaiBody');
@@ -208,8 +209,8 @@ function renderTabel() {
     }
 }
 
-// ✅ CALCULATE NA
-function hitungNA(sIdx) {
+// ✅ CALCULATE NA - FIX: Expose to window for HTML oninput
+window.hitungNA = function(sIdx) {
     let totalPH = 0;
     for(let i=0; i<jumlahPH; i++) {
         const el = document.getElementById(`ph_${sIdx}_${i}`);
@@ -227,8 +228,8 @@ function hitungNA(sIdx) {
     }
 }
 
-// ✅ SAVE
-async function simpanPermanen() {
+// ✅ SAVE - FIX: Expose to window for HTML onclick
+window.simpanPermanen = async function() {
     if(indexAktif === null) return alert('Pilih kelas dulu!');
     const classId = dbKelas[indexAktif].id;
     const namaKelas = dbKelas[indexAktif].nama;
@@ -266,7 +267,8 @@ async function simpanPermanen() {
     alert("✅ Data Berhasil Disimpan!");
 }
 
-function updateSemuaWarna() { 
+// ✅ UPDATE SEMUA WARNA - FIX: Expose to window for HTML oninput
+window.updateSemuaWarna = function() { 
     if(indexAktif !== null && viewAktif === 'pengetahuan') renderTabel(); 
 }
 
