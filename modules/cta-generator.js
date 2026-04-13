@@ -29,13 +29,18 @@ export async function isAiReady() {
   } catch (error) { console.error('❌ [CTA Generator] Error checking AI readiness:', error); _aiReadyCache = false; return false; }
 }
 
+// ✅ FIX: Added role parameter for admin check
 function filterCTAOptions(userData) {
   if (!userData) return;
-  const { jenjang_sekolah, kelas_diampu, mapel_diampu, sd_mapel_type } = userData;
+  const { jenjang_sekolah, kelas_diampu, mapel_diampu, sd_mapel_type, role } = userData;
   
   const kelasSelect = document.getElementById('cta-kelas');
   if (kelasSelect && kelas_diampu?.length > 0) {
-    if (jenjang_sekolah === 'sd' && sd_mapel_type !== 'kelas') {
+    // ✅ FIX: Admin unrestricted access
+    if (role === 'admin') {
+      enableOptions(kelasSelect, 'all');
+      console.log('👑 [Filter] Admin: All classes enabled');
+    } else if (jenjang_sekolah === 'sd' && sd_mapel_type !== 'kelas') {
       enableOptions(kelasSelect, ['1','2','3','4','5','6']);
     } else {
       enableOptions(kelasSelect, kelas_diampu);
@@ -44,7 +49,11 @@ function filterCTAOptions(userData) {
   
   const mapelSelect = document.getElementById('cta-mapel');
   if (mapelSelect) {
-    if (jenjang_sekolah === 'sd' && sd_mapel_type === 'kelas') {
+    // ✅ FIX: Admin unrestricted access
+    if (role === 'admin') {
+      enableOptions(mapelSelect, 'all');
+      console.log('👑 [Filter] Admin: All subjects enabled');
+    } else if (jenjang_sekolah === 'sd' && sd_mapel_type === 'kelas') {
       enableOptions(mapelSelect, 'all');
     } else if (jenjang_sekolah === 'sd' && sd_mapel_type !== 'kelas') {
       const allowed = sd_mapel_type === 'pai' ? ['pai'] : ['pjok'];
@@ -192,14 +201,24 @@ window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, sem
   const allClasses = ['1','2','3','4','5','6','7','8','9','10','11','12'];
   let availableClasses = allClasses;
   let isClassLocked = false;
-  if (userRole === 'teacher' && userKelasDiampu.length > 0) {
+  
+  // ✅ FIX: Admin unrestricted access, teacher restricted
+  if (userRole === 'admin') {
+    // ✅ Admin: unrestricted access to all classes
+    availableClasses = allClasses;
+    isClassLocked = false;
+    console.log('👑 [CTA Generator] Admin mode: All classes unlocked');
+  } else if (userRole === 'teacher' && userKelasDiampu.length > 0) {
+    // ✅ Teacher: restricted to assigned classes
     if (userSdMapelType !== 'kelas') {
       availableClasses = ['1','2','3','4','5','6'];
     } else {
       availableClasses = userKelasDiampu;
     }
     isClassLocked = true;
+    console.log('👤 [CTA Generator] Teacher mode: Classes locked to', userKelasDiampu);
   }
+  
   let defaultClass = kelasFromParam || '';
   if (isClassLocked && availableClasses.length > 0) defaultClass = availableClasses[0];
   console.log('📚 [CTA Generator] Available classes:', availableClasses);
@@ -305,11 +324,11 @@ window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, sem
         <div class="section-title"><i class="fas fa-book-open"></i><span>2. Informasi Pembelajaran</span></div>
         <div class="grid-cols-3">
           <div><label for="cta-jenjang"><i class="fas fa-school mr-2"></i>Jenjang</label><select id="cta-jenjang" required><option value="">Pilih</option><option value="sd" ${jenjangFromParam === 'sd' ? 'selected' : ''}>SD</option><option value="smp" ${jenjangFromParam === 'smp' ? 'selected' : ''}>SMP</option><option value="sma" ${jenjangFromParam === 'sma' ? 'selected' : ''}>SMA</option></select></div>
-          <div><label for="cta-kelas"><i class="fas fa-users mr-2"></i>Kelas</label><select id="cta-kelas" required ${isClassLocked ? 'disabled' : ''}><option value="">Pilih</option>${availableClasses.map(k => `<option value="${k}" ${k === defaultClass ? 'selected' : ''}>${k}</option>`).join('')}</select>${isClassLocked ? `<p class="lock-indicator"><i class="fas fa-lock"></i> Terkunci untuk kelas yang Anda ampu</p>` : ''}</div>
+          <div><label for="cta-kelas"><i class="fas fa-users mr-2"></i>Kelas</label><select id="cta-kelas" required ${isClassLocked ? 'disabled' : ''}><option value="">Pilih</option>${availableClasses.map(k => `<option value="${k}" ${k === defaultClass ? 'selected' : ''}>${k}</option>`).join('')}</select>${isClassLocked && userRole !== 'admin' ? `<p class="lock-indicator"><i class="fas fa-lock"></i> Terkunci untuk kelas yang Anda ampu</p>` : ''}</div>
           <div><label for="cta-semester"><i class="fas fa-clock mr-2"></i>Semester</label><select id="cta-semester" required><option value="">Pilih</option><option value="1" ${semesterFromParam === '1' ? 'selected' : ''}>1 (Ganjil)</option><option value="2" ${semesterFromParam === '2' ? 'selected' : ''}>2 (Genap)</option></select></div>
         </div>
         <div class="grid-cols-2">
-          <div><label for="cta-mapel"><i class="fas fa-book mr-2"></i>Mata Pelajaran</label><select id="cta-mapel" required><option value="">Pilih</option><option value="matematika">Matematika</option><option value="ipas">IPAS</option><option value="bahasa-indonesia">Bahasa Indonesia</option><option value="pjok">PJOK</option><option value="seni-budaya">Seni Budaya</option><option value="paibd">paibd</option><option value="lainnya">Lainnya</option></select></div>
+          <div><label for="cta-mapel"><i class="fas fa-book mr-2"></i>Mata Pelajaran</label><select id="cta-mapel" required><option value="">Pilih</option><option value="matematika">Matematika</option><option value="ipas">IPAS</option><option value="bahasa-indonesia">Bahasa Indonesia</option><option value="pjok">PJOK</option><option value="seni-budaya">Seni Budaya</option><option value="lainnya">Lainnya</option></select></div>
           <div><label for="cta-topik"><i class="fas fa-tag mr-2"></i>Topik/Materi</label><input type="text" id="cta-topik" placeholder="Contoh: Bilangan 1-20" required></div>
         </div>
         <button type="button" id="btn-generate" class="btn-generate"><i class="fas fa-magic"></i> Generate dengan AI</button>
@@ -528,4 +547,4 @@ export async function autoSaveCTA(generatedContent, metadata) {
   }
 }
 
-console.log('🟢 [CTA Generator] READY — Auto-Expand Textarea + Auto-Save Integration');
+console.log('🟢 [CTA Generator] READY — Auto-Expand Textarea + Auto-Save Integration + Admin Access Fix');
