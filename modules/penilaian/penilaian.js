@@ -142,19 +142,35 @@ function updateSemuaWarna() {
     if(indexAktif !== null && viewAktif === 'pengetahuan') renderTabel(); 
 }
 
-// Export render function for dashboard
+// ✅ PENTING: Tunggu sampai getPenilaianTemplate tersedia sebelum export
+function waitForTemplate(callback, maxAttempts = 50) {
+    if (typeof getPenilaianTemplate === 'function') {
+        console.log('✅ [Penilaian] getPenilaianTemplate found!');
+        callback();
+    } else if (maxAttempts > 0) {
+        setTimeout(() => waitForTemplate(callback, maxAttempts - 1), 50);
+    } else {
+        console.error('❌ [Penilaian] getPenilaianTemplate not found after waiting');
+    }
+}
+
+// Export render function untuk dashboard
 window.renderPenilaian = async function() {
     const container = document.getElementById('penilaian-container');
     if(!container) return console.error('❌ penilaian-container not found');
     
-    if(typeof getPenilaianTemplate === 'function') {
-        container.innerHTML = getPenilaianTemplate();
-        container.classList.remove('hidden');
-        initPenilaian();
-        console.log('✅ Penilaian module rendered');
-    } else {
-        console.error('❌ getPenilaianTemplate function not found');
-    }
+    // Tunggu sampai getPenilaianTemplate siap
+    waitForTemplate(() => {
+        if(typeof getPenilaianTemplate === 'function') {
+            container.innerHTML = getPenilaianTemplate();
+            container.classList.remove('hidden');
+            initPenilaian();
+            console.log('✅ Penilaian module rendered');
+        } else {
+            console.error('❌ getPenilaianTemplate function still not found');
+            container.innerHTML = '<div class="p-8 text-rose-600 text-center">Error: Template tidak ditemukan</div>';
+        }
+    });
 };
 
 window.loadPenilaianModule = window.renderPenilaian;
