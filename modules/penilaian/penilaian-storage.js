@@ -2,10 +2,11 @@
  * PENILAIAN STORAGE MODULE
  * ✅ Persamaan dengan adm-kelas (pakai Firebase storage.js)
  * ✅ Simpan & ambil nilai per kelas
+ * ✅ FIX: Browser-compatible import via firebase-config.js re-exports
  */
 
-import { db } from '../firebase-config.js';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
+// ✅ FIX: Semua import dari firebase-config.js (relative path - work di browser)
+import { db, doc, setDoc, getDoc } from '../firebase-config.js';
 
 export const penilaianStorage = {
   // Load semua nilai untuk kelas tertentu
@@ -18,7 +19,7 @@ export const penilaianStorage = {
         return snap.data();
       } else {
         console.warn("⚠️ [PenilaianStorage] No grades found for:", classId);
-        return { meta: { jumlahPH: 1 }, data: {} };
+        return { meta: { jumlahPH: 1 },  {} };
       }
     } catch (e) {
       console.error("❌ [PenilaianStorage] loadGrades error:", e.message);
@@ -39,3 +40,5 @@ export const penilaianStorage = {
     }
   }
 };
+
+console.log('✅ [PenilaianStorage] Loaded - Browser Compatible');
