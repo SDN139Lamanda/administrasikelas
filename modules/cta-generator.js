@@ -309,7 +309,7 @@ window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, sem
           <div><label for="cta-semester"><i class="fas fa-clock mr-2"></i>Semester</label><select id="cta-semester" required><option value="">Pilih</option><option value="1" ${semesterFromParam === '1' ? 'selected' : ''}>1 (Ganjil)</option><option value="2" ${semesterFromParam === '2' ? 'selected' : ''}>2 (Genap)</option></select></div>
         </div>
         <div class="grid-cols-2">
-          <div><label for="cta-mapel"><i class="fas fa-book mr-2"></i>Mata Pelajaran</label><select id="cta-mapel" required><option value="">Pilih</option><option value="matematika">Matematika</option><option value="ipas">IPAS</option><option value="bahasa-indonesia">Bahasa Indonesia</option><option value="pjok">PJOK</option><option value="seni-budaya">Seni Budaya</option><option value="lainnya">Lainnya</option></select></div>
+          <div><label for="cta-mapel"><i class="fas fa-book mr-2"></i>Mata Pelajaran</label><select id="cta-mapel" required><option value="">Pilih</option><option value="matematika">Matematika</option><option value="ipas">IPAS</option><option value="bahasa-indonesia">Bahasa Indonesia</option><option value="pjok">PJOK</option><option value="seni-budaya">Seni Budaya</option><option value="paibd">paibd</option><option value="lainnya">Lainnya</option></select></div>
           <div><label for="cta-topik"><i class="fas fa-tag mr-2"></i>Topik/Materi</label><input type="text" id="cta-topik" placeholder="Contoh: Bilangan 1-20" required></div>
         </div>
         <button type="button" id="btn-generate" class="btn-generate"><i class="fas fa-magic"></i> Generate dengan AI</button>
