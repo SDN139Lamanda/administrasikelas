@@ -1,4 +1,5 @@
-function getPenilaianTemplate() {
+// ✅ PENTING: Expose function ke window global agar bisa diakses dari penilaian.js
+window.getPenilaianTemplate = function() {
     return `
     <div class="penilaian-container min-h-screen flex flex-col md:flex-row bg-slate-50">
         <aside class="w-full md:w-72 sidebar-gradient text-slate-300 p-8 shadow-2xl z-20">
@@ -51,14 +52,4 @@ function getPenilaianTemplate() {
                         <thead id="tabelHead" class="bg-slate-50 text-slate-400 text-[10px] font-bold uppercase tracking-widest border-b">
                         </thead>
                         <tbody id="tabelNilaiBody" class="divide-y divide-slate-100">
-                            <tr><td colspan="6" class="p-20 text-center text-slate-300 font-bold italic">Pilih kelas untuk mengaktifkan tabel</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </main>
-    </div>
-    `;
-}
-
-console.log('✅ [Penilaian Templates] Module loaded');
+                            <tr><td colspan="6" class="p-20`
