@@ -3,7 +3,7 @@
  * ✅ Reads from adm-kelas storage
  * ✅ Auto-sync with class & student data
  * ✅ Save & load nilai via penilaian-storage.js
- * ✅ FIX: Container + Template loading
+ * ✅ FIX: Container + Template loading + Student data integration
  */
 
 import { storage } from '../adm-kelas/storage.js';
@@ -16,10 +16,18 @@ let dbNilaiFull = {};
 let indexAktif = null;
 let viewAktif = 'pengetahuan';
 let jumlahPH = 1;
+let isDataSynced = false; // ✅ UPDATE: Track sync status
 
 // ✅ SYNC DATA
 async function syncData() {
+    // ✅ UPDATE: Hindari sync berulang jika sudah ada data
+    if (isDataSynced && dbKelas.length > 0) {
+        console.log('🔄 [Penilaian] Data already synced, skipping...');
+        return;
+    }
+    
     dbKelas = await storage.loadClasses();
+    isDataSynced = true;
     console.log('🔄 [Penilaian] Data synced - Classes:', dbKelas.length);
 }
 
@@ -59,10 +67,31 @@ async function inisialisasiTabel(classId) {
         if(body) body.innerHTML = `<tr><td colspan="6">Pilih kelas untuk mengaktifkan tabel</td></tr>`;
         return;
     }
+    
+    // ✅ UPDATE: Pastikan data sync sebelum cari class
+    await syncData();
+    
     const classIndex = dbKelas.findIndex(k => k.id === classId);
     if(classIndex === -1) return alert('❌ Kelas tidak ditemukan!');
     indexAktif = classIndex;
-    const namaKelas = dbKelas[classIndex].nama;
+    
+    const kelas = dbKelas[classIndex];
+    const namaKelas = kelas.nama;
+    
+    // ✅ UPDATE: Handle jika tidak ada siswa
+    if (!kelas.siswa || kelas.siswa.length === 0) {
+        const body = document.getElementById('tabelNilaiBody');
+        if (body) {
+            body.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-slate-500">
+                ⚠️ Belum ada siswa di kelas ini. 
+                <br><a href="javascript:void(0)" onclick="backToDashboard()" class="text-blue-600 underline">
+                Tambah siswa di Adm. Kelas dulu!
+                </a>
+            </td></tr>`;
+        }
+        return;
+    }
+    
     dbNilaiFull[namaKelas] = await penilaianStorage.loadGrades(classId);
     jumlahPH = dbNilaiFull[namaKelas]?.meta?.jumlahPH || 1;
     renderTabel();
@@ -88,14 +117,15 @@ function renderTabel() {
         head.innerHTML = `<tr><th class="px-8 py-4 sticky-col min-w-[250px] bg-white">Identitas Siswa</th>${headPH}<th class="px-6 py-4 text-center bg-amber-50/30 min-w-[100px]">STS</th><th class="px-6 py-4 text-center bg-emerald-50/30 min-w-[100px]">SAS</th><th class="px-6 py-4 text-center bg-slate-900 text-white">NA</th></tr>`;
         // body
         siswa.forEach((s, sIdx) => {
-            const studentKey = s.id;
+            // ✅ UPDATE: Fallback key jika s.id tidak ada
+            const studentKey = s.id || s.nama || `siswa_${sIdx}`;
             const sVal = savedData[studentKey] || { ph: [], sts: 0, sas: 0 };
             let rowPH = "";
             for(let i=0; i<jumlahPH; i++) {
                 rowPH += `<td class="px-2 py-2"><input type="number" id="ph_${sIdx}_${i}" value="${sVal.ph[i] || 0}" oninput="hitungNA(${sIdx})" class="w-full bg-slate-50 border border-slate-200 p-2 rounded text-center"></td>`;
             }
             body.innerHTML += `<tr class="hover:bg-slate-50/50">
-                <td class="px-8 py-3 sticky-col font-medium text-slate-800 bg-white">${s.nama}</td>
+                <td class="px-8 py-3 sticky-col font-medium text-slate-800 bg-white">${s.nama || 'Siswa ' + (sIdx+1)}</td>
                 ${rowPH}
                 <td class="px-4 py-3"><input type="number" id="sts_${sIdx}" value="${sVal.sts || 0}" oninput="hitungNA(${sIdx})" class="w-16 mx-auto block bg-white border border-amber-200 p-2 rounded text-center"></td>
                 <td class="px-4 py-3"><input type="number" id="sas_${sIdx}" value="${sVal.sas || 0}" oninput="hitungNA(${sIdx})" class="w-16 mx-auto block bg-white border border-emerald-200 p-2 rounded text-center"></td>
@@ -108,10 +138,11 @@ function renderTabel() {
         head.innerHTML = `<tr><th class="px-8 py-4 sticky-col min-w-[250px] bg-white">Identitas Siswa</th><th class="px-8 py-4 text-center bg-purple-50 text-purple-600 min-w-[150px]">Predikat</th><th class="px-8 py-4 text-left bg-slate-50 min-w-[400px]">Catatan Deskripsi Sikap</th></tr>`;
         // body sikap
         siswa.forEach((s, sIdx) => {
-            const studentKey = s.id;
+            // ✅ UPDATE: Fallback key jika s.id tidak ada
+            const studentKey = s.id || s.nama || `siswa_${sIdx}`;
             const sVal = savedData[studentKey] || { sikap: 'B', catatan: '' };
             body.innerHTML += `<tr class="hover:bg-slate-50/50">
-                <td class="px-8 py-4 sticky-col font-medium text-slate-800 bg-white">${s.nama}</td>
+                <td class="px-8 py-4 sticky-col font-medium text-slate-800 bg-white">${s.nama || 'Siswa ' + (sIdx+1)}</td>
                 <td class="px-8 py-4 text-center">
                     <select id="sikap_${sIdx}" class="bg-white border-2 border-purple-200 px-3 py-2 rounded-lg font-medium text-purple-600">
                         <option value="A" ${sVal.sikap==='A'?'selected':''}>A (Sangat Baik)</option>
@@ -157,7 +188,8 @@ async function simpanPermanen() {
     let payload = { meta: { jumlahPH }, data: {} };
 
     siswa.forEach((s, sIdx) => {
-        const studentKey = s.id;
+        // ✅ UPDATE: Fallback key jika s.id tidak ada
+        const studentKey = s.id || s.nama || `siswa_${sIdx}`;
         const sLama = dataLama[studentKey] || {};
         if(viewAktif === 'pengetahuan') {
             let listPH = [];
@@ -218,6 +250,8 @@ window.renderPenilaian = async function() {
     }
     
     try {
+        // ✅ UPDATE: Reset sync flag saat module dirender ulang
+        isDataSynced = false;
         await syncData();
         container.innerHTML = window.getPenilaianTemplate();
         container.classList.remove('hidden');
@@ -234,4 +268,4 @@ window.loadPenilaianModule = window.renderPenilaian;
 // ✅ HAPUS: window.safeRenderPenilaian = window.renderPenilaian; 
 // (dashboard.html sudah punya safe wrapper sendiri)
 
-console.log('🟢 [Penilaian] Module LOADED - Integrated with Adm. Kelas + Fixed');
+console.log('🟢 [Penilaian] Module LOADED - Integrated with Adm. Kelas + Student Data Fix');
