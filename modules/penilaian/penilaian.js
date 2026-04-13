@@ -199,5 +199,6 @@ window.renderPenilaian = async function() {
 };
 
 window.loadPenilaianModule = window.renderPenilaian;
+window.safeRenderPenilaian = window.renderPenilaian;
 
 console.log('🟢 [Penilaian] Module LOADED - Integrated with Adm. Kelas');
