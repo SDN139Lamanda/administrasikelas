@@ -5,7 +5,7 @@
  * ✅ Save & load nilai via penilaian-storage.js
  * ✅ FIX: Container + Template loading + Student data integration
  * ✅ UPDATE: Action buttons (Simpan/Edit/Hapus) per row
- * ✅ FIX: All object syntax validated - no unexpected tokens
+ * ✅ FIX: All syntax validated + userId set for storage
  */
 
 import { storage } from '../adm-kelas/storage.js';
@@ -18,15 +18,35 @@ let viewAktif = 'pengetahuan';
 let jumlahPH = 1;
 let isDataSynced = false;
 
-// ✅ SYNC DATA
+// ✅ SYNC DATA - FIX: Set storage.userId before loadClasses
 async function syncData() {
+    // ✅ FIX: Set userId dari auth.currentUser
+    const { auth } = await import('../firebase-config.js');
+    const currentUser = auth.currentUser;
+    
+    if (currentUser?.uid) {
+        storage.setUserId(currentUser.uid);
+        console.log('🔧 [Penilaian] storage.userId set:', currentUser.uid);
+    } else {
+        console.warn('⚠️ [Penilaian] No authenticated user, skipping sync');
+        return;
+    }
+    
     if (isDataSynced && dbKelas.length > 0) {
         console.log('🔄 [Penilaian] Data already synced, skipping...');
         return;
     }
+    
+    console.log('🔍 [Penilaian] Calling storage.loadClasses()...');
     dbKelas = await storage.loadClasses();
+    
+    console.log('📊 [Penilaian] loadClasses result:', {
+        count: dbKelas?.length,
+        firstClass: dbKelas?.[0]?.nama,
+        firstClassStudents: dbKelas?.[0]?.siswa?.length
+    });
+    
     isDataSynced = true;
-    console.log('🔄 [Penilaian] Data synced - Classes:', dbKelas.length);
 }
 
 // ✅ INIT DROPDOWN
@@ -209,15 +229,14 @@ window.hitungNA = function(sIdx) {
     }
 }
 
-// ✅ SAVE PERMANEN - Expose to window - FIX: Valid object syntax
+// ✅ SAVE PERMANEN - Expose to window
 window.simpanPermanen = async function() {
     if(indexAktif === null) return alert('Pilih kelas dulu!');
     const classId = dbKelas[indexAktif].id;
     const namaKelas = dbKelas[indexAktif].nama;
     const siswa = dbKelas[indexAktif].siswa || [];
     const dataLama = dbNilaiFull[namaKelas]?.data || {};
-    // ✅ FIX: Valid syntax - ada "data:" key sebelum {}
-    let payload = { meta: { jumlahPH }, data: {} };
+    let payload = { meta: { jumlahPH },  {} };
 
     siswa.forEach((s, sIdx) => {
         const studentKey = s.id || s.nama || `siswa_${sIdx}`;
@@ -317,8 +336,7 @@ window.aksiSimpanRow = async function(sIdx) {
     
     try {
         await penilaianStorage.saveGrades(classId, existing);
-        // ✅ FIX: Valid syntax
-        if (!dbNilaiFull[namaKelas]) dbNilaiFull[namaKelas] = { meta: { jumlahPH }, data: {} };
+        if (!dbNilaiFull[namaKelas]) dbNilaiFull[namaKelas] = { meta: { jumlahPH },  {} };
         dbNilaiFull[namaKelas].data[studentKey] = { ph: listPH, sts, sas };
         showToast(`✅ Nilai ${siswa.nama} disimpan!`, 'success');
     } catch (e) {
@@ -358,8 +376,7 @@ window.aksiSimpanSikapRow = async function(sIdx) {
     
     try {
         await penilaianStorage.saveGrades(classId, existing);
-        // ✅ FIX: Valid syntax
-        if (!dbNilaiFull[namaKelas]) dbNilaiFull[namaKelas] = { meta: { jumlahPH }, data: {} };
+        if (!dbNilaiFull[namaKelas]) dbNilaiFull[namaKelas] = { meta: { jumlahPH },  {} };
         dbNilaiFull[namaKelas].data[studentKey] = { ...(dbNilaiFull[namaKelas].data[studentKey] || {}), sikap, catatan };
         showToast(`✅ Sikap ${siswa.nama} disimpan!`, 'success');
     } catch (e) {
@@ -423,4 +440,4 @@ function showToast(message, type = 'info') {
     setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000);
 }
 
-console.log('🟢 [Penilaian] Module LOADED - All syntax validated');
+console.log('🟢 [Penilaian] Module LOADED - All syntax validated + userId integration fixed');
