@@ -167,6 +167,7 @@ window.renderGeneratorModule = function() {
               <option value="bahasa-indonesia">B. Indonesia</option>
               <option value="pjok">PJOK</option>
               <option value="seni-budaya">Seni Budaya</option>
+              <option value="paibd">paibd</option>
               <option value="lainnya">Lainnya</option>
             </select>
           </div>
