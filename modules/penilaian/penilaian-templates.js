@@ -1,6 +1,6 @@
 function getPenilaianTemplate() {
     return `
-    <div class="penilaian-container">
+    <div class="penilaian-container min-h-screen flex flex-col md:flex-row bg-slate-50">
         <aside class="w-full md:w-72 sidebar-gradient text-slate-300 p-8 shadow-2xl z-20">
             <div class="flex items-center space-x-3 mb-12">
                 <div class="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center text-white shadow-lg">
@@ -13,7 +13,7 @@ function getPenilaianTemplate() {
                 <button onclick="switchView('pengetahuan')" id="btnPengetahuan" class="w-full flex items-center space-x-4 px-4 py-3 rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-500/30 transition-all">
                     <i class="fas fa-brain w-5"></i> <span class="font-bold">Pengetahuan</span>
                 </button>
-                <button onclick="switchView('sikap')" id="btnSikap" class="w-full flex items-center space-x-4 px-4 py-3 rounded-2xl hover:bg-white/5 transition-all">
+                <button onclick="switchView('sikap')" id="btnSikap" class="w-full flex items-center space-x-4 px-4 py-3 rounded-2xl hover:bg-white/5 transition-all text-slate-300">
                     <i class="fas fa-heart w-5 text-rose-400"></i> <span class="font-bold">Sikap</span>
                 </button>
             </nav>
@@ -61,11 +61,4 @@ function getPenilaianTemplate() {
     `;
 }
 
-// Function untuk load template ke dalam container
-function loadPenilaianModule() {
-    const container = document.getElementById('penilaian-module'); // Sesuaikan dengan ID container di dashboard Anda
-    if(container) {
-        container.innerHTML = getPenilaianTemplate();
-        initPenilaian();
-    }
-}
+console.log('✅ [Penilaian Templates] Module loaded');
