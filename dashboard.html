@@ -541,10 +541,11 @@
     <script type="module" src="modules/adm-pembelajaran/adm-pembelajaran-template.js"></script>
     <script type="module" src="modules/adm-pembelajaran/adm-pembelajaran.js"></script>
     
-    <!-- ✅ Penilaian module imports -->
-    <script type="module" src="modules/penilaian/penilaian.js"></script>
-    <!-- ✅ UPDATE 2: Tambah script import untuk penilaian-templates.js -->
+    <!-- ✅ PENILAIAN MODULE IMPORTS - URUTAN PENTING! -->
+    <!-- ✅ Load templates DULU sebelum penilaian.js -->
     <script type="module" src="modules/penilaian/penilaian-templates.js"></script>
+    <!-- ✅ Baru load logic/functionality -->
+    <script type="module" src="modules/penilaian/penilaian.js"></script>
     
 </body>
 </html>
