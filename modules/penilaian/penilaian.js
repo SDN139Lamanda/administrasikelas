@@ -292,7 +292,7 @@ window.aksiSimpanRow = async function(sIdx) {
         existing.data[studentKey] = { ...(existing.data[studentKey] || {}), ph: listPH, sts, sas };
         await penilaianStorage.saveGrades(classId, existing);
         // ✅ SYNTAX VALID:
-        if (!dbNilaiFull[namaKelas]) dbNilaiFull[namaKelas] = { meta: { jumlahPH },  {} };
+        if (!dbNilaiFull[namaKelas]) dbNilaiFull[namaKelas] = { meta: { jumlahPH }, data {} };
         dbNilaiFull[namaKelas].data[studentKey] = { ph: listPH, sts, sas };
         showToast(`✅ ${siswa.nama} disimpan`, 'success');
     } catch (e) { showToast('❌ ' + e.message, 'error'); }
