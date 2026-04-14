@@ -3,7 +3,6 @@
  * ✅ All syntax validated - no unexpected tokens
  * ✅ All HTML-callable functions exposed to window
  * ✅ Mobile layout: normal scroll (nama ikut bergeser)
- * ✅ FIX: Data sync - set userId before loadClasses
  */
 
 import { storage } from '../adm-kelas/storage.js';
@@ -16,34 +15,15 @@ let viewAktif = 'pengetahuan';
 let jumlahPH = 1;
 let isDataSynced = false;
 
-// ✅ SYNC DATA - FIX: Set userId BEFORE loadClasses
+// ✅ SYNC DATA
 async function syncData() {
-    // ✅ FIX WAJIB: Set userId dari Firebase auth
-    const { auth } = await import('../firebase-config.js');
-    const currentUser = auth.currentUser;
-    
-    if (currentUser?.uid) {
-        storage.setUserId(currentUser.uid);
-        console.log('🔧 [Penilaian] storage.userId set:', currentUser.uid.substring(0, 10) + '...');
-    } else {
-        console.warn('⚠️ [Penilaian] No authenticated user, skipping sync');
-        return;
-    }
-    
     if (isDataSynced && dbKelas.length > 0) {
         console.log('🔄 [Penilaian] Data already synced, skipping...');
         return;
     }
-    
-    console.log('🔍 [Penilaian] Calling storage.loadClasses()...');
     dbKelas = await storage.loadClasses();
-    
-    console.log('📊 [Penilaian] loadClasses result:', {
-        count: dbKelas?.length,
-        firstClass: dbKelas?.[0]?.nama
-    });
-    
     isDataSynced = true;
+    console.log('🔄 [Penilaian] Data synced - Classes:', dbKelas.length);
 }
 
 // ✅ INIT DROPDOWN
@@ -117,6 +97,7 @@ function renderTabel() {
     if(viewAktif === 'pengetahuan') {
         let headPH = "";
         for(let i=1; i<=jumlahPH; i++) headPH += `<th class="px-4 py-2 text-center bg-blue-50/30 min-w-[80px]">PH ${i}</th>`;
+        // ✅ UPDATE: Hapus sticky-col, tambah border separator
         head.innerHTML = `<tr>
             <th class="px-8 py-4 min-w-[200px] bg-white border-r border-slate-200">Identitas Siswa</th>
             ${headPH}
@@ -133,6 +114,7 @@ function renderTabel() {
             for(let i=0; i<jumlahPH; i++) {
                 rowPH += `<td class="px-2 py-2"><input type="number" id="ph_${sIdx}_${i}" value="${sVal.ph[i] || 0}" oninput="window.hitungNA(${sIdx})" class="w-full bg-slate-50 border border-slate-200 p-2 rounded text-center"></td>`;
             }
+            // ✅ UPDATE: Hapus sticky-col, tambah border separator
             body.innerHTML += `<tr class="hover:bg-slate-50/50" data-student-id="${studentKey}">
                 <td class="px-8 py-3 font-medium text-slate-800 bg-white border-r border-slate-200">${s.nama || 'Siswa ' + (sIdx+1)}</td>
                 ${rowPH}
@@ -150,6 +132,7 @@ function renderTabel() {
             window.hitungNA(sIdx);
         });
     } else {
+        // ✅ UPDATE: Hapus sticky-col, tambah border separator
         head.innerHTML = `<tr>
             <th class="px-8 py-4 min-w-[200px] bg-white border-r border-slate-200">Identitas Siswa</th>
             <th class="px-8 py-4 text-center bg-purple-50 text-purple-600 min-w-[150px]">Predikat</th>
@@ -160,6 +143,7 @@ function renderTabel() {
         siswa.forEach((s, sIdx) => {
             const studentKey = s.id || s.nama || `siswa_${sIdx}`;
             const sVal = savedData[studentKey] || { sikap: 'B', catatan: '' };
+            // ✅ UPDATE: Hapus sticky-col, tambah border separator
             body.innerHTML += `<tr class="hover:bg-slate-50/50" data-student-id="${studentKey}">
                 <td class="px-8 py-4 font-medium text-slate-800 bg-white border-r border-slate-200">${s.nama || 'Siswa ' + (sIdx+1)}</td>
                 <td class="px-8 py-4 text-center">
@@ -202,7 +186,7 @@ window.hitungNA = function(sIdx) {
     }
 };
 
-// ✅ FIX 5: Expose to window + ✅ SYNTAX FIX:  key
+// ✅ FIX 5: Expose to window + ✅ SYNTAX FIX: data: key
 window.simpanPermanen = async function() {
     if(indexAktif === null) return alert('Pilih kelas dulu!');
     const classId = dbKelas[indexAktif].id;
@@ -210,8 +194,8 @@ window.simpanPermanen = async function() {
     const siswa = dbKelas[indexAktif].siswa || [];
     const dataLama = dbNilaiFull[namaKelas]?.data || {};
     
-    // ✅ SYNTAX VALID - ada "" key:
-    let payload = { meta: { jumlahPH }, data  {} };
+    // ✅ SYNTAX VALID - ada "data:" key:
+    let payload = { meta: { jumlahPH }, data: {} };
 
     siswa.forEach((s, sIdx) => {
         const studentKey = s.id || s.nama || `siswa_${sIdx}`;
@@ -258,8 +242,8 @@ window.renderPenilaian = async function() {
     }
     
     try {
-        isDataSynced = false;  // ✅ Reset sync flag saat module dirender ulang
-        await syncData();      // ✅ Ini akan set userId + load classes
+        isDataSynced = false;
+        await syncData();
         container.innerHTML = window.getPenilaianTemplate();
         container.classList.remove('hidden');
         await initPenilaian();
@@ -292,7 +276,7 @@ window.aksiSimpanRow = async function(sIdx) {
         existing.data[studentKey] = { ...(existing.data[studentKey] || {}), ph: listPH, sts, sas };
         await penilaianStorage.saveGrades(classId, existing);
         // ✅ SYNTAX VALID:
-        if (!dbNilaiFull[namaKelas]) dbNilaiFull[namaKelas] = { meta: { jumlahPH }, data {} };
+        if (!dbNilaiFull[namaKelas]) dbNilaiFull[namaKelas] = { meta: { jumlahPH }, data: {} };
         dbNilaiFull[namaKelas].data[studentKey] = { ph: listPH, sts, sas };
         showToast(`✅ ${siswa.nama} disimpan`, 'success');
     } catch (e) { showToast('❌ ' + e.message, 'error'); }
@@ -320,7 +304,7 @@ window.aksiSimpanSikapRow = async function(sIdx) {
         existing.data[studentKey] = { ...(existing.data[studentKey] || {}), sikap, catatan };
         await penilaianStorage.saveGrades(classId, existing);
         // ✅ SYNTAX VALID:
-        if (!dbNilaiFull[namaKelas]) dbNilaiFull[namaKelas] = { meta: { jumlahPH }, data  {} };
+        if (!dbNilaiFull[namaKelas]) dbNilaiFull[namaKelas] = { meta: { jumlahPH }, data: {} };
         dbNilaiFull[namaKelas].data[studentKey] = { ...(dbNilaiFull[namaKelas].data[studentKey] || {}), sikap, catatan };
         showToast(`✅ ${siswa.nama} disimpan`, 'success');
     } catch (e) { showToast('❌ ' + e.message, 'error'); }
@@ -362,4 +346,4 @@ function showToast(message, type = 'info') {
     setTimeout(() => { toast.style.opacity='0'; setTimeout(() => toast.remove(), 300); }, 3000);
 }
 
-console.log('🟢 [Penilaian] FINAL - All syntax validated + Mobile scroll + Data sync fix');
+console.log('🟢 [Penilaian] FINAL - All syntax validated + Mobile scroll fix');
