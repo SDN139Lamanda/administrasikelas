@@ -320,7 +320,7 @@ window.aksiSimpanSikapRow = async function(sIdx) {
         existing.data[studentKey] = { ...(existing.data[studentKey] || {}), sikap, catatan };
         await penilaianStorage.saveGrades(classId, existing);
         // ✅ SYNTAX VALID:
-        if (!dbNilaiFull[namaKelas]) dbNilaiFull[namaKelas] = { meta: { jumlahPH },  {} };
+        if (!dbNilaiFull[namaKelas]) dbNilaiFull[namaKelas] = { meta: { jumlahPH }, data  {} };
         dbNilaiFull[namaKelas].data[studentKey] = { ...(dbNilaiFull[namaKelas].data[studentKey] || {}), sikap, catatan };
         showToast(`✅ ${siswa.nama} disimpan`, 'success');
     } catch (e) { showToast('❌ ' + e.message, 'error'); }
