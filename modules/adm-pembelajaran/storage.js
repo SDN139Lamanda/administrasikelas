@@ -1,6 +1,6 @@
 /**
- * STORAGE: Firebase Only (Adm.Pembelajaran)
- * Shared storage for Section 1, Section 2, Section 3
+ * STORAGE: Firebase Only (Clean Architecture)
+ * ✅ Added: autoSaveFromExternal + getSourceLabel for integration
  */
 
 import * as fb from '../firebase-config.js';
@@ -17,129 +17,124 @@ export const storage = {
   setUserId: function(uid) {
     if (uid && typeof uid === 'string' && uid.length > 0) {
       this.userId = uid;
-      console.log('🔧 [Storage-Pembelajaran] userId set:', uid.substring(0, 10) + '...');
+      console.log('🔧 [Storage] userId set:', uid.substring(0, 10) + '...');
     } else {
       this.userId = null;
-      console.warn('⚠️ [Storage-Pembelajaran] userId set to null (invalid)');
+      console.warn('⚠️ [Storage] userId set to null (invalid)');
     }
   },
   
   loadDokumen: async function() {
     if (!isFirebaseMode(this.userId)) return [];
     try {
-      const q = fb.query(
-        fb.collection(fb.db, 'pembelajaran'),
-        fb.where('userId', '==', this.userId),
-        fb.orderBy('createdAt', 'desc')
-      );
+      const q = fb.query(fb.collection(fb.db, 'dokumen'), fb.where('userId', '==', this.userId));
       const snapshot = await fb.getDocs(q, { source: 'server' });
-      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      return snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
     } catch (e) {
-      console.error('❌ [Storage-Pembelajaran] loadDokumen error:', e.message);
+      console.error('❌ [Storage] loadDokumen error:', e.message);
       return [];
     }
   },
   
-  loadDokumenByJenis: async function(jenis) {
-    if (!isFirebaseMode(this.userId)) return [];
+  getDokumenById: async function(docId) {
+    if (!isFirebaseMode(this.userId)) return null;
     try {
-      const q = fb.query(
-        fb.collection(fb.db, 'pembelajaran'),
-        fb.where('userId', '==', this.userId),
-        fb.where('jenis', '==', jenis),
-        fb.orderBy('createdAt', 'desc')
-      );
-      const snapshot = await fb.getDocs(q, { source: 'server' });
-      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const ref = fb.doc(fb.db, 'dokumen', docId);
+      const snap = await fb.getDoc(ref);
+      if (snap.exists() && snap.data().userId === this.userId) {
+        return { id: snap.id, ...snap.data() };
+      }
+      return null;
     } catch (e) {
-      console.error('❌ [Storage-Pembelajaran] loadDokumenByJenis error:', e.message);
-      return [];
+      console.error('❌ [Storage] getDokumenById error:', e.message);
+      return null;
     }
   },
   
   saveDokumen: async function(docData) {
     if (!isFirebaseMode(this.userId)) throw new Error('saveDokumen: userId not set');
-    if (!docData?.judul?.trim()) throw new Error('saveDokumen: judul is required');
-    if (!docData?.jenis) throw new Error('saveDokumen: jenis is required');
-    
     try {
-      const newDoc = {
+      const { db, doc: docRef, setDoc, serverTimestamp } = await import('../firebase-config.js');
+      
+      const id = docData.id || `doc_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const ref = docRef(db, 'dokumen', id);
+      
+      const payload = {
+        ...docData,
         userId: this.userId,
-        jenis: docData.jenis,
-        jenjang: docData.jenjang || '',
-        kelas: docData.kelas || '',
-        mapel: docData.mapel || '',
-        judul: docData.judul.trim(),
-        konten: docData.konten || '',
-        tags: docData.tags || [],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: serverTimestamp(),
+        createdAt: docData.createdAt || serverTimestamp()
       };
       
-      const colRef = fb.collection(fb.db, 'pembelajaran');
-      const docRef = await fb.addDoc(colRef, newDoc);
-      console.log('✅ [Storage-Pembelajaran] saveDokumen:', docRef.id);
-      return { id: docRef.id, ...newDoc };
+      await setDoc(ref, payload, { merge: true });
+      console.log('✅ [Storage] saveDokumen:', id);
+      return { id, ...payload };
     } catch (e) {
-      console.error('❌ [Storage-Pembelajaran] saveDokumen error:', e.message);
-      throw e;
-    }
-  },
-  
-  updateDokumen: async function(docId, updates) {
-    if (!isFirebaseMode(this.userId)) throw new Error('updateDokumen: userId not set');
-    if (!docId) throw new Error('updateDokumen: docId is required');
-    
-    try {
-      const docRef = fb.doc(fb.db, 'pembelajaran', docId);
-      await fb.updateDoc(docRef, { ...updates, userId: this.userId, updatedAt: new Date().toISOString() });
-      console.log('✅ [Storage-Pembelajaran] updateDokumen:', docId);
-      return { id: docId, ...updates };
-    } catch (e) {
-      console.error('❌ [Storage-Pembelajaran] updateDokumen error:', e.message);
+      console.error('❌ [Storage] saveDokumen error:', e.message);
       throw e;
     }
   },
   
   deleteDokumen: async function(docId) {
     if (!isFirebaseMode(this.userId)) throw new Error('deleteDokumen: userId not set');
-    if (!docId) throw new Error('deleteDokumen: docId is required');
-    
     try {
-      const docRef = fb.doc(fb.db, 'pembelajaran', docId);
-      const docSnap = await fb.getDoc(docRef);
-      if (docSnap.exists()) {
-        const docData = docSnap.data();
-        if (docData.userId && docData.userId !== this.userId) {
-          throw new Error(`Permission denied`);
-        }
+      const { db, doc: docRef, deleteDoc, getDoc } = await import('../firebase-config.js');
+      
+      const ref = docRef(db, 'dokumen', docId);
+      const snap = await getDoc(ref);
+      
+      if (snap.exists() && snap.data().userId !== this.userId) {
+        throw new Error('Permission denied: document not owned by user');
       }
-      await fb.deleteDoc(docRef);
-      console.log('✅ [Storage-Pembelajaran] deleteDokumen:', docId);
+      
+      await deleteDoc(ref);
+      console.log('✅ [Storage] deleteDokumen:', docId);
+      return true;
     } catch (e) {
-      console.error('❌ [Storage-Pembelajaran] deleteDokumen error:', e.message);
+      console.error('❌ [Storage] deleteDokumen error:', e.message);
       throw e;
     }
   },
   
-  getDokumenById: async function(docId) {
-    if (!docId) throw new Error('getDokumenById: docId is required');
+  // ✅ NEW: Auto-save from external modules (cta-generator, asisten-modul)
+  autoSaveFromExternal: async function(moduleName, docData) {
+    if (!isFirebaseMode(this.userId)) throw new Error('autoSave: userId not set');
     try {
-      const docRef = fb.doc(fb.db, 'pembelajaran', docId);
-      const docSnap = await fb.getDoc(docRef);
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        if (data.userId && data.userId !== this.userId) {
-          throw new Error('Permission denied');
-        }
-        return { id: docSnap.id, ...data };
-      }
-      return null;
+      const { db, doc: docRef, setDoc, serverTimestamp } = await import('../firebase-config.js');
+      
+      const id = docData.id || `doc_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const ref = docRef(db, 'dokumen', id);
+      
+      const payload = {
+        ...docData,
+        userId: this.userId,
+        source: moduleName, // 'cta-generator' | 'asisten-modul'
+        updatedAt: serverTimestamp(),
+        createdAt: docData.createdAt || serverTimestamp()
+      };
+      
+      await setDoc(ref, payload, { merge: true });
+      console.log(`✅ [Storage] Auto-saved from ${moduleName}:`, id);
+      return { id, ...payload };
     } catch (e) {
-      console.error('❌ [Storage-Pembelajaran] getDokumenById error:', e.message);
+      console.error(`❌ [Storage] autoSaveFromExternal error:`, e);
       throw e;
     }
   }
 };
 
-console.log('✅ [Storage-Pembelajaran] Loaded - Firebase Only (Shared)');
+// ✅ NEW: Get human-readable label for document source
+export function getSourceLabel(source) {
+  const labels = {
+    'cta-generator': '📝 CTA',
+    'asisten-modul': '🤖 AI',
+    'manual': '✏️ Manual',
+    'penilaian-auto': '📊 Auto'
+  };
+  return labels[source] || '✏️';
+}
+
+console.log('✅ [Storage] Loaded - Firebase Only + Auto-Save Integration');
