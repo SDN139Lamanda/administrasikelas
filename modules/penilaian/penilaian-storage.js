@@ -1,45 +1,74 @@
 /**
- * PENILAIAN STORAGE MODULE
- * ✅ Browser-compatible import via firebase-config.js re-exports
- * ✅ FIX: Correct object syntax for return values
+ * PENILAIAN STORAGE - Reuse adm-kelas storage for consistency
+ * ✅ No duplicate Firebase config - use shared storage.js
  */
 
-// ✅ FIX: Semua import dari firebase-config.js (relative path)
-import { db, doc, setDoc, getDoc } from '../firebase-config.js';
+import { storage as admStorage } from '../adm-kelas/storage.js';
 
 export const penilaianStorage = {
-  // Load semua nilai untuk kelas tertentu
-  async loadGrades(classId) {
+  /**
+   * Load grades for a class
+   * Collection: 'penilaian' (separate from 'classes')
+   * Structure: { meta: { jumlahPH },  { studentKey: { ph, sts, sas, sikap, catatan } } }
+   */
+  loadGrades: async function(classId) {
     try {
-      const ref = doc(db, "grades", classId);
-      const snap = await getDoc(ref);
-      if (snap.exists()) {
-        console.log("📊 [PenilaianStorage] Grades loaded:", classId);
-        return snap.data();
-      } else {
-        console.warn("⚠️ [PenilaianStorage] No grades found for:", classId);
-        // ✅ FIX: Tambah key "data:" sebelum {}
-        return { meta: { jumlahPH: 1 }, data: {} };
+      // Use adm-kelas storage pattern: set userId first
+      const { auth } = await import('../firebase-config.js');
+      admStorage.setUserId(auth.currentUser?.uid || null);
+      
+      // Query 'penilaian' collection
+      const { db, collection, query, where, getDocs } = await import('../firebase-config.js');
+      const q = query(
+        collection(db, 'penilaian'),
+        where('classId', '==', classId),
+        where('userId', '==', auth.currentUser?.uid)
+      );
+      
+      const snapshot = await getDocs(q, { source: 'server' });
+      
+      if (!snapshot.empty) {
+        const doc = snapshot.docs[0];
+        return doc.data();
       }
+      
+      // Return empty structure if not found
+      return { meta: { jumlahPH: 1 },  {} };
+      
     } catch (e) {
-      console.error("❌ [PenilaianStorage] loadGrades error:", e.message);
-      // ✅ FIX: Tambah key "data:" sebelum {}
-      return { meta: { jumlahPH: 1 }, data: {} };
+      console.error('❌ [PenilaianStorage] loadGrades error:', e);
+      return { meta: { jumlahPH: 1 },  {} };
     }
   },
-
-  // Simpan nilai untuk kelas tertentu
-  async saveGrades(classId, payload) {
+  
+  /**
+   * Save grades for a class
+   * Auto-merge with existing data
+   */
+  saveGrades: async function(classId, payload) {
     try {
-      const ref = doc(db, "grades", classId);
-      await setDoc(ref, payload, { merge: true });
-      console.log("✅ [PenilaianStorage] Grades saved:", classId);
+      const { auth, db, doc: docRef, setDoc, serverTimestamp } = await import('../firebase-config.js');
+      
+      // Set userId for adm-storage consistency
+      admStorage.setUserId(auth.currentUser?.uid || null);
+      
+      const ref = docRef(db, 'penilaian', classId);
+      
+      await setDoc(ref, {
+        ...payload,
+        classId,
+        userId: auth.currentUser?.uid,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+      
+      console.log('✅ [PenilaianStorage] Grades saved:', classId);
       return true;
+      
     } catch (e) {
-      console.error("❌ [PenilaianStorage] saveGrades error:", e.message);
+      console.error('❌ [PenilaianStorage] saveGrades error:', e);
       throw e;
     }
   }
 };
 
-console.log('✅ [PenilaianStorage] Loaded - Browser Compatible');
+console.log('✅ [PenilaianStorage] Loaded - Reuses adm-kelas storage pattern');
