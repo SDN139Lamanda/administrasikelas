@@ -211,7 +211,7 @@ window.simpanPermanen = async function() {
     const dataLama = dbNilaiFull[namaKelas]?.data || {};
     
     // ✅ SYNTAX VALID - ada "" key:
-    let payload = { meta: { jumlahPH },  {} };
+    let payload = { meta: { jumlahPH }, data  {} };
 
     siswa.forEach((s, sIdx) => {
         const studentKey = s.id || s.nama || `siswa_${sIdx}`;
