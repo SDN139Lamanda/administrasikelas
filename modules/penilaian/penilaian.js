@@ -1,8 +1,8 @@
-
 /**
  * PENILAIAN MODULE - INTEGRATED WITH ADM. KELAS
  * ✅ All syntax validated - no unexpected tokens
  * ✅ All HTML-callable functions exposed to window
+ * ✅ Mobile layout: normal scroll (nama ikut bergeser)
  */
 
 import { storage } from '../adm-kelas/storage.js';
@@ -97,13 +97,14 @@ function renderTabel() {
     if(viewAktif === 'pengetahuan') {
         let headPH = "";
         for(let i=1; i<=jumlahPH; i++) headPH += `<th class="px-4 py-2 text-center bg-blue-50/30 min-w-[80px]">PH ${i}</th>`;
+        // ✅ UPDATE: Hapus sticky-col, tambah border separator
         head.innerHTML = `<tr>
-            <th class="px-8 py-4 sticky-col min-w-[250px] bg-white">Identitas Siswa</th>
+            <th class="px-8 py-4 min-w-[200px] bg-white border-r border-slate-200">Identitas Siswa</th>
             ${headPH}
-            <th class="px-6 py-4 text-center bg-amber-50/30 min-w-[100px]">STS</th>
-            <th class="px-6 py-4 text-center bg-emerald-50/30 min-w-[100px]">SAS</th>
-            <th class="px-6 py-4 text-center bg-slate-900 text-white">NA</th>
-            <th class="px-4 py-4 text-center bg-slate-100 min-w-[120px]">Aksi</th>
+            <th class="px-6 py-4 text-center bg-amber-50/30 min-w-[80px] border-l border-slate-200">STS</th>
+            <th class="px-6 py-4 text-center bg-emerald-50/30 min-w-[80px]">SAS</th>
+            <th class="px-6 py-4 text-center bg-slate-900 text-white min-w-[80px]">NA</th>
+            <th class="px-4 py-4 text-center bg-slate-100 min-w-[100px] border-l border-slate-200">Aksi</th>
         </tr>`;
         
         siswa.forEach((s, sIdx) => {
@@ -113,13 +114,14 @@ function renderTabel() {
             for(let i=0; i<jumlahPH; i++) {
                 rowPH += `<td class="px-2 py-2"><input type="number" id="ph_${sIdx}_${i}" value="${sVal.ph[i] || 0}" oninput="window.hitungNA(${sIdx})" class="w-full bg-slate-50 border border-slate-200 p-2 rounded text-center"></td>`;
             }
+            // ✅ UPDATE: Hapus sticky-col, tambah border separator
             body.innerHTML += `<tr class="hover:bg-slate-50/50" data-student-id="${studentKey}">
-                <td class="px-8 py-3 sticky-col font-medium text-slate-800 bg-white">${s.nama || 'Siswa ' + (sIdx+1)}</td>
+                <td class="px-8 py-3 font-medium text-slate-800 bg-white border-r border-slate-200">${s.nama || 'Siswa ' + (sIdx+1)}</td>
                 ${rowPH}
-                <td class="px-4 py-3"><input type="number" id="sts_${sIdx}" value="${sVal.sts || 0}" oninput="window.hitungNA(${sIdx})" class="w-16 mx-auto block bg-white border border-amber-200 p-2 rounded text-center"></td>
+                <td class="px-4 py-3 border-l border-slate-200"><input type="number" id="sts_${sIdx}" value="${sVal.sts || 0}" oninput="window.hitungNA(${sIdx})" class="w-16 mx-auto block bg-white border border-amber-200 p-2 rounded text-center"></td>
                 <td class="px-4 py-3"><input type="number" id="sas_${sIdx}" value="${sVal.sas || 0}" oninput="window.hitungNA(${sIdx})" class="w-16 mx-auto block bg-white border border-emerald-200 p-2 rounded text-center"></td>
-                <td class="px-6 py-3 text-center font-bold" id="na_${sIdx}">0</td>
-                <td class="px-4 py-3 text-center">
+                <td class="px-6 py-3 text-center font-bold border-l border-slate-200" id="na_${sIdx}">0</td>
+                <td class="px-4 py-3 text-center border-l border-slate-200">
                     <div class="flex items-center justify-center gap-1">
                         <button onclick="window.aksiSimpanRow(${sIdx})" class="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded transition" title="Simpan"><i class="fas fa-save text-sm"></i></button>
                         <button onclick="window.aksiEditRow(${sIdx})" class="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition" title="Edit"><i class="fas fa-edit text-sm"></i></button>
@@ -130,18 +132,20 @@ function renderTabel() {
             window.hitungNA(sIdx);
         });
     } else {
+        // ✅ UPDATE: Hapus sticky-col, tambah border separator
         head.innerHTML = `<tr>
-            <th class="px-8 py-4 sticky-col min-w-[250px] bg-white">Identitas Siswa</th>
+            <th class="px-8 py-4 min-w-[200px] bg-white border-r border-slate-200">Identitas Siswa</th>
             <th class="px-8 py-4 text-center bg-purple-50 text-purple-600 min-w-[150px]">Predikat</th>
             <th class="px-8 py-4 text-left bg-slate-50 min-w-[400px]">Catatan</th>
-            <th class="px-4 py-4 text-center bg-slate-100 min-w-[120px]">Aksi</th>
+            <th class="px-4 py-4 text-center bg-slate-100 min-w-[120px] border-l border-slate-200">Aksi</th>
         </tr>`;
         
         siswa.forEach((s, sIdx) => {
             const studentKey = s.id || s.nama || `siswa_${sIdx}`;
             const sVal = savedData[studentKey] || { sikap: 'B', catatan: '' };
+            // ✅ UPDATE: Hapus sticky-col, tambah border separator
             body.innerHTML += `<tr class="hover:bg-slate-50/50" data-student-id="${studentKey}">
-                <td class="px-8 py-4 sticky-col font-medium text-slate-800 bg-white">${s.nama || 'Siswa ' + (sIdx+1)}</td>
+                <td class="px-8 py-4 font-medium text-slate-800 bg-white border-r border-slate-200">${s.nama || 'Siswa ' + (sIdx+1)}</td>
                 <td class="px-8 py-4 text-center">
                     <select id="sikap_${sIdx}" class="bg-white border-2 border-purple-200 px-3 py-2 rounded-lg">
                         <option value="A" ${sVal.sikap==='A'?'selected':''}>A</option>
@@ -151,7 +155,7 @@ function renderTabel() {
                     </select>
                 </td>
                 <td class="px-8 py-4"><textarea id="catatan_${sIdx}" class="w-full bg-slate-50 border p-2 rounded" rows="2">${sVal.catatan || ''}</textarea></td>
-                <td class="px-4 py-4 text-center">
+                <td class="px-4 py-4 text-center border-l border-slate-200">
                     <div class="flex items-center justify-center gap-1">
                         <button onclick="window.aksiSimpanSikapRow(${sIdx})" class="p-1.5 text-emerald-600"><i class="fas fa-save text-sm"></i></button>
                         <button onclick="window.aksiEditSikapRow(${sIdx})" class="p-1.5 text-blue-600"><i class="fas fa-edit text-sm"></i></button>
@@ -342,4 +346,4 @@ function showToast(message, type = 'info') {
     setTimeout(() => { toast.style.opacity='0'; setTimeout(() => toast.remove(), 300); }, 3000);
 }
 
-console.log('🟢 [Penilaian] FINAL - All syntax validated');
+console.log('🟢 [Penilaian] FINAL - All syntax validated + Mobile scroll fix');
