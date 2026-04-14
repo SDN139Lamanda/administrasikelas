@@ -4,6 +4,83 @@
     
     window.getPenilaianTemplate = function() {
         return `
+        <style>
+            /* ✅ TABLE WRAPPER - Normal horizontal scroll untuk semua device */
+            .tabel-wrapper {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch; /* Smooth scroll iOS */
+                border-radius: 1.5rem;
+                border: 1px solid #e2e8f0;
+                scrollbar-width: thin;
+                scrollbar-color: #cbd5e1 #f1f5f9;
+            }
+            
+            /* ✅ TABLE - Semua kolom scroll bersama (NORMAL BEHAVIOR) */
+            #tabelUtama {
+                min-width: 100%;
+                border-collapse: collapse;
+                width: 100%;
+                table-layout: auto;
+            }
+            
+            /* ✅ CELL STYLING - Border separator untuk visual clarity */
+            #tabelUtama th, #tabelUtama td {
+                border-right: 1px solid #f1f5f9;
+            }
+            #tabelUtama th:last-child, #tabelUtama td:last-child {
+                border-right: none;
+            }
+            
+            /* ✅ MOBILE OPTIMIZATION */
+            @media (max-width: 768px) {
+                .tabel-wrapper {
+                    border-radius: 1rem;
+                    font-size: 12px;
+                }
+                
+                /* Perkecil padding cell di mobile */
+                #tabelUtama th, #tabelUtama td {
+                    padding: 6px 4px !important;
+                    white-space: nowrap;
+                }
+                
+                /* Perkecil input di mobile */
+                #tabelUtama input, #tabelUtama select, #tabelUtama textarea {
+                    min-width: 40px;
+                    padding: 4px 2px;
+                    font-size: 11px;
+                    text-align: center;
+                }
+                
+                /* Nama siswa tetap readable di mobile */
+                #tabelUtama td:first-child {
+                    min-width: 120px;
+                    font-weight: 600;
+                }
+                
+                /* Kolom aksi compact di mobile */
+                #tabelUtama td:last-child {
+                    min-width: 80px;
+                }
+            }
+            
+            /* ✅ SCROLLBAR CUSTOM - Estetik & functional */
+            .tabel-wrapper::-webkit-scrollbar {
+                height: 6px;
+            }
+            .tabel-wrapper::-webkit-scrollbar-track {
+                background: #f1f5f9;
+                border-radius: 3px;
+            }
+            .tabel-wrapper::-webkit-scrollbar-thumb {
+                background: #cbd5e1;
+                border-radius: 3px;
+            }
+            .tabel-wrapper::-webkit-scrollbar-thumb:hover {
+                background: #94a3b8;
+            }
+        </style>
+        
         <div class="penilaian-container min-h-screen flex flex-col md:flex-row bg-slate-50">
             <!-- Sidebar -->
             <aside class="w-full md:w-72 sidebar-gradient text-slate-300 p-8 shadow-2xl z-20">
@@ -54,8 +131,8 @@
                 </div>
 
                 <!-- Table -->
-                <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-200 overflow-hidden">
-                    <div class="overflow-x-auto">
+                <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-200">
+                    <div class="tabel-wrapper">
                         <table id="tabelUtama" class="w-full text-left border-collapse">
                             <thead id="tabelHead" class="bg-slate-50 text-slate-400 text-[10px] font-bold uppercase tracking-widest border-b">
                             </thead>
