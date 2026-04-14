@@ -4,7 +4,7 @@
  */
 
 // ✅ Import getSourceLabel from storage
-import { getSourceLabel } from './storage.js';
+import { getSourceLabel } from '../storage.js';
 
 export function getMainTemplate() {
   return `
