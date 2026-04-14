@@ -420,7 +420,8 @@ async function handleGenerate() {
         metadata: { sekolah, tahun, guru, semester }
       };
       
-      await storage.saveDokumen(docData);
+      // ✅ FIX: Use autoSaveFromExternal for consistency with new storage architecture
+      await storage.autoSaveFromExternal('cta-generator', docData);
       console.log('✅ [CTA Generator] Auto-save to Adm.Pembelajaran successful');
       
       // Show non-blocking notification
@@ -516,8 +517,8 @@ export async function autoSaveCTA(generatedContent, metadata) {
       createdAt: new Date().toISOString()
     };
     
-    // Save to Firestore
-    const savedDoc = await storage.saveDokumen(docData);
+    // ✅ FIX: Use autoSaveFromExternal for consistency with new storage architecture
+    const savedDoc = await storage.autoSaveFromExternal('cta-generator', docData);
     
     console.log('✅ [CTA Generator] Auto-save successful:', savedDoc.id);
     
