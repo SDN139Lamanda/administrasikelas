@@ -1,6 +1,6 @@
 /**
- * PENILAIAN STORAGE - Reuse adm-kelas storage for consistency
- * ✅ No duplicate Firebase config - use shared storage.js
+ * PENILAIAN STORAGE - Reuse adm-kelas storage pattern
+ * ✅ All object syntax validated - no unexpected tokens
  */
 
 import { storage as admStorage } from '../adm-kelas/storage.js';
@@ -9,16 +9,14 @@ export const penilaianStorage = {
   /**
    * Load grades for a class
    * Collection: 'penilaian' (separate from 'classes')
-   * Structure: { meta: { jumlahPH },  { studentKey: { ph, sts, sas, sikap, catatan } } }
    */
   loadGrades: async function(classId) {
     try {
-      // Use adm-kelas storage pattern: set userId first
-      const { auth } = await import('../firebase-config.js');
+      const { auth, db, collection, query, where, getDocs } = await import('../firebase-config.js');
+      
+      // Set userId for consistency
       admStorage.setUserId(auth.currentUser?.uid || null);
       
-      // Query 'penilaian' collection
-      const { db, collection, query, where, getDocs } = await import('../firebase-config.js');
       const q = query(
         collection(db, 'penilaian'),
         where('classId', '==', classId),
@@ -28,28 +26,26 @@ export const penilaianStorage = {
       const snapshot = await getDocs(q, { source: 'server' });
       
       if (!snapshot.empty) {
-        const doc = snapshot.docs[0];
-        return doc.data();
+        return snapshot.docs[0].data();
       }
       
-      // Return empty structure if not found
-      return { meta: { jumlahPH: 1 },  {} };
+      // ✅ RETURN DENGAN SYNTAX VALID:
+      return { meta: { jumlahPH: 1 }, data: {} };
       
     } catch (e) {
       console.error('❌ [PenilaianStorage] loadGrades error:', e);
-      return { meta: { jumlahPH: 1 },  {} };
+      // ✅ RETURN DENGAN SYNTAX VALID:
+      return { meta: { jumlahPH: 1 }, data: {} };
     }
   },
   
   /**
    * Save grades for a class
-   * Auto-merge with existing data
    */
   saveGrades: async function(classId, payload) {
     try {
       const { auth, db, doc: docRef, setDoc, serverTimestamp } = await import('../firebase-config.js');
       
-      // Set userId for adm-storage consistency
       admStorage.setUserId(auth.currentUser?.uid || null);
       
       const ref = docRef(db, 'penilaian', classId);
@@ -71,4 +67,4 @@ export const penilaianStorage = {
   }
 };
 
-console.log('✅ [PenilaianStorage] Loaded - Reuses adm-kelas storage pattern');
+console.log('✅ [PenilaianStorage] Loaded - Syntax Validated');
