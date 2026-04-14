@@ -435,7 +435,7 @@
                     await window.renderAdmPembelajaran();
                 } else {
                     console.warn('⚠️ [Dashboard] renderAdmPembelajaran not ready, trying dynamic import...');
-                    await import('./modules/adm-pembelajaran/section1/adm-pembelajaran.js');
+                    await import('./modules/adm-pembelajaran/adm-pembelajaran.js');
                     if (typeof window.renderAdmPembelajaran === 'function') {
                         await window.renderAdmPembelajaran();
                     } else {
