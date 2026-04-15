@@ -1,7 +1,7 @@
 /**
  * ============================================
  * DASHBOARD LOGIC - Platform Administrasi Kelas
- * VERSI: BULLETPROOF + GRANULAR VISIBILITY + LOGOUT FIX
+ * VERSI: BULLETPROOF + GRANULAR VISIBILITY + LOGOUT FIX + APPROVAL CHECK
  * ============================================
  */
 
@@ -16,6 +16,13 @@ window.showSection = function(sectionId) {
     console.log('📂 [Dashboard] showSection DIPANGGIL:', sectionId);
     
     try {
+        // ✅ BLOCK if user not approved
+        if (window.currentUserIsApproved === false) {
+            console.log('🔒 [Dashboard] User pending, blocking section access');
+            alert('⏳ Akun Anda masih menunggu persetujuan admin.\n\nFitur belum dapat diakses.');
+            return;
+        }
+        
         // Hide welcome hero section
         const welcomeSection = document.querySelector('.dashboard-hero');
         if (welcomeSection) {
@@ -134,11 +141,12 @@ window.logout = async function() {
     }
 };
 
-// ✅ NEW FUNCTION: Filter class cards by user's assigned kelas
+// ✅ UPDATED FUNCTION: Filter class cards by user's assigned kelas (with array handling)
 window.initKelasCards = function(jenjang) {
     console.log('🔍 [Dashboard] initKelasCards() called for:', jenjang);
     
-    const userKelas = window.currentUserKelas;
+    // ✅ Ensure array (fallback to empty array)
+    const userKelas = Array.isArray(window.currentUserKelas) ? window.currentUserKelas : [];
     
     // If no restriction, show all classes
     if (!userKelas || userKelas.length === 0) {
@@ -184,6 +192,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     // ✅ Wait a bit more for data to propagate
     await new Promise(resolve => setTimeout(resolve, 300));
     
+    // ✅ BLOCK dashboard if user not approved
+    if (window.currentUserIsApproved === false) {
+        console.log('🔒 [Dashboard] User pending approval, blocking dashboard');
+        // Show pending message in UI
+        const userContext = document.getElementById('userContextText');
+        if (userContext) {
+            userContext.innerHTML = `<span class="text-yellow-600">⏳ Menunggu approval...</span>`;
+        }
+        // Disable all room cards
+        document.querySelectorAll('.room-card').forEach(card => {
+            card.style.opacity = '0.5';
+            card.style.pointerEvents = 'none';
+            card.title = 'Fitur terkunci - menunggu persetujuan admin';
+        });
+        return;
+    }
+    
     // Initialize room card visibility
     await initRoomCards();
     
@@ -225,26 +250,40 @@ async function checkAuthStatus() {
                         
                         if (userDoc.exists()) {
                             const userData = userDoc.data();
+                            
+                            // ✅ FIX: Match field names with Firestore schema (from register.html)
                             window.currentUserRole = userData.role || 'guru';
-                            window.currentUserJenjang = userData.jenjang || null;
-                            window.currentUserKelas = userData.kelas || null;
+                            window.currentUserJenjang = userData.jenjang_sekolah || null;  // ✅ Fixed: was 'jenjang'
+                            window.currentUserKelas = userData.kelas_diampu || [];          // ✅ Fixed: was 'kelas', now array
+                            window.currentUserMapel = userData.mapel_diampu || [];          // ✅ New: array of mapel
+                            window.currentUserSdMapelType = userData.sd_mapel_type || 'kelas'; // ✅ New: for SD teacher type
+                            window.currentUserIsApproved = userData.isApproved === true;    // ✅ New: approval status
+                            
                             console.log('✅ [Dashboard] User profile loaded:', { 
                                 role: window.currentUserRole, 
                                 jenjang: window.currentUserJenjang, 
-                                kelas: window.currentUserKelas 
+                                kelas: window.currentUserKelas,
+                                mapel: window.currentUserMapel,
+                                isApproved: window.currentUserIsApproved
                             });
                         } else {
                             console.warn('⚠️ [Dashboard] User doc NOT FOUND in Firestore!');
                             console.log('🔍 Expected Document ID:', user.uid);
                             window.currentUserRole = 'guru';
                             window.currentUserJenjang = null;
-                            window.currentUserKelas = null;
+                            window.currentUserKelas = [];
+                            window.currentUserMapel = [];
+                            window.currentUserSdMapelType = 'kelas';
+                            window.currentUserIsApproved = false;
                         }
                     } catch (e) {
                         console.error('❌ [Dashboard] Failed to fetch user profile:', e);
                         window.currentUserRole = 'guru';
                         window.currentUserJenjang = null;
-                        window.currentUserKelas = null;
+                        window.currentUserKelas = [];
+                        window.currentUserMapel = [];
+                        window.currentUserSdMapelType = 'kelas';
+                        window.currentUserIsApproved = false;
                     }
                     
                     // ✅ Resolve promise after data loaded
@@ -266,6 +305,13 @@ async function checkAuthStatus() {
         console.error('❌ [Dashboard] Auth check error:', error);
         document.getElementById('userEmail').textContent = 'Guest';
         document.getElementById('userContextText').textContent = 'Loading...';
+        // Set defaults to avoid errors
+        window.currentUserRole = 'guru';
+        window.currentUserJenjang = null;
+        window.currentUserKelas = [];
+        window.currentUserMapel = [];
+        window.currentUserSdMapelType = 'kelas';
+        window.currentUserIsApproved = false;
     }
 }
 
@@ -283,12 +329,29 @@ async function initRoomCards() {
     const userRole = window.currentUserRole || 'guru';
     const userJenjang = window.currentUserJenjang || null;
     
-    console.log('🎯 [Dashboard] User data:', { role: userRole, jenjang: userJenjang, kelas: window.currentUserKelas });
+    console.log('🎯 [Dashboard] User data:', { 
+        role: userRole, 
+        jenjang: userJenjang, 
+        kelas: window.currentUserKelas,
+        isApproved: window.currentUserIsApproved
+    });
     
     // ✅ DEBUG: Check if data is null (means Firestore not loaded)
     if (window.currentUserRole === undefined) {
         console.error('❌ [Dashboard] User data NOT loaded! Check Firestore connection!');
         showAllRooms();
+        return;
+    }
+    
+    // ✅ BLOCK: If user not approved, don't show any feature rooms
+    if (window.currentUserIsApproved === false) {
+        console.log('🔒 [Dashboard] User pending, hiding all feature rooms');
+        document.querySelectorAll('.room-card').forEach(card => {
+            // Keep only "info" rooms visible, hide feature rooms
+            if (!card.classList.contains('room-info')) {
+                card.classList.add('hidden');
+            }
+        });
         return;
     }
     
@@ -328,7 +391,7 @@ function showRoomsByJenjang(jenjang) {
         console.log(`✅ [Dashboard] Shown: room-${jenjang}`);
     }
     
-    // ALWAYS show these rooms for all users:
+    // ALWAYS show these rooms for all APPROVED users:
     const alwaysVisible = ['adm-kelas', 'adm-pembelajaran', 'penilaian', 'refleksi', 'generator-modul'];
     alwaysVisible.forEach(feature => {
         const room = document.querySelector(`.room-${feature}`);
