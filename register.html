@@ -33,6 +33,7 @@
         .checkbox-group { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
         .checkbox-label { display: flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer; }
         .checkbox-label input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; }
+        .checkbox-label input[type="checkbox"]:disabled { opacity: 0.5; cursor: not-allowed; }
         .mapel-checkbox-group { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; max-height: 120px; overflow-y: auto; padding: 8px; border: 1px solid #e5e7eb; border-radius: 6px; background: #f9fafb; }
         .mapel-count { font-size: 11px; color: #6b7280; margin-top: 4px; text-align: right; }
         .mapel-count.warning { color: #f59e0b; }
@@ -85,8 +86,19 @@
             </div>
             <!-- ✅ CONDITIONAL FIELDS based on Jenjang -->
             <div id="conditionalFields" class="hidden mb-4">
-                <!-- 🟢 SD: Kelas 1-6 + Jenis Pengajaran + Mapel Multi-Select -->
+                <!-- 🟢 SD: Jenis Pengajaran → Kelas Diampu → Mapel -->
                 <div id="sdFields" class="hidden">
+                    <!-- ✅ JENIS PENGAJARAN DULUAN (baru menentukan validasi kelas) -->
+                    <div class="mb-4">
+                        <label for="sdMapelType" class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-book mr-2"></i>Jenis Pengajaran <span class="text-red-500">*</span></label>
+                        <select id="sdMapelType" class="register-input" required>
+                            <option value="">Pilih Jenis</option>
+                            <option value="kelas">Guru Kelas (semua mapel)</option>
+                            <option value="mapel">Guru Mapel Khusus</option>
+                        </select>
+                        <p class="text-xs text-gray-500 mt-1"><i class="fas fa-info-circle mr-1"></i>Pilih jenis pengajaran Anda</p>
+                    </div>
+                    <!-- ✅ KELAS DIAMPU (validasi tergantung sdMapelType) -->
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-users mr-2"></i>Kelas Diampu <span class="text-red-500">*</span></label>
                         <div class="checkbox-group">
@@ -98,15 +110,7 @@
                             <label class="checkbox-label"><input type="checkbox" name="kelasDiampu" value="6"><span>Kelas 6</span></label>
                         </div>
                         <p class="error-text" id="kelasError">Pilih minimal 1 kelas</p>
-                        <p class="text-xs text-gray-500 mt-1" id="sdKelasHint"><i class="fas fa-info-circle mr-1"></i>Guru Kelas: max 1 kelas | Guru Mapel: max 6 kelas</p>
-                    </div>
-                    <div class="mb-4">
-                        <label for="sdMapelType" class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-book mr-2"></i>Jenis Pengajaran <span class="text-red-500">*</span></label>
-                        <select id="sdMapelType" class="register-input" required>
-                            <option value="">Pilih Jenis</option>
-                            <option value="kelas">Guru Kelas (semua mapel)</option>
-                            <option value="mapel">Guru Mapel Khusus</option>
-                        </select>
+                        <p class="text-xs text-gray-500 mt-1" id="sdKelasHint"><i class="fas fa-info-circle mr-1"></i>Pilih jenis pengajaran dulu</p>
                     </div>
                     <!-- ✅ SD Mapel Multi-Select (hanya jika Guru Mapel) -->
                     <div id="sdMapelGroup" class="hidden mb-4">
@@ -237,7 +241,7 @@
             if (jenjang === 'sd') { 
                 conditionalFields.classList.remove('hidden'); 
                 sdFields.classList.remove('hidden'); 
-                document.getElementById('sdKelasHint').textContent = 'Guru Kelas: max 1 kelas | Guru Mapel: max 6 kelas';
+                document.getElementById('sdKelasHint').textContent = 'Pilih jenis pengajaran dulu';
             }
             else if (jenjang === 'smp') { 
                 conditionalFields.classList.remove('hidden'); 
@@ -253,17 +257,26 @@
             showFieldError(null, smaMapelError, false);
         });
         
-        // ✅ SD: Toggle mapel group based on sdMapelType
+        // ✅ SD: Toggle mapel group AND update kelas hint based on sdMapelType
         if (sdMapelType) {
             sdMapelType.addEventListener('change', function() {
                 if (this.value === 'mapel') {
                     sdMapelGroup.classList.remove('hidden');
                     document.getElementById('sdKelasHint').textContent = 'Guru Mapel: bisa pilih sampai 6 kelas';
-                } else {
+                    // Enable all kelas checkboxes for Guru Mapel
+                    document.querySelectorAll('input[name="kelasDiampu"]').forEach(cb => cb.disabled = false);
+                } else if (this.value === 'kelas') {
                     sdMapelGroup.classList.add('hidden');
                     document.querySelectorAll('input[name="sdMapel"]').forEach(cb => cb.checked = false);
                     updateMapelCount('sdFields', 'sdMapelCount', 4);
-                    document.getElementById('sdKelasHint').textContent = 'Guru Kelas: max 1 kelas | Guru Mapel: max 6 kelas';
+                    document.getElementById('sdKelasHint').textContent = 'Guru Kelas: hanya 1 kelas yang bisa dipilih';
+                    // Reset: uncheck all, then allow only 1 selection for Guru Kelas
+                    document.querySelectorAll('input[name="kelasDiampu"]').forEach(cb => {
+                        cb.checked = false;
+                        cb.disabled = false;
+                    });
+                } else {
+                    document.getElementById('sdKelasHint').textContent = 'Pilih jenis pengajaran dulu';
                 }
             });
         }
@@ -273,19 +286,30 @@
         document.querySelectorAll('input[name="smpMapel"]').forEach(cb => cb.addEventListener('change', () => updateMapelCount('smpFields', 'smpMapelCount', 2)));
         document.querySelectorAll('input[name="smaMapel"]').forEach(cb => cb.addEventListener('change', () => updateMapelCount('smaFields', 'smaMapelCount', 2)));
         
-        // Validate kelas checkboxes
+        // ✅ Validate kelas checkboxes with DYNAMIC rules based on sdMapelType
         document.querySelectorAll('input[name="kelasDiampu"]').forEach(cb => {
             cb.addEventListener('change', function() {
                 const jenjang = jenjangSelect.value;
                 const checked = document.querySelectorAll('input[name="kelasDiampu"]:checked');
                 const isVisible = !conditionalFields.classList.contains('hidden');
                 
-                // ✅ SD Guru Kelas: max 1 kelas
-                if (jenjang === 'sd' && sdMapelType?.value === 'kelas' && checked.length > 1) {
-                    this.checked = false;
-                    showMessage('⚠️ Guru Kelas SD hanya bisa memilih 1 kelas', 'warning');
+                // ✅ SD Guru Kelas: max 1 kelas (auto-lock others)
+                if (jenjang === 'sd' && sdMapelType?.value === 'kelas') {
+                    if (checked.length > 1) {
+                        // Uncheck the one that was just checked (keep the first one)
+                        this.checked = false;
+                        showMessage('⚠️ Guru Kelas SD hanya bisa memilih 1 kelas', 'warning');
+                    }
+                    // Optional: auto-disable other checkboxes after 1 is selected
+                    if (checked.length === 1) {
+                        document.querySelectorAll('input[name="kelasDiampu"]').forEach(box => {
+                            if (!box.checked) box.disabled = true;
+                        });
+                    } else {
+                        document.querySelectorAll('input[name="kelasDiampu"]').forEach(box => box.disabled = false);
+                    }
                 }
-                // ✅ SD Guru Mapel: max 6 kelas
+                // ✅ SD Guru Mapel: max 6 kelas (all available)
                 if (jenjang === 'sd' && sdMapelType?.value === 'mapel' && checked.length > 6) {
                     this.checked = false;
                     showMessage('⚠️ Guru Mapel SD maksimal 6 kelas', 'warning');
