@@ -1,4 +1,3 @@
-
 /**
  * MODULE: ADM. PEMBELAJARAN (Main Container)
  * 3 Independent Sections with separate folders
@@ -6,19 +5,18 @@
 
 console.log('🔴 [AdmPembelajaran Module] Script START');
 
-// ✅ IMPORT PATH YANG BENAR (dari section1/adm-pembelajaran.js):
+// ✅ IMPORT PATH YANG BENAR (dari section1/adm-pembelajaran1.js):
 
 // 🔹 Shared utils/storage (ada di parent folder)
 import { storage } from '../storage.js';              // ← ../ = naik 1 level ke parent
 import { escapeHtml } from '../utils.js';             // ← ../ = naik 1 level ke parent
 
-// 🔹 Template utama (ada di folder yang sama: section1/)
-import { getMainTemplate } from './adm-pembelajaran-template.js';  // ← ./ = folder sama
+// 🔹 Template files (SEMUA ADA DI ROOT folder adm-pembelajaran/) ✅ FIX
+import { getMainTemplate } from '../adm-pembelajaran-template.js';  // ← ../ = naik ke ROOT
+import { renderSection1Content } from '../section1-template.js';           // ← ../ = naik ke ROOT
+import { renderSection2Content } from '../section2-template.js'; // ← ../ = naik ke ROOT
+import { renderSection3Content } from '../section3-template.js'; // ← ../ = naik ke ROOT
 
-// 🔹 Section templates:
-import { renderSection1Content } from './section1-template.js';           // ← ./ = folder sama, HAPUS "section1/"
-import { renderSection2Content } from '../section2/section2-template.js'; // ← ../ = naik ke parent, lalu masuk section2/
-import { renderSection3Content } from '../section3/section3-template.js'; // ← ../ = naik ke parent, lalu masuk section3/
 let dokumenList = [];
 let activeSection = 'section1';
 
