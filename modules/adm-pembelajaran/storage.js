@@ -4,7 +4,7 @@
  * ✅ FINAL FIX: Query tanpa orderBy untuk avoid index error
  */
 
-import * as fb from './firebase-config.js';
+import * as fb from '../firebase-config.js';
 
 const USE_FIREBASE = true;
 
