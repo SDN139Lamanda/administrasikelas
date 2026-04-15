@@ -33,6 +33,10 @@
         .checkbox-group { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
         .checkbox-label { display: flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer; }
         .checkbox-label input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; }
+        .mapel-checkbox-group { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; max-height: 120px; overflow-y: auto; padding: 8px; border: 1px solid #e5e7eb; border-radius: 6px; background: #f9fafb; }
+        .mapel-count { font-size: 11px; color: #6b7280; margin-top: 4px; text-align: right; }
+        .mapel-count.warning { color: #f59e0b; }
+        .mapel-count.error { color: #ef4444; }
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen flex items-center justify-center p-4">
@@ -81,7 +85,7 @@
             </div>
             <!-- ✅ CONDITIONAL FIELDS based on Jenjang -->
             <div id="conditionalFields" class="hidden mb-4">
-                <!-- 🟢 SD: Kelas 1-6 + Jenis Pengajaran -->
+                <!-- 🟢 SD: Kelas 1-6 + Jenis Pengajaran + Mapel Multi-Select -->
                 <div id="sdFields" class="hidden">
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-users mr-2"></i>Kelas Diampu <span class="text-red-500">*</span></label>
@@ -94,18 +98,30 @@
                             <label class="checkbox-label"><input type="checkbox" name="kelasDiampu" value="6"><span>Kelas 6</span></label>
                         </div>
                         <p class="error-text" id="kelasError">Pilih minimal 1 kelas</p>
+                        <p class="text-xs text-gray-500 mt-1" id="sdKelasHint"><i class="fas fa-info-circle mr-1"></i>Guru Kelas: max 1 kelas | Guru Mapel: max 6 kelas</p>
                     </div>
                     <div class="mb-4">
-                        <label for="sdMapelType" class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-book mr-2"></i>Jenis Pengajaran</label>
-                        <select id="sdMapelType" class="register-input">
+                        <label for="sdMapelType" class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-book mr-2"></i>Jenis Pengajaran <span class="text-red-500">*</span></label>
+                        <select id="sdMapelType" class="register-input" required>
+                            <option value="">Pilih Jenis</option>
                             <option value="kelas">Guru Kelas (semua mapel)</option>
-                            <option value="pai">Guru PAI / BD</option>
-                            <option value="pjok">Guru PJOK</option>
+                            <option value="mapel">Guru Mapel Khusus</option>
                         </select>
-                        <p class="text-xs text-gray-500 mt-1"><i class="fas fa-info-circle mr-1"></i>Pilih jika Anda guru khusus PAI/BD atau PJOK</p>
+                    </div>
+                    <!-- ✅ SD Mapel Multi-Select (hanya jika Guru Mapel) -->
+                    <div id="sdMapelGroup" class="hidden mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-list mr-2"></i>Mata Pelajaran <span class="text-red-500">*</span></label>
+                        <div class="mapel-checkbox-group">
+                            <label class="checkbox-label"><input type="checkbox" name="sdMapel" value="paibd"><span>PAIBD</span></label>
+                            <label class="checkbox-label"><input type="checkbox" name="sdMapel" value="pjok"><span>PJOK</span></label>
+                            <label class="checkbox-label"><input type="checkbox" name="sdMapel" value="btq"><span>BTQ</span></label>
+                            <label class="checkbox-label"><input type="checkbox" name="sdMapel" value="bahasa-daerah"><span>Bahasa Daerah</span></label>
+                        </div>
+                        <p class="mapel-count" id="sdMapelCount">0/4 dipilih</p>
+                        <p class="error-text" id="sdMapelError">Pilih minimal 1 mata pelajaran</p>
                     </div>
                 </div>
-                <!-- 🔵 SMP: Kelas 7-9 + Mata Pelajaran -->
+                <!-- 🔵 SMP: Kelas 7-9 + Multi-Select Mapel (max 2) -->
                 <div id="smpFields" class="hidden">
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-users mr-2"></i>Kelas Diampu <span class="text-red-500">*</span></label>
@@ -114,28 +130,23 @@
                             <label class="checkbox-label"><input type="checkbox" name="kelasDiampu" value="8"><span>Kelas 8</span></label>
                             <label class="checkbox-label"><input type="checkbox" name="kelasDiampu" value="9"><span>Kelas 9</span></label>
                         </div>
-                        <p class="error-text" id="kelasError">Pilih minimal 1 kelas</p>
+                        <p class="error-text" id="kelasError">Pilih minimal 1 kelas (max 3)</p>
+                        <p class="text-xs text-gray-500 mt-1"><i class="fas fa-info-circle mr-1"></i>Max 3 kelas: 7, 8, 9</p>
                     </div>
                     <div class="mb-4">
-                        <label for="mapel" class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-book mr-2"></i>Mata Pelajaran <span class="text-red-500">*</span></label>
-                        <select id="mapel" class="register-input">
-                            <option value="">Pilih Mata Pelajaran</option>
-                            <option value="matematika">Matematika</option>
-                            <option value="ipa">IPA</option>
-                            <option value="ips">IPS</option>
-                            <option value="bahasa-indonesia">Bahasa Indonesia</option>
-                            <option value="bahasa-inggris">Bahasa Inggris</option>
-                            <option value="pai">Pendidikan Agama Islam</option>
-                            <option value="ppkn">PPKn</option>
-                            <option value="seni-budaya">Seni Budaya</option>
-                            <option value="pjok">PJOK</option>
-                            <option value="prakarya">Prakarya</option>
-                            <option value="tik">Informatika/TIK</option>
-                        </select>
-                        <p class="error-text" id="mapelError">Pilih mata pelajaran</p>
+                        <label class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-list mr-2"></i>Mata Pelajaran (Pilih Max 2) <span class="text-red-500">*</span></label>
+                        <div class="mapel-checkbox-group">
+                            <label class="checkbox-label"><input type="checkbox" name="smpMapel" value="bahasa-indonesia"><span>Bhs. Indonesia</span></label>
+                            <label class="checkbox-label"><input type="checkbox" name="smpMapel" value="bahasa-inggris"><span>Bhs. Inggris</span></label>
+                            <label class="checkbox-label"><input type="checkbox" name="smpMapel" value="matematika"><span>Matematika</span></label>
+                            <label class="checkbox-label"><input type="checkbox" name="smpMapel" value="geografi"><span>Geografi</span></label>
+                            <label class="checkbox-label"><input type="checkbox" name="smpMapel" value="agama"><span>Agama</span></label>
+                        </div>
+                        <p class="mapel-count" id="smpMapelCount">0/2 dipilih</p>
+                        <p class="error-text" id="smpMapelError">Pilih 1-2 mata pelajaran</p>
                     </div>
                 </div>
-                <!-- 🟣 SMA: Kelas 10-12 + Mata Pelajaran -->
+                <!-- 🟣 SMA: Kelas 10-12 + Multi-Select Mapel (max 2) -->
                 <div id="smaFields" class="hidden">
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-users mr-2"></i>Kelas Diampu <span class="text-red-500">*</span></label>
@@ -144,28 +155,22 @@
                             <label class="checkbox-label"><input type="checkbox" name="kelasDiampu" value="11"><span>Kelas 11</span></label>
                             <label class="checkbox-label"><input type="checkbox" name="kelasDiampu" value="12"><span>Kelas 12</span></label>
                         </div>
-                        <p class="error-text" id="kelasError">Pilih minimal 1 kelas</p>
+                        <p class="error-text" id="kelasError">Pilih minimal 1 kelas (max 3)</p>
+                        <p class="text-xs text-gray-500 mt-1"><i class="fas fa-info-circle mr-1"></i>Max 3 kelas: 10, 11, 12</p>
                     </div>
                     <div class="mb-4">
-                        <label for="mapel" class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-book mr-2"></i>Mata Pelajaran <span class="text-red-500">*</span></label>
-                        <select id="mapel" class="register-input">
-                            <option value="">Pilih Mata Pelajaran</option>
-                            <option value="matematika">Matematika</option>
-                            <option value="fisika">Fisika</option>
-                            <option value="kimia">Kimia</option>
-                            <option value="biologi">Biologi</option>
-                            <option value="ekonomi">Ekonomi</option>
-                            <option value="sosiologi">Sosiologi</option>
-                            <option value="geografi">Geografi</option>
-                            <option value="sejarah">Sejarah</option>
-                            <option value="bahasa-indonesia">Bahasa Indonesia</option>
-                            <option value="bahasa-inggris">Bahasa Inggris</option>
-                            <option value="pai">Pendidikan Agama Islam</option>
-                            <option value="ppkn">PPKn</option>
-                            <option value="seni-budaya">Seni Budaya</option>
-                            <option value="pjok">PJOK</option>
-                        </select>
-                        <p class="error-text" id="mapelError">Pilih mata pelajaran</p>
+                        <label class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-list mr-2"></i>Mata Pelajaran (Pilih Max 2) <span class="text-red-500">*</span></label>
+                        <div class="mapel-checkbox-group">
+                            <label class="checkbox-label"><input type="checkbox" name="smaMapel" value="bahasa-indonesia"><span>Bhs. Indonesia</span></label>
+                            <label class="checkbox-label"><input type="checkbox" name="smaMapel" value="matematika"><span>Matematika</span></label>
+                            <label class="checkbox-label"><input type="checkbox" name="smaMapel" value="kimia"><span>Kimia</span></label>
+                            <label class="checkbox-label"><input type="checkbox" name="smaMapel" value="fisika"><span>Fisika</span></label>
+                            <label class="checkbox-label"><input type="checkbox" name="smaMapel" value="sosiologi"><span>Sosiologi</span></label>
+                            <label class="checkbox-label"><input type="checkbox" name="smaMapel" value="bahasa-inggris"><span>Bhs. Inggris</span></label>
+                            <label class="checkbox-label"><input type="checkbox" name="smaMapel" value="agama"><span>Agama</span></label>
+                        </div>
+                        <p class="mapel-count" id="smaMapelCount">0/2 dipilih</p>
+                        <p class="error-text" id="smaMapelError">Pilih 1-2 mata pelajaran</p>
                     </div>
                 </div>
             </div>
@@ -197,13 +202,24 @@
         
         const form = document.getElementById('registerForm'), messageDiv = document.getElementById('message'), submitBtn = document.getElementById('submitBtn'), btnText = document.getElementById('btnText'), loadingIcon = document.getElementById('loadingIcon'), debugInfo = document.getElementById('debugInfo');
         const namaLengkapInput = document.getElementById('namaLengkap'), emailInput = document.getElementById('email'), passwordInput = document.getElementById('password'), confirmPasswordInput = document.getElementById('confirmPassword'), jenjangSelect = document.getElementById('jenjang'), namaSekolahInput = document.getElementById('namaSekolah'), noHpInput = document.getElementById('noHp');
-        const conditionalFields = document.getElementById('conditionalFields'), sdFields = document.getElementById('sdFields'), smpFields = document.getElementById('smpFields'), smaFields = document.getElementById('smaFields'), sdMapelType = document.getElementById('sdMapelType'), mapelSelect = document.getElementById('mapel'), kelasError = document.getElementById('kelasError'), mapelError = document.getElementById('mapelError');
+        const conditionalFields = document.getElementById('conditionalFields'), sdFields = document.getElementById('sdFields'), smpFields = document.getElementById('smpFields'), smaFields = document.getElementById('smaFields'), sdMapelType = document.getElementById('sdMapelType'), sdMapelGroup = document.getElementById('sdMapelGroup');
+        const kelasError = document.getElementById('kelasError'), mapelError = document.getElementById('mapelError'), sdMapelError = document.getElementById('sdMapelError'), smpMapelError = document.getElementById('smpMapelError'), smaMapelError = document.getElementById('smaMapelError');
         const emailError = document.getElementById('emailError'), passwordError = document.getElementById('passwordError'), confirmError = document.getElementById('confirmError'), passwordStrength = document.getElementById('passwordStrength');
+        const sdMapelCount = document.getElementById('sdMapelCount'), smpMapelCount = document.getElementById('smpMapelCount'), smaMapelCount = document.getElementById('smaMapelCount');
         
         function showMessage(text, type = 'success') { messageDiv.innerHTML = text; messageDiv.className = `message ${type}`; messageDiv.style.display = 'block'; if (type === 'success') setTimeout(() => { messageDiv.style.display = 'none'; }, 8000); }
         function setLoading(loading) { submitBtn.disabled = loading; btnText.textContent = loading ? 'Mendaftar...' : 'Daftar Sekarang'; loadingIcon.classList.toggle('hidden', !loading); }
         function showFieldError(element, errorElement, show) { if (show) { if (element) element.classList.add('error'); if (errorElement) errorElement.classList.add('visible'); } else { if (element) element.classList.remove('error'); if (errorElement) errorElement.classList.remove('visible'); } }
         function checkPasswordStrength(password) { let strength = 0; if (password.length >= 6) strength++; if (password.length >= 10) strength++; if (/[A-Z]/.test(password)) strength++; if (/[0-9]/.test(password)) strength++; if (/[^A-Za-z0-9]/.test(password)) strength++; passwordStrength.className = 'password-strength-fill'; if (strength <= 2) passwordStrength.classList.add('strength-weak'); else if (strength <= 4) passwordStrength.classList.add('strength-medium'); else passwordStrength.classList.add('strength-strong'); return strength; }
+        function updateMapelCount(containerId, countId, max) {
+            const checked = document.querySelectorAll(`#${containerId} input[type="checkbox"]:checked`).length;
+            const countEl = document.getElementById(countId);
+            if (countEl) {
+                countEl.textContent = `${checked}/${max} dipilih`;
+                countEl.className = `mapel-count ${checked > max ? 'error' : checked === max ? 'warning' : ''}`;
+            }
+            return checked;
+        }
         
         // Real-time validation
         passwordInput.addEventListener('input', () => { checkPasswordStrength(passwordInput.value); showFieldError(passwordInput, passwordError, passwordInput.value.length > 0 && passwordInput.value.length < 6); });
@@ -214,29 +230,98 @@
         jenjangSelect.addEventListener('change', function() {
             const jenjang = this.value;
             conditionalFields.classList.add('hidden'); sdFields.classList.add('hidden'); smpFields.classList.add('hidden'); smaFields.classList.add('hidden');
-            if (jenjang === 'sd') { conditionalFields.classList.remove('hidden'); sdFields.classList.remove('hidden'); if (mapelSelect) mapelSelect.value = ''; }
-            else if (jenjang === 'smp') { conditionalFields.classList.remove('hidden'); smpFields.classList.remove('hidden'); document.querySelectorAll('input[name="kelasDiampu"]').forEach(cb => cb.checked = false); }
-            else if (jenjang === 'sma') { conditionalFields.classList.remove('hidden'); smaFields.classList.remove('hidden'); document.querySelectorAll('input[name="kelasDiampu"]').forEach(cb => cb.checked = false); }
+            // Reset all checkboxes
+            document.querySelectorAll('input[name="kelasDiampu"], input[name="sdMapel"], input[name="smpMapel"], input[name="smaMapel"]').forEach(cb => cb.checked = false);
+            if (sdMapelType) sdMapelType.value = '';
+            if (sdMapelGroup) sdMapelGroup.classList.add('hidden');
+            if (jenjang === 'sd') { 
+                conditionalFields.classList.remove('hidden'); 
+                sdFields.classList.remove('hidden'); 
+                document.getElementById('sdKelasHint').textContent = 'Guru Kelas: max 1 kelas | Guru Mapel: max 6 kelas';
+            }
+            else if (jenjang === 'smp') { 
+                conditionalFields.classList.remove('hidden'); 
+                smpFields.classList.remove('hidden'); 
+            }
+            else if (jenjang === 'sma') { 
+                conditionalFields.classList.remove('hidden'); 
+                smaFields.classList.remove('hidden'); 
+            }
             showFieldError(document.querySelector('[name="kelasDiampu"]'), kelasError, false);
-            if (mapelSelect) showFieldError(mapelSelect, mapelError, false);
+            showFieldError(null, sdMapelError, false);
+            showFieldError(null, smpMapelError, false);
+            showFieldError(null, smaMapelError, false);
         });
+        
+        // ✅ SD: Toggle mapel group based on sdMapelType
+        if (sdMapelType) {
+            sdMapelType.addEventListener('change', function() {
+                if (this.value === 'mapel') {
+                    sdMapelGroup.classList.remove('hidden');
+                    document.getElementById('sdKelasHint').textContent = 'Guru Mapel: bisa pilih sampai 6 kelas';
+                } else {
+                    sdMapelGroup.classList.add('hidden');
+                    document.querySelectorAll('input[name="sdMapel"]').forEach(cb => cb.checked = false);
+                    updateMapelCount('sdFields', 'sdMapelCount', 4);
+                    document.getElementById('sdKelasHint').textContent = 'Guru Kelas: max 1 kelas | Guru Mapel: max 6 kelas';
+                }
+            });
+        }
+        
+        // ✅ Mapel count updates
+        document.querySelectorAll('input[name="sdMapel"]').forEach(cb => cb.addEventListener('change', () => updateMapelCount('sdFields', 'sdMapelCount', 4)));
+        document.querySelectorAll('input[name="smpMapel"]').forEach(cb => cb.addEventListener('change', () => updateMapelCount('smpFields', 'smpMapelCount', 2)));
+        document.querySelectorAll('input[name="smaMapel"]').forEach(cb => cb.addEventListener('change', () => updateMapelCount('smaFields', 'smaMapelCount', 2)));
         
         // Validate kelas checkboxes
         document.querySelectorAll('input[name="kelasDiampu"]').forEach(cb => {
             cb.addEventListener('change', function() {
+                const jenjang = jenjangSelect.value;
                 const checked = document.querySelectorAll('input[name="kelasDiampu"]:checked');
                 const isVisible = !conditionalFields.classList.contains('hidden');
+                
+                // ✅ SD Guru Kelas: max 1 kelas
+                if (jenjang === 'sd' && sdMapelType?.value === 'kelas' && checked.length > 1) {
+                    this.checked = false;
+                    showMessage('⚠️ Guru Kelas SD hanya bisa memilih 1 kelas', 'warning');
+                }
+                // ✅ SD Guru Mapel: max 6 kelas
+                if (jenjang === 'sd' && sdMapelType?.value === 'mapel' && checked.length > 6) {
+                    this.checked = false;
+                    showMessage('⚠️ Guru Mapel SD maksimal 6 kelas', 'warning');
+                }
+                // ✅ SMP/SMA: max 3 kelas
+                if ((jenjang === 'smp' || jenjang === 'sma') && checked.length > 3) {
+                    this.checked = false;
+                    showMessage('⚠️ Maksimal 3 kelas untuk jenjang ini', 'warning');
+                }
+                
                 showFieldError(this, kelasError, checked.length === 0 && isVisible);
             });
         });
         
         // Validate mapel select
-        if (mapelSelect) {
-            mapelSelect.addEventListener('change', function() {
+        if (sdMapelGroup) {
+            sdMapelGroup.addEventListener('change', function() {
                 const jenjang = jenjangSelect.value;
-                if (jenjang === 'smp' || jenjang === 'sma') showFieldError(this, mapelError, !this.value);
+                if (jenjang === 'sd' && sdMapelType?.value === 'mapel') {
+                    const checked = document.querySelectorAll('input[name="sdMapel"]:checked').length;
+                    showFieldError(null, sdMapelError, checked === 0);
+                }
             });
         }
+        document.getElementById('smpFields')?.addEventListener('change', function() {
+            if (jenjangSelect.value === 'smp') {
+                const checked = document.querySelectorAll('input[name="smpMapel"]:checked').length;
+                showFieldError(null, smpMapelError, checked === 0 || checked > 2);
+            }
+        });
+        document.getElementById('smaFields')?.addEventListener('change', function() {
+            if (jenjangSelect.value === 'sma') {
+                const checked = document.querySelectorAll('input[name="smaMapel"]:checked').length;
+                showFieldError(null, smaMapelError, checked === 0 || checked > 2);
+            }
+        });
         
         // Form submit handler
         form.addEventListener('submit', async (e) => {
@@ -253,15 +338,31 @@
             if (password.length < 6) { showFieldError(passwordInput, passwordError, true); hasError = true; }
             if (password !== confirmPassword) { showFieldError(confirmPasswordInput, confirmError, true); hasError = true; }
             
-            // ✅ Validate conditional fields for ALL jenjang
+            // ✅ Validate conditional fields
             if (jenjang === 'sd' || jenjang === 'smp' || jenjang === 'sma') {
                 const checkedKelas = document.querySelectorAll('input[name="kelasDiampu"]:checked');
                 if (checkedKelas.length === 0) { showFieldError(document.querySelector('[name="kelasDiampu"]'), kelasError, true); hasError = true; }
             }
-            if (jenjang === 'smp' || jenjang === 'sma') {
-                const mapel = mapelSelect?.value;
-                if (!mapel) { showFieldError(mapelSelect, mapelError, true); hasError = true; }
+            
+            // ✅ SD validation
+            if (jenjang === 'sd') {
+                if (!sdMapelType?.value) { showMessage('❌ Pilih jenis pengajaran', 'error'); hasError = true; }
+                if (sdMapelType?.value === 'mapel') {
+                    const checkedMapel = document.querySelectorAll('input[name="sdMapel"]:checked');
+                    if (checkedMapel.length === 0) { showFieldError(null, sdMapelError, true); hasError = true; }
+                }
             }
+            // ✅ SMP validation
+            if (jenjang === 'smp') {
+                const checkedMapel = document.querySelectorAll('input[name="smpMapel"]:checked');
+                if (checkedMapel.length === 0 || checkedMapel.length > 2) { showFieldError(null, smpMapelError, true); hasError = true; }
+            }
+            // ✅ SMA validation
+            if (jenjang === 'sma') {
+                const checkedMapel = document.querySelectorAll('input[name="smaMapel"]:checked');
+                if (checkedMapel.length === 0 || checkedMapel.length > 2) { showFieldError(null, smaMapelError, true); hasError = true; }
+            }
+            
             if (hasError) { showMessage('❌ Mohon perbaiki error di atas sebelum mendaftar.', 'error'); return; }
             
             setLoading(true);
@@ -280,19 +381,31 @@
                 // Collect form data
                 const kelasDiampu = [];
                 document.querySelectorAll('input[name="kelasDiampu"]:checked').forEach(cb => kelasDiampu.push(cb.value));
-                const mapelDiampu = [];
-                if ((jenjang === 'smp' || jenjang === 'sma') && mapelSelect?.value) mapelDiampu.push(mapelSelect.value);
+                
+                let mapelDiampu = [];
+                if (jenjang === 'sd' && sdMapelType?.value === 'mapel') {
+                    document.querySelectorAll('input[name="sdMapel"]:checked').forEach(cb => mapelDiampu.push(cb.value));
+                } else if (jenjang === 'smp') {
+                    document.querySelectorAll('input[name="smpMapel"]:checked').forEach(cb => mapelDiampu.push(cb.value));
+                } else if (jenjang === 'sma') {
+                    document.querySelectorAll('input[name="smaMapel"]:checked').forEach(cb => mapelDiampu.push(cb.value));
+                }
+                
                 const sdMapelTypeValue = sdMapelType?.value || 'kelas';
                 
-                // Save to Firestore
+                // ✅ Save to Firestore with PENDING status
                 await setDoc(doc(db, 'users', user.uid), {
                     email: email, nama_lengkap: namaLengkap, nama_sekolah: namaSekolah, jenjang_sekolah: jenjang, no_hp: noHp || '',
                     kelas_diampu: kelasDiampu,           // ✅ Array: ["4"] or ["7","8"] or ["10","12"]
-                    mapel_diampu: mapelDiampu,           // ✅ Array: ["matematika"] for SMP/SMA
-                    sd_mapel_type: sdMapelTypeValue,     // ✅ String: "kelas" | "pai" | "pjok" (SD only)
-                    role: 'teacher', isActive: true, isApproved: false, isEmailVerified: user.emailVerified,
-                    emailSendStatus: emailSent ? 'sent' : 'failed', emailSendError: emailErr ? { code: emailErr.code, message: emailErr.message } : null,
-                    createdAt: serverTimestamp(), updatedAt: serverTimestamp(), lastLogin: serverTimestamp()
+                    mapel_diampu: mapelDiampu,           // ✅ Array: ["paibd","pjok"] or ["matematika"] etc.
+                    sd_mapel_type: sdMapelTypeValue,     // ✅ String: "kelas" | "mapel" (SD only)
+                    role: 'teacher', 
+                    isActive: false,      // ✅ PENDING: cannot access features yet
+                    isApproved: false,    // ✅ Waiting for admin approval
+                    isEmailVerified: user.emailVerified,
+                    emailSendStatus: emailSent ? 'sent' : 'failed', 
+                    emailSendError: emailErr ? { code: emailErr.code, message: emailErr.message } : null,
+                    createdAt: serverTimestamp(), updatedAt: serverTimestamp(), lastLogin: null
                 });
                 
                 // Success message
@@ -302,14 +415,16 @@
                     <strong>Langkah selanjutnya:</strong><br>
                     1️⃣ Buka email inbox Anda<br>2️⃣ Cek folder <strong>Spam/Promotions/Updates</strong><br>
                     3️⃣ Cari email dari <strong>noreply@firebaseapp.com</strong><br>4️⃣ Klik link <strong>"Verify email"</strong><br>
-                    5️⃣ Login dengan password Anda<br>6️⃣ Tunggu persetujuan admin (1-3 hari kerja)<br><br>
-                    <small class="text-gray-500">⏰ Link verifikasi berlaku 1 jam.</small>`;
+                    5️⃣ Login dengan password Anda<br>6️⃣ <strong>Tunggu persetujuan admin</strong> (1-3 hari kerja)<br><br>
+                    <small class="text-gray-500">⚠️ Akun dalam status <strong>pending</strong>. Fitur terbatas sampai admin approve.</small>`;
                 } else {
                     successMsg += `⚠️ <strong>Catatan:</strong> Email verifikasi <em>gagal terkirim</em>.<br><br>
-                    <strong>Akun Anda tetap dibuat</strong>. Hubungi admin: radiah.tifarahs@gmail.com`;
+                    <strong>Akun Anda tetap dibuat</strong> dalam status pending. Hubungi admin: radiah.tifarahs@gmail.com`;
                 }
                 showMessage(successMsg, 'success');
                 form.reset(); passwordStrength.className = 'password-strength-fill';
+                if (sdMapelType) sdMapelType.value = '';
+                if (sdMapelGroup) sdMapelGroup.classList.add('hidden');
                 setTimeout(() => { window.location.href = 'login.html?registered=true&emailSent=' + emailSent; }, 8000);
                 console.log('🎉 [Register] Completed');
                 
