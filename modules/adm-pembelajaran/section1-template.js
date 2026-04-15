@@ -19,7 +19,9 @@ export function renderDocumentCard(doc) {
       <div class="flex items-start justify-between mb-3">
         <div class="flex gap-2 items-center">
           <span class="px-2 py-1 bg-indigo-100 text-indigo-700 text-xs rounded-full font-medium">
-            ${doc.jenis === 'cta' ? '📝 CTA' : '🤖 AI'}
+            ${doc.jenis === 'cta' ? '📝 CTA' : 
+              doc.jenis === 'asisten-modul' ? '🤖 AI' : 
+              '📚 Refleksi'}
           </span>
           ${sourceBadge}
         </div>
@@ -55,16 +57,18 @@ export function renderSection1Content(dokumenList) {
   }
   
   const filteredDocs = dokumenList.filter(doc => 
-    doc.jenis === 'cta' || doc.jenis === 'asisten-modul'
+    doc.jenis === 'cta' || 
+    doc.jenis === 'asisten-modul' || 
+    doc.jenis === 'refleksi'
   );
   
   if (filteredDocs.length === 0) {
     return `<div class="col-span-full text-center py-12 text-slate-400">
-      <p>Tidak ada dokumen CTA/Modul. Coba generate dulu!</p>
+      <p>Tidak ada dokumen CTA/Modul/Refleksi. Coba generate dulu!</p>
     </div>`;
   }
   
   return filteredDocs.map(doc => renderDocumentCard(doc)).join('');
 }
 
-console.log('✅ [Section1 Template] Loaded - CTA & Modul documents');
+console.log('✅ [Section1 Template] Loaded - CTA & Modul & Refleksi documents');
