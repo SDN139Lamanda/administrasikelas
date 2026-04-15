@@ -20,11 +20,7 @@ import {
   auth, 
   collection, 
   addDoc, 
-  query, 
-  orderBy, 
-  onSnapshot, 
-  serverTimestamp,
-  where  // ✅ TAMBAHKAN: Untuk filter isolasi data
+  serverTimestamp
 } from './firebase-config.js';
 
 console.log('✅ [Refleksi] Firebase imports successful');
@@ -162,14 +158,6 @@ window.renderRefleksiForm = function() {
             <p class="text-yellow-800">⚠️ Silakan login untuk menulis refleksi</p>
           </div>
         `}
-        
-        <h3 class="text-xl font-bold mt-8 mb-4">📚 Refleksi Tersimpan</h3>
-        <div id="refleksi-list" class="space-y-4">
-          <div class="text-center py-8 text-gray-500">
-            <i class="fas fa-spinner fa-spin text-2xl mb-3"></i>
-            <p>Memuat refleksi...</p>
-          </div>
-        </div>
       </div>
     </div>
   `;
@@ -185,9 +173,7 @@ window.renderRefleksiForm = function() {
     console.log('✅ [Refleksi] Form submit handler attached');
   }
   
-  // ✅ STEP 6: Load Realtime Data (with isolation)
-  loadRefleksiData();
-  console.log('✅ [Refleksi] Realtime data loading started');
+  console.log('✅ [Refleksi] Form ready');
 };
 
 // ✅ STEP 7: Handle Form Submit
@@ -219,20 +205,34 @@ async function handleSubmit(event) {
   }
   
   try {
-    console.log('🔥 [Refleksi] Sending to Firestore...');
+    console.log('🔥 [Refleksi] Sending to Firestore (collection: pembelajaran)...');
     
-    await addDoc(collection(db, 'reflections'), {
-      guruId: user.uid,  // ✅ Sudah benar: field untuk isolasi
-      guruName: user.displayName || 'Guru',
-      guruEmail: user.email,
-      guruPhoto: user.photoURL || 'https://ui-avatars.com/api/?name=User',
-      ...data,
-      timestamp: serverTimestamp(),
-      edited: false
+    await addDoc(collection(db, 'pembelajaran'), {
+      userId: user.uid,
+      jenis: 'refleksi',
+      jenjang: '',
+      kelas: data.kelas || '',
+      mapel: data.mapel || '',
+      judul: data.judul || 'Refleksi Guru',
+      konten: `
+        <h3>✅ Sudah Dilakukan:</h3>
+        <p>${data.sudah || '-'}</p>
+        <h3>⚠️ Belum Optimal:</h3>
+        <p>${data.belum || '-'}</p>
+        <h3>💡 Dipelajari:</h3>
+        <p>${data.pelajaran || '-'}</p>
+        <h3>📋 Rencana:</h3>
+        <p>${data.rencana || '-'}</p>
+        <h3>💭 Perasaan:</h3>
+        <p>${data.perasaan || '-'}</p>
+      `,
+      tags: ['refleksi', 'guru'],
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
     });
     
-    console.log('✅ [Refleksi] Data sent successfully!');
-    alert('✅ Refleksi berhasil disimpan!');
+    console.log('✅ [Refleksi] Data sent to pembelajaran collection!');
+    alert('✅ Refleksi berhasil disimpan!\n\nData akan muncul di:\nAdm.Pembelajaran → 📋 Dokumen CTA & Modul');
     event.target.reset();
     
   } catch (error) {
@@ -241,93 +241,9 @@ async function handleSubmit(event) {
   }
 }
 
-// ✅ STEP 8: Load Realtime Data (WITH ISOLATION FIX)
-function loadRefleksiData() {
-  const list = document.getElementById('refleksi-list');
-  if (!list) {
-    console.error('❌ [Refleksi] List container not found!');
-    return;
-  }
-  
-  console.log('🔄 [Refleksi] Setting up realtime listener...');
-  
-  const user = auth.currentUser;
-  
-  // ✅ FIX UTAMA: Tambah filter by guruId untuk isolasi data
-  let q;
-  if (user) {
-    // User biasa: hanya lihat refleksi sendiri
-    q = query(
-      collection(db, 'reflections'), 
-      where('guruId', '==', user.uid),  // ✅ TAMBAHKAN: Isolasi data!
-      orderBy('timestamp', 'desc')
-    );
-  } else {
-    // Tidak login: tidak bisa load data
-    list.innerHTML = `
-      <div class="text-center py-8 text-gray-500">
-        <i class="fas fa-lock text-3xl mb-3"></i>
-        <p>Silakan login untuk melihat refleksi</p>
-      </div>
-    `;
-    return;
-  }
-  
-  onSnapshot(q, (snapshot) => {
-    console.log('📥 [Refleksi] Realtime update:', snapshot.docs.length, 'documents');
-    
-    if (snapshot.empty) {
-      list.innerHTML = `
-        <div class="text-center py-8 text-gray-500">
-          <i class="fas fa-inbox text-3xl mb-3"></i>
-          <p>Belum ada refleksi. Jadilah yang pertama!</p>
-        </div>
-      `;
-      return;
-    }
-    
-    list.innerHTML = snapshot.docs.map(doc => {
-      const d = doc.data();
-      const date = d.timestamp?.toDate?.()?.toLocaleString('id-ID') || '-';
-      
-      return `
-        <div class="reflection-item">
-          <div class="flex justify-between items-start mb-2">
-            <div>
-              <strong class="text-lg">${d.judul || 'Tanpa Judul'}</strong>
-              <br>
-              <small class="text-gray-500">${d.guruName} • ${d.guruEmail}</small>
-            </div>
-            <small class="text-gray-400">${date}</small>
-          </div>
-          <div class="text-sm mb-2">
-            <span class="bg-purple-100 px-2 py-0.5 rounded text-xs">Kelas ${d.kelas}</span>
-            <span class="bg-blue-100 px-2 py-0.5 rounded text-xs ml-1">${d.mapel}</span>
-          </div>
-          <p class="text-gray-700"><strong>✅ Sudah:</strong> ${d.sudah}</p>
-          ${d.belum ? `<p class="text-gray-700"><strong>⚠️ Belum:</strong> ${d.belum}</p>` : ''}
-          ${d.pelajaran ? `<p class="text-gray-700"><strong>💡 Dipelajari:</strong> ${d.pelajaran}</p>` : ''}
-          <p class="text-gray-700"><strong>📋 Rencana:</strong> ${d.rencana}</p>
-          ${d.perasaan ? `<p class="text-gray-700"><strong>💭 Perasaan:</strong> ${d.perasaan}</p>` : ''}
-        </div>
-      `;
-    }).join('');
-    
-  }, (error) => {
-    console.error('❌ [Refleksi] Realtime error:', error);
-    list.innerHTML = `
-      <div class="text-center py-8 text-red-500">
-        <i class="fas fa-exclamation-circle text-3xl mb-3"></i>
-        <p>Gagal memuat: ${error.message}</p>
-        <p class="text-sm mt-2">Cek Firebase Console & Rules</p>
-      </div>
-    `;
-  });
-}
-
 // ✅ STEP 9: Confirm Registration
 console.log('🟢 [Refleksi] window.renderRefleksiForm:', typeof window.renderRefleksiForm);
-console.log('🟢 [Refleksi] Module FINISHED - Ready to use!');
+console.log('🟢 [Refleksi] Module FINISHED - Save to pembelajaran collection');
 
 // ✅ STEP 10: Auto-test (untuk debugging)
 setTimeout(() => {
