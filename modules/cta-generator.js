@@ -381,8 +381,11 @@ async function handleGenerate() {
   const user = auth.currentUser; if (!user) { alert('⚠️ Silakan login dulu!'); return; }
   const jenjang = document.getElementById('cta-jenjang')?.value, kelas = document.getElementById('cta-kelas')?.value, semester = document.getElementById('cta-semester')?.value, mapel = document.getElementById('cta-mapel')?.value, sekolah = document.getElementById('kop-sekolah')?.value, tahun = document.getElementById('kop-tahun')?.value, guru = document.getElementById('cta-guru')?.value, topik = document.getElementById('cta-topik')?.value;
   
-  const validation = validateInputWithFilter({ sekolah, jenjang, kelas, semester, mapel, topik }, { jenjang_sekolah: jenjang, kelas_diampu: userKelasDiampu, mapel_diampu: userMapelDiampu, sd_mapel_type: userSdMapelType });
-  if (!validation.valid) { alert('⚠️ ' + validation.errors.join('\n')); return; }
+  // ✅ ADMIN BYPASS: Skip validation for admin users
+  if (userRole !== 'admin') {
+    const validation = validateInputWithFilter({ sekolah, jenjang, kelas, semester, mapel, topik }, { jenjang_sekolah: jenjang, kelas_diampu: userKelasDiampu, mapel_diampu: userMapelDiampu, sd_mapel_type: userSdMapelType });
+    if (!validation.valid) { alert('⚠️ ' + validation.errors.join('\n')); return; }
+  }
   
   const aiReady = await isAiReady(); if (!aiReady) { const userDoc = await getDoc(doc(db, 'users', user.uid)), isAdmin = userDoc.exists() && userDoc.data()?.role === 'admin'; if (isAdmin) alert('⚠️ Global API Key belum terdeteksi.'); else alert('⚠️ AI belum aktif. Hubungi admin.'); return; }
   
