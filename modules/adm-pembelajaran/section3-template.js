@@ -1,11 +1,17 @@
-// ✅ STUB: Section 3 Template (Coming Soon)
+/**
+ * SECTION 3 TEMPLATE: Reserved Feature
+ * ✅ Minimal stub - MUST export renderSection3Content
+ */
+
+// ✅ WAJIB: Export function dengan nama PERSIS seperti ini
 export function renderSection3Content() {
   return `
-    <div class="p-8 text-center text-slate-400">
+    <div class="col-span-full text-center py-12 text-slate-400">
       <i class="fas fa-tools text-4xl mb-4"></i>
-      <p class="font-medium">Fitur 3 Coming Soon</p>
+      <p class="font-medium text-lg">Fitur 3 Coming Soon</p>
       <p class="text-sm mt-2">Fitur ini sedang dalam pengembangan.</p>
     </div>
   `;
 }
+
 console.log('✅ [Section3 Template] Loaded - Stub');
