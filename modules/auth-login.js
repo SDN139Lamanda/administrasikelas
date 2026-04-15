@@ -4,7 +4,7 @@
  * Platform Administrasi Kelas Digital
  * ============================================
  * 
- * ✅ UPDATE: Tambah field 'features' untuk UI visibility control
+ * ✅ UPDATE: Field names match Firestore schema from register.html
  */
 
 import { auth, db } from './firebase-config.js';
@@ -62,32 +62,28 @@ export async function loginUser(email, password) {
             throw new Error('❌ Akun Anda dinonaktifkan. Hubungi admin.');
         }
         
-        // ✅ STEP 5: BUILD RETURN OBJECT
+        // ✅ STEP 5: BUILD RETURN OBJECT (✅ Field names match Firestore schema)
         const returnUser = {
             // Basic Auth Fields
             uid: user.uid,
             email: user.email,
             emailVerified: user.emailVerified,
             
-            // Profile Fields
-            namaLengkap: userData.namaLengkap || '',
-            noHp: userData.noHp || '',
-            sekolah: userData.sekolah || '',
+            // Profile Fields (✅ Match register.html field names)
+            nama_lengkap: userData.nama_lengkap || '',  // ✅ Fixed: was namaLengkap
+            no_hp: userData.no_hp || '',                 // ✅ Fixed: was noHp
+            nama_sekolah: userData.nama_sekolah || '',   // ✅ Fixed: was sekolah
             
-            // CONTEXT-BASED ACCESS FIELDS
-            jenjang: userData.jenjang || null,
-            sdRole: userData.sdRole || null,
-            kelas: userData.kelas || null,
-            mataPelajaranSD: userData.mataPelajaranSD || null,
-            mataPelajaranSMP: userData.mataPelajaranSMP || null,
-            mataPelajaranSMA: userData.mataPelajaranSMA || null,
+            // CONTEXT-BASED ACCESS FIELDS (✅ Match register.html)
+            jenjang_sekolah: userData.jenjang_sekolah || null,  // ✅ Fixed: was jenjang
+            kelas_diampu: userData.kelas_diampu || [],          // ✅ Fixed: was kelas (now array)
+            mapel_diampu: userData.mapel_diampu || [],          // ✅ Fixed: was mataPelajaran* (now unified array)
+            sd_mapel_type: userData.sd_mapel_type || 'kelas',   // ✅ New: for SD teacher type
             
             // Role & Status
             role: userData.role || 'guru',
-            status: userData.status || 'active',
-            
-            // ✅ FEATURE ACCESS FIELD (UPDATE BARU!) ⭐
-            features: userData.features || null,
+            isActive: userData.isActive === true,        // ✅ New
+            isApproved: userData.isApproved === true,    // ✅ New: approval status
             
             // Timestamps
             createdAt: userData.createdAt || null,
@@ -96,9 +92,9 @@ export async function loginUser(email, password) {
         
         console.log('✅ Login successful, returning user:', {
             email: returnUser.email,
-            jenjang: returnUser.jenjang,
+            jenjang: returnUser.jenjang_sekolah,
             role: returnUser.role,
-            features: returnUser.features
+            isApproved: returnUser.isApproved
         });
         
         return {
