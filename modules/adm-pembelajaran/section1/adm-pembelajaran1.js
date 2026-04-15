@@ -31,7 +31,7 @@ window.renderAdmPembelajaran = async function() {
   
   let authUser = null;
   try {
-    const { auth, onAuthStateChanged } = await import('../firebase-config.js');
+    const { auth, onAuthStateChanged } = await import('../../firebase-config.js');
     if (auth.currentUser) {
       authUser = auth.currentUser;
     } else {
