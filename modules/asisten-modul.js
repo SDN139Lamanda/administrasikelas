@@ -2,19 +2,25 @@
  * ============================================
  * MODULE: ASISTEN MODUL AJAR
  * Platform Administrasi Kelas Digital
+ * ✅ UPDATED: Prototype Offline (API-Ready Pattern)
  * ============================================
  * FITUR:
  * - Auto-fill data user dari localStorage (modal)
- * - MOCK MODE ONLY (No API Key)
+ * - MOCK MODE ONLY (No API Key) - Prototype Offline
  * - Editable fields (user bisa ubah auto-fill)
  * - Profil Pancasila included
  * - Clean result display (no scroll frame)
  * - Kop format sesuai standar modul ajar
  * - ✅ NEW: Field lengkap sesuai komposisi Kurikulum Merdeka
+ * - ✅ NEW: Loading state + disable button
+ * - ✅ NEW: Specific error handling
+ * - ✅ NEW: Download/Print buttons
+ * - ✅ NEW: API-ready pattern (easy swap to Groq)
+ * - ✅ NEW: Auto-save to Adm.Pembelajaran (non-blocking)
  * ============================================
  */
 
-console.log('🔴 [Asisten Modul] Script START — MOCK MODE');
+console.log('🔴 [Asisten Modul] Script START — MOCK MODE (Prototype Offline)');
 
 import { 
   db, 
@@ -31,6 +37,213 @@ import {
 } from './firebase-config.js';
 
 console.log('✅ [Asisten Modul] Firebase imports successful');
+
+// ============================================
+// ✅ API-READY WRAPPER (Easy Swap to Groq Later)
+// ============================================
+
+/**
+ * Generate modul dengan pattern yang sama seperti CTA Generator
+ * 🔜 NANTI: Uncomment generateWithGroq untuk pakai API
+ * ✅ SEKARANG: Pakai mockGenerateModul (offline prototype)
+ */
+async function generateModulWithAI(promptData) {
+  console.log('🤖 [Asisten Modul] Generate called (Mock Mode)');
+  
+  // 🔜 NANTI: Ganti dengan ini untuk pakai Groq API:
+  // const { generateWithGroq } = await import('./groq-api.js');
+  // const prompt = buildPromptForAI(promptData);
+  // const result = await generateWithGroq({
+  //   prompt: prompt,
+  //   temperature: 0.7,
+  //   max_tokens: 1500
+  // });
+  // return result.content;
+  
+  // ✅ SEKARANG: Pakai mock (offline prototype)
+  return await mockGenerateModul(promptData);
+}
+
+/**
+ * Build prompt untuk AI (siap digunakan saat integrasi API)
+ */
+function buildPromptForAI(data) {
+  return `
+Buat Modul Ajar Kurikulum Merdeka dengan spesifikasi berikut:
+
+INFORMASI UMUM:
+- Guru: ${data.guru} (${data.nip || 'N/A'})
+- Sekolah: ${data.sekolah}, Tahun: ${data.tahun}
+- Jenjang/Kelas: ${data.jenjang?.toUpperCase()}/${data.kelas}
+- Mapel: ${data.mapel?.toUpperCase()}, Topik: ${data.topik}
+- Alokasi: ${data.alokasi}
+- Kompetensi Awal: ${data.kompetensiAwal}
+- Sarana: ${data.sarana}
+- Target: ${data.targetPesertaDidik}, Model: ${data.modelPembelajaran}
+
+PROFIL PELAJAR PANCASILA:
+${data.profilPancasila?.filter(p => p.checked).map(p => p.value).join(', ') || '-'}
+
+LAMPIRAN:
+- LKPD: ${data.lkpd}
+- Bahan Bacaan: ${data.bahanBacaan}
+- Glosarium: ${data.glosarium}
+- Pustaka: ${data.daftarPustaka}
+
+Format output: Gunakan struktur modul ajar standar dengan section I-IV.
+  `.trim();
+}
+
+// ============================================
+// ✅ MOCK GENERATOR (Offline Prototype)
+// ============================================
+
+async function mockGenerateModul(data) {
+  console.log('📝 [Asisten Modul] Generating mock modul...');
+  // Simulate API delay
+  await new Promise(resolve => setTimeout(resolve, 2000));
+  
+  const {
+    guru, nip, sekolah, tahun, jenjang, kelas, mapel, topik, alokasi,
+    kompetensiAwal, sarana, targetPesertaDidik, modelPembelajaran,
+    profilPancasila,
+    lkpd, bahanBacaan, glosarium, daftarPustaka,
+    userKepsek, userNIPKepsek
+  } = data;
+  
+  const jenjangCapital = jenjang?.toUpperCase() || '-';
+  const mapelCapital = mapel?.toUpperCase() || '-';
+  const pppList = profilPancasila?.filter(p => p.checked).map(p => p.value).join(', ') || '-';
+  const targetLabel = {
+    'reguler': 'Siswa Reguler',
+    'kesulitan': 'Siswa dengan Kesulitan Belajar',
+    'pencapaian-tinggi': 'Siswa dengan Pencapaian Tinggi'
+  }[targetPesertaDidik] || 'Siswa Reguler';
+  const modelLabel = {
+    'pbl': 'Problem Based Learning (PBL)',
+    'pjbl': 'Project Based Learning (PjBL)',
+    'tatap-muka': 'Tatap Muka',
+    'lainnya': 'Lainnya'
+  }[modelPembelajaran] || 'Problem Based Learning (PBL)';
+  
+  return `
+═══════════════════════════════════════════════════════════
+                    MODUL AJAR
+                  KURIKULUM MERDEKA
+═══════════════════════════════════════════════════════════
+
+I. INFORMASI UMUM
+───────────────────────────────────────────────────────────
+Nama Penyusun      : ${guru || '-'}
+NIP                : ${nip || '-'}
+Nama Sekolah       : ${sekolah || '-'}
+Tahun Ajaran       : ${tahun || '2025/2026'}
+Jenjang/Kelas      : ${jenjangCapital} / Kelas ${kelas}
+Mata Pelajaran     : ${mapelCapital}
+Topik/Materi       : ${topik || '-'}
+Alokasi Waktu      : ${alokasi || '-'}
+
+Kompetensi Awal    : ${kompetensiAwal || 'Siswa telah memahami konsep dasar terkait topik ini.'}
+Sarana/Prasarana   : ${sarana || 'Laptop, proyektor, alat peraga, lingkungan sekitar'}
+Target Peserta     : ${targetLabel}
+Model Pembelajaran : ${modelLabel}
+
+II. PROFIL PELAJAR PANCASILA
+───────────────────────────────────────────────────────────
+${pppList}
+
+═══════════════════════════════════════════════════════════
+
+III. KOMPONEN INTI
+───────────────────────────────────────────────────────────
+
+A. TUJUAN PEMBELAJARAN
+   Setelah mengikuti pembelajaran ini, peserta didik dapat:
+   1. Memahami konsep dasar ${topik || 'materi'} dengan benar
+   2. Menerapkan ${topik || 'materi'} dalam situasi nyata
+   3. Menganalisis hubungan antar konsep ${topik || 'materi'}
+   4. Menyajikan hasil pembelajaran dengan jelas
+
+B. PEMAHAMAN BERMAKNA
+   Peserta didik memahami bahwa ${topik || 'materi ini'} 
+   memiliki keterkaitan dengan kehidupan sehari-hari dan 
+   dapat diterapkan dalam berbagai konteks.
+
+C. PERTANYAAN PEMANTIK
+   1. Apa yang kalian ketahui tentang ${topik || 'materi ini'}?
+   2. Bagaimana ${topik || 'materi ini'} digunakan dalam kehidupan?
+   3. Mengapa ${topik || 'materi ini'} penting untuk dipelajari?
+
+D. KEGIATAN PEMBELAJARAN
+   ┌─────────────────────────────────────────────────────┐
+   │ PERTEMUAN 1                                         │
+   ├─────────────────────────────────────────────────────┤
+   │ Pendahuluan (10 menit)                             │
+   │ • Salam dan doa                                    │
+   │ • Apersepsi                                        │
+   │ • Penyampaian tujuan                               │
+   ├─────────────────────────────────────────────────────┤
+   │ Kegiatan Inti (50 menit)                           │
+   │ • Eksplorasi konsep                                │
+   │ • Diskusi kelompok                                 │
+   │ • Presentasi hasil                                 │
+   ├─────────────────────────────────────────────────────┤
+   │ Penutup (10 menit)                                 │
+   │ • Refleksi                                         │
+   │ • Kesimpulan                                       │
+   │ • Doa penutup                                      │
+   └─────────────────────────────────────────────────────┘
+
+E. ASESMEN
+   1. Asesmen Diagnostik: Kuis awal
+   2. Asesmen Formatif: Observasi, lembar kerja
+   3. Asesmen Sumatif: Tes tertulis
+
+F. PENGAYAAN DAN REMEDIAL
+   • Pengayaan: Tugas proyek tambahan
+   • Remedial: Pembelajaran ulang dengan metode berbeda
+
+G. REFLEKSI
+   • Peserta Didik: Apa yang paling menarik dari pembelajaran ini?
+   • Guru: Apa yang perlu diperbaiki untuk pembelajaran berikutnya?
+
+═══════════════════════════════════════════════════════════
+
+IV. LAMPIRAN
+───────────────────────────────────────────────────────────
+
+📄 LEMBAR KERJA PESERTA DIDIK (LKPD)
+${lkpd || '• Aktivitas 1: Eksplorasi konsep\n• Aktivitas 2: Diskusi kelompok\n• Aktivitas 3: Presentasi hasil'}
+
+📚 BAHAN BACAAN GURU & PESERTA DIDIK
+${bahanBacaan || '• Rangkuman materi\n• Contoh soal dan pembahasan\n• Referensi tambahan'}
+
+📖 GLOSARIUM
+${glosarium || '• Istilah 1: Definisi\n• Istilah 2: Definisi\n• Istilah 3: Definisi'}
+
+📋 DAFTAR PUSTAKA
+${daftarPustaka || '• Kementerian Pendidikan. (2022). Panduan Kurikulum Merdeka.\n• Sumber online terpercaya terkait topik.'}
+
+═══════════════════════════════════════════════════════════
+Mengetahui,
+Kepala Sekolah
+
+
+( ${userKepsek || '.....................'} )
+NIP. ${userNIPKepsek || '.....................'}
+
+Guru Mata Pelajaran
+
+
+( ${guru || '.....................'} )
+NIP. ${nip || '.....................'}
+═══════════════════════════════════════════════════════════
+  `.trim();
+}
+
+// ============================================
+// ✅ UI RENDER FUNCTION
+// ============================================
 
 window.renderGeneratorModule = function() {
   console.log('📝 [Asisten Modul] renderGeneratorModule() called');
@@ -58,11 +271,15 @@ window.renderGeneratorModule = function() {
       .modul-form label { display: block; margin-top: 12px; font-weight: 600; color: #374151; font-size: 14px; }
       .modul-form select, .modul-form input, .modul-form textarea { width: 100%; margin-top: 8px; padding: 12px; border-radius: 8px; border: 1px solid #d1d5db; font-size: 14px; font-family: inherit; }
       .modul-form textarea { min-height: 100px; resize: vertical; line-height: 1.6; }
-      .btn-generate, .btn-save, .btn-secondary { margin-top: 20px; padding: 14px 30px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; }
+      .btn-generate, .btn-save, .btn-secondary, .btn-print, .btn-download { margin-top: 20px; padding: 14px 30px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; }
       .btn-generate { background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); color: white; }
       .btn-generate:hover { background: linear-gradient(135deg, #6d28d9 0%, #5b21b6 100%); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(124,58,237,0.3); }
       .btn-save { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; }
       .btn-save:hover { background: linear-gradient(135deg, #059669 0%, #047857 100%); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(16,185,129,0.3); }
+      .btn-print { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white; }
+      .btn-print:hover { background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(99,102,241,0.3); }
+      .btn-download { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; }
+      .btn-download:hover { background: linear-gradient(135deg, #d97706 0%, #b45309 100%); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(245,158,11,0.3); }
       .btn-secondary { background: #6b7280; color: white; margin-top: 10px; }
       .btn-secondary:hover { background: #4b5563; transform: translateY(-2px); }
       .result-section { background: transparent; padding: 0; margin-top: 20px; }
@@ -254,13 +471,19 @@ window.renderGeneratorModule = function() {
       <!-- ✅ HASIL GENERATE — TANPA BINGKAI SCROLL -->
       <div id="modul-result" class="hidden result-section">
         <h3 class="text-xl font-bold mb-4 text-gray-800">📋 Hasil Generate</h3>
-        <textarea id="result-modul" placeholder="Modul akan muncul setelah generate..." style="min-height: 600px; width: 100%; padding: 16px; border: 1px solid #e5e7eb; border-radius: 8px; font-family: monospace; font-size: 13px; line-height: 1.5; white-space: pre-wrap;"></textarea>
+        <textarea id="result-modul" placeholder="Modul akan muncul setelah generate..." style="min-height: 600px; width: 100%; padding: 16px; border: 1px solid #e5e7eb; border-radius: 8px; font-family: monospace; font-size: 13px; line-height: 1.5; white-space: pre-wrap;" readonly></textarea>
         
-        <div style="display: flex; gap: 12px; margin-top: 16px;">
-          <button type="button" id="btn-save" class="btn-save" style="flex: 2;">
-            <i class="fas fa-save"></i> Simpan ke Firestore
+        <div style="display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap;">
+          <button type="button" id="btn-download" class="btn-download" style="flex: 1; min-width: 120px;">
+            <i class="fas fa-download"></i> Download
           </button>
-          <button type="button" id="btn-regenerate" class="btn-secondary" style="flex: 1;">
+          <button type="button" id="btn-print" class="btn-print" style="flex: 1; min-width: 120px;">
+            <i class="fas fa-print"></i> Print
+          </button>
+          <button type="button" id="btn-save" class="btn-save" style="flex: 2; min-width: 150px;">
+            <i class="fas fa-save"></i> Simpan
+          </button>
+          <button type="button" id="btn-regenerate" class="btn-secondary" style="flex: 1; min-width: 120px;">
             <i class="fas fa-redo"></i> Ulang
           </button>
         </div>
@@ -287,6 +510,10 @@ window.renderGeneratorModule = function() {
   }
 };
 
+// ============================================
+// ✅ HELPER FUNCTIONS
+// ============================================
+
 function hideDashboardSections() {
   document.querySelector('.dashboard-hero')?.closest('section')?.classList.add('hidden');
   document.querySelector('[aria-labelledby="rooms-heading"]')?.classList.add('hidden');
@@ -297,154 +524,54 @@ function setupEventHandlers() {
   const btnGenerate = document.getElementById('btn-generate');
   const btnSave = document.getElementById('btn-save');
   const btnRegenerate = document.getElementById('btn-regenerate');
+  const btnPrint = document.getElementById('btn-print');
+  const btnDownload = document.getElementById('btn-download');
   
   if (btnGenerate) btnGenerate.addEventListener('click', handleGenerate);
   if (btnSave) btnSave.addEventListener('click', handleSave);
   if (btnRegenerate) btnRegenerate.addEventListener('click', handleGenerate);
+  if (btnPrint) btnPrint.addEventListener('click', handlePrint);
+  if (btnDownload) btnDownload.addEventListener('click', handleDownload);
 }
 
-// ✅ MOCK GENERATE — UPDATED: Include all fields from komposisi
-async function mockGenerateModul(data) {
-  console.log('📝 [Asisten Modul] Generating mock modul...');
-  await new Promise(resolve => setTimeout(resolve, 2000));
+// ✅ Download function (seperti CTA Generator)
+function handleDownload() {
+  const modul = document.getElementById('result-modul')?.value;
+  if (!modul || modul.includes('⏳')) {
+    alert('⚠️ Generate data dulu sebelum download!');
+    return;
+  }
   
-  const {
-    guru, nip, sekolah, tahun, jenjang, kelas, mapel, topik, alokasi,
-    kompetensiAwal, sarana, targetPesertaDidik, modelPembelajaran,
-    profilPancasila,
-    lkpd, bahanBacaan, glosarium, daftarPustaka,
-    userKepsek, userNIPKepsek
-  } = data;
+  const topik = document.getElementById('modul-topik')?.value || 'modul';
+  const kelas = document.getElementById('modul-kelas')?.value || '';
+  const mapel = document.getElementById('modul-mapel')?.value || '';
   
-  const jenjangCapital = jenjang?.toUpperCase() || '-';
-  const mapelCapital = mapel?.toUpperCase() || '-';
-  const pppList = profilPancasila?.filter(p => p.checked).map(p => p.value).join(', ') || '-';
-  const targetLabel = {
-    'reguler': 'Siswa Reguler',
-    'kesulitan': 'Siswa dengan Kesulitan Belajar',
-    'pencapaian-tinggi': 'Siswa dengan Pencapaian Tinggi'
-  }[targetPesertaDidik] || 'Siswa Reguler';
-  const modelLabel = {
-    'pbl': 'Problem Based Learning (PBL)',
-    'pjbl': 'Project Based Learning (PjBL)',
-    'tatap-muka': 'Tatap Muka',
-    'lainnya': 'Lainnya'
-  }[modelPembelajaran] || 'Problem Based Learning (PBL)';
+  const blob = new Blob([modul], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `ModulAjar_${mapel}_${kelas}_${topik.replace(/\s+/g, '_')}.txt`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
   
-  return `
-═══════════════════════════════════════════════════════════
-                    MODUL AJAR
-                  KURIKULUM MERDEKA
-═══════════════════════════════════════════════════════════
-
-I. INFORMASI UMUM
-───────────────────────────────────────────────────────────
-Nama Penyusun      : ${guru || '-'}
-NIP                : ${nip || '-'}
-Nama Sekolah       : ${sekolah || '-'}
-Tahun Ajaran       : ${tahun || '2025/2026'}
-Jenjang/Kelas      : ${jenjangCapital} / Kelas ${kelas}
-Mata Pelajaran     : ${mapelCapital}
-Topik/Materi       : ${topik || '-'}
-Alokasi Waktu      : ${alokasi || '-'}
-
-Kompetensi Awal    : ${kompetensiAwal || 'Siswa telah memahami konsep dasar terkait topik ini.'}
-Sarana/Prasarana   : ${sarana || 'Laptop, proyektor, alat peraga, lingkungan sekitar'}
-Target Peserta     : ${targetLabel}
-Model Pembelajaran : ${modelLabel}
-
-II. PROFIL PELAJAR PANCASILA
-───────────────────────────────────────────────────────────
-${pppList}
-
-═══════════════════════════════════════════════════════════
-
-III. KOMPONEN INTI
-───────────────────────────────────────────────────────────
-
-A. TUJUAN PEMBELAJARAN
-   Setelah mengikuti pembelajaran ini, peserta didik dapat:
-   1. Memahami konsep dasar ${topik || 'materi'} dengan benar
-   2. Menerapkan ${topik || 'materi'} dalam situasi nyata
-   3. Menganalisis hubungan antar konsep ${topik || 'materi'}
-   4. Menyajikan hasil pembelajaran dengan jelas
-
-B. PEMAHAMAN BERMAKNA
-   Peserta didik memahami bahwa ${topik || 'materi ini'} 
-   memiliki keterkaitan dengan kehidupan sehari-hari dan 
-   dapat diterapkan dalam berbagai konteks.
-
-C. PERTANYAAN PEMANTIK
-   1. Apa yang kalian ketahui tentang ${topik || 'materi ini'}?
-   2. Bagaimana ${topik || 'materi ini'} digunakan dalam kehidupan?
-   3. Mengapa ${topik || 'materi ini'} penting untuk dipelajari?
-
-D. KEGIATAN PEMBELAJARAN
-   ┌─────────────────────────────────────────────────────┐
-   │ PERTEMUAN 1                                         │
-   ├─────────────────────────────────────────────────────┤
-   │ Pendahuluan (10 menit)                             │
-   │ • Salam dan doa                                    │
-   │ • Apersepsi                                        │
-   │ • Penyampaian tujuan                               │
-   ├─────────────────────────────────────────────────────┤
-   │ Kegiatan Inti (50 menit)                           │
-   │ • Eksplorasi konsep                                │
-   │ • Diskusi kelompok                                 │
-   │ • Presentasi hasil                                 │
-   ├─────────────────────────────────────────────────────┤
-   │ Penutup (10 menit)                                 │
-   │ • Refleksi                                         │
-   │ • Kesimpulan                                       │
-   │ • Doa penutup                                      │
-   └─────────────────────────────────────────────────────┘
-
-E. ASESMEN
-   1. Asesmen Diagnostik: Kuis awal
-   2. Asesmen Formatif: Observasi, lembar kerja
-   3. Asesmen Sumatif: Tes tertulis
-
-F. PENGAYAAN DAN REMEDIAL
-   • Pengayaan: Tugas proyek tambahan
-   • Remedial: Pembelajaran ulang dengan metode berbeda
-
-G. REFLEKSI
-   • Peserta Didik: Apa yang paling menarik dari pembelajaran ini?
-   • Guru: Apa yang perlu diperbaiki untuk pembelajaran berikutnya?
-
-═══════════════════════════════════════════════════════════
-
-IV. LAMPIRAN
-───────────────────────────────────────────────────────────
-
-📄 LEMBAR KERJA PESERTA DIDIK (LKPD)
-${lkpd || '• Aktivitas 1: Eksplorasi konsep\n• Aktivitas 2: Diskusi kelompok\n• Aktivitas 3: Presentasi hasil'}
-
-📚 BAHAN BACAAN GURU & PESERTA DIDIK
-${bahanBacaan || '• Rangkuman materi\n• Contoh soal dan pembahasan\n• Referensi tambahan'}
-
-📖 GLOSARIUM
-${glosarium || '• Istilah 1: Definisi\n• Istilah 2: Definisi\n• Istilah 3: Definisi'}
-
-📋 DAFTAR PUSTAKA
-${daftarPustaka || '• Kementerian Pendidikan. (2022). Panduan Kurikulum Merdeka.\n• Sumber online terpercaya terkait topik.'}
-
-═══════════════════════════════════════════════════════════
-Mengetahui,
-Kepala Sekolah
-
-
-( ${userKepsek || '.....................'} )
-NIP. ${userNIPKepsek || '.....................'}
-
-Guru Mata Pelajaran
-
-
-( ${guru || '.....................'} )
-NIP. ${nip || '.....................'}
-═══════════════════════════════════════════════════════════
-  `.trim();
+  console.log('✅ [Asisten Modul] Download successful');
 }
+
+// ✅ Print function
+function handlePrint() {
+  const modul = document.getElementById('result-modul')?.value;
+  if (!modul || modul.includes('⏳')) {
+    alert('⚠️ Generate data dulu sebelum print!');
+    return;
+  }
+  window.print();
+}
+
+// ============================================
+// ✅ MAIN GENERATE HANDLER (With Loading + Error Handling)
+// ============================================
 
 async function handleGenerate() {
   console.log('🪄 [Asisten Modul] Generate clicked');
@@ -452,9 +579,8 @@ async function handleGenerate() {
   const user = auth.currentUser;
   if (!user) { alert('⚠️ Silakan login dulu!'); return; }
   
-  // ✅ Ambil semua field dari form (existing + new)
+  // ✅ Ambil semua field dari form
   const data = {
-    // Existing fields
     guru: document.getElementById('modul-guru')?.value,
     nip: document.getElementById('modul-nip')?.value,
     sekolah: document.getElementById('modul-sekolah')?.value,
@@ -471,7 +597,7 @@ async function handleGenerate() {
     targetPesertaDidik: document.getElementById('modul-target')?.value,
     modelPembelajaran: document.getElementById('modul-model')?.value,
     
-    // ✅ Profil Pancasila (existing)
+    // ✅ Profil Pancasila
     profilPancasila: [
       { id: 'ppp-1', value: 'Beriman, Bertakwa' },
       { id: 'ppp-2', value: 'Berkebinekaan Global' },
@@ -492,25 +618,80 @@ async function handleGenerate() {
     userNIPKepsek: localStorage.getItem('user_nip_kepsek') || ''
   };
   
-  // Validation (existing + new required fields)
+  // ✅ Validation
   if (!data.sekolah) { alert('⚠️ Nama Sekolah wajib diisi!'); return; }
   if (!data.jenjang || !data.kelas || !data.mapel || !data.topik) { alert('⚠️ Lengkapi Informasi Modul!'); return; }
   
+  const btnGenerate = document.getElementById('btn-generate');
   const resultDiv = document.getElementById('modul-result');
-  if (resultDiv) resultDiv.classList.remove('hidden');
+  const resultTextarea = document.getElementById('result-modul');
   
-  document.getElementById('result-modul').value = '⏳ Sedang generate...';
+  // ✅ Loading state: disable button + show spinner
+  const originalBtnText = btnGenerate.innerHTML;
+  btnGenerate.disabled = true;
+  btnGenerate.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+  
+  if (resultDiv) resultDiv.classList.remove('hidden');
+  resultTextarea.value = '⏳ Sedang generate modul...';
   resultDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
   
   try {
-    const result = await mockGenerateModul(data);
-    document.getElementById('result-modul').value = result;
+    // ✅ Call generator (mock now, API-ready pattern)
+    const result = await generateModulWithAI(data);
+    
+    resultTextarea.value = result;
     console.log('✅ [Asisten Modul] Generate complete!');
+    
+    // ✅ Auto-save to Adm.Pembelajaran (non-blocking, like CTA)
+    try {
+      const { storage } = await import('./adm-pembelajaran/storage.js');
+      storage.setUserId(user.uid);
+      
+      const docData = {
+        jenis: 'asisten-modul',
+        jenjang: data.jenjang || '',
+        kelas: data.kelas || '',
+        mapel: data.mapel || '',
+        judul: `${data.topik || 'Modul'} - Kelas ${data.kelas}`,
+        konten: result,
+        tags: ['modul', data.mapel?.toLowerCase()],
+        source: 'asisten-modul',
+        meta { topik: data.topik, guru: data.guru, sekolah: data.sekolah }
+      };
+      
+      await storage.autoSaveFromExternal('asisten-modul', docData);
+      console.log('✅ [Asisten Modul] Auto-save to Adm.Pembelajaran successful');
+    } catch (autoSaveError) {
+      console.warn('⚠️ [Asisten Modul] Auto-save skipped:', autoSaveError.message);
+      // Non-blocking: don't alert user
+    }
+    
   } catch (error) {
     console.error('❌ [Asisten Modul] Error:', error);
-    alert('❌ Gagal generate: ' + error.message);
+    
+    // ✅ Specific error handling
+    let errorMessage = error.message;
+    if (error.message.includes('API key') || error.message.includes('auth')) {
+      errorMessage = 'API Key tidak valid atau belum terkonfigurasi.';
+    } else if (error.message.includes('quota') || error.message.includes('429')) {
+      errorMessage = 'Limit AI harian habis. Coba lagi nanti.';
+    } else if (error.message.includes('network') || error.message.includes('fetch')) {
+      errorMessage = 'Koneksi internet bermasalah. Cek koneksi Anda.';
+    }
+    
+    resultTextarea.value = `❌ Error: ${errorMessage}`;
+    alert('❌ Gagal generate modul:\n\n' + errorMessage);
+    
+  } finally {
+    // ✅ Restore button state
+    btnGenerate.disabled = false;
+    btnGenerate.innerHTML = originalBtnText;
   }
 }
+
+// ============================================
+// ✅ SAVE HANDLER
+// ============================================
 
 async function handleSave() {
   console.log('💾 [Asisten Modul] Save clicked');
@@ -519,7 +700,7 @@ async function handleSave() {
   if (!user) { alert('⚠️ Silakan login dulu!'); return; }
   
   const modul = document.getElementById('result-modul')?.value;
-  if (!modul || modul === '⏳ Sedang generate...') {
+  if (!modul || modul === '⏳ Sedang generate...' || modul.includes('Error:')) {
     alert('⚠️ Generate data dulu sebelum menyimpan!');
     return;
   }
@@ -528,7 +709,7 @@ async function handleSave() {
     const userDoc = await getDoc(doc(db, 'users', user.uid));
     const isAdmin = userDoc.exists() && userDoc.data()?.role === 'admin';
     
-    // ✅ Save ALL fields (existing + new) to Firestore
+    // ✅ Save ALL fields to Firestore
     await addDoc(collection(db, 'modul_ajar'), {
       // Existing fields
       userId: user.uid,
@@ -568,12 +749,24 @@ async function handleSave() {
     alert('✅ Modul Ajar berhasil disimpan!');
     loadModulData();
     document.getElementById('modul-result').classList.add('hidden');
-    document.getElementById('modul-form').reset();
   } catch (error) {
     console.error('❌ [Asisten Modul] Save error:', error);
-    alert('❌ Gagal simpan: ' + error.message);
+    
+    // ✅ Specific error handling for save
+    let errorMessage = error.message;
+    if (error.message.includes('permission') || error.message.includes('security')) {
+      errorMessage = 'Anda tidak memiliki akses untuk menyimpan. Hubungi admin.';
+    } else if (error.message.includes('network')) {
+      errorMessage = 'Koneksi internet bermasalah. Cek koneksi Anda.';
+    }
+    
+    alert('❌ Gagal simpan: ' + errorMessage);
   }
 }
+
+// ============================================
+// ✅ LOAD DATA HANDLER
+// ============================================
 
 function loadModulData() {
   const list = document.getElementById('modul-list');
@@ -628,4 +821,4 @@ function loadModulData() {
   })();
 }
 
-console.log('🟢 [Asisten Modul] READY — KOMPOSISI LENGKAP + FIRESTORE SYNC');
+console.log('🟢 [Asisten Modul] READY — Prototype Offline (API-Ready Pattern)');
