@@ -2,18 +2,22 @@
  * ============================================
  * CHAT WIDGET - UI untuk AI Chatbot
  * Platform Administrasi Kelas Digital
+ * ✅ UPDATED: Tambah suggested question buttons
  * ============================================
- * 
- * Fungsi:
- * - Floating button di corner kanan bawah
- * - Chat window dengan history
- * - Integrasi dengan chat-ai.js
  */
 
 import { getChatResponse, getFAQAnswer } from './chat-ai.js';
 
 let chatHistory = [];
 let isChatOpen = false;
+
+// ✅ SUGGESTED QUESTIONS (tombol pilihan FAQ)
+const SUGGESTED_QUESTIONS = [
+    { label: 'Cara daftar?', question: 'Bagaimana cara mendaftar?' },
+    { label: 'Syarat approval?', question: 'Apa syarat approval admin?' },
+    { label: 'Info donasi?', question: 'Berapa biaya donasi?' },
+    { label: 'Tutorial pakai?', question: 'Bagaimana tutorial penggunaan?' }
+];
 
 // ✅ FUNGSI: Initialize Chat Widget
 export function initChatWidget() {
@@ -48,9 +52,11 @@ export function initChatWidget() {
                     • Cara daftar<br>
                     • Syarat approval<br>
                     • Tutorial penggunaan<br><br>
-                    Silakan tanya! 😊
+                    <strong>💡 Klik pertanyaan di bawah atau ketik sendiri:</strong>
                 </div>
             </div>
+            <!-- ✅ SUGGESTED QUESTIONS BUTTONS -->
+            <div class="suggested-questions" id="suggested-questions"></div>
         </div>
         <div class="chat-input-area">
             <input 
@@ -69,11 +75,35 @@ export function initChatWidget() {
     `;
     document.body.appendChild(chatWindow);
     
+    // Render suggested questions
+    renderSuggestedQuestions();
+    
     // Add styles
     addChatStyles();
     
     console.log('✅ [Chat Widget] Initialized');
 }
+
+// ✅ FUNGSI: Render Suggested Question Buttons
+function renderSuggestedQuestions() {
+    const container = document.getElementById('suggested-questions');
+    if (!container) return;
+    
+    container.innerHTML = SUGGESTED_QUESTIONS.map(item => `
+        <button class="suggested-question-btn" onclick="askSuggested('${item.question.replace(/'/g, "\\'")}')">
+            ${item.label}
+        </button>
+    `).join('');
+}
+
+// ✅ FUNGSI: Handle Suggested Question Click
+window.askSuggested = function(question) {
+    const input = document.getElementById('chat-input');
+    if (input) {
+        input.value = question;
+        sendMessage();
+    }
+};
 
 // ✅ FUNGSI: Toggle Chat Window
 window.toggleChat = function() {
@@ -104,6 +134,12 @@ window.sendMessage = async function() {
     // Add user message to UI
     addMessageToChat('user', message);
     input.value = '';
+    
+    // Hide suggested questions after first message
+    const suggestedContainer = document.getElementById('suggested-questions');
+    if (suggestedContainer) {
+        suggestedContainer.style.display = 'none';
+    }
     
     // Show typing indicator
     showTyping(true);
@@ -296,6 +332,32 @@ function addChatStyles() {
             box-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
         
+        /* ✅ SUGGESTED QUESTIONS */
+        .suggested-questions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 8px 0 16px 0;
+            margin-top: 8px;
+        }
+        
+        .suggested-question-btn {
+            background: white;
+            border: 1px solid #7c3aed;
+            color: #7c3aed;
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+        
+        .suggested-question-btn:hover {
+            background: #7c3aed;
+            color: white;
+        }
+        
         /* Chat Input */
         .chat-input-area {
             display: flex;
@@ -363,6 +425,15 @@ function addChatStyles() {
                 width: 50px;
                 height: 50px;
                 font-size: 20px;
+            }
+            
+            .suggested-questions {
+                gap: 6px;
+            }
+            
+            .suggested-question-btn {
+                font-size: 11px;
+                padding: 5px 10px;
             }
         }
     `;
