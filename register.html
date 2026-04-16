@@ -334,22 +334,31 @@
                 }
             });
         }
-        document.getElementById('smpFields')?.addEventListener('change', function() {
-            if (jenjangSelect.value === 'smp') {
-                const checked = document.querySelectorAll('input[name="smpMapel"]:checked').length;
-                showFieldError(null, smpMapelError, checked === 0 || checked > 2);
-            }
+        
+        // ✅ FIX: Attach event to individual checkboxes for SMP/SMA (not parent container)
+        document.querySelectorAll('input[name="smpMapel"]').forEach(cb => {
+            cb.addEventListener('change', function() {
+                if (jenjangSelect.value === 'smp') {
+                    const checked = document.querySelectorAll('input[name="smpMapel"]:checked').length;
+                    showFieldError(this, smpMapelError, checked === 0 || checked > 2);
+                }
+            });
         });
-        document.getElementById('smaFields')?.addEventListener('change', function() {
-            if (jenjangSelect.value === 'sma') {
-                const checked = document.querySelectorAll('input[name="smaMapel"]:checked').length;
-                showFieldError(null, smaMapelError, checked === 0 || checked > 2);
-            }
+        
+        document.querySelectorAll('input[name="smaMapel"]').forEach(cb => {
+            cb.addEventListener('change', function() {
+                if (jenjangSelect.value === 'sma') {
+                    const checked = document.querySelectorAll('input[name="smaMapel"]:checked').length;
+                    showFieldError(this, smaMapelError, checked === 0 || checked > 2);
+                }
+            });
         });
         
         // Form submit handler
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
+            console.log('📝 [Register] Form submitted, jenjang:', jenjangSelect.value);
+            
             showMessage('', 'success');
             showFieldError(emailInput, emailError, false); showFieldError(passwordInput, passwordError, false); showFieldError(confirmPasswordInput, confirmError, false);
             
@@ -387,7 +396,11 @@
                 if (checkedMapel.length === 0 || checkedMapel.length > 2) { showFieldError(null, smaMapelError, true); hasError = true; }
             }
             
-            if (hasError) { showMessage('❌ Mohon perbaiki error di atas sebelum mendaftar.', 'error'); return; }
+            if (hasError) { 
+                console.log('❌ [Register] Validation failed, hasError:', hasError);
+                showMessage('❌ Mohon perbaiki error di atas sebelum mendaftar.', 'error'); 
+                return; 
+            }
             
             setLoading(true);
             try {
@@ -454,6 +467,9 @@
                 
             } catch (error) {
                 console.error('❌ [Register] Error:', error);
+                console.error('❌ [Register] Error code:', error.code);
+                console.error('❌ [Register] Error message:', error.message);
+                
                 let errorMessage = '❌ <strong>Gagal mendaftar.</strong><br><br>';
                 if (error.code === 'auth/email-already-in-use') { errorMessage += 'Email sudah terdaftar.'; showFieldError(emailInput, emailError, true); }
                 else if (error.code === 'auth/invalid-email') { errorMessage += 'Format email tidak valid.'; showFieldError(emailInput, emailError, true); }
