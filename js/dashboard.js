@@ -1,7 +1,7 @@
 /**
  * ============================================
  * DASHBOARD LOGIC - Platform Administrasi Kelas
- * VERSI: BULLETPROOF + GRANULAR VISIBILITY + LOGOUT FIX + APPROVAL CHECK
+ * VERSI: BULLETPROOF + GRANULAR VISIBILITY + LOGOUT FIX + APPROVAL CHECK + ADMIN WIDGET
  * ============================================
  */
 
@@ -258,6 +258,11 @@ async function checkAuthStatus() {
                             window.currentUserMapel = userData.mapel_diampu || [];          // ✅ New: array of mapel
                             window.currentUserSdMapelType = userData.sd_mapel_type || 'kelas'; // ✅ New: for SD teacher type
                             window.currentUserIsApproved = userData.isApproved === true;    // ✅ New: approval status
+                            
+                            // ✅ INTEGRASI: Init admin widget after user data loaded
+                            if (typeof window.initAdminWidget === 'function') {
+                                window.initAdminWidget(window.currentUserRole);
+                            }
                             
                             console.log('✅ [Dashboard] User profile loaded:', { 
                                 role: window.currentUserRole, 
