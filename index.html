@@ -371,6 +371,16 @@
                 console.error('❌ [Index] Auth check error:', error);
             }
         });
+        <!-- ✅ CHAT WIDGET INIT -->
+<script type="module">
+    import { initChatWidget } from './modules/chat-widget.js';
+    
+    // Initialize chat widget after page load
+    document.addEventListener('DOMContentLoaded', () => {
+        initChatWidget();
+        console.log('✅ [Index] Chat Widget initialized');
+    });
+</script>
     </script>
 </body>
 </html>
