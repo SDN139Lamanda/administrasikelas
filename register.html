@@ -91,7 +91,8 @@
                     <!-- ✅ JENIS PENGAJARAN DULUAN (baru menentukan validasi kelas) -->
                     <div class="mb-4">
                         <label for="sdMapelType" class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-book mr-2"></i>Jenis Pengajaran <span class="text-red-500">*</span></label>
-                        <select id="sdMapelType" class="register-input" required>
+                        <!-- ✅ FIX: HAPUS 'required' dari sini (conditional field) -->
+                        <select id="sdMapelType" class="register-input">
                             <option value="">Pilih Jenis</option>
                             <option value="kelas">Guru Kelas (semua mapel)</option>
                             <option value="mapel">Guru Mapel Khusus</option>
