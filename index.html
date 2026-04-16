@@ -330,7 +330,7 @@
     <!-- Global JS -->
     <script type="module" src="js/main.js"></script>
     
-    <!-- ✅ TAMBAHKAN: Script untuk handle logout flow & cache clear -->
+    <!-- ✅ Script untuk handle logout flow & cache clear -->
     <script>
         // ✅ Check if user just logged out (bypass cache)
         const urlParams = new URLSearchParams(window.location.search);
@@ -371,16 +371,17 @@
                 console.error('❌ [Index] Auth check error:', error);
             }
         });
-        <!-- ✅ CHAT WIDGET INIT -->
-<script type="module">
-    import { initChatWidget } from './modules/chat-widget.js';
+    </script>
     
-    // Initialize chat widget after page load
-    document.addEventListener('DOMContentLoaded', () => {
-        initChatWidget();
-        console.log('✅ [Index] Chat Widget initialized');
-    });
-</script>
+    <!-- ✅ CHAT WIDGET INIT (SCRIPT TERPISAH) -->
+    <script type="module">
+        import { initChatWidget } from './modules/chat-widget.js';
+        
+        // Initialize chat widget after DOM ready
+        document.addEventListener('DOMContentLoaded', () => {
+            initChatWidget();
+            console.log('✅ [Index] Chat Widget initialized');
+        });
     </script>
 </body>
 </html>
