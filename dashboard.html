@@ -649,223 +649,142 @@
         </div>
     </div>
 
-    <!-- ✅ ADMIN WIDGET LOGIC (Inline for minimal file changes) -->
-    <script>
-    // Global cache for pending users
+   <!-- ✅ ADMIN WIDGET LOGIC (UPDATED - Fixed Event Handler + Debug) -->
+<script>
+(function() {
+    console.log('👑 [Admin Widget v2] Script initializing...');
+    
     let adminPendingUsers = [];
-
-    // ✅ Toggle admin widget modal
-    window.toggleAdminWidget = function() {
-        const modal = document.getElementById('admin-approval-modal');
+    
+    function initAdminWidgetScript() {
         const btn = document.getElementById('admin-widget-btn');
+        const modal = document.getElementById('admin-approval-modal');
         
+        if (!btn || !modal) {
+            console.error('❌ [Admin Widget] Elements not found!', { btn, modal });
+            return;
+        }
+        
+        console.log('✅ [Admin Widget] Elements found, attaching listeners...');
+        
+        // ✅ Use addEventListener (more reliable than onclick)
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('👑 [Admin Widget] Button clicked!');
+            toggleAdminWidget();
+        });
+        
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) toggleAdminWidget();
+        });
+        
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+                toggleAdminWidget();
+            }
+        });
+        
+        console.log('✅ [Admin Widget] Listeners attached');
+    }
+    
+    window.toggleAdminWidget = function() {
+        console.log('🔄 [Admin Widget] toggle called');
+        const modal = document.getElementById('admin-approval-modal');
         if (!modal) return;
         
         if (modal.classList.contains('hidden')) {
-            // Open modal
+            console.log('✅ Opening modal...');
             modal.classList.remove('hidden');
-            document.body.style.overflow = 'hidden'; // Prevent scroll
-            
-            // Load data if not loaded yet
-            if (adminPendingUsers.length === 0) {
-                loadAdminPendingUsers();
-            }
+            document.body.style.overflow = 'hidden';
+            if (adminPendingUsers.length === 0) loadAdminPendingUsers();
         } else {
-            // Close modal
+            console.log('✅ Closing modal...');
             modal.classList.add('hidden');
             document.body.style.overflow = '';
         }
     };
-
-    // ✅ Load pending users from Firestore
+    
     async function loadAdminPendingUsers() {
-        console.log('👑 [Admin Widget] Loading pending users...');
-        
+        console.log('📊 Loading pending users...');
         try {
-            // Dynamic import to avoid circular dependency
             const { db, collection, query, where, orderBy, getDocs } = await import('./modules/firebase-config.js');
-            
-            // Query: users with isApproved === false, exclude admins
-            const q = query(
-                collection(db, 'users'),
-                where('isApproved', '==', false),
-                orderBy('createdAt', 'desc')
-            );
-            
+            const q = query(collection(db, 'users'), where('isApproved', '==', false), orderBy('createdAt', 'desc'));
             const snapshot = await getDocs(q);
-            adminPendingUsers = snapshot.docs
-                .map(doc => ({ id: doc.id, ...doc.data() }))
-                .filter(u => u.role !== 'admin');
-            
-            console.log(`📊 [Admin Widget] Found ${adminPendingUsers.length} pending user(s)`);
-            
-            // Update stats
-            document.getElementById('admin-stat-pending').textContent = adminPendingUsers.length;
-            document.getElementById('admin-stat-approved').textContent = '-'; // Could add query later
-            
-            // Render table
+            adminPendingUsers = snapshot.docs.map(d => ({ id: d.id, ...d.data() })).filter(u => u.role !== 'admin');
+            console.log(`📊 Found ${adminPendingUsers.length} pending`);
+            const el = document.getElementById('admin-stat-pending');
+            if (el) el.textContent = adminPendingUsers.length;
             renderAdminPendingTable();
-            
         } catch (error) {
-            console.error('❌ [Admin Widget] Error:', error);
-            document.getElementById('admin-pending-tbody').innerHTML = `
-                <tr><td colspan="4" class="px-4 py-8 text-center text-red-600">
-                    ❌ Gagal memuat: ${error.message}
-                </td></tr>
-            `;
+            console.error('❌ Error:', error);
+            const tbody = document.getElementById('admin-pending-tbody');
+            if (tbody) tbody.innerHTML = `<tr><td colspan="4" class="px-4 py-8 text-center text-red-600">❌ ${error.message}</td></tr>`;
         }
     }
-
-    // ✅ Render pending users table
+    
     function renderAdminPendingTable() {
         const tbody = document.getElementById('admin-pending-tbody');
-        const emptyState = document.getElementById('admin-empty-state');
-        const searchTerm = document.getElementById('admin-search-input')?.value?.toLowerCase() || '';
+        const empty = document.getElementById('admin-empty-state');
+        const search = document.getElementById('admin-search-input')?.value?.toLowerCase() || '';
+        if (!tbody) return;
         
-        // Filter by search
         const filtered = adminPendingUsers.filter(u => 
-            u.nama_lengkap?.toLowerCase().includes(searchTerm) ||
-            u.email?.toLowerCase().includes(searchTerm) ||
-            u.nama_sekolah?.toLowerCase().includes(searchTerm)
+            u.nama_lengkap?.toLowerCase().includes(search) ||
+            u.email?.toLowerCase().includes(search) ||
+            u.nama_sekolah?.toLowerCase().includes(search)
         );
         
         if (filtered.length === 0) {
             tbody.innerHTML = '';
-            emptyState.classList.remove('hidden');
+            if (empty) empty.classList.remove('hidden');
             return;
         }
-        
-        emptyState.classList.add('hidden');
+        if (empty) empty.classList.add('hidden');
         
         tbody.innerHTML = filtered.map(u => {
-            const date = u.createdAt?.toDate?.()?.toLocaleDateString('id-ID', {
-                day: 'numeric', month: 'short', year: 'numeric'
-            }) || '-';
-            
-            return `
-                <tr class="hover:bg-gray-50 transition">
-                    <td class="px-4 py-3">
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold text-sm">
-                                ${(u.nama_lengkap || 'U').charAt(0).toUpperCase()}
-                            </div>
-                            <div>
-                                <div class="font-medium text-gray-900 text-sm">${u.nama_lengkap || 'Tanpa Nama'}</div>
-                                <div class="text-xs text-gray-500">${u.jenjang_sekolah?.toUpperCase() || '-'}</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="px-4 py-3 text-sm text-gray-600">${u.email || '-'}</td>
-                    <td class="px-4 py-3 text-sm text-gray-600">${u.nama_sekolah || '-'}</td>
-                    <td class="px-4 py-3 text-right">
-                        <div class="flex justify-end gap-1">
-                            <button onclick="adminApproveUser('${u.id}', '${u.email}', '${u.nama_lengkap}')" 
-                                    class="p-2 text-green-600 hover:bg-green-50 rounded-lg transition"
-                                    title="Setujui">
-                                <i class="fas fa-check"></i>
-                            </button>
-                            <button onclick="adminRejectUser('${u.id}', '${u.email}', '${u.nama_lengkap}')" 
-                                    class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
-                                    title="Tolak">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-            `;
+            const date = u.createdAt?.toDate?.()?.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) || '-';
+            return `<tr class="hover:bg-gray-50"><td class="px-4 py-3"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold text-sm">${(u.nama_lengkap||'U')[0].toUpperCase()}</div><div><div class="font-medium text-sm">${u.nama_lengkap||'-'}</div><div class="text-xs text-gray-500">${u.jenjang_sekolah?.toUpperCase()||'-'}</div></div></div></td><td class="px-4 py-3 text-sm">${u.email||'-'}</td><td class="px-4 py-3 text-sm">${u.nama_sekolah||'-'}</td><td class="px-4 py-3 text-right"><div class="flex justify-end gap-1"><button onclick="adminApproveUser('${u.id}','${u.email}','${u.nama_lengkap}')" class="p-2 text-green-600 hover:bg-green-50 rounded" title="Setujui"><i class="fas fa-check"></i></button><button onclick="adminRejectUser('${u.id}','${u.email}','${u.nama_lengkap}')" class="p-2 text-red-600 hover:bg-red-50 rounded" title="Tolak"><i class="fas fa-times"></i></button></div></td></tr>`;
         }).join('');
     }
-
-    // ✅ Filter function for search
-    window.filterAdminUsers = function() {
-        renderAdminPendingTable();
-    };
-
-    // ✅ Approve user
-    window.adminApproveUser = async function(userId, email, nama) {
-        if (!confirm(`✅ Setujui user:\n\n${nama}\n${email}\n\nUser akan bisa login setelah ini.`)) {
-            return;
-        }
-        
+    
+    window.filterAdminUsers = () => renderAdminPendingTable();
+    
+    window.adminApproveUser = async (uid, email, nama) => {
+        if (!confirm(`✅ Setujui ${nama}?\n\n${email}`)) return;
         try {
             const { db, doc, updateDoc, serverTimestamp, auth } = await import('./modules/firebase-config.js');
-            
-            await updateDoc(doc(db, 'users', userId), {
-                isApproved: true,
-                approvedAt: serverTimestamp(),
-                approvedBy: auth.currentUser?.uid || 'admin'
-            });
-            
-            alert(`✅ User "${nama}" berhasil disetujui!`);
-            
-            // Refresh list
+            await updateDoc(doc(db, 'users', uid), { isApproved: true, approvedAt: serverTimestamp(), approvedBy: auth.currentUser?.uid || 'admin' });
+            alert(`✅ ${nama} disetujui!`);
             await loadAdminPendingUsers();
-            
-        } catch (error) {
-            console.error('❌ [Admin] Approve error:', error);
-            alert(`❌ Gagal: ${error.message}`);
-        }
+        } catch (e) { alert(`❌ ${e.message}`); }
     };
-
-    // ✅ Reject user
-    window.adminRejectUser = async function(userId, email, nama) {
-        if (!confirm(`❌ Tolak user:\n\n${nama}\n${email}\n\nUser TIDAK akan bisa login.`)) {
-            return;
-        }
-        
+    
+    window.adminRejectUser = async (uid, email, nama) => {
+        if (!confirm(`❌ Tolak ${nama}?\n\n${email}`)) return;
         try {
             const { db, doc, updateDoc, serverTimestamp, auth } = await import('./modules/firebase-config.js');
-            
-            await updateDoc(doc(db, 'users', userId), {
-                isApproved: false,
-                isActive: false,
-                rejectedAt: serverTimestamp(),
-                rejectedBy: auth.currentUser?.uid || 'admin'
-            });
-            
-            alert(`✅ User "${nama}" ditolak.`);
+            await updateDoc(doc(db, 'users', uid), { isApproved: false, isActive: false, rejectedAt: serverTimestamp(), rejectedBy: auth.currentUser?.uid || 'admin' });
+            alert(`✅ ${nama} ditolak`);
             await loadAdminPendingUsers();
-            
-        } catch (error) {
-            console.error('❌ [Admin] Reject error:', error);
-            alert(`❌ Gagal: ${error.message}`);
-        }
+        } catch (e) { alert(`❌ ${e.message}`); }
     };
-
-    // ✅ Show/hide admin button based on role (call this after auth check)
-    window.initAdminWidget = function(userRole) {
+    
+    window.initAdminWidget = (role) => {
         const btn = document.getElementById('admin-widget-btn');
         if (!btn) return;
-        
-        if (userRole === 'admin') {
-            btn.classList.remove('hidden');
-            console.log('👑 [Admin Widget] Button visible for admin');
-        } else {
-            btn.classList.add('hidden');
-        }
+        btn.classList.toggle('hidden', role !== 'admin');
+        console.log(`👑 Button ${role === 'admin' ? 'visible' : 'hidden'} for ${role}`);
     };
-
-    // ✅ Close modal on outside click
-    document.addEventListener('click', function(e) {
-        const modal = document.getElementById('admin-approval-modal');
-        const modalContent = modal?.querySelector('.bg-white');
-        
-        if (modal && !modal.classList.contains('hidden') && modalContent && !modalContent.contains(e.target)) {
-            toggleAdminWidget();
-        }
-    });
-
-    // ✅ Close modal on Escape key
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            const modal = document.getElementById('admin-approval-modal');
-            if (modal && !modal.classList.contains('hidden')) {
-                toggleAdminWidget();
-            }
-        }
-    });
-
-    console.log('✅ [Admin Widget] Inline script loaded');
-    </script>
+    
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initAdminWidgetScript);
+    } else {
+        initAdminWidgetScript();
+    }
+    
+    console.log('✅ [Admin Widget v2] Ready');
+})();
+</script>
 </body>
 </html>
