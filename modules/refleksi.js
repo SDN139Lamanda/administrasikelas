@@ -3,12 +3,15 @@
  * MODULE: REFLEKSI GURU
  * Platform Administrasi Kelas Digital
  * ISOLASI DATA: guruId-based filtering
+ * UPDATED: Back to Dashboard + Hide Main Features
  * ============================================
  * Fitur:
  * - Form refleksi terstruktur (6 aspek)
  * - Firebase Firestore realtime
  * - Multi-user support dengan isolasi data
  * - Auto-save dengan timestamp
+ * - ✅ NEW: Tombol Kembali ke Dashboard
+ * - ✅ NEW: Hide fitur utama saat refleksi aktif
  * ============================================
  */
 
@@ -27,6 +30,70 @@ console.log('✅ [Refleksi] Firebase imports successful');
 console.log('✅ [Refleksi] db:', typeof db);
 console.log('✅ [Refleksi] auth:', typeof auth);
 
+// ✅ HELPER: Hide main dashboard sections
+function hideMainDashboardSections() {
+  console.log('🔒 [Refleksi] Hiding main dashboard sections...');
+  
+  // Hide hero section
+  const heroSection = document.querySelector('.dashboard-hero');
+  if (heroSection) {
+    heroSection.closest('section')?.classList.add('hidden');
+    console.log('✅ Hero section hidden');
+  }
+  
+  // Hide rooms grid section
+  const roomsSection = document.querySelector('[aria-labelledby="rooms-heading"]');
+  if (roomsSection) {
+    roomsSection.classList.add('hidden');
+    console.log('✅ Rooms section hidden');
+  }
+  
+  // Hide jenjang sections (sd/smp/sma)
+  ['sd-section', 'smp-section', 'sma-section'].forEach(id => {
+    const section = document.getElementById(id);
+    if (section) section.classList.add('hidden');
+  });
+  
+  // Hide other module containers
+  const moduleContainer = document.getElementById('module-container');
+  if (moduleContainer) moduleContainer.classList.add('hidden');
+  
+  console.log('✅ Main sections hidden');
+}
+
+// ✅ HELPER: Show dashboard (called by back button)
+function showDashboard() {
+  console.log('🏠 [Refleksi] Showing dashboard...');
+  
+  // Use existing backToDashboard if available
+  if (typeof window.backToDashboard === 'function') {
+    window.backToDashboard();
+  } else {
+    // Fallback: manually show sections
+    const heroSection = document.querySelector('.dashboard-hero');
+    if (heroSection) {
+      heroSection.closest('section')?.classList.remove('hidden');
+    }
+    
+    const roomsSection = document.querySelector('[aria-labelledby="rooms-heading"]');
+    if (roomsSection) {
+      roomsSection.classList.remove('hidden');
+    }
+    
+    // Hide refleksi container
+    const refleksiContainer = document.getElementById('refleksi-container');
+    if (refleksiContainer) {
+      refleksiContainer.classList.add('hidden');
+      refleksiContainer.innerHTML = '';
+    }
+    
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  
+  console.log('✅ Dashboard shown');
+}
+
 // ✅ STEP 2: Register Global Function (untuk onclick di HTML)
 window.renderRefleksiForm = function() {
   console.log('📝 [Refleksi] renderRefleksiForm() called');
@@ -43,6 +110,13 @@ window.renderRefleksiForm = function() {
   
   const user = auth.currentUser;
   console.log('👤 [Refleksi] Current user:', user?.email || 'Not logged in');
+  
+  // ✅ NEW: Hide main dashboard sections before showing refleksi
+  hideMainDashboardSections();
+  
+  // Show refleksi container
+  container.classList.remove('hidden');
+  console.log('✅ [Refleksi] Container displayed');
   
   // ✅ STEP 3: Render HTML Form
   container.innerHTML = `
@@ -99,10 +173,34 @@ window.renderRefleksiForm = function() {
       .reflection-item small {
         color: #666;
       }
+      /* ✅ NEW: Back button style */
+      .btn-back-dashboard {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 20px;
+        background: #6b7280;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        margin-bottom: 15px;
+        transition: background 0.2s;
+      }
+      .btn-back-dashboard:hover {
+        background: #4b5563;
+      }
     </style>
     
     <div class="container py-8">
       <div class="reflection-form">
+        <!-- ✅ NEW: Back to Dashboard Button -->
+        <button type="button" class="btn-back-dashboard" onclick="showDashboard()">
+          <i class="fas fa-arrow-left"></i>
+          <span>Kembali ke Dashboard</span>
+        </button>
+        
         <h2>📝 Form Refleksi Guru</h2>
         
         ${user ? `
@@ -162,11 +260,7 @@ window.renderRefleksiForm = function() {
     </div>
   `;
   
-  // ✅ STEP 4: Show Container
-  container.classList.remove('hidden');
-  console.log('✅ [Refleksi] Container displayed');
-  
-  // ✅ STEP 5: Add Form Submit Handler
+  // ✅ STEP 4: Add Form Submit Handler
   const form = document.getElementById('refleksi-form');
   if (form) {
     form.addEventListener('submit', handleSubmit);
@@ -176,7 +270,7 @@ window.renderRefleksiForm = function() {
   console.log('✅ [Refleksi] Form ready');
 };
 
-// ✅ STEP 7: Handle Form Submit
+// ✅ STEP 7: Handle Form Submit (UNCHANGED - preserve logic)
 async function handleSubmit(event) {
   event.preventDefault();
   console.log('📤 [Refleksi] Form submitted');
