@@ -14,7 +14,6 @@
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/dashboard.css">
-    <!-- ✅ UPDATE 1: Tambah CSS Link untuk Penilaian -->
     <link rel="stylesheet" href="css/penilaian.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -22,29 +21,45 @@
     <style>
         /* Admin modal table scroll for mobile */
         .admin-table-wrapper {
-            overflow-x: auto;
+            overflow-x: auto !important;
             -webkit-overflow-scrolling: touch;
             max-width: 100%;
         }
         
         .admin-table-wrapper table {
-            min-width: 600px; /* Force horizontal scroll on mobile */
+            min-width: 600px;
+        }
+        
+        /* Ensure modal content is scrollable */
+        #admin-approval-modal .overflow-y-auto {
+            overflow-y: auto !important;
         }
         
         /* Mobile modal adjustments */
         @media (max-width: 640px) {
             #admin-approval-modal .bg-white {
+                width: 95vw !important;
                 max-width: 95vw !important;
                 margin: 10px !important;
             }
             
             #admin-approval-modal h3 {
-                font-size: 16px !important;
+                font-size: 14px !important;
+            }
+            
+            #admin-approval-modal .p-4 {
+                padding: 12px !important;
             }
             
             #admin-approval-modal .px-4 {
                 padding-left: 12px !important;
                 padding-right: 12px !important;
+            }
+            
+            /* Larger touch targets for mobile */
+            #admin-approval-modal button {
+                min-height: 44px !important;
+                min-width: 44px !important;
             }
         }
     </style>
@@ -68,29 +83,24 @@
                     </a>
                 </div>
                 
-                <!-- ✅ NAV ACTIONS (UPDATED WITH PROFILE DROPDOWN) -->
                 <div class="nav-actions flex items-center gap-4">
-                    <!-- User Info (existing) -->
                     <div class="user-info hidden sm:flex items-center gap-2">
                         <span class="text-sm text-gray-600" id="userEmail">Loading...</span>
                         <img class="h-8 w-8 rounded-full" src="https://ui-avatars.com/api/?name=User&background=7c3aed&color=fff" alt="Profile" id="userAvatar">
                     </div>
                     
-                    <!-- ✅ TAMBAHAN: Profile Dropdown Button -->
                     <div class="relative">
                         <button id="profileMenuBtn" class="btn btn-ghost flex items-center gap-2" aria-label="Menu Profil" aria-haspopup="true" aria-expanded="false">
                             <i class="fas fa-user-circle text-xl"></i>
                             <i class="fas fa-chevron-down text-xs"></i>
                         </button>
                         
-                        <!-- ✅ TAMBAHAN: Dropdown Menu -->
                         <div id="profileDropdown" class="hidden absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50" role="menu">
                             <div class="px-4 py-2 border-b border-gray-100">
                                 <p class="text-sm font-medium text-gray-900" id="profileName">Loading...</p>
                                 <p class="text-xs text-gray-500" id="profileEmailSub">Loading...</p>
                             </div>
                             
-                            <!-- Menu Items -->
                             <a href="change-password.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">
                                 <i class="fas fa-lock mr-2"></i>Ganti Password
                             </a>
@@ -107,7 +117,6 @@
                         </div>
                     </div>
                     
-                    <!-- Existing Logout Button (kept for mobile) -->
                     <button onclick="logout()" class="btn btn-ghost sm:hidden" aria-label="Logout">
                         <i class="fas fa-sign-out-alt mr-2" aria-hidden="true"></i>Keluar
                     </button>
@@ -170,7 +179,6 @@
                         </a>
                     </article>
                     
-                    <!-- ✅ FIX: Adm.Pembelajaran card - Added onclick handler -->
                     <article class="room-card room-adm-pembelajaran" data-feature="adm-pembelajaran">
                         <a href="javascript:void(0)" class="room-link" onclick="safeRenderAdmPembelajaran(event); return false;">
                             <div class="room-icon bg-teal"><i class="fas fa-book-open"></i></div>
@@ -179,7 +187,6 @@
                         </a>
                     </article>
                     
-                    <!-- ✅ CHANGE 1/3: Added onclick to Penilaian card -->
                     <article class="room-card room-penilaian" data-feature="penilaian">
                         <a href="javascript:void(0)" class="room-link" onclick="safeRenderPenilaian(event); return false;">
                             <div class="room-icon bg-green"><i class="fas fa-chart-bar"></i></div>
@@ -257,8 +264,6 @@
 
         <section id="module-container" class="section bg-gray-50"><div class="container"></div></section>
         <section id="refleksi-container" class="section bg-gray-50 hidden"></section>
-        
-        <!-- ✅ CHANGE 2/3: Added Penilaian container -->
         <section id="penilaian-container" class="section bg-gray-50 hidden"></section>
 
     </main>
@@ -269,7 +274,7 @@
             <p class="mt-2">Dibuat untuk Guru SD/SMP/SMA</p>
         </div>
     </footer>
-        <!-- ✅ Global API Key Loader (UNCHANGED) -->
+
     <script type="module">
         console.log('🔴 [Global API Key] Module START');
         window.GLOBAL_API_KEY = null;
@@ -318,7 +323,6 @@
         console.log('🟢 [Global API Key] Module READY');
     </script>
 
-    <!-- ✅ SIMPLE DASHBOARD SCRIPT (UNCHANGED) -->
     <script type="module">
         import { auth, onAuthStateChanged, db, doc, getDoc } from './modules/firebase-config.js';
         
@@ -338,7 +342,6 @@
                 userContextText: document.getElementById('userContextText')
             };
             
-            // Profile dropdown toggle (PRESERVED)
             if (els.profileMenuBtn && els.profileDropdown) {
                 els.profileMenuBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
@@ -351,7 +354,6 @@
                 });
             }
             
-            // ✅ SIMPLE: Load user data & update badge only (NO hide/show logic)
             onAuthStateChanged(auth, async (user) => {
                 console.log('🔐 [Dashboard] Auth:', user ? `IN (${user.uid})` : 'OUT');
                 
@@ -362,7 +364,6 @@
                     if (userDoc.exists()) {
                         const data = userDoc.data();
                         
-                        // Update profile display (PRESERVED)
                         if (els.profileName) els.profileName.textContent = data.nama_lengkap || 'User';
                         if (els.profileEmailSub) els.profileEmailSub.textContent = user.email || '';
                         if (els.userEmail) els.userEmail.textContent = user.email || '';
@@ -370,18 +371,15 @@
                             els.userAvatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(data.nama_lengkap || 'User')}&background=7c3aed&color=fff`;
                         }
                         
-                        // Update context badge only (PRESERVED)
                         if (els.userContextText) {
                             const label = {sd:'SD', smp:'SMP', sma:'SMA'}[data.jenjang_sekolah] || 'Guru';
                             els.userContextText.textContent = `Guru ${label}`;
                         }
                         
-                        // ✅ INTEGRASI: Init admin widget if admin
                         if (typeof window.initAdminWidget === 'function') {
                             window.initAdminWidget(data.role || 'teacher');
                         }
                         
-                        // Save to localStorage for other modules (PRESERVED)
                         localStorage.setItem('user_jenjang', data.jenjang_sekolah || '');
                         localStorage.setItem('user_kelas_diampu', JSON.stringify(data.kelas_diampu || []));
                         localStorage.setItem('user_role', data.role || 'teacher');
@@ -397,23 +395,17 @@
         });
     </script>
 
-    <!-- ✅ SAFE MODULE WRAPPERS (UNCHANGED) -->
     <script>
-        // ✅ Wrapper functions for safe module calling
-        // These wait for the actual function to be available before calling
-        
         window.safeRenderAdmKelas = async function(e) {
             if (e) e.preventDefault();
             console.log('🔄 [Dashboard] Loading adm-kelas module...');
             
-            // If already loaded, call directly
             if (typeof window.renderAdmKelas === 'function') {
                 console.log('✅ [Dashboard] adm-kelas already loaded');
                 await window.renderAdmKelas();
                 return;
             }
             
-            // Show loading state
             const container = document.getElementById('module-container');
             if (container) {
                 container.innerHTML = '<div class="text-center py-8"><i class="fas fa-spinner fa-spin text-2xl text-indigo-600"></i><p class="mt-2 text-slate-600">Memuat modul...</p></div>';
@@ -421,14 +413,12 @@
             }
             
             try {
-                // Wait a bit for modules to initialize, then retry
                 await new Promise(resolve => setTimeout(resolve, 500));
                 
                 if (typeof window.renderAdmKelas === 'function') {
                     await window.renderAdmKelas();
                 } else {
                     console.warn('⚠️ [Dashboard] renderAdmKelas still not ready, trying dynamic import...');
-                    // Fallback: try dynamic import
                     await import('./modules/adm-kelas/adm-kelas.js');
                     if (typeof window.renderAdmKelas === 'function') {
                         await window.renderAdmKelas();
@@ -445,7 +435,6 @@
             }
         };
         
-        // ✅ NEW: Safe wrapper for Adm.Pembelajaran
         window.safeRenderAdmPembelajaran = async function(e) {
             if (e) e.preventDefault();
             console.log('🔄 [Dashboard] Loading adm-pembelajaran module...');
@@ -485,7 +474,6 @@
             }
         };
         
-        // ✅ UPDATE 3: Ganti function safeRenderPenilaian dengan versi yang lebih robust
         window.safeRenderPenilaian = async function(e) {
             if (e) e.preventDefault();
             console.log('🔄 [Dashboard] Loading penilaian module...');
@@ -541,14 +529,10 @@
         console.log('✅ [Dashboard] Safe module wrappers loaded');
     </script>
 
-    <!-- ✅ HTML2PDF Library for PDF Download (Global) - FIX ADDED -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" crossorigin="anonymous"></script>
-
-    <!-- ✅ Docx.js + FileSaver for Word Export (Global) - NEW -->
     <script src="https://cdn.jsdelivr.net/npm/docx@7.8.2/build/index.js" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js" crossorigin="anonymous"></script>
 
-    <!-- ✅ Module Scripts (UNCHANGED) -->
     <script type="module" src="modules/firebase-config.js"></script>
     <script type="module" src="js/main.js"></script>
     <script type="module" src="js/dashboard.js"></script>
@@ -563,8 +547,6 @@
     <script type="module" src="modules/adm-kelas/storage.js"></script>
     <script type="module" src="modules/adm-kelas/adm-kelas-template.js"></script>
     <script type="module" src="modules/adm-kelas/adm-kelas.js"></script>
-    
-    <!-- ✅ Adm.Pembelajaran Module Imports (FIXED) -->
     <script type="module" src="modules/adm-pembelajaran/utils.js"></script>
     <script type="module" src="modules/adm-pembelajaran/storage.js"></script>
     <script type="module" src="modules/adm-pembelajaran/section1/adm-pembelajaran1.js"></script>
@@ -573,8 +555,6 @@
     <script type="module" src="modules/adm-pembelajaran/section1-template.js"></script>
     <script type="module" src="modules/adm-pembelajaran/section2-template.js"></script>
     <script type="module" src="modules/adm-pembelajaran/section3-template.js"></script>
-    
-    <!-- ✅ PENILAIAN MODULE IMPORTS - URUTAN PENTING! -->
     <script type="module" src="modules/penilaian/penilaian-template.js"></script>
     <script type="module" src="modules/penilaian/penilaian-storage.js"></script>
     <script type="module" src="modules/penilaian/penilaian.js"></script> 
@@ -586,26 +566,27 @@
         <i class="fas fa-crown text-xl"></i>
     </button>
 
-  <div id="admin-approval-modal" 
-     class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] hidden"
-     role="dialog" 
-     aria-modal="true"
-     aria-labelledby="admin-modal-title"
-     style="display: none;">
+    <div id="admin-approval-modal" 
+         class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] hidden"
+         role="dialog" 
+         aria-modal="true"
+         aria-labelledby="admin-modal-title">
         
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col mx-4 sm:mx-0">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col mx-4 sm:mx-0" style="display: none;">
             
             <!-- Modal Header -->
             <div class="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-purple-600 to-cyan-600 text-white flex-shrink-0">
-                <h3 id="admin-modal-title" class="text-lg font-semibold flex items-center gap-2">
+                <h3 id="admin-modal-title" class="text-base sm:text-lg font-semibold flex items-center gap-2">
                     <i class="fas fa-crown"></i>
                     <span class="hidden sm:inline">Admin Approval Panel</span>
                     <span class="sm:hidden">Approval</span>
                 </h3>
-                <!-- ✅ FIX: Larger close button for mobile -->
+                <!-- ✅ FIX: Larger close button for mobile with inline style -->
                 <button onclick="toggleAdminWidget()" 
+                        id="modal-close-btn"
                         class="p-3 hover:bg-white hover:bg-opacity-20 rounded-lg transition bg-white bg-opacity-20"
-                        aria-label="Tutup panel">
+                        aria-label="Tutup panel"
+                        style="min-width: 44px; min-height: 44px;">
                     <i class="fas fa-times text-lg"></i>
                 </button>
             </div>
@@ -680,10 +661,10 @@
         </div>
     </div>
 
-   <!-- ✅ ADMIN WIDGET LOGIC (UPDATED - Fixed Event Handler + Debug) -->
+   <!-- ✅ ADMIN WIDGET LOGIC (UPDATED - Fixed for Mobile) -->
 <script>
 (function() {
-    console.log('👑 [Admin Widget v2] Script initializing...');
+    console.log('👑 [Admin Widget v3] Script initializing...');
     
     let adminPendingUsers = [];
     
@@ -698,7 +679,6 @@
         
         console.log('✅ [Admin Widget] Elements found, attaching listeners...');
         
-        // ✅ Use addEventListener (more reliable than onclick)
         btn.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
@@ -723,6 +703,7 @@
     console.log('🔄 [Admin Widget] toggle called');
     
     const modal = document.getElementById('admin-approval-modal');
+    const modalContent = modal.querySelector('.bg-white');
     if (!modal) return;
     
     if (modal.classList.contains('hidden')) {
@@ -730,29 +711,15 @@
         console.log('✅ Opening modal...');
         modal.classList.remove('hidden');
         
-        // ✅ FIX 2: Force inline styles for Tailwind CDN compatibility (COMPLETE)
-        modal.style.cssText = `
-            display: flex !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-            z-index: 99999 !important;
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: 100% !important;
-            height: 100% !important;
-            background: rgba(0,0,0,0.5) !important;
-        `;
+        // ✅ FIX: Only set visibility properties, let CSS handle responsive
+        modal.style.display = 'flex';
+        modal.style.visibility = 'visible';
+        modal.style.opacity = '1';
+        modal.style.zIndex = '99999';
         
-        // ✅ FIX 3: Also force modal content visible
-        const content = modal.querySelector('.bg-white');
-        if (content) {
-            content.style.cssText = `
-                display: block !important;
-                visibility: visible !important;
-                opacity: 1 !important;
-                z-index: 100000 !important;
-            `;
+        if (modalContent) {
+            modalContent.style.display = 'block';
+            modalContent.style.visibility = 'visible';
         }
         
         document.body.style.overflow = 'hidden';
@@ -765,12 +732,7 @@
         // Close modal
         console.log('✅ Closing modal...');
         modal.classList.add('hidden');
-        
-        // ✅ Also hide with inline style
         modal.style.display = 'none';
-        modal.style.visibility = 'hidden';
-        modal.style.opacity = '0';
-        
         document.body.style.overflow = '';
     }
 };
@@ -821,14 +783,13 @@
     
     window.filterAdminUsers = () => renderAdminPendingTable();
     
-    // ✅ UPDATED: Set BOTH isApproved AND isActive to true
     window.adminApproveUser = async (uid, email, nama) => {
         if (!confirm(`✅ Setujui ${nama}?\n\n${email}`)) return;
         try {
             const { db, doc, updateDoc, serverTimestamp, auth } = await import('./modules/firebase-config.js');
             await updateDoc(doc(db, 'users', uid), { 
                 isApproved: true, 
-                isActive: true,  // ✅ NEW: Set isActive to true on approve
+                isActive: true,
                 approvedAt: serverTimestamp(), 
                 approvedBy: auth.currentUser?.uid || 'admin' 
             });
@@ -865,7 +826,7 @@
         initAdminWidgetScript();
     }
     
-    console.log('✅ [Admin Widget v2] Ready');
+    console.log('✅ [Admin Widget v3] Ready');
 })();
 </script>
 </body>
