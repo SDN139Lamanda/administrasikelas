@@ -17,6 +17,37 @@
     <!-- ✅ UPDATE 1: Tambah CSS Link untuk Penilaian -->
     <link rel="stylesheet" href="css/penilaian.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- ✅ MOBILE RESPONSIVE CSS FOR ADMIN PANEL -->
+    <style>
+        /* Admin modal table scroll for mobile */
+        .admin-table-wrapper {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            max-width: 100%;
+        }
+        
+        .admin-table-wrapper table {
+            min-width: 600px; /* Force horizontal scroll on mobile */
+        }
+        
+        /* Mobile modal adjustments */
+        @media (max-width: 640px) {
+            #admin-approval-modal .bg-white {
+                max-width: 95vw !important;
+                margin: 10px !important;
+            }
+            
+            #admin-approval-modal h3 {
+                font-size: 16px !important;
+            }
+            
+            #admin-approval-modal .px-4 {
+                padding-left: 12px !important;
+                padding-right: 12px !important;
+            }
+        }
+    </style>
 </head>
 <body class="bg-gray-50">
 
@@ -562,18 +593,20 @@
      aria-labelledby="admin-modal-title"
      style="display: none;">
         
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col mx-4 sm:mx-0">
             
             <!-- Modal Header -->
-            <div class="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-purple-600 to-cyan-600 text-white">
+            <div class="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-purple-600 to-cyan-600 text-white flex-shrink-0">
                 <h3 id="admin-modal-title" class="text-lg font-semibold flex items-center gap-2">
                     <i class="fas fa-crown"></i>
-                    <span>Admin Approval Panel</span>
+                    <span class="hidden sm:inline">Admin Approval Panel</span>
+                    <span class="sm:hidden">Approval</span>
                 </h3>
+                <!-- ✅ FIX: Larger close button for mobile -->
                 <button onclick="toggleAdminWidget()" 
-                        class="p-2 hover:bg-white hover:bg-opacity-20 rounded-lg transition"
+                        class="p-3 hover:bg-white hover:bg-opacity-20 rounded-lg transition bg-white bg-opacity-20"
                         aria-label="Tutup panel">
-                    <i class="fas fa-times"></i>
+                    <i class="fas fa-times text-lg"></i>
                 </button>
             </div>
             
@@ -602,15 +635,15 @@
                            oninput="filterAdminUsers()">
                 </div>
                 
-                <!-- Pending Users Table -->
-                <div class="border border-gray-200 rounded-lg overflow-hidden">
+                <!-- ✅ FIX: Pending Users Table with Horizontal Scroll -->
+                <div class="admin-table-wrapper border border-gray-200 rounded-lg overflow-hidden">
                     <table class="w-full">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">User</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Sekolah</th>
-                                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Aksi</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">User</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">Email</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">Sekolah</th>
+                                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase whitespace-nowrap">Aksi</th>
                             </tr>
                         </thead>
                         <tbody id="admin-pending-tbody" class="divide-y divide-gray-100">
@@ -633,10 +666,10 @@
             </div>
             
             <!-- Modal Footer -->
-            <div class="p-4 border-t border-gray-200 bg-gray-50 flex justify-end gap-2">
+            <div class="p-4 border-t border-gray-200 bg-gray-50 flex justify-end gap-2 flex-shrink-0">
                 <button onclick="loadAdminPendingUsers()" 
                         class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition">
-                    <i class="fas fa-refresh mr-1"></i> Refresh
+                    <i class="fas fa-refresh mr-1"></i> <span class="hidden sm:inline">Refresh</span><i class="sm:hidden">↻</i>
                 </button>
                 <button onclick="toggleAdminWidget()" 
                         class="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700 transition">
@@ -782,7 +815,7 @@
         
         tbody.innerHTML = filtered.map(u => {
             const date = u.createdAt?.toDate?.()?.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) || '-';
-            return `<tr class="hover:bg-gray-50"><td class="px-4 py-3"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold text-sm">${(u.nama_lengkap||'U')[0].toUpperCase()}</div><div><div class="font-medium text-sm">${u.nama_lengkap||'-'}</div><div class="text-xs text-gray-500">${u.jenjang_sekolah?.toUpperCase()||'-'}</div></div></div></td><td class="px-4 py-3 text-sm">${u.email||'-'}</td><td class="px-4 py-3 text-sm">${u.nama_sekolah||'-'}</td><td class="px-4 py-3 text-right"><div class="flex justify-end gap-1"><button onclick="adminApproveUser('${u.id}','${u.email}','${u.nama_lengkap}')" class="p-2 text-green-600 hover:bg-green-50 rounded" title="Setujui"><i class="fas fa-check"></i></button><button onclick="adminRejectUser('${u.id}','${u.email}','${u.nama_lengkap}')" class="p-2 text-red-600 hover:bg-red-50 rounded" title="Tolak"><i class="fas fa-times"></i></button></div></td></tr>`;
+            return `<tr class="hover:bg-gray-50"><td class="px-4 py-3"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold text-sm flex-shrink-0">${(u.nama_lengkap||'U')[0].toUpperCase()}</div><div><div class="font-medium text-sm">${u.nama_lengkap||'-'}</div><div class="text-xs text-gray-500">${u.jenjang_sekolah?.toUpperCase()||'-'}</div></div></div></td><td class="px-4 py-3 text-sm whitespace-nowrap">${u.email||'-'}</td><td class="px-4 py-3 text-sm whitespace-nowrap">${u.nama_sekolah||'-'}</td><td class="px-4 py-3 text-right"><div class="flex justify-end gap-1"><button onclick="adminApproveUser('${u.id}','${u.email}','${u.nama_lengkap}')" class="p-2 text-green-600 hover:bg-green-50 rounded" title="Setujui"><i class="fas fa-check"></i></button><button onclick="adminRejectUser('${u.id}','${u.email}','${u.nama_lengkap}')" class="p-2 text-red-600 hover:bg-red-50 rounded" title="Tolak"><i class="fas fa-times"></i></button></div></td></tr>`;
         }).join('');
     }
     
