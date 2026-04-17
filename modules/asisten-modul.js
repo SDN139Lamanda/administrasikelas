@@ -647,17 +647,18 @@ async function handleGenerate() {
       const { storage } = await import('./adm-pembelajaran/storage.js');
       storage.setUserId(user.uid);
       
-      const docData = {
-        jenis: 'asisten-modul',
-        jenjang: data.jenjang || '',
-        kelas: data.kelas || '',
-        mapel: data.mapel || '',
-        judul: `${data.topik || 'Modul'} - Kelas ${data.kelas}`,
-        konten: result,
-        tags: ['modul', data.mapel?.toLowerCase()],
-        source: 'asisten-modul',
-        meta { topik: data.topik, guru: data.guru, sekolah: data.sekolah }
-      };
+     // ✅ BENAR — Tambah ":" setelah "meta"
+const docData = {
+  jenis: 'asisten-modul',
+  jenjang: data.jenjang || '',
+  kelas: data.kelas || '',
+  mapel: data.mapel || '',
+  judul: `${data.topik || 'Modul'} - Kelas ${data.kelas}`,
+  konten: result,
+  tags: ['modul', data.mapel?.toLowerCase()],
+  source: 'asisten-modul',
+  meta: { topik: data.topik, guru: data.guru, sekolah: data.sekolah }  // ← ✅ FIXED!
+};
       
       await storage.autoSaveFromExternal('asisten-modul', docData);
       console.log('✅ [Asisten Modul] Auto-save to Adm.Pembelajaran successful');
