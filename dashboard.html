@@ -549,7 +549,6 @@
     <script type="module" src="modules/penilaian/penilaian.js"></script> 
     
     <!-- ✅ ADMIN FLOATING WIDGET (Crown Button + Modal) - Only for Admin -->
-    <!-- ✅ FIX 1: HAPUS onclick attribute (gunakan addEventListener saja) -->
     <button id="admin-widget-btn" 
             class="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-gradient-to-r from-purple-600 to-cyan-600 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 flex items-center justify-center z-40 hidden"
             aria-label="Admin Approval Panel">
@@ -789,12 +788,18 @@
     
     window.filterAdminUsers = () => renderAdminPendingTable();
     
+    // ✅ UPDATED: Set BOTH isApproved AND isActive to true
     window.adminApproveUser = async (uid, email, nama) => {
         if (!confirm(`✅ Setujui ${nama}?\n\n${email}`)) return;
         try {
             const { db, doc, updateDoc, serverTimestamp, auth } = await import('./modules/firebase-config.js');
-            await updateDoc(doc(db, 'users', uid), { isApproved: true, approvedAt: serverTimestamp(), approvedBy: auth.currentUser?.uid || 'admin' });
-            alert(`✅ ${nama} disetujui!`);
+            await updateDoc(doc(db, 'users', uid), { 
+                isApproved: true, 
+                isActive: true,  // ✅ NEW: Set isActive to true on approve
+                approvedAt: serverTimestamp(), 
+                approvedBy: auth.currentUser?.uid || 'admin' 
+            });
+            alert(`✅ ${nama} disetujui!\n\nUser sekarang bisa login.`);
             await loadAdminPendingUsers();
         } catch (e) { alert(`❌ ${e.message}`); }
     };
@@ -803,7 +808,12 @@
         if (!confirm(`❌ Tolak ${nama}?\n\n${email}`)) return;
         try {
             const { db, doc, updateDoc, serverTimestamp, auth } = await import('./modules/firebase-config.js');
-            await updateDoc(doc(db, 'users', uid), { isApproved: false, isActive: false, rejectedAt: serverTimestamp(), rejectedBy: auth.currentUser?.uid || 'admin' });
+            await updateDoc(doc(db, 'users', uid), { 
+                isApproved: false, 
+                isActive: false, 
+                rejectedAt: serverTimestamp(), 
+                rejectedBy: auth.currentUser?.uid || 'admin' 
+            });
             alert(`✅ ${nama} ditolak`);
             await loadAdminPendingUsers();
         } catch (e) { alert(`❌ ${e.message}`); }
