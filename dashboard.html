@@ -688,22 +688,41 @@
         console.log('✅ [Admin Widget] Listeners attached');
     }
     
-    window.toggleAdminWidget = function() {
-        console.log('🔄 [Admin Widget] toggle called');
-        const modal = document.getElementById('admin-approval-modal');
-        if (!modal) return;
+  window.toggleAdminWidget = function() {
+    console.log('🔄 [Admin Widget] toggle called');
+    
+    const modal = document.getElementById('admin-approval-modal');
+    if (!modal) return;
+    
+    if (modal.classList.contains('hidden')) {
+        // Open modal
+        console.log('✅ Opening modal...');
+        modal.classList.remove('hidden');
         
-        if (modal.classList.contains('hidden')) {
-            console.log('✅ Opening modal...');
-            modal.classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-            if (adminPendingUsers.length === 0) loadAdminPendingUsers();
-        } else {
-            console.log('✅ Closing modal...');
-            modal.classList.add('hidden');
-            document.body.style.overflow = '';
+        // ✅ FALLBACK: Force inline styles for CDN compatibility
+        modal.style.display = 'flex';
+        modal.style.visibility = 'visible';
+        modal.style.opacity = '1';
+        modal.style.zIndex = '9999';
+        
+        document.body.style.overflow = 'hidden';
+        
+        if (adminPendingUsers.length === 0) {
+            console.log('📊 Loading pending users...');
+            loadAdminPendingUsers();
         }
-    };
+    } else {
+        // Close modal
+        console.log('✅ Closing modal...');
+        modal.classList.add('hidden');
+        
+        // ✅ FALLBACK: Hide with inline style too
+        modal.style.display = 'none';
+        
+        document.body.style.overflow = '';
+    }
+};
+    
     
     async function loadAdminPendingUsers() {
         console.log('📊 Loading pending users...');
