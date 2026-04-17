@@ -3,7 +3,7 @@
  * MODULE: REFLEKSI GURU
  * Platform Administrasi Kelas Digital
  * ISOLASI DATA: guruId-based filtering
- * UPDATED: Back to Dashboard + Hide Main Features
+ * UPDATED: Back to Dashboard + Hide Main Features + FIX SCOPE
  * ============================================
  * Fitur:
  * - Form refleksi terstruktur (6 aspek)
@@ -12,6 +12,7 @@
  * - Auto-save dengan timestamp
  * - ✅ NEW: Tombol Kembali ke Dashboard
  * - ✅ NEW: Hide fitur utama saat refleksi aktif
+ * - ✅ FIX: showDashboard attached to window
  * ============================================
  */
 
@@ -62,7 +63,8 @@ function hideMainDashboardSections() {
 }
 
 // ✅ HELPER: Show dashboard (called by back button)
-function showDashboard() {
+// ✅ FIX: Attach to window for global access
+window.showDashboard = function() {
   console.log('🏠 [Refleksi] Showing dashboard...');
   
   // Use existing backToDashboard if available
@@ -92,7 +94,7 @@ function showDashboard() {
   }
   
   console.log('✅ Dashboard shown');
-}
+};
 
 // ✅ STEP 2: Register Global Function (untuk onclick di HTML)
 window.renderRefleksiForm = function() {
@@ -196,7 +198,7 @@ window.renderRefleksiForm = function() {
     <div class="container py-8">
       <div class="reflection-form">
         <!-- ✅ NEW: Back to Dashboard Button -->
-        <button type="button" class="btn-back-dashboard" onclick="showDashboard()">
+        <button type="button" class="btn-back-dashboard" onclick="window.showDashboard()">
           <i class="fas fa-arrow-left"></i>
           <span>Kembali ke Dashboard</span>
         </button>
@@ -337,6 +339,7 @@ async function handleSubmit(event) {
 
 // ✅ STEP 9: Confirm Registration
 console.log('🟢 [Refleksi] window.renderRefleksiForm:', typeof window.renderRefleksiForm);
+console.log('🟢 [Refleksi] window.showDashboard:', typeof window.showDashboard);
 console.log('🟢 [Refleksi] Module FINISHED - Save to pembelajaran collection');
 
 // ✅ STEP 10: Auto-test (untuk debugging)
@@ -345,5 +348,10 @@ setTimeout(() => {
     console.log('✅ [Refleksi] Function is registered and callable!');
   } else {
     console.error('❌ [Refleksi] Function NOT registered! Check import/export!');
+  }
+  if (typeof window.showDashboard === 'function') {
+    console.log('✅ [Refleksi] showDashboard is registered and callable!');
+  } else {
+    console.error('❌ [Refleksi] showDashboard NOT registered!');
   }
 }, 2000);
