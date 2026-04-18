@@ -2,21 +2,7 @@
  * ============================================
  * MODULE: ASISTEN MODUL AJAR
  * Platform Administrasi Kelas Digital
- * ✅ UPDATED: Full Groq API Integration + Signature Layout Fix
- * ============================================
- * FITUR:
- * - Auto-fill data user dari localStorage (modal)
- * - ✅ FULL GROQ API (No Mock) - Production Ready
- * - Editable fields (user bisa ubah auto-fill)
- * - Profil Pancasila included
- * - Clean result display (no scroll frame)
- * - Kop format sesuai standar modul ajar
- * - ✅ NEW: Field lengkap sesuai komposisi Kurikulum Merdeka
- * - ✅ NEW: Loading state + disable button
- * - ✅ NEW: Specific error handling
- * - ✅ NEW: Download/Print buttons
- * - ✅ NEW: Auto-save to Adm.Pembelajaran (non-blocking)
- * - ✅ NEW: Signature side-by-side layout
+ * ✅ UPDATED: Fix undefined result + Full Groq API + Signature Layout
  * ============================================
  */
 
@@ -42,33 +28,36 @@ console.log('✅ [Asisten Modul] Firebase imports successful');
 // ✅ API-READY WRAPPER — NOW USING GROQ API
 // ============================================
 
-/**
- * Generate modul dengan Groq API (Production Ready)
- */
 async function generateModulWithAI(promptData) {
   console.log('🤖 [Asisten Modul] Generate called (Groq API Mode)');
   
   try {
-    // ✅ Import Groq API function
     const { generateWithGroq } = await import('./groq-api.js');
-    
-    // ✅ Build prompt from form data
     const prompt = buildPromptForAI(promptData);
     
-    // ✅ Call Groq API
     const result = await generateWithGroq({
       prompt: prompt,
       temperature: 0.7,
-      max_tokens: 2000  // Increased for full modul output
+      max_tokens: 2000
     });
     
     console.log('✅ [Asisten Modul] Groq API response received');
-    return result.content;
+    
+    // ✅ FIX: Handle various response formats + ensure string return
+    if (result?.content) {
+      return result.content;
+    } else if (typeof result === 'string') {
+      return result;
+    } else if (result?.text) {
+      return result.text;
+    } else {
+      console.warn('⚠️ [Asisten Modul] Unexpected response format:', result);
+      return '❌ Error: Format response AI tidak dikenali. Coba lagi.';
+    }
     
   } catch (error) {
     console.error('❌ [Asisten Modul] Groq API error:', error);
     
-    // ✅ Fallback: Return helpful error message
     let errorMessage = 'Gagal generate modul. ';
     if (error.message?.includes('API key') || error.message?.includes('auth')) {
       errorMessage += 'API Key tidak valid atau belum terkonfigurasi.';
@@ -80,14 +69,10 @@ async function generateModulWithAI(promptData) {
       errorMessage += error.message || 'Silakan coba lagi.';
     }
     
-    // ✅ Return formatted error for display
     return `❌ Error: ${errorMessage}\n\n💡 Tips:\n• Pastikan API Key sudah dikonfigurasi\n• Cek koneksi internet Anda\n• Coba lagi dalam beberapa menit jika limit habis`;
   }
 }
 
-/**
- * Build prompt untuk AI (optimized for Groq)
- */
 function buildPromptForAI(data) {
   const pppChecked = data.profilPancasila?.filter(p => p.checked).map(p => p.value).join(', ') || '-';
   
@@ -125,7 +110,7 @@ Output hanya berisi konten modul, tanpa penjelasan tambahan.
 }
 
 // ============================================
-// ✅ MOCK GENERATOR (Fallback Only - For Testing)
+// ✅ MOCK GENERATOR (Fallback Only)
 // ============================================
 
 async function mockGenerateModul(data) {
@@ -155,7 +140,6 @@ async function mockGenerateModul(data) {
     'lainnya': 'Lainnya'
   }[modelPembelajaran] || 'Problem Based Learning (PBL)';
   
-  // ✅ FIX: Signature side-by-side layout (monospace-friendly)
   const signatureBlock = `
 ═══════════════════════════════════════════════════════════
 Mengetahui,
@@ -282,7 +266,6 @@ window.renderGeneratorModule = function() {
   
   const user = auth.currentUser;
   
-  // ✅ AMBIL DATA DARI MODAL (LOCALSTORAGE)
   const userNama = localStorage.getItem('user_nama_lengkap') || '';
   const userNIP = localStorage.getItem('user_nip') || '';
   const userKepsek = localStorage.getItem('user_nama_kepsek') || '';
@@ -320,7 +303,6 @@ window.renderGeneratorModule = function() {
       .grid-cols-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
       @media (max-width: 768px) { .grid-cols-2, .grid-cols-3 { grid-template-columns: 1fr; } }
       
-      /* ✅ HASIL GENERATE — TANPA BINGKAI/SCROLL */
       #result-modul {
         width: 100%;
         min-height: 500px;
@@ -335,7 +317,6 @@ window.renderGeneratorModule = function() {
         margin-top: 12px;
       }
       
-      /* ✅ SIGNATURE SIDE-BY-SIDE (for preview in textarea) */
       .signature-row { display: flex; justify-content: space-between; margin-top: 20px; }
       .signature-col { text-align: center; width: 45%; }
     </style>
@@ -349,7 +330,6 @@ window.renderGeneratorModule = function() {
       </button>
       
       <form id="modul-form">
-        <!-- ✅ SECTION 1: INFORMASI GURU (AUTO-FILL DARI MODAL) -->
         <div class="section-title"><i class="fas fa-user-tie"></i><span>1. Informasi Guru (Auto-Fill)</span></div>
         
         <div class="grid-cols-2">
@@ -365,7 +345,6 @@ window.renderGeneratorModule = function() {
           </div>
         </div>
         
-        <!-- ✅ SECTION 2: INFORMASI SEKOLAH (AUTO-FILL DARI MODAL) -->
         <div class="section-title"><i class="fas fa-school"></i><span>2. Informasi Sekolah (Auto-Fill)</span></div>
         
         <div>
@@ -385,7 +364,6 @@ window.renderGeneratorModule = function() {
           </div>
         </div>
         
-        <!-- ✅ SECTION 3: INFORMASI MODUL -->
         <div class="section-title"><i class="fas fa-book"></i><span>3. Informasi Modul</span></div>
         
         <div class="grid-cols-3">
@@ -428,7 +406,6 @@ window.renderGeneratorModule = function() {
           <input type="text" id="modul-topik" placeholder="Contoh: Pecahan Sederhana" required>
         </div>
         
-        <!-- ✅ SECTION 4: INFORMASI UMUM (NEW - Sesuai Komposisi) -->
         <div class="section-title"><i class="fas fa-info-circle"></i><span>4. Informasi Umum (Lengkap)</span></div>
         
         <div>
@@ -461,7 +438,6 @@ window.renderGeneratorModule = function() {
           </div>
         </div>
         
-        <!-- ✅ SECTION 5: PROFIL PELAJAR PANCASILA (EXISTING) -->
         <div class="section-title"><i class="fas fa-star"></i><span>5. Profil Pelajar Pancasila</span></div>
         
         <div class="grid-cols-3">
@@ -473,7 +449,6 @@ window.renderGeneratorModule = function() {
           <div><label><input type="checkbox" id="ppp-6" value="Kreatif"> Kreatif</label></div>
         </div>
         
-        <!-- ✅ SECTION 6: LAMPIRAN (NEW - Sesuai Komposisi) -->
         <div class="section-title"><i class="fas fa-paperclip"></i><span>6. Lampiran</span></div>
         
         <div>
@@ -501,7 +476,6 @@ window.renderGeneratorModule = function() {
         </button>
       </form>
       
-      <!-- ✅ HASIL GENERATE — TANPA BINGKAI SCROLL -->
       <div id="modul-result" class="hidden result-section">
         <h3 class="text-xl font-bold mb-4 text-gray-800">📋 Hasil Generate</h3>
         <textarea id="result-modul" placeholder="Modul akan muncul setelah generate..." style="min-height: 600px; width: 100%; padding: 16px; border: 1px solid #e5e7eb; border-radius: 8px; font-family: monospace; font-size: 13px; line-height: 1.5; white-space: pre-wrap;" readonly></textarea>
@@ -522,7 +496,6 @@ window.renderGeneratorModule = function() {
         </div>
       </div>
       
-      <!-- Daftar Modul Tersimpan -->
       <div class="mt-12">
         <h3 class="text-xl font-bold mb-4 text-gray-800">
           <i class="fas fa-archive mr-2"></i>Modul Tersimpan (<span id="saved-count">0</span>)
@@ -567,7 +540,6 @@ function setupEventHandlers() {
   if (btnDownload) btnDownload.addEventListener('click', handleDownload);
 }
 
-// ✅ Download function (seperti CTA Generator)
 function handleDownload() {
   const modul = document.getElementById('result-modul')?.value;
   if (!modul || modul.includes('⏳') || modul.includes('❌ Error')) {
@@ -592,7 +564,6 @@ function handleDownload() {
   console.log('✅ [Asisten Modul] Download successful');
 }
 
-// ✅ Print function
 function handlePrint() {
   const modul = document.getElementById('result-modul')?.value;
   if (!modul || modul.includes('⏳') || modul.includes('❌ Error')) {
@@ -603,7 +574,7 @@ function handlePrint() {
 }
 
 // ============================================
-// ✅ MAIN GENERATE HANDLER (With Loading + Error Handling)
+// ✅ MAIN GENERATE HANDLER — FIXED UNDEFINED CHECK
 // ============================================
 
 async function handleGenerate() {
@@ -612,7 +583,6 @@ async function handleGenerate() {
   const user = auth.currentUser;
   if (!user) { alert('⚠️ Silakan login dulu!'); return; }
   
-  // ✅ Ambil semua field dari form
   const data = {
     guru: document.getElementById('modul-guru')?.value,
     nip: document.getElementById('modul-nip')?.value,
@@ -624,13 +594,11 @@ async function handleGenerate() {
     topik: document.getElementById('modul-topik')?.value,
     alokasi: document.getElementById('modul-alokasi')?.value,
     
-    // ✅ NEW: Fields from komposisi - Informasi Umum
     kompetensiAwal: document.getElementById('modul-kompetensi-awal')?.value,
     sarana: document.getElementById('modul-sarana')?.value,
     targetPesertaDidik: document.getElementById('modul-target')?.value,
     modelPembelajaran: document.getElementById('modul-model')?.value,
     
-    // ✅ Profil Pancasila
     profilPancasila: [
       { id: 'ppp-1', value: 'Beriman, Bertakwa' },
       { id: 'ppp-2', value: 'Berkebinekaan Global' },
@@ -640,18 +608,15 @@ async function handleGenerate() {
       { id: 'ppp-6', value: 'Kreatif' }
     ].map(p => ({ checked: document.getElementById(p.id)?.checked, value: p.value })),
     
-    // ✅ NEW: Fields from komposisi - Lampiran
     lkpd: document.getElementById('modul-lkpd')?.value,
     bahanBacaan: document.getElementById('modul-bahan-bacaan')?.value,
     glosarium: document.getElementById('modul-glosarium')?.value,
     daftarPustaka: document.getElementById('modul-pustaka')?.value,
     
-    // User data for signature
     userKepsek: localStorage.getItem('user_nama_kepsek') || '',
     userNIPKepsek: localStorage.getItem('user_nip_kepsek') || ''
   };
   
-  // ✅ Validation
   if (!data.sekolah) { alert('⚠️ Nama Sekolah wajib diisi!'); return; }
   if (!data.jenjang || !data.kelas || !data.mapel || !data.topik) { alert('⚠️ Lengkapi Informasi Modul!'); return; }
   
@@ -659,7 +624,6 @@ async function handleGenerate() {
   const resultDiv = document.getElementById('modul-result');
   const resultTextarea = document.getElementById('result-modul');
   
-  // ✅ Loading state: disable button + show spinner
   const originalBtnText = btnGenerate.innerHTML;
   btnGenerate.disabled = true;
   btnGenerate.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
@@ -669,11 +633,13 @@ async function handleGenerate() {
   resultDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
   
   try {
-    // ✅ Call generator (Groq API now enabled)
     const result = await generateModulWithAI(data);
     
-    // ✅ Check if result is error message
-    if (result.includes('❌ Error:')) {
+    // ✅ FIX: Check for undefined/null before using .includes()
+    if (!result) {
+      resultTextarea.value = '❌ Error: Tidak ada response dari AI';
+      alert('⚠️ Gagal generate modul. Response kosong. Coba lagi.');
+    } else if (typeof result === 'string' && result.includes('❌ Error:')) {
       resultTextarea.value = result;
       alert('⚠️ ' + result.replace('❌ Error: ', ''));
     } else {
@@ -681,7 +647,7 @@ async function handleGenerate() {
       console.log('✅ [Asisten Modul] Generate complete!');
     }
     
-    // ✅ Auto-save to Adm.Pembelajaran (non-blocking, like CTA)
+    // Auto-save to Adm.Pembelajaran (non-blocking)
     try {
       const { storage } = await import('./adm-pembelajaran/storage.js');
       storage.setUserId(user.uid);
@@ -702,7 +668,6 @@ async function handleGenerate() {
       console.log('✅ [Asisten Modul] Auto-save to Adm.Pembelajaran successful');
     } catch (autoSaveError) {
       console.warn('⚠️ [Asisten Modul] Auto-save skipped:', autoSaveError.message);
-      // Non-blocking: don't alert user
     }
     
   } catch (error) {
@@ -712,7 +677,6 @@ async function handleGenerate() {
     alert('❌ Gagal generate modul:\n\n' + (error.message || 'Silakan coba lagi'));
     
   } finally {
-    // ✅ Restore button state
     btnGenerate.disabled = false;
     btnGenerate.innerHTML = originalBtnText;
   }
@@ -738,9 +702,7 @@ async function handleSave() {
     const userDoc = await getDoc(doc(db, 'users', user.uid));
     const isAdmin = userDoc.exists() && userDoc.data()?.role === 'admin';
     
-    // ✅ Save ALL fields to Firestore
     await addDoc(collection(db, 'modul_ajar'), {
-      // Existing fields
       userId: user.uid,
       userEmail: user.email,
       userName: user.displayName || 'Guru',
@@ -755,19 +717,16 @@ async function handleSave() {
       alokasi: document.getElementById('modul-alokasi')?.value,
       profilPancasila: Array.from(document.querySelectorAll('#modul-form input[type="checkbox"]:checked')).map(cb => cb.value),
       
-      // ✅ NEW: Fields from komposisi - Informasi Umum
       kompetensiAwal: document.getElementById('modul-kompetensi-awal')?.value || '',
       sarana: document.getElementById('modul-sarana')?.value || '',
       targetPesertaDidik: document.getElementById('modul-target')?.value || 'reguler',
       modelPembelajaran: document.getElementById('modul-model')?.value || 'pbl',
       
-      // ✅ NEW: Fields from komposisi - Lampiran
       lkpd: document.getElementById('modul-lkpd')?.value || '',
       bahanBacaan: document.getElementById('modul-bahan-bacaan')?.value || '',
       glosarium: document.getElementById('modul-glosarium')?.value || '',
       daftarPustaka: document.getElementById('modul-pustaka')?.value || '',
       
-      // Content & metadata
       modul: modul,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
@@ -849,4 +808,4 @@ function loadModulData() {
   })();
 }
 
-console.log('🟢 [Asisten Modul] READY — Full Groq API + Signature Fix Applied');
+console.log('🟢 [Asisten Modul] READY — Full Groq API + Undefined Fix Applied');
