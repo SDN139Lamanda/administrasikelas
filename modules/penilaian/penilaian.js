@@ -1,8 +1,8 @@
-
 /**
  * PENILAIAN MODULE - INTEGRATED WITH ADM. KELAS
  * ✅ All syntax validated - no unexpected tokens
  * ✅ All HTML-callable functions exposed to window
+ * ✅ UPDATED: Fix mobile scroll - remove sticky-col, standardize table structure
  */
 
 import { storage } from '../adm-kelas/storage.js';
@@ -85,7 +85,7 @@ window.inisialisasiTabel = async function(classId) {
     renderTabel();
 };
 
-// ✅ RENDER TABLE
+// ✅ RENDER TABLE - UPDATED: Standardize name column class, remove sticky-col
 function renderTabel() {
     if(indexAktif === null) return;
     const head = document.getElementById('tabelHead');
@@ -101,6 +101,7 @@ function renderTabel() {
     if(viewAktif === 'pengetahuan') {
         let headPH = "";
         for(let i=1; i<=jumlahPH; i++) headPH += `<th class="px-4 py-2 text-center bg-blue-50/30 min-w-[80px]">PH ${i}</th>`;
+        // ✅ FIX: Standardize header name column class (match sikap view)
         head.innerHTML = `<tr>
             <th class="px-8 py-4 min-w-[200px] bg-white border-r border-slate-200">Identitas Siswa</th>
             ${headPH}
@@ -117,8 +118,9 @@ function renderTabel() {
             for(let i=0; i<jumlahPH; i++) {
                 rowPH += `<td class="px-2 py-2"><input type="number" id="ph_${sIdx}_${i}" value="${sVal.ph[i] || 0}" oninput="window.hitungNA(${sIdx})" class="w-full bg-slate-50 border border-slate-200 p-2 rounded text-center"></td>`;
             }
+            // ✅ FIX: Remove 'sticky-col' class, use same class as sikap view
             body.innerHTML += `<tr class="hover:bg-slate-50/50" data-student-id="${studentKey}">
-                <td class="px-8 py-3 sticky-col font-medium text-slate-800 bg-white">${s.nama || 'Siswa ' + (sIdx+1)}</td>
+                <td class="px-8 py-4 font-medium text-slate-800 bg-white border-r border-slate-200">${s.nama || 'Siswa ' + (sIdx+1)}</td>
                 ${rowPH}
                 <td class="px-4 py-3"><input type="number" id="sts_${sIdx}" value="${sVal.sts || 0}" oninput="window.hitungNA(${sIdx})" class="w-16 mx-auto block bg-white border border-amber-200 p-2 rounded text-center"></td>
                 <td class="px-4 py-3"><input type="number" id="sas_${sIdx}" value="${sVal.sas || 0}" oninput="window.hitungNA(${sIdx})" class="w-16 mx-auto block bg-white border border-emerald-200 p-2 rounded text-center"></td>
@@ -134,6 +136,7 @@ function renderTabel() {
             window.hitungNA(sIdx);
         });
     } else {
+        // ✅ Sikap view - already correct, keep as is
         head.innerHTML = `<tr>  
             <th class="px-8 py-4 min-w-[200px] bg-white border-r border-slate-200">Identitas Siswa</th>
             <th class="px-8 py-4 text-center bg-purple-50 text-purple-600 min-w-[150px]">Predikat</th>
@@ -347,4 +350,4 @@ function showToast(message, type = 'info') {
     setTimeout(() => { toast.style.opacity='0'; setTimeout(() => toast.remove(), 300); }, 3000);
 }
 
-console.log('🟢 [Penilaian] FINAL - All syntax validated');
+console.log('🟢 [Penilaian] FINAL - All syntax validated + Mobile scroll fix applied');
