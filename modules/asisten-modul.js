@@ -2,11 +2,11 @@
  * ============================================
  * MODULE: ASISTEN MODUL AJAR
  * Platform Administrasi Kelas Digital
- * ✅ UPDATED: Prototype Offline (API-Ready Pattern)
+ * ✅ UPDATED: Full Groq API Integration + Signature Layout Fix
  * ============================================
  * FITUR:
  * - Auto-fill data user dari localStorage (modal)
- * - MOCK MODE ONLY (No API Key) - Prototype Offline
+ * - ✅ FULL GROQ API (No Mock) - Production Ready
  * - Editable fields (user bisa ubah auto-fill)
  * - Profil Pancasila included
  * - Clean result display (no scroll frame)
@@ -15,12 +15,12 @@
  * - ✅ NEW: Loading state + disable button
  * - ✅ NEW: Specific error handling
  * - ✅ NEW: Download/Print buttons
- * - ✅ NEW: API-ready pattern (easy swap to Groq)
  * - ✅ NEW: Auto-save to Adm.Pembelajaran (non-blocking)
+ * - ✅ NEW: Signature side-by-side layout
  * ============================================
  */
 
-console.log('🔴 [Asisten Modul] Script START — MOCK MODE (Prototype Offline)');
+console.log('🔴 [Asisten Modul] Script START — Full Groq API Mode');
 
 import { 
   db, 
@@ -39,68 +39,97 @@ import {
 console.log('✅ [Asisten Modul] Firebase imports successful');
 
 // ============================================
-// ✅ API-READY WRAPPER (Easy Swap to Groq Later)
+// ✅ API-READY WRAPPER — NOW USING GROQ API
 // ============================================
 
 /**
- * Generate modul dengan pattern yang sama seperti CTA Generator
- * 🔜 NANTI: Uncomment generateWithGroq untuk pakai API
- * ✅ SEKARANG: Pakai mockGenerateModul (offline prototype)
+ * Generate modul dengan Groq API (Production Ready)
  */
 async function generateModulWithAI(promptData) {
-  console.log('🤖 [Asisten Modul] Generate called (Mock Mode)');
+  console.log('🤖 [Asisten Modul] Generate called (Groq API Mode)');
   
-  // 🔜 NANTI: Ganti dengan ini untuk pakai Groq API:
-  // const { generateWithGroq } = await import('./groq-api.js');
-  // const prompt = buildPromptForAI(promptData);
-  // const result = await generateWithGroq({
-  //   prompt: prompt,
-  //   temperature: 0.7,
-  //   max_tokens: 1500
-  // });
-  // return result.content;
-  
-  // ✅ SEKARANG: Pakai mock (offline prototype)
-  return await mockGenerateModul(promptData);
+  try {
+    // ✅ Import Groq API function
+    const { generateWithGroq } = await import('./groq-api.js');
+    
+    // ✅ Build prompt from form data
+    const prompt = buildPromptForAI(promptData);
+    
+    // ✅ Call Groq API
+    const result = await generateWithGroq({
+      prompt: prompt,
+      temperature: 0.7,
+      max_tokens: 2000  // Increased for full modul output
+    });
+    
+    console.log('✅ [Asisten Modul] Groq API response received');
+    return result.content;
+    
+  } catch (error) {
+    console.error('❌ [Asisten Modul] Groq API error:', error);
+    
+    // ✅ Fallback: Return helpful error message
+    let errorMessage = 'Gagal generate modul. ';
+    if (error.message?.includes('API key') || error.message?.includes('auth')) {
+      errorMessage += 'API Key tidak valid atau belum terkonfigurasi.';
+    } else if (error.message?.includes('quota') || error.message?.includes('429')) {
+      errorMessage += 'Limit AI harian habis. Coba lagi nanti.';
+    } else if (error.message?.includes('network') || error.message?.includes('fetch')) {
+      errorMessage += 'Koneksi internet bermasalah. Cek koneksi Anda.';
+    } else {
+      errorMessage += error.message || 'Silakan coba lagi.';
+    }
+    
+    // ✅ Return formatted error for display
+    return `❌ Error: ${errorMessage}\n\n💡 Tips:\n• Pastikan API Key sudah dikonfigurasi\n• Cek koneksi internet Anda\n• Coba lagi dalam beberapa menit jika limit habis`;
+  }
 }
 
 /**
- * Build prompt untuk AI (siap digunakan saat integrasi API)
+ * Build prompt untuk AI (optimized for Groq)
  */
 function buildPromptForAI(data) {
-  return `
-Buat Modul Ajar Kurikulum Merdeka dengan spesifikasi berikut:
+  const pppChecked = data.profilPancasila?.filter(p => p.checked).map(p => p.value).join(', ') || '-';
+  
+  return `Anda adalah asisten guru profesional. Buat Modul Ajar Kurikulum Merdeka yang lengkap dan siap pakai.
 
-INFORMASI UMUM:
-- Guru: ${data.guru} (${data.nip || 'N/A'})
-- Sekolah: ${data.sekolah}, Tahun: ${data.tahun}
-- Jenjang/Kelas: ${data.jenjang?.toUpperCase()}/${data.kelas}
-- Mapel: ${data.mapel?.toUpperCase()}, Topik: ${data.topik}
-- Alokasi: ${data.alokasi}
-- Kompetensi Awal: ${data.kompetensiAwal}
-- Sarana: ${data.sarana}
-- Target: ${data.targetPesertaDidik}, Model: ${data.modelPembelajaran}
+SPESIFIKASI:
+• Guru: ${data.guru || '-'} (${data.nip || 'N/A'})
+• Sekolah: ${data.sekolah || '-'}, Tahun: ${data.tahun || '2025/2026'}
+• Jenjang/Kelas: ${data.jenjang?.toUpperCase() || '-'}/Kelas ${data.kelas || '-'}
+• Mapel: ${data.mapel?.toUpperCase() || '-'}, Topik: ${data.topik || '-'}
+• Alokasi Waktu: ${data.alokasi || '-'}
+• Kompetensi Awal: ${data.kompetensiAwal || 'Siswa telah memahami konsep dasar terkait topik ini.'}
+• Sarana: ${data.sarana || 'Laptop, proyektor, alat peraga, lingkungan sekitar'}
+• Target Peserta: ${data.targetPesertaDidik === 'reguler' ? 'Siswa Reguler' : data.targetPesertaDidik === 'kesulitan' ? 'Siswa dengan Kesulitan Belajar' : 'Siswa dengan Pencapaian Tinggi'}
+• Model Pembelajaran: ${data.modelPembelajaran === 'pbl' ? 'Problem Based Learning (PBL)' : data.modelPembelajaran === 'pjbl' ? 'Project Based Learning (PjBL)' : data.modelPembelajaran === 'tatap-muka' ? 'Tatap Muka' : 'Lainnya'}
 
-PROFIL PELAJAR PANCASILA:
-${data.profilPancasila?.filter(p => p.checked).map(p => p.value).join(', ') || '-'}
+PROFIL PELAJAR PANCASILA: ${pppChecked}
 
-LAMPIRAN:
-- LKPD: ${data.lkpd}
-- Bahan Bacaan: ${data.bahanBacaan}
-- Glosarium: ${data.glosarium}
-- Pustaka: ${data.daftarPustaka}
+LAMPIRAN YANG DIMINTA:
+• LKPD: ${data.lkpd || 'Aktivitas eksplorasi, diskusi kelompok, presentasi hasil'}
+• Bahan Bacaan: ${data.bahanBacaan || 'Rangkuman materi, contoh soal, referensi tambahan'}
+• Glosarium: ${data.glosarium || 'Istilah penting dengan definisi'}
+• Daftar Pustaka: ${data.daftarPustaka || 'Kementerian Pendidikan, sumber online terpercaya'}
 
-Format output: Gunakan struktur modul ajar standar dengan section I-IV.
-  `.trim();
+INSTRUKSI OUTPUT:
+1. Gunakan format teks plain dengan pemisah garis (===, ---)
+2. Struktur: I. INFORMASI UMUM, II. PROFIL PELAJAR PANCASILA, III. KOMPONEN INTI, IV. LAMPIRAN
+3. Komponen Inti harus mencakup: Tujuan Pembelajaran, Pemahaman Bermakna, Pertanyaan Pemantik, Kegiatan Pembelajaran (Pendahuluan-Inti-Penutup), Asesmen, Pengayaan/Remedial, Refleksi
+4. Gunakan bahasa Indonesia formal yang mudah dipahami guru
+5. Buat konten yang relevan dengan topik "${data.topik || 'materi'}" untuk kelas ${data.kelas || '-'} ${data.jenjang?.toUpperCase() || '-'}
+6. Di bagian akhir, tambahkan tanda tangan side-by-side untuk Kepala Sekolah dan Guru
+
+Output hanya berisi konten modul, tanpa penjelasan tambahan.
+`.trim();
 }
 
 // ============================================
-// ✅ MOCK GENERATOR (Offline Prototype)
+// ✅ MOCK GENERATOR (Fallback Only - For Testing)
 // ============================================
 
 async function mockGenerateModul(data) {
-  console.log('📝 [Asisten Modul] Generating mock modul...');
-  // Simulate API delay
+  console.log('📝 [Asisten Modul] Generating mock modul (fallback)...');
   await new Promise(resolve => setTimeout(resolve, 2000));
   
   const {
@@ -125,6 +154,19 @@ async function mockGenerateModul(data) {
     'tatap-muka': 'Tatap Muka',
     'lainnya': 'Lainnya'
   }[modelPembelajaran] || 'Problem Based Learning (PBL)';
+  
+  // ✅ FIX: Signature side-by-side layout (monospace-friendly)
+  const signatureBlock = `
+═══════════════════════════════════════════════════════════
+Mengetahui,
+
+Kepala Sekolah                                  Guru Mata Pelajaran
+
+
+( ${userKepsek || '.....................'.substring(0, 21)} )          ( ${guru || '.....................'.substring(0, 21)} )
+NIP. ${userNIPKepsek || '.....................'.substring(0, 21)}          NIP. ${nip || '.....................'.substring(0, 21)}
+═══════════════════════════════════════════════════════════
+`.trim();
   
   return `
 ═══════════════════════════════════════════════════════════
@@ -224,21 +266,8 @@ ${glosarium || '• Istilah 1: Definisi\n• Istilah 2: Definisi\n• Istilah 3:
 📋 DAFTAR PUSTAKA
 ${daftarPustaka || '• Kementerian Pendidikan. (2022). Panduan Kurikulum Merdeka.\n• Sumber online terpercaya terkait topik.'}
 
-═══════════════════════════════════════════════════════════
-Mengetahui,
-Kepala Sekolah
-
-
-( ${userKepsek || '.....................'} )
-NIP. ${userNIPKepsek || '.....................'}
-
-Guru Mata Pelajaran
-
-
-( ${guru || '.....................'} )
-NIP. ${nip || '.....................'}
-═══════════════════════════════════════════════════════════
-  `.trim();
+${signatureBlock}
+`.trim();
 }
 
 // ============================================
@@ -305,6 +334,10 @@ window.renderGeneratorModule = function() {
         white-space: pre-wrap;
         margin-top: 12px;
       }
+      
+      /* ✅ SIGNATURE SIDE-BY-SIDE (for preview in textarea) */
+      .signature-row { display: flex; justify-content: space-between; margin-top: 20px; }
+      .signature-col { text-align: center; width: 45%; }
     </style>
     
     <div class="modul-form">
@@ -537,7 +570,7 @@ function setupEventHandlers() {
 // ✅ Download function (seperti CTA Generator)
 function handleDownload() {
   const modul = document.getElementById('result-modul')?.value;
-  if (!modul || modul.includes('⏳')) {
+  if (!modul || modul.includes('⏳') || modul.includes('❌ Error')) {
     alert('⚠️ Generate data dulu sebelum download!');
     return;
   }
@@ -562,7 +595,7 @@ function handleDownload() {
 // ✅ Print function
 function handlePrint() {
   const modul = document.getElementById('result-modul')?.value;
-  if (!modul || modul.includes('⏳')) {
+  if (!modul || modul.includes('⏳') || modul.includes('❌ Error')) {
     alert('⚠️ Generate data dulu sebelum print!');
     return;
   }
@@ -632,33 +665,38 @@ async function handleGenerate() {
   btnGenerate.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
   
   if (resultDiv) resultDiv.classList.remove('hidden');
-  resultTextarea.value = '⏳ Sedang generate modul...';
+  resultTextarea.value = '⏳ Sedang generate modul dengan AI...';
   resultDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
   
   try {
-    // ✅ Call generator (mock now, API-ready pattern)
+    // ✅ Call generator (Groq API now enabled)
     const result = await generateModulWithAI(data);
     
-    resultTextarea.value = result;
-    console.log('✅ [Asisten Modul] Generate complete!');
+    // ✅ Check if result is error message
+    if (result.includes('❌ Error:')) {
+      resultTextarea.value = result;
+      alert('⚠️ ' + result.replace('❌ Error: ', ''));
+    } else {
+      resultTextarea.value = result;
+      console.log('✅ [Asisten Modul] Generate complete!');
+    }
     
     // ✅ Auto-save to Adm.Pembelajaran (non-blocking, like CTA)
     try {
       const { storage } = await import('./adm-pembelajaran/storage.js');
       storage.setUserId(user.uid);
       
-     // ✅ BENAR — Tambah ":" setelah "meta"
-const docData = {
-  jenis: 'asisten-modul',
-  jenjang: data.jenjang || '',
-  kelas: data.kelas || '',
-  mapel: data.mapel || '',
-  judul: `${data.topik || 'Modul'} - Kelas ${data.kelas}`,
-  konten: result,
-  tags: ['modul', data.mapel?.toLowerCase()],
-  source: 'asisten-modul',
-  meta: { topik: data.topik, guru: data.guru, sekolah: data.sekolah }  // ← ✅ FIXED!
-};
+      const docData = {
+        jenis: 'asisten-modul',
+        jenjang: data.jenjang || '',
+        kelas: data.kelas || '',
+        mapel: data.mapel || '',
+        judul: `${data.topik || 'Modul'} - Kelas ${data.kelas}`,
+        konten: result,
+        tags: ['modul', data.mapel?.toLowerCase()],
+        source: 'asisten-modul',
+        meta: { topik: data.topik, guru: data.guru, sekolah: data.sekolah }
+      };
       
       await storage.autoSaveFromExternal('asisten-modul', docData);
       console.log('✅ [Asisten Modul] Auto-save to Adm.Pembelajaran successful');
@@ -670,18 +708,8 @@ const docData = {
   } catch (error) {
     console.error('❌ [Asisten Modul] Error:', error);
     
-    // ✅ Specific error handling
-    let errorMessage = error.message;
-    if (error.message.includes('API key') || error.message.includes('auth')) {
-      errorMessage = 'API Key tidak valid atau belum terkonfigurasi.';
-    } else if (error.message.includes('quota') || error.message.includes('429')) {
-      errorMessage = 'Limit AI harian habis. Coba lagi nanti.';
-    } else if (error.message.includes('network') || error.message.includes('fetch')) {
-      errorMessage = 'Koneksi internet bermasalah. Cek koneksi Anda.';
-    }
-    
-    resultTextarea.value = `❌ Error: ${errorMessage}`;
-    alert('❌ Gagal generate modul:\n\n' + errorMessage);
+    resultTextarea.value = `❌ Error: ${error.message || 'Gagal generate modul'}`;
+    alert('❌ Gagal generate modul:\n\n' + (error.message || 'Silakan coba lagi'));
     
   } finally {
     // ✅ Restore button state
@@ -701,7 +729,7 @@ async function handleSave() {
   if (!user) { alert('⚠️ Silakan login dulu!'); return; }
   
   const modul = document.getElementById('result-modul')?.value;
-  if (!modul || modul === '⏳ Sedang generate...' || modul.includes('Error:')) {
+  if (!modul || modul.includes('⏳') || modul.includes('❌ Error')) {
     alert('⚠️ Generate data dulu sebelum menyimpan!');
     return;
   }
@@ -753,7 +781,6 @@ async function handleSave() {
   } catch (error) {
     console.error('❌ [Asisten Modul] Save error:', error);
     
-    // ✅ Specific error handling for save
     let errorMessage = error.message;
     if (error.message.includes('permission') || error.message.includes('security')) {
       errorMessage = 'Anda tidak memiliki akses untuk menyimpan. Hubungi admin.';
@@ -822,4 +849,4 @@ function loadModulData() {
   })();
 }
 
-console.log('🟢 [Asisten Modul] READY — Prototype Offline (API-Ready Pattern)');
+console.log('🟢 [Asisten Modul] READY — Full Groq API + Signature Fix Applied');
