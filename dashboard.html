@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Platform Guru TK/SD/MI/SMP/MTs/SMA/MA</title>
+    <meta name="description" content="Dashboard Administrasi Kelas Digital">
+    
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/penilaian.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- ✅ MOBILE RESPONSIVE CSS FOR ADMIN PANEL -->
+    <style>
+        /* Admin modal table scroll for mobile */
+        .admin-table-wrapper {
+            overflow-x: auto !important;
+            -webkit-overflow-scrolling: touch;
+            max-width: 100%;
+        }
+        
+        .admin-table-wrapper table {
+            min-width: 600px;
+        }
+        
+        /* Ensure modal content is scrollable */
+        #admin-approval-modal .overflow-y-auto {
+            overflow-y: auto !important;
+        }
+        
+        /* Mobile modal adjustments */
+        @media (max-width: 640px) {
+            #admin-approval-modal .bg-white {
+                width: 95vw !important;
+                max-width: 95vw !important;
+                margin: 10px !important;
+            }
+            
+            #admin-approval-modal h3 {
+                font-size: 14px !important;
+            }
+            
+            #admin-approval-modal .p-4 {                padding: 12px !important;
+            }
+            
+            #admin-approval-modal .px-4 {
+                padding-left: 12px !important;
+                padding-right: 12px !important;
+            }
+            
+            /* Larger touch targets for mobile */
+            #admin-approval-modal button {
+                min-height: 44px !important;
+                min-width: 44px !important;
+            }
+        }
+
+        /* ✅ NEW: Sub-feature modal styling */
+        #subfeature-modal .modal-content {
+            transform: translateY(0);
+            transition: transform 0.3s ease-out;
+        }
+        #subfeature-modal.hidden .modal-content {
+            transform: translateY(20px);
+        }
+        
+        /* ✅ NEW: Sub-feature card hover effect */
+        .subfeature-card {
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+        }
+        .subfeature-card:hover {
+            border-color: #7c3aed;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.15);
+        }
+        
+        /* ✅ NEW: Class badge styling */
+        .class-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            background: #f3f4f6;
+            color: #374151;
+            font-weight: 500;
+        }
+        
+        /* ✅ NEW: Responsive grid for jenjang cards */
+        @media (max-width: 768px) {
+            .rooms-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 0.75rem !important;            }
+            .room-card {
+                padding: 1rem !important;
+            }
+            .room-icon {
+                width: 40px !important;
+                height: 40px !important;
+                font-size: 1rem !important;
+            }
+            .room-title {
+                font-size: 0.9rem !important;
+            }
+            .room-desc {
+                font-size: 0.75rem !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-purple-600 text-white px-4 py-2 rounded z-50">
+        Lewati ke konten utama
+    </a>
+
+    <nav class="navbar" role="navigation" aria-label="Navigasi Utama">
+        <div class="container">
+            <div class="nav-content">
+                <div class="nav-brand">
+                    <a href="dashboard.html" class="flex items-center gap-3" aria-label="Kembali ke Dashboard">
+                        <div class="nav-logo" aria-hidden="true"><i class="fas fa-school"></i></div>
+                        <div>
+                            <h1 class="nav-title">Administrasi Kelas</h1>
+                            <p class="nav-subtitle">Platform Guru TK/SD/MI/SMP/MTs/SMA/MA</p>
+                        </div>
+                    </a>
+                </div>
+                
+                <div class="nav-actions flex items-center gap-4">
+                    <div class="user-info hidden sm:flex items-center gap-2">
+                        <span class="text-sm text-gray-600" id="userEmail">Loading...</span>
+                        <img class="h-8 w-8 rounded-full" src="https://ui-avatars.com/api/?name=User&background=7c3aed&color=fff" alt="Profile" id="userAvatar">
+                    </div>
+                    
+                    <div class="relative">
+                        <button id="profileMenuBtn" class="btn btn-ghost flex items-center gap-2" aria-label="Menu Profil" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-user-circle text-xl"></i>
+                            <i class="fas fa-chevron-down text-xs"></i>
+                        </button>
+                        
+                        <div id="profileDropdown" class="hidden absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50" role="menu">                            <div class="px-4 py-2 border-b border-gray-100">
+                                <p class="text-sm font-medium text-gray-900" id="profileName">Loading...</p>
+                                <p class="text-xs text-gray-500" id="profileEmailSub">Loading...</p>
+                            </div>
+                            
+                            <a href="change-password.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">
+                                <i class="fas fa-lock mr-2"></i>Ganti Password
+                            </a>
+                            
+                            <a href="profile.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">
+                                <i class="fas fa-user-edit mr-2"></i>Edit Profil
+                            </a>
+                            
+                            <div class="border-t border-gray-100 my-1"></div>
+                            
+                            <button onclick="logout()" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50" role="menuitem">
+                                <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <button onclick="logout()" class="btn btn-ghost sm:hidden" aria-label="Logout">
+                        <i class="fas fa-sign-out-alt mr-2" aria-hidden="true"></i>Keluar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main id="main-content">
+        
+        <section class="hero dashboard-hero" aria-labelledby="welcome-heading">
+            <div class="container">
+                <h1 id="welcome-heading" class="hero-title text-white">
+                    <i class="fas fa-home mr-3" aria-hidden="true"></i>Dashboard
+                </h1>
+                <p class="hero-subtitle text-white">Selamat datang di Rumah Digital Anda</p>
+                <div class="user-context-badge" id="userContextBadge">
+                    <i class="fas fa-user-circle mr-2" aria-hidden="true"></i>
+                    <span id="userContextText">Loading...</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ✅ UPDATED: 7 Main Features Grid (TK, SD, MI, SMP, MTs, SMA, MA) -->
+        <section class="section" aria-labelledby="rooms-heading">
+            <div class="container">
+                <h2 id="rooms-heading" class="section-title text-center mb-8">
+                    <i class="fas fa-door-open mr-2" aria-hidden="true"></i>JENJANG PENDIDIKAN
+                </h2>                
+                <div class="rooms-grid">
+                    <!-- TK -->
+                    <article class="room-card room-tk" data-jenjang="tk">
+                        <a href="javascript:void(0)" class="room-link" onclick="showJenjangSection('tk'); return false;">
+                            <div class="room-icon bg-pink"><i class="fas fa-child"></i></div>
+                            <h3 class="room-title">TK</h3>
+                            <p class="room-desc">Kelas A-B</p>
+                        </a>
+                    </article>
+                    
+                    <!-- SD -->
+                    <article class="room-card room-sd" data-jenjang="sd">
+                        <a href="javascript:void(0)" class="room-link" onclick="showJenjangSection('sd'); return false;">
+                            <div class="room-icon bg-blue"><i class="fas fa-elementary"></i></div>
+                            <h3 class="room-title">SD</h3>
+                            <p class="room-desc">Kelas 1-6</p>
+                        </a>
+                    </article>
+                    
+                    <!-- MI -->
+                    <article class="room-card room-mi" data-jenjang="mi">
+                        <a href="javascript:void(0)" class="room-link" onclick="showJenjangSection('mi'); return false;">
+                            <div class="room-icon bg-indigo"><i class="fas fa-mosque"></i></div>
+                            <h3 class="room-title">MI</h3>
+                            <p class="room-desc">Kelas 1-6</p>
+                        </a>
+                    </article>
+                    
+                    <!-- SMP -->
+                    <article class="room-card room-smp" data-jenjang="smp">
+                        <a href="javascript:void(0)" class="room-link" onclick="showJenjangSection('smp'); return false;">
+                            <div class="room-icon bg-green"><i class="fas fa-school"></i></div>
+                            <h3 class="room-title">SMP</h3>
+                            <p class="room-desc">Kelas 7-9</p>
+                        </a>
+                    </article>
+                    
+                    <!-- MTs -->
+                    <article class="room-card room-mts" data-jenjang="mts">
+                        <a href="javascript:void(0)" class="room-link" onclick="showJenjangSection('mts'); return false;">
+                            <div class="room-icon bg-emerald"><i class="fas fa-mosque"></i></div>
+                            <h3 class="room-title">MTs</h3>
+                            <p class="room-desc">Kelas 7-9</p>
+                        </a>
+                    </article>
+                    
+                    <!-- SMA -->
+                    <article class="room-card room-sma" data-jenjang="sma">
+                        <a href="javascript:void(0)" class="room-link" onclick="showJenjangSection('sma'); return false;">                            <div class="room-icon bg-purple"><i class="fas fa-graduation-cap"></i></div>
+                            <h3 class="room-title">SMA</h3>
+                            <p class="room-desc">Kelas 10-12</p>
+                        </a>
+                    </article>
+                    
+                    <!-- MA -->
+                    <article class="room-card room-ma" data-jenjang="ma">
+                        <a href="javascript:void(0)" class="room-link" onclick="showJenjangSection('ma'); return false;">
+                            <div class="room-icon bg-violet"><i class="fas fa-graduation-cap"></i></div>
+                            <h3 class="room-title">MA</h3>
+                            <p class="room-desc">Kelas 10-12</p>
+                        </a>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- ✅ DYNAMIC SECTIONS FOR EACH JENJANG (Template Pattern) -->
+        <!-- TK Section -->
+        <section id="tk-section" class="section bg-white hidden" data-jenjang="tk">
+            <div class="container">
+                <div class="section-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div>
+                        <h2 class="section-title"><i class="fas fa-child mr-2"></i>TK - Pilih Kelas</h2>
+                        <p class="section-subtitle">Kemudian pilih fitur yang ingin diakses</p>
+                    </div>
+                    <button onclick="backToDashboard()" class="btn btn-ghost btn-sm self-start sm:self-auto"><i class="fas fa-arrow-left mr-2"></i>Kembali</button>
+                </div>
+                <div class="kelas-grid">
+                    <article class="kelas-card" data-kelas="A">
+                        <a href="javascript:void(0)" class="kelas-link" onclick="showSubFeatureModal('tk', 'A'); return false;">
+                            <div class="kelas-number bg-pink-100 text-pink-700">A</div>
+                            <h3>Kelas A</h3>
+                            <p><span class="class-badge">TK</span> 6 Sub-fitur</p>
+                        </a>
+                    </article>
+                    <article class="kelas-card" data-kelas="B">
+                        <a href="javascript:void(0)" class="kelas-link" onclick="showSubFeatureModal('tk', 'B'); return false;">
+                            <div class="kelas-number bg-pink-100 text-pink-700">B</div>
+                            <h3>Kelas B</h3>
+                            <p><span class="class-badge">TK</span> 6 Sub-fitur</p>
+                        </a>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- SD Section -->
+        <section id="sd-section" class="section bg-white hidden" data-jenjang="sd">            <div class="container">
+                <div class="section-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div>
+                        <h2 class="section-title"><i class="fas fa-elementary mr-2"></i>SD - Pilih Kelas</h2>
+                        <p class="section-subtitle">Kemudian pilih fitur yang ingin diakses</p>
+                    </div>
+                    <button onclick="backToDashboard()" class="btn btn-ghost btn-sm self-start sm:self-auto"><i class="fas fa-arrow-left mr-2"></i>Kembali</button>
+                </div>
+                <div class="kelas-grid">
+                    <article class="kelas-card" data-kelas="1"><a href="javascript:void(0)" class="kelas-link" onclick="showSubFeatureModal('sd', '1'); return false;"><div class="kelas-number">1</div><h3>Kelas 1</h3><p><span class="class-badge">Fase A</span> 6 Sub-fitur</p></a></article>
+                    <article class="kelas-card" data-kelas="2"><a href="javascript:void(0)" class="kelas-link" onclick="showSubFeatureModal('sd', '2'); return false;"><div class="kelas-number">2</div><h3>Kelas 2</h3><p><span class="class-badge">Fase A</span> 6 Sub-fitur</p></a></article>
+                    <article class="kelas-card" data-kelas="3"><a href="javascript:void(0)" class="kelas-link" onclick="showSubFeatureModal('sd', '3'); return false;"><div class="kelas-number">3</div><h3>Kelas 3</h3><p><span class="class-badge">Fase B</span> 6 Sub-fitur</p></a></article>
+                    <article class="kelas-card" data-kelas="4"><a href="javascript:void(0)" class="kelas-link" onclick="showSubFeatureModal('sd', '4'); return false;"><div class="kelas-number">4</div><h3>Kelas 4</h3><p><span class="class-badge">Fase B</span> 6 Sub-fitur</p></a></article>
+                    <article class="kelas-card" data-kelas="5"><a href="javascript:void(0)" class="kelas-link" onclick="showSubFeatureModal('sd', '5'); return false;"><div class="kelas-number">5</div><h3>Kelas 5</h3><p><span class="class-badge">Fase C</span> 6 Sub-fitur</p></a></article>
+                    <article class="kelas-card" data-kelas="6"><a href="javascript:void(0)" class="kelas-link" onclick="showSubFeatureModal('sd', '6'); return false;"><div class="kelas-number">6</div><h3>Kelas 6</h3><p><span class="class-badge">Fase C</span> 6 Sub-fitur</p></a></article>
+                </div>
+            </div>
+        </section>
+
+        <!-- MI Section -->
+        <section id="mi-section" class="section bg-white hidden" data-jenjang="mi">
+            <div class="container">
+                <div class="section-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div>
+                        <h2 class="section-title"><i class="fas fa-mosque mr-2"></i>MI - Pilih Kelas</h2>
+                        <p class="section-subtitle">Kemudian pilih fitur yang ingin diakses</p>
+                    </div>
+                    <button onclick="backToDashboard()" class="btn btn-ghost btn-sm self-start sm:self-auto"><i class="fas fa-arrow-left mr-2"></i>Kembali</button>
+                </div>
+                <div class="kelas-grid">
+                    <article class="kelas-card" data-kelas="1"><a href="javascript:void(0)" class="kelas-link" onclick="showSubFeatureModal('mi', '1'); return false;"><div class="kelas-number">1</div><h3>Kelas 1</h3><p><span class="class-badge">Fase A</span> 6 Sub-fitur</p></a></article>
+                    <article class="kelas-card" data-kelas="2"><a href="javascript:void(0)" class="kelas-link" onclick="showSubFeatureModal('mi', '2'); return false;"><div class="kelas-number">2</div><h3>Kelas 2</h3><p><span class="class-badge">Fase A</span> 6 Sub-fitur</p></a></article>
+                    <article class="kelas-card" data-kelas="3"><a href="javascript:void(0)" class="kelas-link" onclick="showSubFeatureModal('mi', '3'); return false;"><div class="kelas-number">3</div><h3>Kelas 3</h3><p><span class="class-badge">Fase B</span> 6 Sub-fitur</p></a></article>
+                    <article class="kelas-card" data-kelas="4"><a href="javascript:void(0)" class="kelas-link" onclick="showSubFeatureModal('mi', '4'); return false;"><div class="kelas-number">4</div><h3>Kelas 4</h3><p><span class="class-badge">Fase B</span> 6 Sub-fitur</p></a></article>
+                    <article class="kelas-card" data-kelas="5"><a href="javascript:void(0)" class="kelas-link" onclick="showSubFeatureModal('mi', '5'); return false;"><div class="kelas-number">5</div><h3>Kelas 5</h3><p><span class="class-badge">Fase C</span> 6 Sub-fitur</p></a></article>
+                    <article class="kelas-card" data-kelas="6"><a href="javascript:void(0)" class="kelas-link" onclick="showSubFeatureModal('mi', '6'); return false;"><div class="kelas-number">6</div><h3>Kelas 6</h3><p><span class="class-badge">Fase C</span> 6 Sub-fitur</p></a></article>
+                </div>
+            </div>
+        </section>
+
+        <!-- SMP Section -->
+        <section id="smp-section" class="section bg-white hidden" data-jenjang="smp">
+            <div class="container">
+                <div class="section-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div>
+                        <h2 class="section-title"><i class="fas fa-school mr-2"></i>SMP - Pilih Kelas</h2>
+                        <p class="section-subtitle">Kemudian pilih fitur yang ingin diakses</p>
+                    </div>
+                    <button onclick="backToDashboard()" class="btn btn-ghost btn-sm self-start sm:self-auto"><i class="fas fa-arrow-left mr-2"></i>Kembali</button>
+                </div>                <div class="kelas-grid">
+                    <article class="kelas-card" data-kelas="7"><a href="javascript:void(0)" class="kelas-link" onclick="showSubFeatureModal('smp', '7'); return false;"><div class="kelas-number">7</div><h3>Kelas 7</h3><p><span class="class-badge">Fase D</span> 6 Sub-fitur</p></a></article>
+                    <article class="kelas-card" data-kelas="8"><a href="javascript:void(0)" class="kelas-link" onclick="showSubFeatureModal('smp', '8'); return false;"><div class="kelas-number">8</div><h3>Kelas 8</h3><p><span class="class-badge">Fase D</span> 6 Sub-fitur</p></a></article>
+                    <article class="kelas-card" data-kelas="9"><a href="javascript:void(0)" class="kelas-link" onclick="showSubFeatureModal('smp', '9'); return false;"><div class="kelas-number">9</div><h3>Kelas 9</h3><p><span class="class-badge">Fase D</span> 6 Sub-fitur</p></a></article>
+                </div>
+            </div>
+        </section>
+
+        <!-- MTs Section -->
+        <section id="mts-section" class="section bg-white hidden" data-jenjang="mts">
+            <div class="container">
+                <div class="section-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div>
+                        <h2 class="section-title"><i class="fas fa-mosque mr-2"></i>MTs - Pilih Kelas</h2>
+                        <p class="section-subtitle">Kemudian pilih fitur yang ingin diakses</p>
+                    </div>
+                    <button onclick="backToDashboard()" class="btn btn-ghost btn-sm self-start sm:self-auto"><i class="fas fa-arrow-left mr-2"></i>Kembali</button>
+                </div>
+                <div class="kelas-grid">
+                    <article class="kelas-card" data-kelas="7"><a href="javascript:void(0)" class="kelas-link" onclick="showSubFeatureModal('mts', '7'); return false;"><div class="kelas-number">7</div><h3>Kelas 7</h3><p><span class="class-badge">Fase D</span> 6 Sub-fitur</p></a></article>
+                    <article class="kelas-card" data-kelas="8"><a href="javascript:void(0)" class="kelas-link" onclick="showSubFeatureModal('mts', '8'); return false;"><div class="kelas-number">8</div><h3>Kelas 8</h3><p><span class="class-badge">Fase D</span> 6 Sub-fitur</p></a></article>
+                    <article class="kelas-card" data-kelas="9"><a href="javascript:void(0)" class="kelas-link" onclick="showSubFeatureModal('mts', '9'); return false;"><div class="kelas-number">9</div><h3>Kelas 9</h3><p><span class="class-badge">Fase D</span> 6 Sub-fitur</p></a></article>
+                </div>
+            </div>
+        </section>
+
+        <!-- SMA Section -->
+        <section id="sma-section" class="section bg-white hidden" data-jenjang="sma">
+            <div class="container">
+                <div class="section-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div>
+                        <h2 class="section-title"><i class="fas fa-graduation-cap mr-2"></i>SMA - Pilih Kelas</h2>
+                        <p class="section-subtitle">Kemudian pilih fitur yang ingin diakses</p>
+                    </div>
+                    <button onclick="backToDashboard()" class="btn btn-ghost btn-sm self-start sm:self-auto"><i class="fas fa-arrow-left mr-2"></i>Kembali</button>
+                </div>
+                <div class="kelas-grid">
+                    <article class="kelas-card" data-kelas="10"><a href="javascript:void(0)" class="kelas-link" onclick="showSubFeatureModal('sma', '10'); return false;"><div class="kelas-number">10</div><h3>Kelas 10</h3><p><span class="class-badge">Fase E</span> 6 Sub-fitur</p></a></article>
+                    <article class="kelas-card" data-kelas="11"><a href="javascript:void(0)" class="kelas-link" onclick="showSubFeatureModal('sma', '11'); return false;"><div class="kelas-number">11</div><h3>Kelas 11</h3><p><span class="class-badge">Fase F</span> 6 Sub-fitur</p></a></article>
+                    <article class="kelas-card" data-kelas="12"><a href="javascript:void(0)" class="kelas-link" onclick="showSubFeatureModal('sma', '12'); return false;"><div class="kelas-number">12</div><h3>Kelas 12</h3><p><span class="class-badge">Fase F</span> 6 Sub-fitur</p></a></article>
+                </div>
+            </div>
+        </section>
+
+        <!-- MA Section -->
+        <section id="ma-section" class="section bg-white hidden" data-jenjang="ma">
+            <div class="container">
+                <div class="section-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div>
+                        <h2 class="section-title"><i class="fas fa-graduation-cap mr-2"></i>MA - Pilih Kelas</h2>                        <p class="section-subtitle">Kemudian pilih fitur yang ingin diakses</p>
+                    </div>
+                    <button onclick="backToDashboard()" class="btn btn-ghost btn-sm self-start sm:self-auto"><i class="fas fa-arrow-left mr-2"></i>Kembali</button>
+                </div>
+                <div class="kelas-grid">
+                    <article class="kelas-card" data-kelas="10"><a href="javascript:void(0)" class="kelas-link" onclick="showSubFeatureModal('ma', '10'); return false;"><div class="kelas-number">10</div><h3>Kelas 10</h3><p><span class="class-badge">Fase E</span> 6 Sub-fitur</p></a></article>
+                    <article class="kelas-card" data-kelas="11"><a href="javascript:void(0)" class="kelas-link" onclick="showSubFeatureModal('ma', '11'); return false;"><div class="kelas-number">11</div><h3>Kelas 11</h3><p><span class="class-badge">Fase F</span> 6 Sub-fitur</p></a></article>
+                    <article class="kelas-card" data-kelas="12"><a href="javascript:void(0)" class="kelas-link" onclick="showSubFeatureModal('ma', '12'); return false;"><div class="kelas-number">12</div><h3>Kelas 12</h3><p><span class="class-badge">Fase F</span> 6 Sub-fitur</p></a></article>
+                </div>
+            </div>
+        </section>
+
+        <!-- ✅ SUB-FEATURE SELECTION MODAL (Reusable for all jenjang/kelas) -->
+        <div id="subfeature-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60] hidden" role="dialog" aria-modal="true">
+            <div class="modal-content bg-white rounded-xl shadow-2xl w-full max-w-2xl mx-4 overflow-hidden">
+                <div class="p-4 border-b border-gray-200 bg-gradient-to-r from-purple-600 to-cyan-600 text-white flex items-center justify-between">
+                    <h3 id="subfeature-modal-title" class="font-semibold flex items-center gap-2">
+                        <i class="fas fa-layer-group"></i>
+                        <span>Pilih Fitur - <span id="modal-jenjang-kelas"></span></span>
+                    </h3>
+                    <button onclick="closeSubFeatureModal()" class="p-2 hover:bg-white hover:bg-opacity-20 rounded-lg transition" aria-label="Tutup">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="p-4">
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                        <!-- 6 Sub-features (uniform across all jenjang) -->
+                        <button class="subfeature-card p-3 border border-gray-200 rounded-lg text-left hover:bg-gray-50" 
+                                onclick="loadSubFeature('adm-kelas')">
+                            <div class="flex items-center gap-2 mb-1">
+                                <i class="fas fa-users text-orange-500"></i>
+                                <span class="font-medium text-sm">Adm. Kelas</span>
+                            </div>
+                            <p class="text-xs text-gray-500">Data siswa & absensi</p>
+                        </button>
+                        
+                        <button class="subfeature-card p-3 border border-gray-200 rounded-lg text-left hover:bg-gray-50" 
+                                onclick="loadSubFeature('adm-pembelajaran')">
+                            <div class="flex items-center gap-2 mb-1">
+                                <i class="fas fa-book-open text-teal-500"></i>
+                                <span class="font-medium text-sm">Adm. Pembelajaran</span>
+                            </div>
+                            <p class="text-xs text-gray-500">Modul & RPP</p>
+                        </button>
+                        
+                        <button class="subfeature-card p-3 border border-gray-200 rounded-lg text-left hover:bg-gray-50" 
+                                onclick="loadSubFeature('penilaian')">
+                            <div class="flex items-center gap-2 mb-1">
+                                <i class="fas fa-chart-bar text-green-500"></i>                                <span class="font-medium text-sm">Penilaian</span>
+                            </div>
+                            <p class="text-xs text-gray-500">Nilai & laporan</p>
+                        </button>
+                        
+                        <button class="subfeature-card p-3 border border-gray-200 rounded-lg text-left hover:bg-gray-50" 
+                                onclick="loadSubFeature('refleksi')">
+                            <div class="flex items-center gap-2 mb-1">
+                                <i class="fas fa-pen-fancy text-purple-500"></i>
+                                <span class="font-medium text-sm">Refleksi</span>
+                            </div>
+                            <p class="text-xs text-gray-500">Jurnal pembelajaran</p>
+                        </button>
+                        
+                        <button class="subfeature-card p-3 border border-gray-200 rounded-lg text-left hover:bg-gray-50" 
+                                onclick="loadSubFeature('asisten')">
+                            <div class="flex items-center gap-2 mb-1">
+                                <i class="fas fa-robot text-blue-500"></i>
+                                <span class="font-medium text-sm">Asisten</span>
+                            </div>
+                            <p class="text-xs text-gray-500">Bantuan AI</p>
+                        </button>
+                        
+                        <button class="subfeature-card p-3 border border-gray-200 rounded-lg text-left hover:bg-gray-50" 
+                                onclick="loadSubFeature('modul')">
+                            <div class="flex items-center gap-2 mb-1">
+                                <i class="fas fa-wand-magic-sparkles text-pink-500"></i>
+                                <span class="font-medium text-sm">Modul</span>
+                            </div>
+                            <p class="text-xs text-gray-500">Generator template</p>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="p-4 border-t border-gray-200 bg-gray-50 flex justify-end">
+                    <button onclick="closeSubFeatureModal()" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+                        Batal
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ✅ CONTAINER SECTIONS FOR DYNAMIC MODULES (Preserved) -->
+        <section id="module-container" class="section bg-gray-50"><div class="container"></div></section>
+        <section id="refleksi-container" class="section bg-gray-50 hidden"></section>
+        <section id="penilaian-container" class="section bg-gray-50 hidden"></section>
+
+    </main>
+
+    <footer class="footer">        <div class="container">
+            <p>&copy; 2026 Platform Administrasi Kelas Digital.</p>
+            <p class="mt-2">Dibuat untuk Guru TK/SD/MI/SMP/MTs/SMA/MA</p>
+        </div>
+    </footer>
+
+    <!-- ✅ GLOBAL API KEY MODULE (Preserved) -->
+    <script type="module">
+        console.log('🔴 [Global API Key] Module START');
+        window.GLOBAL_API_KEY = null;
+        
+        export async function loadGlobalApiKey() {
+            try {
+                console.log('🔑 [Global API Key] Fetching from Firestore...');
+                const { db, doc, getDoc } = await import('./modules/firebase-config.js');
+                const keyDoc = await getDoc(doc(db, 'settings', 'api_key'));
+                
+                if (keyDoc.exists()) {
+                    const keyData = keyDoc.data();
+                    window.GLOBAL_API_KEY = keyData.groq_key || keyData.api_key || null;
+                    if (window.GLOBAL_API_KEY) {
+                        console.log('✅ [Global API Key] Loaded successfully');
+                        console.log('🔑 [Global API Key] Key prefix:', window.GLOBAL_API_KEY.substring(0, 10) + '...');
+                        return { success: true, key: window.GLOBAL_API_KEY };
+                    } else {
+                        console.warn('⚠️ [Global API Key] Document exists but no key found');
+                        return { success: false, error: 'No key in document' };
+                    }
+                } else {
+                    console.warn('⚠️ [Global API Key] Document not found in Firestore');
+                    return { success: false, error: 'Document not found' };
+                }
+            } catch (error) {
+                console.error('❌ [Global API Key] Error fetching:', error);
+                return { success: false, error: error.message };
+            }
+        }
+        
+        export async function getApiKey() {
+            if (window.GLOBAL_API_KEY) return window.GLOBAL_API_KEY;
+            const result = await loadGlobalApiKey();
+            if (result.success) return result.key;
+            const localKey = localStorage.getItem('groq_api_key');
+            if (localKey) {
+                console.log('🔄 [Global API Key] Using localStorage fallback');
+                return localKey;
+            }
+            console.warn('⚠️ [Global API Key] No key available');
+            return null;
+        }        
+        loadGlobalApiKey();
+        console.log('🟢 [Global API Key] Module READY');
+    </script>
+
+    <!-- ✅ DASHBOARD MAIN SCRIPT (Preserved + Enhanced) -->
+    <script type="module">
+        import { auth, onAuthStateChanged, db, doc, getDoc } from './modules/firebase-config.js';
+        
+        console.log('🔴 [Dashboard Simple] START');
+        
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('✅ [Dashboard] DOM loaded');
+            
+            const els = {
+                profileMenuBtn: document.getElementById('profileMenuBtn'),
+                profileDropdown: document.getElementById('profileDropdown'),
+                profileName: document.getElementById('profileName'),
+                profileEmailSub: document.getElementById('profileEmailSub'),
+                userEmail: document.getElementById('userEmail'),
+                userAvatar: document.getElementById('userAvatar'),
+                userContextBadge: document.getElementById('userContextBadge'),
+                userContextText: document.getElementById('userContextText')
+            };
+            
+            if (els.profileMenuBtn && els.profileDropdown) {
+                els.profileMenuBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    els.profileDropdown.classList.toggle('hidden');
+                });
+                document.addEventListener('click', (e) => {
+                    if (!els.profileDropdown?.contains(e.target) && !els.profileMenuBtn?.contains(e.target)) {
+                        els.profileDropdown?.classList.add('hidden');
+                    }
+                });
+            }
+            
+            onAuthStateChanged(auth, async (user) => {
+                console.log('🔐 [Dashboard] Auth:', user ? `IN (${user.uid})` : 'OUT');
+                
+                if (!user) return;
+                
+                try {
+                    const userDoc = await getDoc(doc(db, 'users', user.uid));
+                    if (userDoc.exists()) {
+                        const data = userDoc.data();
+                        
+                        if (els.profileName) els.profileName.textContent = data.nama_lengkap || 'User';
+                        if (els.profileEmailSub) els.profileEmailSub.textContent = user.email || '';
+                        if (els.userEmail) els.userEmail.textContent = user.email || '';                        if (els.userAvatar) {
+                            els.userAvatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(data.nama_lengkap || 'User')}&background=7c3aed&color=fff`;
+                        }
+                        
+                        if (els.userContextText) {
+                            // ✅ UPDATED: Support new jenjang labels
+                            const jenjangLabel = {
+                                tk:'TK', sd:'SD', mi:'MI', smp:'SMP', mts:'MTs', sma:'SMA', ma:'MA'
+                            };
+                            const label = jenjangLabel[data.jenjang_sekolah] || 'Guru';
+                            els.userContextText.textContent = `Guru ${label}`;
+                        }
+                        
+                        if (typeof window.initAdminWidget === 'function') {
+                            window.initAdminWidget(data.role || 'teacher');
+                        }
+                        
+                        // ✅ Preserve localStorage keys for backward compatibility
+                        localStorage.setItem('user_jenjang', data.jenjang_sekolah || '');
+                        localStorage.setItem('user_kelas_diampu', JSON.stringify(data.kelas_diampu || []));
+                        localStorage.setItem('user_role', data.role || 'teacher');
+                        
+                        console.log('✅ [Dashboard] User loaded:', data.jenjang_sekolah);
+                    }
+                } catch (e) {
+                    console.error('❌ [Dashboard] Error:', e);
+                }
+            });
+            
+            console.log('🟢 [Dashboard Simple] READY');
+        });
+    </script>
+
+    <!-- ✅ SAFE MODULE WRAPPERS (Preserved + Enhanced for new flow) -->
+    <script>
+        // ✅ NEW: Context tracking for sub-feature loading
+        window.currentJenjang = null;
+        window.currentKelas = null;
+        
+        // ✅ NEW: Show jenjang section (replaces old showSection for jenjang navigation)
+        window.showJenjangSection = function(jenjang) {
+            // Hide all sections first
+            document.querySelectorAll('section[data-jenjang]').forEach(sec => {
+                sec.classList.add('hidden');
+            });
+            // Show target section
+            const target = document.getElementById(`${jenjang}-section`);
+            if (target) {
+                target.classList.remove('hidden');
+                // Scroll to top smoothly                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+            // Hide module containers
+            ['module-container', 'refleksi-container', 'penilaian-container'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.classList.add('hidden');
+                    el.innerHTML = '';
+                }
+            });
+        };
+        
+        // ✅ NEW: Show sub-feature selection modal
+        window.showSubFeatureModal = function(jenjang, kelas) {
+            window.currentJenjang = jenjang;
+            window.currentKelas = kelas;
+            
+            const titleEl = document.getElementById('modal-jenjang-kelas');
+            if (titleEl) {
+                const jenjangLabel = {tk:'TK', sd:'SD', mi:'MI', smp:'SMP', mts:'MTs', sma:'SMA', ma:'MA'};
+                titleEl.textContent = `${jenjangLabel[jenjang] || jenjang.toUpperCase()} - Kelas ${kelas}`;
+            }
+            
+            const modal = document.getElementById('subfeature-modal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                // Add animation
+                setTimeout(() => {
+                    modal.querySelector('.modal-content')?.classList.remove('hidden');
+                }, 10);
+                document.body.style.overflow = 'hidden';
+            }
+        };
+        
+        // ✅ NEW: Close sub-feature modal
+        window.closeSubFeatureModal = function() {
+            const modal = document.getElementById('subfeature-modal');
+            if (modal) {
+                modal.classList.add('hidden');
+                document.body.style.overflow = '';
+            }
+            window.currentJenjang = null;
+            window.currentKelas = null;
+        };
+        
+        // ✅ NEW: Load sub-feature with context (core function)
+        window.loadSubFeature = async function(subfitur) {
+            const jenjang = window.currentJenjang;
+            const kelas = window.currentKelas;
+                        if (!jenjang || !kelas) {
+                alert('❌ Konteks kelas tidak ditemukan. Silakan pilih kelas terlebih dahulu.');
+                return;
+            }
+            
+            console.log(`🔄 Loading ${subfitur} for ${jenjang.toUpperCase()} - Kelas ${kelas}`);
+            
+            // Save context to localStorage (compatible with existing modules)
+            localStorage.setItem('current_jenjang', jenjang);
+            localStorage.setItem('current_kelas', kelas);
+            localStorage.setItem('current_subfitur', subfitur);
+            
+            // Close modal first
+            closeSubFeatureModal();
+            
+            // Hide all jenjang sections
+            document.querySelectorAll('section[data-jenjang]').forEach(sec => {
+                sec.classList.add('hidden');
+            });
+            
+            // Route to appropriate container/loader
+            try {
+                switch(subfitur) {
+                    case 'adm-kelas':
+                        await window.safeRenderAdmKelas();
+                        break;
+                    case 'adm-pembelajaran':
+                        await window.safeRenderAdmPembelajaran();
+                        break;
+                    case 'penilaian':
+                        await window.safeRenderPenilaian();
+                        break;
+                    case 'refleksi':
+                        await window.safeRenderRefleksiForm();
+                        break;
+                    case 'asisten':
+                        // Route to asisten-modul if available
+                        if (typeof window.renderAsistenModul === 'function') {
+                            await window.renderAsistenModul(jenjang, kelas);
+                        } else {
+                            await import('./modules/asisten-modul.js');
+                            if (typeof window.renderAsistenModul === 'function') {
+                                await window.renderAsistenModul(jenjang, kelas);
+                            }
+                        }
+                        break;
+                    case 'modul':
+                        // Route to generator-modul
+                        await window.safeRenderGeneratorModule();
+                        break;                    default:
+                        console.warn(`⚠️ Unknown subfitur: ${subfitur}`);
+                }
+            } catch (err) {
+                console.error(`❌ Failed to load ${subfitur}:`, err);
+                alert(`⚠️ Gagal memuat modul ${subfitur}. Silakan refresh halaman.`);
+            }
+        };
+        
+        // ✅ BACKWARD COMPATIBILITY: Keep old showSection for existing calls
+        window.showSection = function(sectionId) {
+            // Map old section IDs to new jenjang sections
+            const mapping = {
+                'sd-section': 'sd',
+                'smp-section': 'smp', 
+                'sma-section': 'sma'
+            };
+            const jenjang = mapping[sectionId];
+            if (jenjang) {
+                return window.showJenjangSection(jenjang);
+            }
+            // Fallback to original behavior for non-jenjang sections
+            document.querySelectorAll('section[data-jenjang]').forEach(sec => sec.classList.add('hidden'));
+            const target = document.getElementById(sectionId);
+            if (target) target.classList.remove('hidden');
+        };
+        
+        // ✅ BACKWARD COMPATIBILITY: Keep old loadSemester for existing module calls
+        window.loadSemester = function(jenjang, kelas) {
+            // Redirect to new flow with default sub-feature (adm-kelas)
+            window.currentJenjang = jenjang;
+            window.currentKelas = kelas;
+            return window.loadSubFeature('adm-kelas');
+        };
+        
+        // ✅ Keep existing safeRender* wrappers (unchanged logic)
+        window.safeRenderAdmKelas = async function(e) {
+            if (e) e.preventDefault();
+            console.log('🔄 [Dashboard] Loading adm-kelas module...');
+            
+            if (typeof window.renderAdmKelas === 'function') {
+                console.log('✅ [Dashboard] adm-kelas already loaded');
+                await window.renderAdmKelas();
+                return;
+            }
+            
+            const container = document.getElementById('module-container');
+            if (container) {
+                container.innerHTML = '<div class="text-center py-8"><i class="fas fa-spinner fa-spin text-2xl text-indigo-600"></i><p class="mt-2 text-slate-600">Memuat modul...</p></div>';
+                container.classList.remove('hidden');            }
+            
+            try {
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                if (typeof window.renderAdmKelas === 'function') {
+                    await window.renderAdmKelas();
+                } else {
+                    console.warn('⚠️ [Dashboard] renderAdmKelas still not ready, trying dynamic import...');
+                    await import('./modules/adm-kelas/adm-kelas.js');
+                    if (typeof window.renderAdmKelas === 'function') {
+                        await window.renderAdmKelas();
+                    } else {
+                        throw new Error('renderAdmKelas not found after import');
+                    }
+                }
+            } catch (err) {
+                console.error('❌ [Dashboard] Failed to load adm-kelas:', err);
+                if (container) {
+                    container.innerHTML = `<div class="text-center py-8 text-rose-600"><i class="fas fa-exclamation-circle text-2xl"></i><p class="mt-2">Gagal memuat modul: ${err.message}</p><button onclick="location.reload()" class="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg">Refresh</button></div>`;
+                }
+                alert('❌ Gagal memuat modul Adm. Kelas. Silakan refresh halaman.');
+            }
+        };
+        
+        window.safeRenderAdmPembelajaran = async function(e) {
+            if (e) e.preventDefault();
+            console.log('🔄 [Dashboard] Loading adm-pembelajaran module...');
+            
+            if (typeof window.renderAdmPembelajaran === 'function') {
+                console.log('✅ [Dashboard] adm-pembelajaran already loaded');
+                await window.renderAdmPembelajaran();
+                return;
+            }
+            
+            const container = document.getElementById('module-container');
+            if (container) {
+                container.innerHTML = '<div class="text-center py-8"><i class="fas fa-spinner fa-spin text-2xl text-indigo-600"></i><p class="mt-2 text-slate-600">Memuat modul...</p></div>';
+                container.classList.remove('hidden');
+            }
+            
+            try {
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                if (typeof window.renderAdmPembelajaran === 'function') {
+                    await window.renderAdmPembelajaran();
+                } else {
+                    console.warn('⚠️ [Dashboard] renderAdmPembelajaran not ready, trying dynamic import...');
+                    await import('./modules/adm-pembelajaran/adm-pembelajaran.js');
+                    if (typeof window.renderAdmPembelajaran === 'function') {                        await window.renderAdmPembelajaran();
+                    } else {
+                        throw new Error('renderAdmPembelajaran not found after import');
+                    }
+                }
+            } catch (err) {
+                console.error('❌ [Dashboard] Failed to load adm-pembelajaran:', err);
+                if (container) {
+                    container.innerHTML = `<div class="text-center py-8 text-rose-600"><i class="fas fa-exclamation-circle text-2xl"></i><p class="mt-2">Gagal memuat modul: ${err.message}</p><button onclick="location.reload()" class="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg">Refresh</button></div>`;
+                }
+                alert('❌ Gagal memuat modul Adm. Pembelajaran. Silakan refresh halaman.');
+            }
+        };
+        
+        window.safeRenderPenilaian = async function(e) {
+            if (e) e.preventDefault();
+            console.log('🔄 [Dashboard] Loading penilaian module...');
+            
+            if (typeof window.renderPenilaian === 'function') {
+                console.log('✅ [Dashboard] penilaian already loaded');
+                await window.renderPenilaian();
+                return;
+            }
+            
+            const container = document.getElementById('penilaian-container');
+            if (container) {
+                container.innerHTML = '<div class="text-center py-8"><i class="fas fa-spinner fa-spin text-2xl text-indigo-600"></i><p class="mt-2 text-slate-600">Memuat modul...</p></div>';
+                container.classList.remove('hidden');
+            }
+            
+            try {
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                if (typeof window.renderPenilaian === 'function') {
+                    await window.renderPenilaian();
+                } else {
+                    throw new Error('renderPenilaian not found');
+                }
+            } catch (err) {
+                console.error('❌ [Dashboard] Failed to load penilaian:', err);
+                if (container) {
+                    container.innerHTML = `<div class="text-center py-8 text-rose-600"><i class="fas fa-exclamation-circle text-2xl"></i><p class="mt-2">Gagal memuat modul: ${err.message}</p><button onclick="location.reload()" class="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg">Refresh</button></div>`;
+                }
+            }
+        };
+        
+        window.safeRenderRefleksiForm = async function(e) {
+            if (e) e.preventDefault();
+            if (typeof window.renderRefleksiForm === 'function') {
+                await window.renderRefleksiForm();            } else {
+                console.warn('⚠️ renderRefleksiForm not ready yet');
+                alert('⚠️ Modul Refleksi sedang dimuat. Silakan coba lagi dalam beberapa detik.');
+            }
+        };
+        
+        window.safeRenderGeneratorModule = async function(e) {
+            if (e) e.preventDefault();
+            if (typeof window.renderGeneratorModule === 'function') {
+                await window.renderGeneratorModule();
+            } else {
+                console.warn('⚠️ renderGeneratorModule not ready yet');
+                alert('⚠️ Modul Generator sedang dimuat. Silakan coba lagi dalam beberapa detik.');
+            }
+        };
+        
+        // ✅ BACK TO DASHBOARD (Preserved)
+        window.backToDashboard = function() {
+            // Hide all jenjang sections
+            document.querySelectorAll('section[data-jenjang]').forEach(sec => {
+                sec.classList.add('hidden');
+            });
+            // Show main dashboard grid section (first section after hero)
+            const dashboardGrid = document.querySelector('section[aria-labelledby="rooms-heading"]');
+            if (dashboardGrid) {
+                dashboardGrid.classList.remove('hidden');
+            }
+            // Hide module containers
+            ['module-container', 'refleksi-container', 'penilaian-container'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.classList.add('hidden');
+                    el.innerHTML = '';
+                }
+            });
+            // Reset context
+            window.currentJenjang = null;
+            window.currentKelas = null;
+            localStorage.removeItem('current_jenjang');
+            localStorage.removeItem('current_kelas');
+            localStorage.removeItem('current_subfitur');
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+        
+        console.log('✅ [Dashboard] Safe module wrappers + new navigation loaded');
+    </script>
+
+    <!-- ✅ EXTERNAL LIBRARIES (Preserved) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" crossorigin="anonymous"></script>    <script src="https://cdn.jsdelivr.net/npm/docx@7.8.2/build/index.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js" crossorigin="anonymous"></script>
+
+    <!-- ✅ MODULE IMPORTS (Preserved) -->
+    <script type="module" src="modules/firebase-config.js"></script>
+    <script type="module" src="js/main.js"></script>
+    <script type="module" src="js/dashboard.js"></script>
+    <script type="module" src="modules/jenjang-classes.js"></script>
+    <script type="module" src="modules/refleksi.js"></script>
+    <script type="module" src="modules/asisten-modul.js"></script>
+    <script type="module" src="modules/cta-loader.js"></script>
+    <script type="module" src="modules/cta-templates.js"></script>
+    <script type="module" src="modules/cta-generator.js"></script>
+    <script type="module" src="modules/groq-api.js"></script>
+    <script type="module" src="modules/adm-kelas/utils.js"></script>
+    <script type="module" src="modules/adm-kelas/storage.js"></script>
+    <script type="module" src="modules/adm-kelas/adm-kelas-template.js"></script>
+    <script type="module" src="modules/adm-kelas/adm-kelas.js"></script>
+    <script type="module" src="modules/adm-pembelajaran/utils.js"></script>
+    <script type="module" src="modules/adm-pembelajaran/storage.js"></script>
+    <script type="module" src="modules/adm-pembelajaran/section1/adm-pembelajaran1.js"></script>
+    <script type="module" src="modules/adm-pembelajaran/section1/section1.js"></script>
+    <script type="module" src="modules/adm-pembelajaran/section2/section2.js"></script>
+    <script type="module" src="modules/adm-pembelajaran/section1-template.js"></script>
+    <script type="module" src="modules/adm-pembelajaran/section2-template.js"></script>
+    <script type="module" src="modules/adm-pembelajaran/section3-template.js"></script>
+    <script type="module" src="modules/penilaian/penilaian-template.js"></script>
+    <script type="module" src="modules/penilaian/penilaian-storage.js"></script>
+    <script type="module" src="modules/penilaian/penilaian.js"></script> 
+    
+    <!-- ✅ ADMIN FLOATING WIDGET (Preserved - Crown Button + Modal) -->
+    <button id="admin-widget-btn" 
+            class="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-gradient-to-r from-purple-600 to-cyan-600 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 flex items-center justify-center z-40 hidden"
+            aria-label="Admin Approval Panel">
+        <i class="fas fa-crown text-xl"></i>
+    </button>
+
+    <div id="admin-approval-modal" 
+         class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] hidden"
+         role="dialog" 
+         aria-modal="true"
+         aria-labelledby="admin-modal-title">
+        
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col mx-4 sm:mx-0" style="display: none;">
+            
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-purple-600 to-cyan-600 text-white flex-shrink-0">
+                <h3 id="admin-modal-title" class="text-base sm:text-lg font-semibold flex items-center gap-2">
+                    <i class="fas fa-crown"></i>
+                    <span class="hidden sm:inline">Admin Approval Panel</span>                    <span class="sm:hidden">Approval</span>
+                </h3>
+                <button onclick="toggleAdminWidget()" 
+                        id="modal-close-btn"
+                        class="p-3 hover:bg-white hover:bg-opacity-20 rounded-lg transition bg-white bg-opacity-20"
+                        aria-label="Tutup panel"
+                        style="min-width: 44px; min-height: 44px;">
+                    <i class="fas fa-times text-lg"></i>
+                </button>
+            </div>
+            
+            <!-- Modal Body -->
+            <div class="flex-1 overflow-y-auto p-4">
+                
+                <!-- Stats -->
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 text-center">
+                        <div class="text-2xl font-bold text-amber-600" id="admin-stat-pending">0</div>
+                        <div class="text-xs text-gray-600">Menunggu</div>
+                    </div>
+                    <div class="bg-green-50 border border-green-200 rounded-lg p-3 text-center">
+                        <div class="text-2xl font-bold text-green-600" id="admin-stat-approved">0</div>
+                        <div class="text-xs text-gray-600">Disetujui</div>
+                    </div>
+                </div>
+                
+                <!-- Search -->
+                <div class="relative mb-4">
+                    <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                    <input type="text" 
+                           id="admin-search-input" 
+                           placeholder="Cari nama atau email..." 
+                           class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                           oninput="filterAdminUsers()">
+                </div>
+                
+                <!-- Pending Users Table with Horizontal Scroll -->
+                <div class="admin-table-wrapper border border-gray-200 rounded-lg overflow-hidden">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">User</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">Email</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">Sekolah</th>
+                                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase whitespace-nowrap">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-pending-tbody" class="divide-y divide-gray-100">
+                            <tr>
+                                <td colspan="4" class="px-4 py-8 text-center text-gray-500">                                    <i class="fas fa-spinner fa-spin text-xl mb-2"></i>
+                                    <p>Memuat data...</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Empty State -->
+                <div id="admin-empty-state" class="hidden text-center py-8">
+                    <i class="fas fa-check-circle text-4xl text-green-500 mb-3"></i>
+                    <p class="text-gray-600">Tidak ada user yang menunggu approval.</p>
+                </div>
+                
+            </div>
+            
+            <!-- Modal Footer -->
+            <div class="p-4 border-t border-gray-200 bg-gray-50 flex justify-end gap-2 flex-shrink-0">
+                <button onclick="loadAdminPendingUsers()" 
+                        class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+                    <i class="fas fa-refresh mr-1"></i> <span class="hidden sm:inline">Refresh</span><i class="sm:hidden">↻</i>
+                </button>
+                <button onclick="toggleAdminWidget()" 
+                        class="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700 transition">
+                    Tutup
+                </button>
+            </div>
+            
+        </div>
+    </div>
+
+   <!-- ✅ ADMIN WIDGET LOGIC (Preserved - No Changes) -->
+<script>
+(function() {
+    console.log('👑 [Admin Widget v3] Script initializing...');
+    
+    let adminPendingUsers = [];
+    
+    function initAdminWidgetScript() {
+        const btn = document.getElementById('admin-widget-btn');
+        const modal = document.getElementById('admin-approval-modal');
+        
+        if (!btn || !modal) {
+            console.error('❌ [Admin Widget] Elements not found!', { btn, modal });
+            return;
+        }
+        
+        console.log('✅ [Admin Widget] Elements found, attaching listeners...');
+        
+        btn.addEventListener('click', function(e) {            e.preventDefault();
+            e.stopPropagation();
+            console.log('👑 [Admin Widget] Button clicked!');
+            toggleAdminWidget();
+        });
+        
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) toggleAdminWidget();
+        });
+        
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+                toggleAdminWidget();
+            }
+        });
+        
+        console.log('✅ [Admin Widget] Listeners attached');
+    }
+    
+  window.toggleAdminWidget = function() {
+    console.log('🔄 [Admin Widget] toggle called');
+    
+    const modal = document.getElementById('admin-approval-modal');
+    const modalContent = modal.querySelector('.bg-white');
+    if (!modal) return;
+    
+    if (modal.classList.contains('hidden')) {
+        // Open modal
+        console.log('✅ Opening modal...');
+        modal.classList.remove('hidden');
+        
+        modal.style.display = 'flex';
+        modal.style.visibility = 'visible';
+        modal.style.opacity = '1';
+        modal.style.zIndex = '99999';
+        
+        if (modalContent) {
+            modalContent.style.display = 'block';
+            modalContent.style.visibility = 'visible';
+        }
+        
+        document.body.style.overflow = 'hidden';
+        
+        if (adminPendingUsers.length === 0) {
+            console.log('📊 Loading pending users...');
+            loadAdminPendingUsers();
+        }
+    } else {
+        // Close modal
+        console.log('✅ Closing modal...');        modal.classList.add('hidden');
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+    }
+};
+    
+    
+    async function loadAdminPendingUsers() {
+        console.log('📊 Loading pending users...');
+        try {
+            const { db, collection, query, where, orderBy, getDocs } = await import('./modules/firebase-config.js');
+            const q = query(collection(db, 'users'), where('isApproved', '==', false), orderBy('createdAt', 'desc'));
+            const snapshot = await getDocs(q);
+            adminPendingUsers = snapshot.docs.map(d => ({ id: d.id, ...d.data() })).filter(u => u.role !== 'admin');
+            console.log(`📊 Found ${adminPendingUsers.length} pending`);
+            const el = document.getElementById('admin-stat-pending');
+            if (el) el.textContent = adminPendingUsers.length;
+            renderAdminPendingTable();
+        } catch (error) {
+            console.error('❌ Error:', error);
+            const tbody = document.getElementById('admin-pending-tbody');
+            if (tbody) tbody.innerHTML = `<tr><td colspan="4" class="px-4 py-8 text-center text-red-600">❌ ${error.message}</td></tr>`;
+        }
+    }
+    
+    function renderAdminPendingTable() {
+        const tbody = document.getElementById('admin-pending-tbody');
+        const empty = document.getElementById('admin-empty-state');
+        const search = document.getElementById('admin-search-input')?.value?.toLowerCase() || '';
+        if (!tbody) return;
+        
+        const filtered = adminPendingUsers.filter(u => 
+            u.nama_lengkap?.toLowerCase().includes(search) ||
+            u.email?.toLowerCase().includes(search) ||
+            u.nama_sekolah?.toLowerCase().includes(search)
+        );
+        
+        if (filtered.length === 0) {
+            tbody.innerHTML = '';
+            if (empty) empty.classList.remove('hidden');
+            return;
+        }
+        if (empty) empty.classList.add('hidden');
+        
+        tbody.innerHTML = filtered.map(u => {
+            const date = u.createdAt?.toDate?.()?.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) || '-';
+            return `<tr class="hover:bg-gray-50"><td class="px-4 py-3"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold text-sm flex-shrink-0">${(u.nama_lengkap||'U')[0].toUpperCase()}</div><div><div class="font-medium text-sm">${u.nama_lengkap||'-'}</div><div class="text-xs text-gray-500">${u.jenjang_sekolah?.toUpperCase()||'-'}</div></div></div></td><td class="px-4 py-3 text-sm whitespace-nowrap">${u.email||'-'}</td><td class="px-4 py-3 text-sm whitespace-nowrap">${u.nama_sekolah||'-'}</td><td class="px-4 py-3 text-right"><div class="flex justify-end gap-1"><button onclick="adminApproveUser('${u.id}','${u.email}','${u.nama_lengkap}')" class="p-2 text-green-600 hover:bg-green-50 rounded" title="Setujui"><i class="fas fa-check"></i></button><button onclick="adminRejectUser('${u.id}','${u.email}','${u.nama_lengkap}')" class="p-2 text-red-600 hover:bg-red-50 rounded" title="Tolak"><i class="fas fa-times"></i></button></div></td></tr>`;
+        }).join('');
+    }
+        window.filterAdminUsers = () => renderAdminPendingTable();
+    
+    window.adminApproveUser = async (uid, email, nama) => {
+        if (!confirm(`✅ Setujui ${nama}?\n\n${email}`)) return;
+        try {
+            const { db, doc, updateDoc, serverTimestamp, auth } = await import('./modules/firebase-config.js');
+            await updateDoc(doc(db, 'users', uid), { 
+                isApproved: true, 
+                isActive: true,
+                approvedAt: serverTimestamp(), 
+                approvedBy: auth.currentUser?.uid || 'admin' 
+            });
+            alert(`✅ ${nama} disetujui!\n\nUser sekarang bisa login.`);
+            await loadAdminPendingUsers();
+        } catch (e) { alert(`❌ ${e.message}`); }
+    };
+    
+    window.adminRejectUser = async (uid, email, nama) => {
+        if (!confirm(`❌ Tolak ${nama}?\n\n${email}`)) return;
+        try {
+            const { db, doc, updateDoc, serverTimestamp, auth } = await import('./modules/firebase-config.js');
+            await updateDoc(doc(db, 'users', uid), { 
+                isApproved: false, 
+                isActive: false, 
+                rejectedAt: serverTimestamp(), 
+                rejectedBy: auth.currentUser?.uid || 'admin' 
+            });
+            alert(`✅ ${nama} ditolak`);
+            await loadAdminPendingUsers();
+        } catch (e) { alert(`❌ ${e.message}`); }
+    };
+    
+    window.initAdminWidget = (role) => {
+        const btn = document.getElementById('admin-widget-btn');
+        if (!btn) return;
+        btn.classList.toggle('hidden', role !== 'admin');
+        console.log(`👑 Button ${role === 'admin' ? 'visible' : 'hidden'} for ${role}`);
+    };
+    
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initAdminWidgetScript);
+    } else {
+        initAdminWidgetScript();
+    }
+    
+    console.log('✅ [Admin Widget v3] Ready');
+})();
+</script>
+</body>
+</html>
