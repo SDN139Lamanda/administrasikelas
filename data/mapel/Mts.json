@@ -1,8 +1,15 @@
 [
   { "nama": "Matematika", "jenjang": "mts" },
+  { "nama": "bahsa arab", "jenjang": "mts" },
+  { "nama": "aqidah ahlak", "jenjang": "mts" },
+  { "nama": "sejarah kebudayaan islam", "jenjang": "mts" },
+  { "nama": "Matematika", "jenjang": "mts" },
+  { "nama": "Matematika", "jenjang": "mts" },
+  { "nama": "Matematika", "jenjang": "mts" },
+  { "nama": "Matematika", "jenjang": "mts" },
   { "nama": "Bahasa Indonesia", "jenjang": "mts" },
   { "nama": "IPA", "jenjang": "mts" },
   { "nama": "IPS", "jenjang": "mts" },
   { "nama": "Bahasa Inggris", "jenjang": "mts" },
-  { "nama": "Fiqih / Akidah Akhlak", "jenjang": "mts" }
+  { "nama": "Fiqih", "jenjang": "mts" }
 ]
