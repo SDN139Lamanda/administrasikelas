@@ -1,0 +1,10 @@
+[
+  { "nama": "Matematika Wajib", "jenjang": "sma" },
+  { "nama": "Bahasa Indonesia", "jenjang": "sma" },
+  { "nama": "Fisika", "jenjang": "sma" },
+  { "nama": "Kimia", "jenjang": "sma" },
+  { "nama": "Biologi", "jenjang": "sma" },
+  { "nama": "Ekonomi", "jenjang": "sma" },
+  { "nama": "Sosiologi", "jenjang": "sma" },
+  { "nama": "Sejarah", "jenjang": "sma" }
+]
