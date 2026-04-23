@@ -1,5 +1,9 @@
 [
-  { "nama": "Matematika", "jenjang": "sd" },
+  { "nama": "Paibd", "jenjang": "sd" },
+  { "nama": "Pjok", "jenjang": "sd" },
+  { "nama": "Bahasa inggris", "jenjang": "sd" },
+   { "nama": "Matematika", "jenjang": "sd" },
+    { "nama": "Coding dan kecerdasab artifisial", "jenjang": "sd" },
   { "nama": "Bahasa Indonesia", "jenjang": "sd" },
   { "nama": "IPAS", "jenjang": "sd" },
   { "nama": "Pendidikan Pancasila", "jenjang": "sd" },
