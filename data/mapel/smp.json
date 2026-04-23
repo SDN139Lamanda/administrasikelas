@@ -1,4 +1,10 @@
 [
+  { "nama": "Coding dan kecerdasan artifisial", "jenjang": "smp" },
+  { "nama": "Muatan lokal", "jenjang": "smp" },
+  { "nama": "Prakarya", "jenjang": "smp" },
+  { "nama": "Seni budaya", "jenjang": "smp" },
+  { "nama": "Impormatika", "jenjang": "smp" },
+  { "nama": "Pjok", "jenjang": "smp" },
   { "nama": "Matematika", "jenjang": "smp" },
   { "nama": "Bahasa Indonesia", "jenjang": "smp" },
   { "nama": "IPA", "jenjang": "smp" },
