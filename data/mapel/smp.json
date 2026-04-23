@@ -7,8 +7,10 @@
   { "nama": "Pjok", "jenjang": "smp" },
   { "nama": "Matematika", "jenjang": "smp" },
   { "nama": "Bahasa Indonesia", "jenjang": "smp" },
-  { "nama": "IPA", "jenjang": "smp" },
-  { "nama": "IPS", "jenjang": "smp" },
+  { "nama": "Ipa", "jenjang": "smp" },
+  { "nama": "Ips", "jenjang": "smp" },
   { "nama": "Bahasa Inggris", "jenjang": "smp" },
   { "nama": "Pendidikan Pancasila", "jenjang": "smp" }
+  { "nama": "Pendidikan Agama Islam", "jenjang": "smp" },
+
 ]
