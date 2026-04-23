@@ -1,7 +1,16 @@
 [
   { "nama": "Matematika", "jenjang": "mi" },
+    { "nama": "Bahasa inggris", "jenjang": "mi" },
+    { "nama": "Seni dan budaya", "jenjang": "mi" },
+    { "nama": "Pjok", "jenjang": "mi" },
+    { "nama": "Pendidikan pancasila", "jenjang": "mi" },
+    { "nama": "Quran hadits", "jenjang": "mi" },
+    { "nama": "Sejarah kebudayaan islam", "jenjang": "mi" },
+  { "nama": "Aqidah ahlak", "jenjang": "mi" },
+    { "nama": "Fiqih", "jenjang": "mi" },
+  { "nama": "Muatan lokal", "jenjang": "mi" },  
   { "nama": "Bahasa Indonesia", "jenjang": "mi" },
   { "nama": "IPAS", "jenjang": "mi" },
-  { "nama": "Pendidikan Agama Islam", "jenjang": "mi" },
-  { "nama": "Bahasa Arab", "jenjang": "mi" }
+  { "nama": "coding dan kecerdasan artifisial", "jenjang": "mi" },
+  
 ]
