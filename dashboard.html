@@ -17,6 +17,21 @@
     <link rel="stylesheet" href="css/penilaian.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- ✅ LOGOUT SHIM - Prevent "logout is not defined" error (sync, non-module) -->
+    <script>
+        // Define minimal logout shim immediately (sync, non-module)
+        // This ensures inline onclick="logout()" works even before js/dashboard.js module loads
+        if (typeof window.logout !== 'function') {
+            window.logout = function() {
+                console.log('🚪 [Logout Shim] Called, waiting for module...');
+                // Fallback: redirect to index with logout flag
+                try { localStorage.clear(); sessionStorage.clear(); } catch(e) {}
+                window.location.href = 'index.html?loggedout=' + Date.now();
+            };
+        }
+        console.log('✅ [Logout Shim] Defined in global scope');
+    </script>
+    
     <!-- ✅ MOBILE RESPONSIVE CSS + VISIBILITY FIX + SUB-FEATURE STYLES + ACCESS BADGE -->
     <style>
         /* Admin modal table scroll for mobile */
