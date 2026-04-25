@@ -5,7 +5,7 @@
  * ============================================
  */
 
-// ✅ Flag to prevent double-execution of logout (shared with dashboard.html shim)
+// ✅ Flag to prevent double-execution of logout (shared with index.html)
 if (typeof window.__logoutExecuted === 'undefined') {
     window.__logoutExecuted = false;
 }
@@ -19,7 +19,12 @@ if (typeof window.logout !== 'function') {
         window.__logoutExecuted = true;
         
         console.log('🚪 [Dashboard] Logout called (sync shim)');
-        try { localStorage.clear(); sessionStorage.clear(); } catch(e) {}
+        
+        // Set session flag BEFORE any redirect
+        sessionStorage.setItem('__justLoggedOut', 'true');
+        sessionStorage.setItem('__loggingOut', 'true');
+        
+        try { localStorage.clear(); } catch(e) {}
         const redirectUrl = 'index.html?loggedout=' + Date.now() + '&' + Math.random().toString(36).substr(2, 9);
         window.location.replace(redirectUrl);
         setTimeout(function() { if (window.__logoutExecuted) window.location.href = redirectUrl; }, 100);
@@ -256,6 +261,10 @@ window.logout = async function() {
     
     console.log('🚪 [Dashboard] logout DIPANGGIL (async full implementation)');
     
+    // ✅ CRITICAL: Set session flag BEFORE any redirect
+    sessionStorage.setItem('__justLoggedOut', 'true');
+    sessionStorage.setItem('__loggingOut', 'true');
+    
     try {
         const { auth, signOut } = await import('./modules/firebase-config.js');
         
@@ -269,22 +278,23 @@ window.logout = async function() {
     }
     
     try {
-        // ✅ 2. Clear localStorage & sessionStorage
+        // ✅ 2. Clear localStorage & sessionStorage (keep logout flag)
+        const logoutFlag = sessionStorage.getItem('__justLoggedOut');
         localStorage.clear();
         sessionStorage.clear();
+        if (logoutFlag) sessionStorage.setItem('__justLoggedOut', 'true');
         console.log('✅ [Dashboard] Storage cleared');
     } catch (e) {
         console.warn('⚠️ [Dashboard] Storage clear failed:', e);
     }
     
     // ✅ 3. Force redirect using replace() + cache busting
-    // replace() prevents browser back-button from returning to dashboard
-    const redirectUrl = 'index.html?loggedout=' + Date.now() + '&' + Math.random().toString(36).substr(2, 9);
+    const redirectUrl = 'index.html?loggedout=' + Date.now() + '&r=' + Math.random();
     
     console.log('🔄 [Dashboard] Redirecting to:', redirectUrl);
     window.location.replace(redirectUrl);
     
-    // ✅ 4. Extra safety: force reload after delay if replace didn't work
+    // ✅ 4. Extra safety: force reload after delay
     setTimeout(function() {
         if (window.__logoutExecuted) {
             console.log('🔄 [Dashboard] Fallback redirect via href');
