@@ -1,16 +1,16 @@
 /**
  * ============================================
  * DASHBOARD LOGIC - Platform Administrasi Kelas
- * VERSI: Fix logout + Flexible approval check for existing users
+ * VERSI: Fix Admin Auto-Approved + Backward Compatibility
  * ============================================
  */
 
-// ✅ Flag to prevent double-execution of logout (shared with index.html)
+// ✅ Flag to prevent double-execution of logout
 if (typeof window.__logoutExecuted === 'undefined') {
     window.__logoutExecuted = false;
 }
 
-// ✅ CRITICAL: Define window.logout SYNCHRONOUSLY at file top (before any async code)
+// ✅ CRITICAL: Sync logout shim
 if (typeof window.logout !== 'function') {
     window.logout = function() {
         if (window.__logoutExecuted) return;
@@ -30,7 +30,7 @@ if (typeof window.logout !== 'function') {
 console.log('🔴 [Dashboard] Script START');
 
 // ============================================
-// ✅ GLOBAL STATE - Initialize with safe defaults
+// ✅ GLOBAL STATE
 // ============================================
 
 window.currentUserIsApproved = false;
@@ -42,12 +42,18 @@ window.currentUserSdMapelType = 'kelas';
 window.currentUserMiMapelType = 'kelas';
 
 // ============================================
-// ✅ HELPER FUNCTIONS - For approval & UI
+// ✅ HELPER FUNCTIONS
 // ============================================
 
-// ✅ UPDATED: Flexible approval check - handles boolean, string, and missing field
+// ✅ UPDATED: Admin ALWAYS approved + backward compatibility for missing field
 window.isUserApproved = function() {
-    // Check multiple possible values for approval
+    // ✅ CRITICAL: Admin role ALWAYS approved (no check needed)
+    if (window.currentUserRole === 'admin') {
+        console.log('✅ [Approval] Admin user - auto approved');
+        return true;
+    }
+    
+    // Check approval value
     const approved = window.currentUserIsApproved;
     
     // Handle boolean true
@@ -59,11 +65,16 @@ window.isUserApproved = function() {
     // Handle number 1
     if (approved === 1) return true;
     
+    // ✅ BACKWARD COMPATIBILITY: undefined means old account → treat as approved
+    if (approved === undefined || approved === null) {
+        console.log('✅ [Approval] No approval field (old account) - treating as approved');
+        return true;
+    }
+    
     // Default: not approved
     return false;
 };
 
-// ✅ Helper: Show pending screen (reusable)
 window.showPendingApprovalUI = function() {
     console.log('⏳ [Dashboard] Showing pending approval UI');
     
@@ -94,7 +105,7 @@ window.showPendingApprovalUI = function() {
 };
 
 // ============================================
-// ✅ YOUR CODE - PRESERVED 100% (Navigation & Routing)
+// ✅ NAVIGATION & ROUTING
 // ============================================
 
 window.currentJenjang = null; 
@@ -236,7 +247,7 @@ window.backToDashboard = function() {
 };
 
 // ============================================
-// ✅ AUTHENTICATION CHECK - UPDATED WITH FLEXIBLE APPROVAL + DEBUG LOGS
+// ✅ AUTHENTICATION CHECK - FIXED ADMIN + BACKWARD COMPATIBILITY
 // ============================================
 
 async function checkAuthStatus() {
@@ -261,56 +272,55 @@ async function checkAuthStatus() {
                         if (userDoc.exists()) {
                             const userData = userDoc.data();
                             
-                            // ✅ DEBUG: Log all possible approval fields
+                            // ✅ DEBUG: Log all fields
                             console.log('🔍 [Dashboard] User doc fields:', Object.keys(userData));
-                            console.log('🔍 [Dashboard] Approval check:', {
-                                isApproved: userData.isApproved,
-                                approved: userData.approved,
-                                is_approved: userData.is_approved,
-                                type_isApproved: typeof userData.isApproved,
-                                type_approved: typeof userData.approved
-                            });
+                            console.log('🔍 [Dashboard] Role:', userData.role);
+                            console.log('🔍 [Dashboard] isApproved:', userData.isApproved, 'type:', typeof userData.isApproved);
                             
-                            // ✅ FLEXIBLE: Check multiple possible field names and values
+                            // ✅ Set role FIRST (before approval check)
+                            window.currentUserRole = userData.role || 'teacher';
+                            
+                            // ✅ CRITICAL FIX: Admin ALWAYS approved
                             let approvalValue = false;
                             
-                            // Check isApproved (boolean or string)
-                            if (userData.isApproved === true || userData.isApproved === 'true' || userData.isApproved === 1) {
+                            if (window.currentUserRole === 'admin') {
                                 approvalValue = true;
+                                console.log('✅ [Approval] ADMIN USER - auto approved regardless of isApproved field');
                             }
-                            // Check approved (fallback field name)
-                            else if (userData.approved === true || userData.approved === 'true' || userData.approved === 1) {
+                            // ✅ BACKWARD COMPATIBILITY: Old accounts without isApproved field → approved
+                            else if (userData.isApproved === undefined || userData.isApproved === null) {
                                 approvalValue = true;
+                                console.log('✅ [Approval] No isApproved field (old account) - treating as approved');
                             }
-                            // Check is_approved (another fallback)
-                            else if (userData.is_approved === true || userData.is_approved === 'true' || userData.is_approved === 1) {
+                            // ✅ Check isApproved (various formats)
+                            else if (userData.isApproved === true || userData.isApproved === 'true' || userData.isApproved === 1) {
                                 approvalValue = true;
+                                console.log('✅ [Approval] isApproved field is true');
+                            }
+                            // ✅ Fallback field names
+                            else if (userData.approved === true || userData.approved === 'true') {
+                                approvalValue = true;
+                                console.log('✅ [Approval] approved field is true');
+                            }
+                            else {
+                                approvalValue = false;
+                                console.log('⚠️ [Approval] User NOT approved (isApproved = false)');
                             }
                             
-                            // ✅ Set global state
-                            window.currentUserRole = userData.role || 'teacher';
+                            // ✅ Set all user data
                             window.currentUserJenjang = userData.jenjang_sekolah || null;
                             window.currentUserKelas = Array.isArray(userData.kelas_diampu) ? userData.kelas_diampu : [];
                             window.currentUserMapel = Array.isArray(userData.mapel_diampu) ? userData.mapel_diampu : [];
                             window.currentUserSdMapelType = userData.sd_mapel_type || 'kelas';
                             window.currentUserMiMapelType = userData.mi_mapel_type || 'kelas';
-                            window.currentUserIsApproved = approvalValue; // ✅ Store the flexible check result
+                            window.currentUserIsApproved = approvalValue;
                             
                             console.log('✅ [Dashboard] User profile loaded:', { 
                                 role: window.currentUserRole, 
                                 jenjang: window.currentUserJenjang, 
-                                kelas: window.currentUserKelas,
                                 isApproved: window.currentUserIsApproved,
                                 raw_isApproved: userData.isApproved
                             });
-                            
-                            // ✅ AUTO-FIX: If user should be approved but isn't, log warning for admin
-                            if (!approvalValue && (userData.isApproved || userData.approved || userData.is_approved)) {
-                                console.warn('⚠️ [Dashboard] Approval field mismatch detected! User has approval flag but check failed. Possible causes:');
-                                console.warn('  • Field name mismatch (isApproved vs approved vs is_approved)');
-                                console.warn('  • Type mismatch (boolean true vs string "true")');
-                                console.warn('  • Value: isApproved=', userData.isApproved, 'approved=', userData.approved);
-                            }
                             
                         } else {
                             console.warn('⚠️ [Dashboard] User doc NOT FOUND in Firestore!');
@@ -320,7 +330,7 @@ async function checkAuthStatus() {
                             window.currentUserMapel = [];
                             window.currentUserSdMapelType = 'kelas';
                             window.currentUserMiMapelType = 'kelas';
-                            window.currentUserIsApproved = false;
+                            window.currentUserIsApproved = true; // ✅ No doc → treat as approved (edge case)
                         }
                     } catch (e) {
                         console.error('❌ [Dashboard] Failed to fetch user profile:', e);
@@ -330,7 +340,7 @@ async function checkAuthStatus() {
                         window.currentUserMapel = [];
                         window.currentUserSdMapelType = 'kelas';
                         window.currentUserMiMapelType = 'kelas';
-                        window.currentUserIsApproved = false;
+                        window.currentUserIsApproved = true; // ✅ Error → treat as approved (fail open)
                     }
                     
                     if (typeof window.initAdminWidget === 'function') {
@@ -339,7 +349,7 @@ async function checkAuthStatus() {
                     
                     resolve();
                 } else {
-                    console.warn('⚠️ [Dashboard] User not logged in, redirecting to login...');
+                    console.warn('⚠️ [Dashboard] User not logged in, redirecting...');
                     localStorage.clear();
                     sessionStorage.clear();
                     window.location.href = 'index.html?notauth=' + Date.now();
@@ -357,7 +367,7 @@ async function checkAuthStatus() {
         window.currentUserMapel = [];
         window.currentUserSdMapelType = 'kelas';
         window.currentUserMiMapelType = 'kelas';
-        window.currentUserIsApproved = false;
+        window.currentUserIsApproved = true; // ✅ Error → fail open
     }
 }
 
@@ -376,26 +386,20 @@ async function initRoomCards() {
     console.log('🎯 [Dashboard] User data:', { 
         role: userRole, 
         jenjang: userJenjang, 
-        kelas: window.currentUserKelas,
         isApproved: isApproved
     });
     
-    if (window.currentUserRole === null && !isApproved) {
-        console.error('❌ [Dashboard] User data NOT loaded! Check Firestore connection!');
-        if (!window.isUserApproved()) {
-            window.showPendingApprovalUI();
-        }
-        return;
-    }
-    
+    // ✅ CRITICAL: Check approval using helper (which handles admin + backward compat)
     if (!window.isUserApproved() && userRole !== 'admin') {
-        console.log('🔒 [Dashboard] User pending, hiding all feature rooms');
+        console.log('🔒 [Dashboard] User pending, showing pending UI');
         window.showPendingApprovalUI();
         return;
     }
     
+    console.log('✅ [Dashboard] User approved, showing rooms');
+    
     if (userRole === 'teacher' && !userJenjang) {
-        console.log('👨‍🏫 [Dashboard] Showing all rooms (no jenjang restriction)');
+        console.log('👨‍ [Dashboard] Showing all rooms (no jenjang restriction)');
         showAllRooms();
     } else if (userJenjang) {
         console.log(`🎯 [Dashboard] Showing ${userJenjang.toUpperCase()} rooms only`);
@@ -461,14 +465,14 @@ function initSmoothScroll() {
 // FINAL CONFIRMATION
 // ============================================
 
-console.log('🟢🟢🟢 [Dashboard] SCRIPT SELESAI LOADING 🟢🟢🟢');
+console.log('🟢🟢 [Dashboard] SCRIPT SELESAI LOADING 🟢🟢🟢');
 console.log('📋 Available functions:');
 console.log('   • showJenjangSection(jenjang)');
 console.log('   • showSubFeatureModal(jenjang, kelas)');
 console.log('   • closeSubFeatureModal()');
 console.log('   • loadSubFeature(subfitur)');
 console.log('   • backToDashboard()');
-console.log('   • logout() ← UPDATED with replace() + cache busting + double-execution guard!');
-console.log('   • isUserApproved() ← UPDATED: flexible check for boolean/string/number');
-console.log('   • showPendingApprovalUI() ← NEW helper');
+console.log('   • logout() ← UPDATED');
+console.log('   • isUserApproved() ← FIXED: Admin auto-approved + backward compat');
+console.log('   • showPendingApprovalUI()');
 console.log('🚀 READY TO USE!');
