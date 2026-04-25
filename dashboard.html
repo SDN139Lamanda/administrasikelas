@@ -17,19 +17,46 @@
     <link rel="stylesheet" href="css/penilaian.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- ✅ LOGOUT SHIM - Prevent "logout is not defined" error (sync, non-module) -->
+    <!-- ✅ LOGOUT SHIM - Prevent "logout is not defined" + Fix redirect persistence -->
     <script>
+        // Flag to prevent double-execution
+        window.__logoutExecuted = window.__logoutExecuted || false;
+        
         // Define minimal logout shim immediately (sync, non-module)
-        // This ensures inline onclick="logout()" works even before js/dashboard.js module loads
         if (typeof window.logout !== 'function') {
             window.logout = function() {
-                console.log('🚪 [Logout Shim] Called, waiting for module...');
-                // Fallback: redirect to index with logout flag
-                try { localStorage.clear(); sessionStorage.clear(); } catch(e) {}
-                window.location.href = 'index.html?loggedout=' + Date.now();
+                if (window.__logoutExecuted) {
+                    console.log('🚪 [Logout Shim] Already executed, skipping');
+                    return;
+                }
+                window.__logoutExecuted = true;
+                
+                console.log('🚪 [Logout Shim] Called, executing fallback redirect');
+                
+                // Set session flag to prevent dashboard reload
+                sessionStorage.setItem('__loggingOut', 'true');
+                sessionStorage.setItem('__justLoggedOut', 'true');
+                
+                // Clear storage (keep logout flag)
+                try { 
+                    localStorage.clear(); 
+                } catch(e) {
+                    console.warn('⚠️ [Logout Shim] Storage clear failed:', e);
+                }
+                
+                // ✅ Use replace() instead of href + cache busting
+                const redirectUrl = 'index.html?loggedout=' + Date.now() + '&r=' + Math.random().toString(36).substr(2, 9);
+                window.location.replace(redirectUrl);
+                
+                // Extra safety: force reload after short delay
+                setTimeout(function() {
+                    if (window.__logoutExecuted) {
+                        window.location.href = redirectUrl;
+                    }
+                }, 100);
             };
         }
-        console.log('✅ [Logout Shim] Defined in global scope');
+        console.log('✅ [Logout Shim] Defined in global scope with replace() + cache busting');
     </script>
     
     <!-- ✅ MOBILE RESPONSIVE CSS + VISIBILITY FIX + SUB-FEATURE STYLES + ACCESS BADGE -->
@@ -254,7 +281,7 @@
         console.log('🟢 [Global API Key] Module READY');
     </script>
 
-    <!-- ✅ DASHBOARD MAIN SCRIPT (PRESERVED + VISIBILITY FIX INJECTED) -->
+    <!-- ✅ DASHBOARD MAIN SCRIPT - SIMPLIFIED: Only UI updates, NO auth check (handled by js/dashboard.js) -->
     <script type="module">
         import { auth, onAuthStateChanged, db, doc, getDoc } from './modules/firebase-config.js';
         
@@ -269,7 +296,8 @@
                 userEmail: document.getElementById('userEmail'), userAvatar: document.getElementById('userAvatar'),
                 userContextBadge: document.getElementById('userContextBadge'), userContextText: document.getElementById('userContextText')
             };
-                        if (els.profileMenuBtn && els.profileDropdown) {
+            
+            if (els.profileMenuBtn && els.profileDropdown) {
                 els.profileMenuBtn.addEventListener('click', (e) => {
                     e.stopPropagation(); els.profileDropdown.classList.toggle('hidden');
                 });
@@ -278,37 +306,25 @@
                 });
             }
             
+            // ✅ SIMPLIFIED: Only update UI elements, NO approval logic here
+            // Approval check is handled entirely by js/dashboard.js checkAuthStatus()
             onAuthStateChanged(auth, async (user) => {
                 console.log('🔐 [Dashboard] Auth:', user ? `IN (${user.uid})` : 'OUT');
                 if (!user) return;
                 
-                try {
-                    const userDoc = await getDoc(doc(db, 'users', user.uid));
-                    if (userDoc.exists()) {
-                        const data = userDoc.data();
-                        if (els.profileName) els.profileName.textContent = data.nama_lengkap || 'User';
-                        if (els.profileEmailSub) els.profileEmailSub.textContent = user.email || '';
-                        if (els.userEmail) els.userEmail.textContent = user.email || '';
-                        if (els.userAvatar) els.userAvatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(data.nama_lengkap || 'User')}&background=7c3aed&color=fff`;
-                        
-                        // UPDATED: Include all 7 jenjang labels
-                        const jenjangLabel = {tk:'TK', sd:'SD', mi:'MI', smp:'SMP', mts:'MTs', sma:'SMA', ma:'MA'};
-                        if (els.userContextText) {
-                            const label = data.role === 'admin' ? 'Administrator' : `Guru ${jenjangLabel[data.jenjang_sekolah] || 'Guru'}`;
-                            els.userContextText.textContent = label;
-                        }
-                        
-                        // 🔐 CRITICAL FIX: Apply visibility based on role
-                        if (typeof window.applyJenjangVisibility === 'function') window.applyJenjangVisibility(data.role || 'teacher', data.jenjang_sekolah || '');
-                        
-                        if (typeof window.initAdminWidget === 'function') window.initAdminWidget(data.role || 'teacher');
-                        
-                        localStorage.setItem('user_jenjang', data.jenjang_sekolah || '');
-                        localStorage.setItem('user_kelas_diampu', JSON.stringify(data.kelas_diampu || []));
-                        localStorage.setItem('user_role', data.role || 'teacher');
-                        console.log('✅ [Dashboard] User loaded:', data.jenjang_sekolah);
-                    }
-                } catch (e) { console.error('❌ [Dashboard] Error:', e); }
+                // Only update basic UI, don't set approval state here
+                if (els.userEmail) els.userEmail.textContent = user.email;
+                if (els.userAvatar) els.userAvatar.src = user.photoURL || `https://ui-avatars.com/api/?name=${user.displayName || 'User'}&background=7c3aed&color=fff`;
+                if (els.userContextText) els.userContextText.textContent = user.displayName || user.email;
+                
+                // ✅ Init admin widget (role check only, no approval)
+                if (typeof window.initAdminWidget === 'function') {
+                    // Get role from localStorage (set by js/dashboard.js)
+                    const role = localStorage.getItem('user_role') || 'teacher';
+                    window.initAdminWidget(role);
+                }
+                
+                console.log('🟢 [Dashboard Simple] UI updated, waiting for js/dashboard.js to handle approval');
             });
             console.log('🟢 [Dashboard Simple] READY');
         });
@@ -322,29 +338,22 @@
             const adminBadge = document.getElementById('admin-access-badge');
             
             if (role === 'admin') {
-                // Admin: show badge, no restrictions
                 adminBadge?.classList.remove('hidden');
                 console.log('✅ [Admin] Admin mode active');
             } else {
-                // Teacher: hide admin badge
                 adminBadge?.classList.add('hidden');
             }
             
-            // ✅ FIX: ALWAYS SHOW ALL CARDS - NEVER HIDE BASED ON JENJANG
             cards.forEach(c => {
                 const article = c.closest('article');
                 const j = c.dataset.jenjang;
                 
-                // ✅ ALWAYS VISIBLE - Remove any hidden class
                 article?.classList.remove('hidden');
                 c.style.display = '';
                 
-                // ✅ ADD BADGE FOR VISUAL INDICATION ONLY (not blocking)
-                // Remove existing badge first
                 const existingBadge = article?.querySelector('.access-restricted');
                 if (existingBadge) existingBadge.remove();
                 
-                // Add badge if restricted (visual only)
                 if (role !== 'admin' && j !== userJenjang) {
                     const badge = document.createElement('span');
                     badge.className = 'access-restricted';
@@ -357,29 +366,24 @@
             console.log(`✅ [Visibility] All 7 jenjang cards visible. User jenjang: ${userJenjang || 'none'}`);
         };
 
-        // ✅ NEW: Hide main dashboard sections ONLY when sub-feature is active (not jenjang selection)
         window.hideMainSectionsForSubFeature = function() {
             console.log('🔒 [Navigation] Hiding main sections for sub-feature');
             document.querySelector('.dashboard-hero')?.closest('section')?.classList.add('hidden');
             document.querySelector('[aria-labelledby="rooms-heading"]')?.classList.add('hidden');
             document.getElementById('admin-access-badge')?.classList.add('hidden');
-            // ✅ NOTE: Do NOT hide jenjang sections here - they are part of main dashboard
         };
         
-        // ✅ NEW: Show main dashboard sections when returning from sub-feature
         window.showMainSections = function() {
             console.log('🔓 [Navigation] Showing main sections');
             document.querySelector('.dashboard-hero')?.closest('section')?.classList.remove('hidden');
             document.querySelector('[aria-labelledby="rooms-heading"]')?.classList.remove('hidden');
             
-            // Re-apply jenjang visibility (for badge only, not hiding)
             const userRole = localStorage.getItem('user_role') || 'teacher';
             const userJenjang = localStorage.getItem('user_jenjang') || '';
             if (typeof window.applyJenjangVisibility === 'function') {
                 window.applyJenjangVisibility(userRole, userJenjang);
             }
             
-            // Hide module containers only
             ['module-container','refleksi-container','penilaian-container','asisten-container','cita-container']
                 .forEach(id => {
                     const el = document.getElementById(id); 
@@ -387,7 +391,6 @@
                 });
         };
 
-        // ✅ NEW: Helper function for access check (ONLY for blocking, not visibility)
         function checkJenjangAccess(targetJenjang) {
             const userRole = localStorage.getItem('user_role') || 'teacher';
             const userJenjang = localStorage.getItem('user_jenjang') || '';
@@ -401,17 +404,18 @@
             return labels[jenjang] || jenjang.toUpperCase();
         }
 
-        // ✅ UPDATED: Navigation - show jenjang section (NO ACCESS CHECK HERE - cards always visible)
         window.showJenjangSection = function(jenjang) {
-            // ✅ NO ACCESS CHECK HERE - just show the section
-            // Access check will happen at sub-feature level
+            if (!window.isUserApproved?.() && window.currentUserRole !== 'admin') {
+                alert('⏳ Akun Anda masih menunggu persetujuan admin.\n\nFitur belum dapat diakses.');
+                return;
+            }
+            
             document.querySelectorAll('section[data-jenjang]').forEach(sec => sec.classList.add('hidden'));
             const target = document.getElementById(`${jenjang}-section`);
             if (target) { 
                 target.classList.remove('hidden'); 
                 window.scrollTo({ top: 0, behavior: 'smooth' }); 
             }
-            // Hide module containers but keep main sections visible
             ['module-container','refleksi-container','penilaian-container','asisten-container','cita-container']
                 .forEach(id => {
                     const el = document.getElementById(id); 
@@ -419,17 +423,13 @@
                 });
         };
         
-        // ✅ UPDATED: Sub-feature modal - ACCESS CHECK HERE + hide main sections
         window.showSubFeatureModal = function(jenjang, kelas) {
-            // ✅ ACCESS CHECK: Block if user tries to open sub-feature for wrong jenjang
-            if (!checkJenjangAccess(jenjang)) {
-                const label = getJenjangLabel(jenjang);
-                const userLabel = getJenjangLabel(localStorage.getItem('user_jenjang') || '');
-                alert(`⚠️ Akses Dibatasi\n\nAnda terdaftar sebagai Guru ${userLabel}.\nAkses ke jenjang ${label} tidak tersedia.`);
-                return; // Block access
+            if (!window.isUserApproved?.() && window.currentUserRole !== 'admin') {
+                console.log('🔒 [SubFeature] User pending, blocking modal');
+                alert('⏳ Akun Anda masih menunggu persetujuan admin.\n\nFitur belum dapat diakses.');
+                return;
             }
             
-            // If access granted, proceed
             window.currentJenjang = jenjang; 
             window.currentKelas = kelas;
             window.currentUserJenjang = localStorage.getItem('user_jenjang') || '';
@@ -439,8 +439,7 @@
             document.getElementById('subfeature-modal').classList.remove('hidden');
             document.body.style.overflow = 'hidden';
             
-            // ✅ Hide main sections ONLY when sub-feature modal is open
-            window.hideMainSectionsForSubFeature();
+            window.hideMainSectionsForSubFeature?.() || hideMainSectionsForSubFeatureFallback();
         };
         
         window.closeSubFeatureModal = function() {
@@ -449,9 +448,24 @@
             window.currentJenjang = null; 
             window.currentKelas = null;
             
-            // ✅ Show main sections when modal closes
-            window.showMainSections();
+            window.showMainSections?.() || showMainSectionsFallback();
         };
+
+        function hideMainSectionsForSubFeatureFallback() {
+            document.querySelector('.dashboard-hero')?.closest('section')?.classList.add('hidden');
+            document.querySelector('[aria-labelledby="rooms-heading"]')?.classList.add('hidden');
+            document.getElementById('admin-access-badge')?.classList.add('hidden');
+        }
+        
+        function showMainSectionsFallback() {
+            document.querySelector('.dashboard-hero')?.closest('section')?.classList.remove('hidden');
+            document.querySelector('[aria-labelledby="rooms-heading"]')?.classList.remove('hidden');
+            ['module-container','refleksi-container','penilaian-container','asisten-container','cita-container']
+                .forEach(id => {
+                    const el = document.getElementById(id); 
+                    if(el) { el.classList.add('hidden'); el.innerHTML = ''; }
+                });
+        }
 
         function hideModuleContainers() {
             ['module-container','refleksi-container','penilaian-container','asisten-container','cita-container'].forEach(id => {
@@ -459,18 +473,15 @@
             });
         }
 
-        // ✅ ROUTER TO SAFE WRAPPERS - ACCESS CHECK AT SUB-FEATURE LEVEL ONLY
         window.loadSubFeature = async function(subfitur) {
             const j = window.currentJenjang, k = window.currentKelas;
             const userJenjang = window.currentUserJenjang || localStorage.getItem('user_jenjang') || '';
             
             if (!j || !k) { alert('❌ Konteks kelas tidak ditemukan.'); return; }
             
-            // ✅ ACCESS CHECK: Block if user tries to load sub-feature for wrong jenjang
-            if (!checkJenjangAccess(j)) {
-                const label = getJenjangLabel(j);
-                const userLabel = getJenjangLabel(userJenjang);
-                alert(`⚠️ Akses Dibatasi\n\nAnda terdaftar sebagai Guru ${userLabel}.\nFitur ini hanya tersedia untuk jenjang ${label}.`);
+            if (!window.isUserApproved?.() && window.currentUserRole !== 'admin') {
+                console.log('🔒 [LoadSubFeature] User pending, blocking feature load');
+                alert('⏳ Akun Anda masih menunggu persetujuan admin.\n\nFitur belum dapat diakses.');
                 return;
             }
             
@@ -478,13 +489,11 @@
             localStorage.setItem('current_kelas', k); 
             localStorage.setItem('current_subfitur', subfitur);
             
-            closeSubFeatureModal(); // Close modal first
+            closeSubFeatureModal();
             hideModuleContainers();
             
-            // ✅ Ensure main sections are hidden when loading sub-feature
-            window.hideMainSectionsForSubFeature();
+            (window.hideMainSectionsForSubFeature || hideMainSectionsForSubFeatureFallback)();
             
-            // Show the specific container for this sub-feature
             const containerMap = {
                 'adm-kelas': 'module-container',
                 'adm-pembelajaran': 'module-container', 
@@ -520,18 +529,15 @@
             } catch (err) { 
                 console.error('Load Error:', err); 
                 alert(`⚠️ Gagal memuat ${subfitur}.`); 
-                // Show main sections again on error
-                window.showMainSections();
+                (window.showMainSections || showMainSectionsFallback)();
             }
         };
         
         window.backToDashboard = function() {
-            // ✅ Show main sections when returning to dashboard
-            window.showMainSections();
+            (window.showMainSections || showMainSectionsFallback)();
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
 
-        // ✅ BACKWARD COMPATIBILITY (Preserve original function signatures)
         window.showSection = function(sectionId) {
             const m = {'sd-section': 'sd', 'smp-section': 'smp', 'sma-section': 'sma'};
             if (m[sectionId]) return window.showJenjangSection(m[sectionId]);
@@ -541,9 +547,9 @@
         
         window.loadSemester = function(j, k) { 
             window.currentJenjang = j; window.currentKelas = k; 
-            return window.loadSubFeature('adm-kelas'); // Default to adm-kelas for backward compat
+            return window.loadSubFeature('adm-kelas');
         };
-        // ✅ EXACT ORIGINAL SAFE WRAPPERS (RESTORED - DO NOT MODIFY)
+        
         window.safeRenderAdmKelas = async function(e) {
             if (e) e.preventDefault();
             console.log('🔄 [Dashboard] Loading adm-kelas module...');
@@ -591,7 +597,8 @@
         window.safeRenderGeneratorModule = async function(e) {
             if (e) e.preventDefault();
             if (typeof window.renderGeneratorModule === 'function') { await window.renderGeneratorModule(); }
-            else { console.warn('⚠️ renderGeneratorModule not ready yet'); alert('⚠️ Modul Generator sedang dimuat. Silakan coba lagi dalam beberapa detik.'); }        };
+            else { console.warn('⚠️ renderGeneratorModule not ready yet'); alert('⚠️ Modul Generator sedang dimuat. Silakan coba lagi dalam beberapa detik.'); }
+        };
         
         console.log('✅ [Dashboard] Safe module wrappers + new navigation loaded');
     </script>
