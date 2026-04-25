@@ -330,11 +330,14 @@
     <!-- Global JS -->
     <script type="module" src="js/main.js"></script>
     
-    <!-- ✅ Script untuk handle logout flow & cache clear -->
+    <!-- ✅ Script untuk handle logout flow & cache clear + FIX redirect loop -->
     <script>
-        // ✅ Check if user just logged out (bypass cache)
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('loggedout') || urlParams.get('notauth')) {
+        // ✅ Flag to prevent redirect loop after logout
+        const justLoggedOut = sessionStorage.getItem('__justLoggedOut') === 'true';
+        const loggedOutParam = new URLSearchParams(window.location.search).get('loggedout');
+        
+        // ✅ Check if user just logged out (bypass cache & prevent redirect)
+        if (loggedOutParam || justLoggedOut) {
             console.log('🚪 [Index] User just logged out, clearing all cache...');
             
             // Clear all storage
@@ -349,28 +352,40 @@
             }
             
             // Clean URL (remove query param)
-            window.history.replaceState({}, document.title, window.location.pathname);
-        }
-        
-        // ✅ Check auth state on page load
-        window.addEventListener('load', async () => {
-            try {
-                const { auth, onAuthStateChanged } = await import('./modules/firebase-config.js');
-                
-                onAuthStateChanged(auth, (user) => {
-                    if (user) {
-                        // User still logged in → redirect to dashboard
-                        console.log('✅ [Index] User authenticated, redirecting to dashboard...');
-                        window.location.href = 'dashboard.html';
-                    } else {
-                        // User logged out → stay on login page
-                        console.log('✅ [Index] User logged out, showing login page');
-                    }
-                });
-            } catch (error) {
-                console.error('❌ [Index] Auth check error:', error);
+            if (loggedOutParam) {
+                window.history.replaceState({}, document.title, window.location.pathname);
             }
-        });
+            
+            // ✅ CRITICAL: Do NOT redirect to dashboard even if Firebase says user is logged in
+            console.log('✅ [Index] Logout flag detected, staying on index.html');
+            // Stop further execution - don't run auth check
+        } else {
+            // ✅ Check auth state on page load (ONLY if not just logged out)
+            window.addEventListener('load', async () => {
+                try {
+                    const { auth, onAuthStateChanged } = await import('./modules/firebase-config.js');
+                    
+                    onAuthStateChanged(auth, (user) => {
+                        // ✅ DOUBLE-CHECK: Don't redirect if logout flag is set
+                        if (sessionStorage.getItem('__justLoggedOut') === 'true') {
+                            console.log('🚪 [Index] Logout flag still active, not redirecting');
+                            return;
+                        }
+                        
+                        if (user) {
+                            // User still logged in → redirect to dashboard
+                            console.log('✅ [Index] User authenticated, redirecting to dashboard...');
+                            window.location.href = 'dashboard.html';
+                        } else {
+                            // User logged out → stay on login page
+                            console.log('✅ [Index] User logged out, showing login page');
+                        }
+                    });
+                } catch (error) {
+                    console.error('❌ [Index] Auth check error:', error);
+                }
+            });
+        }
     </script>
     
     <!-- ✅ CHAT WIDGET INIT (SCRIPT TERPISAH) -->
