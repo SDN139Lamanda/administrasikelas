@@ -17,7 +17,7 @@
     <link rel="stylesheet" href="css/penilaian.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- ✅ MOBILE RESPONSIVE CSS + VISIBILITY FIX + SUB-FEATURE STYLES -->
+    <!-- ✅ MOBILE RESPONSIVE CSS + VISIBILITY FIX + SUB-FEATURE STYLES + ACCESS BADGE -->
     <style>
         /* Admin modal table scroll for mobile */
         .admin-table-wrapper { overflow-x: auto !important; -webkit-overflow-scrolling: touch; max-width: 100%; }
@@ -47,7 +47,18 @@
         
         /* Visibility override to prevent external CSS from hiding cards */
         .room-card[data-jenjang] { display: block !important; opacity: 1 !important; pointer-events: auto !important; }
-        .room-card[data-jenjang].hidden { display: none !important; }        
+        .room-card[data-jenjang].hidden { display: none !important; }
+        
+        /* ✅ NEW: Access restriction badge */
+        .access-restricted {
+            position: absolute; top: 8px; right: 8px;
+            background: #f3f4f6; color: #6b7280;
+            font-size: 0.65rem; padding: 2px 8px;
+            border-radius: 9999px; font-weight: 500;
+            display: flex; align-items: center; gap: 4px;
+        }
+        .room-card { position: relative; }
+        
         @media (max-width: 768px) {
             .rooms-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 0.75rem !important; }
             .room-card { padding: 1rem !important; }
@@ -288,47 +299,172 @@
         });
     </script>
 
-    <!-- ✅ SAFE MODULE WRAPPERS + NEW ROUTING + BACKWARD COMPATIBILITY -->
+    <!-- ✅ SAFE MODULE WRAPPERS + NEW ROUTING + BACKWARD COMPATIBILITY + ACCESS CONTROL -->
     <script>
-        // 🔐 VISIBILITY FIX FUNCTION
+        // 🔐 VISIBILITY FIX FUNCTION - UPDATED: Show all cards, restrict access on click
         window.applyJenjangVisibility = function(role, userJenjang) {
-            const cards = document.querySelectorAll('.room-card[data-jenjang]');            const adminBadge = document.getElementById('admin-access-badge');
+            const cards = document.querySelectorAll('.room-card[data-jenjang]');
+            const adminBadge = document.getElementById('admin-access-badge');
+            
             if (role === 'admin') {
-                cards.forEach(c => { c.closest('article')?.classList.remove('hidden'); c.style.display = ''; });
+                // Admin: show all, no restrictions
+                cards.forEach(c => { 
+                    c.closest('article')?.classList.remove('hidden'); 
+                    c.style.display = ''; 
+                    // Remove any restriction indicators
+                    const badge = c.closest('article')?.querySelector('.access-restricted');
+                    if (badge) badge.remove();
+                });
                 adminBadge?.classList.remove('hidden');
-                console.log('✅ [Admin] All jenjang cards visible');
+                console.log('✅ [Admin] All jenjang cards visible & accessible');
             } else {
+                // Teacher: show ALL cards, but mark restricted ones
                 adminBadge?.classList.add('hidden');
                 cards.forEach(c => {
+                    const article = c.closest('article');
                     const j = c.dataset.jenjang;
-                    if (j === userJenjang) { c.closest('article')?.classList.remove('hidden'); c.style.display = ''; }
-                    else { c.closest('article')?.classList.add('hidden'); }
+                    
+                    // Always show the card
+                    article?.classList.remove('hidden');
+                    c.style.display = '';
+                    
+                    // Add visual indicator for restricted jenjang
+                    if (j !== userJenjang) {
+                        // Add "Akses Dibatasi" badge
+                        if (!article?.querySelector('.access-restricted')) {
+                            const badge = document.createElement('span');
+                            badge.className = 'access-restricted';
+                            badge.innerHTML = '<i class="fas fa-lock mr-1"></i>Terbatas';
+                            article?.classList.add('relative');
+                            article?.appendChild(badge);
+                        }
+                        // Add click blocker attributes
+                        const link = article?.querySelector('.room-link');
+                        if (link) {
+                            link.setAttribute('data-restricted', 'true');
+                            link.setAttribute('data-user-jenjang', userJenjang);
+                            link.setAttribute('data-card-jenjang', j);
+                        }
+                    } else {
+                        // Remove restriction indicators for accessible jenjang
+                        const badge = article?.querySelector('.access-restricted');
+                        if (badge) badge.remove();
+                        const link = article?.querySelector('.room-link');
+                        if (link) {
+                            link.removeAttribute('data-restricted');
+                            link.removeAttribute('data-user-jenjang');
+                            link.removeAttribute('data-card-jenjang');
+                        }
+                    }
                 });
-                console.log(`✅ [Teacher] Showing only: ${userJenjang.toUpperCase()}`);
+                console.log(`✅ [Teacher] All jenjang visible, restricted: all except ${userJenjang.toUpperCase()}`);
             }
         };
 
-        // ✅ NEW: Navigation & Sub-Feature Routing
-        window.currentJenjang = null; window.currentKelas = null;
+        // ✅ NEW: Hide main dashboard sections when sub-feature is active
+        window.hideMainSectionsForSubFeature = function() {
+            console.log('🔒 [Navigation] Hiding main sections for sub-feature');
+            document.querySelector('.dashboard-hero')?.closest('section')?.classList.add('hidden');
+            document.querySelector('[aria-labelledby="rooms-heading"]')?.classList.add('hidden');
+            document.querySelectorAll('section[data-jenjang]').forEach(s => s.classList.add('hidden'));
+            document.getElementById('admin-access-badge')?.classList.add('hidden');
+        };
+        
+        // ✅ NEW: Show main dashboard sections when returning from sub-feature
+        window.showMainSections = function() {
+            console.log('🔓 [Navigation] Showing main sections');
+            document.querySelector('.dashboard-hero')?.closest('section')?.classList.remove('hidden');
+            document.querySelector('[aria-labelledby="rooms-heading"]')?.classList.remove('hidden');
+            
+            // Re-apply jenjang visibility based on user role
+            const userRole = localStorage.getItem('user_role') || 'teacher';
+            const userJenjang = localStorage.getItem('user_jenjang') || '';
+            if (typeof window.applyJenjangVisibility === 'function') {
+                window.applyJenjangVisibility(userRole, userJenjang);
+            }
+            
+            // Hide module containers
+            ['module-container','refleksi-container','penilaian-container','asisten-container','cita-container']
+                .forEach(id => {
+                    const el = document.getElementById(id); 
+                    if(el) { el.classList.add('hidden'); el.innerHTML = ''; }
+                });
+        };
+
+        // ✅ NEW: Helper function for access check
+        function checkJenjangAccess(targetJenjang) {
+            const userRole = localStorage.getItem('user_role') || 'teacher';
+            const userJenjang = localStorage.getItem('user_jenjang') || '';
+            
+            if (userRole === 'admin') return true;
+            return targetJenjang === userJenjang;
+        }
+        
+        function getJenjangLabel(jenjang) {
+            const labels = {tk:'TK', sd:'SD', mi:'MI', smp:'SMP', mts:'MTs', sma:'SMA', ma:'MA'};
+            return labels[jenjang] || jenjang.toUpperCase();
+        }
+
+        // ✅ UPDATED: Navigation & Sub-Feature Routing with access control
+        window.currentJenjang = null; 
+        window.currentKelas = null;
+        window.currentUserJenjang = null; // Store user's registered jenjang
         
         window.showJenjangSection = function(jenjang) {
+            // ✅ ACCESS CHECK: Validate if user can access this jenjang
+            if (!checkJenjangAccess(jenjang)) {
+                const label = getJenjangLabel(jenjang);
+                const userLabel = getJenjangLabel(localStorage.getItem('user_jenjang') || '');
+                alert(`⚠️ Akses Dibatasi\n\nAnda terdaftar sebagai Guru ${userLabel}.\nAkses ke jenjang ${label} tidak tersedia.`);
+                return; // Block access
+            }
+            
+            // If access granted, proceed normally
             document.querySelectorAll('section[data-jenjang]').forEach(sec => sec.classList.add('hidden'));
             const target = document.getElementById(`${jenjang}-section`);
-            if (target) { target.classList.remove('hidden'); window.scrollTo({ top: 0, behavior: 'smooth' }); }
-            hideModuleContainers();
+            if (target) { 
+                target.classList.remove('hidden'); 
+                window.scrollTo({ top: 0, behavior: 'smooth' }); 
+            }
+            // Hide module containers but NOT main sections yet (user still in jenjang selection)
+            ['module-container','refleksi-container','penilaian-container','asisten-container','cita-container']
+                .forEach(id => {
+                    const el = document.getElementById(id); 
+                    if(el) { el.classList.add('hidden'); el.innerHTML = ''; }
+                });
         };
         
         window.showSubFeatureModal = function(jenjang, kelas) {
-            window.currentJenjang = jenjang; window.currentKelas = kelas;
-            const lbl = {tk:'TK', sd:'SD', mi:'MI', smp:'SMP', mts:'MTs', sma:'SMA', ma:'MA'}[jenjang] || jenjang.toUpperCase();
+            // ✅ ACCESS CHECK: Same as above
+            if (!checkJenjangAccess(jenjang)) {
+                const label = getJenjangLabel(jenjang);
+                const userLabel = getJenjangLabel(localStorage.getItem('user_jenjang') || '');
+                alert(`⚠️ Akses Dibatasi\n\nAnda terdaftar sebagai Guru ${userLabel}.\nAkses ke jenjang ${label} tidak tersedia.`);
+                return; // Block access
+            }
+            
+            // If access granted, proceed
+            window.currentJenjang = jenjang; 
+            window.currentKelas = kelas;
+            window.currentUserJenjang = localStorage.getItem('user_jenjang') || '';
+            
+            const lbl = getJenjangLabel(jenjang);
             document.getElementById('modal-jenjang-kelas').textContent = `${lbl} - Kelas ${kelas}`;
             document.getElementById('subfeature-modal').classList.remove('hidden');
             document.body.style.overflow = 'hidden';
+            
+            // ✅ NEW: Hide main sections when sub-feature modal is open
+            window.hideMainSectionsForSubFeature();
         };
         
         window.closeSubFeatureModal = function() {
             document.getElementById('subfeature-modal').classList.add('hidden');
-            document.body.style.overflow = ''; window.currentJenjang = null; window.currentKelas = null;
+            document.body.style.overflow = ''; 
+            window.currentJenjang = null; 
+            window.currentKelas = null;
+            
+            // ✅ NEW: Show main sections when modal closes
+            window.showMainSections();
         };
 
         function hideModuleContainers() {
@@ -337,13 +473,42 @@
             });
         }
 
-        // ✅ ROUTER TO SAFE WRAPPERS (Preserves original logic)
+        // ✅ ROUTER TO SAFE WRAPPERS (UPDATED with access control + hide main sections)
         window.loadSubFeature = async function(subfitur) {
             const j = window.currentJenjang, k = window.currentKelas;
+            const userJenjang = window.currentUserJenjang || localStorage.getItem('user_jenjang') || '';
+            
             if (!j || !k) { alert('❌ Konteks kelas tidak ditemukan.'); return; }
-                        localStorage.setItem('current_jenjang', j); localStorage.setItem('current_kelas', k); localStorage.setItem('current_subfitur', subfitur);
-            closeSubFeatureModal(); hideModuleContainers();
-            document.querySelectorAll('section[data-jenjang]').forEach(s => s.classList.add('hidden'));
+            
+            // ✅ ACCESS CHECK: Block if user tries to load sub-feature for wrong jenjang
+            if (!checkJenjangAccess(j)) {
+                const label = getJenjangLabel(j);
+                const userLabel = getJenjangLabel(userJenjang);
+                alert(`⚠️ Akses Dibatasi\n\nAnda terdaftar sebagai Guru ${userLabel}.\nFitur ini hanya tersedia untuk jenjang ${label}.`);
+                return;
+            }
+            
+            localStorage.setItem('current_jenjang', j); 
+            localStorage.setItem('current_kelas', k); 
+            localStorage.setItem('current_subfitur', subfitur);
+            
+            closeSubFeatureModal(); // Close modal first
+            hideModuleContainers();
+            
+            // ✅ Ensure main sections are hidden when loading sub-feature
+            window.hideMainSectionsForSubFeature();
+            
+            // Show the specific container for this sub-feature
+            const containerMap = {
+                'adm-kelas': 'module-container',
+                'adm-pembelajaran': 'module-container', 
+                'penilaian': 'penilaian-container',
+                'refleksi': 'refleksi-container',
+                'asisten-modul': 'asisten-container',
+                'cita-generator': 'cita-container'
+            };
+            const targetContainer = document.getElementById(containerMap[subfitur] || 'module-container');
+            if (targetContainer) targetContainer.classList.remove('hidden');
 
             try {
                 switch(subfitur) {
@@ -367,15 +532,17 @@
                             console.warn(`⚠️ Sub-fitur ${subfitur} belum terpasang.`);
                         }
                 }
-            } catch (err) { console.error('Load Error:', err); alert(`⚠️ Gagal memuat ${subfitur}.`); }
+            } catch (err) { 
+                console.error('Load Error:', err); 
+                alert(`⚠️ Gagal memuat ${subfitur}.`); 
+                // Show main sections again on error
+                window.showMainSections();
+            }
         };
         
         window.backToDashboard = function() {
-            document.querySelectorAll('section[data-jenjang]').forEach(s => s.classList.add('hidden'));
-            document.querySelector('section[aria-labelledby="rooms-heading"]')?.classList.remove('hidden');
-            hideModuleContainers();
-            window.currentJenjang = null; window.currentKelas = null;
-            localStorage.removeItem('current_jenjang'); localStorage.removeItem('current_kelas'); localStorage.removeItem('current_subfitur');
+            // ✅ Show main sections when returning to dashboard
+            window.showMainSections();
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
 
