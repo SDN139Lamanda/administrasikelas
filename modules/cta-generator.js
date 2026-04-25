@@ -2,6 +2,7 @@
  * ============================================
  * MODULE: CTA GENERATOR (CP/TP/ATP)
  * Platform Administrasi Kelas Digital
+ * ✅ UPDATED: Fix function name + container + table output format
  * ============================================
  * UPDATE: Dynamic mapel loading from data/mapel/*.json + Auto-lock based on user registration
  */
@@ -18,28 +19,23 @@ let userKelasDiampu = [];
 let userMapelDiampu = [];
 let userSdMapelType = 'kelas';
 let _aiReadyCache = null;
-let _mapelCache = {}; // ✅ Cache for fetched mapel data
+let _mapelCache = {};
 
-// ✅ NEW: Fetch mapel data from external JSON file
 export async function fetchMapelData(jenjang) {
   if (!jenjang) return [];
-  if (_mapelCache[jenjang]) return _mapelCache[jenjang]; // Return cached
+  if (_mapelCache[jenjang]) return _mapelCache[jenjang];
   
   try {
     console.log(`📥 [Mapel] Fetching ./data/mapel/${jenjang}.json`);
     const response = await fetch(`./data/mapel/${jenjang}.json`, { cache: 'no-store' });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
-    
-    // Validate structure
     if (!Array.isArray(data)) throw new Error('Invalid JSON structure');
-    
     _mapelCache[jenjang] = data;
     console.log(`✅ [Mapel] Loaded ${data.length} subjects for ${jenjang.toUpperCase()}`);
     return data;
   } catch (error) {
     console.warn(`⚠️ [Mapel] Failed to fetch ${jenjang}.json:`, error.message);
-    // Fallback: return minimal hardcoded list (non-breaking)
     const fallback = [
       { nama: 'Matematika', jenjang },
       { nama: 'Bahasa Indonesia', jenjang },
@@ -47,23 +43,20 @@ export async function fetchMapelData(jenjang) {
       { nama: 'Lainnya', jenjang }
     ];
     _mapelCache[jenjang] = fallback;
-    return fallback;  }
+    return fallback;
+  }
 }
 
-// ✅ NEW: Populate mapel dropdown dynamically + Auto-lock logic
 async function populateMapelDropdown(jenjang, userMapelFromReg = null) {
   const mapelSelect = document.getElementById('cta-mapel');
   if (!mapelSelect || !jenjang) return;
   
-  // Show loading state
   const originalValue = mapelSelect.value;
   mapelSelect.innerHTML = '<option value="">Memuat daftar mapel...</option>';
   mapelSelect.disabled = true;
   
   try {
     const mapelList = await fetchMapelData(jenjang);
-    
-    // Clear and rebuild options
     mapelSelect.innerHTML = '<option value="">Pilih Mata Pelajaran</option>';
     
     mapelList.forEach(item => {
@@ -73,25 +66,21 @@ async function populateMapelDropdown(jenjang, userMapelFromReg = null) {
       mapelSelect.appendChild(opt);
     });
     
-    // ✅ AUTO-LOCK LOGIC: If user has registered mapel, lock to it
     if (userMapelFromReg && mapelList.some(m => m.nama === userMapelFromReg)) {
       mapelSelect.value = userMapelFromReg;
-      mapelSelect.disabled = true; // 🔐 Lock the dropdown
+      mapelSelect.disabled = true;
       
-      // Add visual indicator
       const lockBadge = document.createElement('span');
       lockBadge.className = 'lock-indicator';
       lockBadge.innerHTML = `<i class="fas fa-lock text-emerald-600"></i> <strong>${userMapelFromReg}</strong> - Terkunci`;
       lockBadge.style.cssText = 'display:block;margin-top:6px;font-size:12px;color:#059669';
       
-      // Remove existing badge if any
       const existingBadge = mapelSelect.parentNode.querySelector('.lock-indicator');
       if (existingBadge) existingBadge.remove();
       
       mapelSelect.parentNode.appendChild(lockBadge);
       console.log(`🔐 [Mapel] Auto-locked to: ${userMapelFromReg}`);
     } else {
-      // Restore original value if not locked
       if (originalValue && mapelList.some(m => m.nama === originalValue)) {
         mapelSelect.value = originalValue;
       }
@@ -115,14 +104,12 @@ export async function isAiReady() {
   } catch (error) { console.error('❌ [CTA Generator] Error checking AI readiness:', error); _aiReadyCache = false; return false; }
 }
 
-// ✅ FIX: Added role parameter for admin check
 function filterCTAOptions(userData) {
   if (!userData) return;
   const { jenjang_sekolah, kelas_diampu, mapel_diampu, sd_mapel_type, role } = userData;
   
   const kelasSelect = document.getElementById('cta-kelas');
   if (kelasSelect && kelas_diampu?.length > 0) {
-    // ✅ FIX: Admin unrestricted access
     if (role === 'admin') {
       enableOptions(kelasSelect, 'all');
       console.log('👑 [Filter] Admin: All classes enabled');
@@ -133,8 +120,6 @@ function filterCTAOptions(userData) {
     }
   }
   
-  // ✅ NOTE: Mapel filtering now handled by populateMapelDropdown() + auto-lock
-  // This function kept for backward compatibility with other modules
   const mapelSelect = document.getElementById('cta-mapel');
   if (mapelSelect && role === 'admin') {
     enableOptions(mapelSelect, 'all');
@@ -145,7 +130,8 @@ function filterCTAOptions(userData) {
 function enableOptions(selectEl, allowedValues) {
   if (!selectEl) return;
   Array.from(selectEl.options).forEach(opt => {
-    if (allowedValues === 'all' || allowedValues.includes(opt.value)) {      opt.disabled = false;
+    if (allowedValues === 'all' || allowedValues.includes(opt.value)) {
+      opt.disabled = false;
     } else {
       opt.disabled = true;
     }
@@ -194,7 +180,7 @@ function downloadCTAResult() {
   const sekolah = document.getElementById('kop-sekolah')?.value || '';
   const guru = document.getElementById('cta-guru')?.value || '';
   const tahun = document.getElementById('kop-tahun')?.value || '';
-    const labelJenjang = {tk:'TK', sd:'SD', mi:'MI', smp:'SMP', mts:'MTs', sma:'SMA', ma:'MA'}[jenjang] || jenjang.toUpperCase();
+  const labelJenjang = {tk:'TK', sd:'SD', mi:'MI', smp:'SMP', mts:'MTs', sma:'SMA', ma:'MA'}[jenjang] || jenjang.toUpperCase();
   const labelSemester = semester === '1' ? 'Ganjil' : 'Genap';
   
   let content = `═══════════════════════════════════════════════════════════\n`;
@@ -238,29 +224,45 @@ function downloadCTAResult() {
   console.log('✅ [Download] File downloaded successfully');
 }
 
-// ✅ NEW: Auto-expand textarea to fit content
 function autoExpandTextarea(textarea) {
   if (!textarea) return;
   textarea.style.height = 'auto';
   textarea.style.height = textarea.scrollHeight + 'px';
 }
-window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, semesterFromParam) {
-  console.log('📝 [CTA Generator] renderCTAGenerator() called');
-  const container = document.getElementById('module-container');
-  if (!container) { console.error('❌ Container not found!'); return; }
+
+// ✅ FIX 1: Rename function to match router expectation: renderCitaGenerator (not renderCTAGenerator)
+// ✅ FIX 2: Render to #cita-container (not #module-container)
+// ✅ FIX 3: Output format as TABLE (per roadmap)
+window.renderCitaGenerator = async function(jenjangFromParam, kelasFromParam, semesterFromParam) {
+  console.log('📝 [CTA Generator] renderCitaGenerator() called');
+  
+  // ✅ FIX: Use #cita-container instead of #module-container
+  const container = document.getElementById('cita-container');
+  if (!container) { 
+    console.error('❌ Container #cita-container not found!'); 
+    // Fallback to module-container for backward compat
+    const fallbackContainer = document.getElementById('module-container');
+    if (fallbackContainer) {
+      console.warn('⚠️ Using #module-container as fallback');
+      return renderCTAGeneratorLegacy(jenjangFromParam, kelasFromParam, semesterFromParam, fallbackContainer);
+    }
+    return; 
+  }
+  
   const user = auth.currentUser;
   if (!user) { alert('⚠️ Silakan login dulu!'); return; }
+  
   const userNama = localStorage.getItem('user_nama_lengkap') || '';
   const userSekolah = localStorage.getItem('user_nama_sekolah') || '';
-  // ✅ NEW: Get user_mapel from localStorage (set during registration)
   const userMapelFromReg = localStorage.getItem('user_mapel') || null;
   console.log('👤 [CTA Generator] Current user:', user.email, user.uid, { mapel_reg: userMapelFromReg });
   
   const aiReady = await isAiReady();
   console.log('🤖 [CTA Generator] AI Ready:', aiReady);
   
+  let userProfile = null;
   try {
-    const userProfile = await getDoc(doc(db, 'users', user.uid));
+    userProfile = await getDoc(doc(db, 'users', user.uid));
     if (userProfile.exists()) {
       const userData = userProfile.data();
       userRole = userData.role || 'teacher';
@@ -279,7 +281,6 @@ window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, sem
   let availableClasses = allClasses;
   let isClassLocked = false;
   
-  // ✅ FIX: Admin unrestricted access, teacher restricted
   if (userRole === 'admin') {
     availableClasses = allClasses;
     isClassLocked = false;
@@ -293,11 +294,12 @@ window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, sem
     isClassLocked = true;
     console.log('👤 [CTA Generator] Teacher mode: Classes locked to', userKelasDiampu);
   }  
+  
   let defaultClass = kelasFromParam || '';
   if (isClassLocked && availableClasses.length > 0) defaultClass = availableClasses[0];
   console.log('📚 [CTA Generator] Available classes:', availableClasses);
   
-  // ✅ RENDER UI — UPDATED: Mapel dropdown will be populated dynamically
+  // ✅ FIX 3: Render UI with TABLE format output (per roadmap)
   container.innerHTML = `
     <style>
       .cta-generator-form { max-width: 950px; margin: auto; padding: 30px; background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
@@ -309,18 +311,13 @@ window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, sem
       .cta-generator-form input:focus, .cta-generator-form select:focus { outline: none; border-color: #0891b2; }
       .cta-generator-form select:disabled { background: #f3f4f6; color: #6b7280; cursor: not-allowed; }
       
-      /* ✅ FIXED: Textarea — AUTO-EXPAND, no scroll at all */
-      #result-cp, #result-tp, #result-atp {
-        width: 100%; min-height: 100px; padding: 16px 0; border: NONE !important; border-radius: 0 !important;
-        background: transparent !important; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        font-size: 14px; line-height: 1.8; white-space: pre-wrap !important; word-wrap: break-word !important;
-        overflow-wrap: break-word !important; overflow-x: hidden !important; overflow-y: hidden !important;
-        max-width: 100% !important; scrollbar-width: none !important; -ms-overflow-style: none !important;
-        margin-top: 8px; resize: none !important; box-shadow: none !important; outline: none !important;
-        color: #1f2937; box-sizing: border-box;
-      }
-      #result-cp::-webkit-scrollbar, #result-tp::-webkit-scrollbar, #result-atp::-webkit-scrollbar { display: none !important; }
-      #result-cp:focus, #result-tp:focus, #result-atp:focus { background: transparent !important; outline: none !important; border: none !important; }
+      /* ✅ FIX 3: TABLE FORMAT OUTPUT (per roadmap) */
+      .cta-result-table { width: 100%; border-collapse: collapse; margin-top: 16px; background: white; }
+      .cta-result-table th { background: #0891b2; color: white; padding: 12px 16px; text-align: left; font-weight: 600; }
+      .cta-result-table td { padding: 16px; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
+      .cta-result-table tr:last-child td { border-bottom: none; }
+      .cta-result-table .label-col { width: 180px; background: #f8fafc; font-weight: 600; color: #374151; }
+      .cta-result-table .content-col { white-space: pre-wrap; line-height: 1.6; color: #1f2937; }
       
       .btn-generate, .btn-save, .btn-secondary, .btn-print, .btn-download { margin-top: 20px; padding: 14px 30px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; }
       .btn-generate { background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%); color: white; }
@@ -341,7 +338,8 @@ window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, sem
       .grid-cols-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
       @media (max-width: 768px) { .grid-cols-2, .grid-cols-3 { grid-template-columns: 1fr; } }
       .cta-item { background: white; padding: 20px; margin-top: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-      .status-badge { display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 11px; font-weight: 600; margin-left: 8px; }      .status-ready { background: #dcfce7; color: #166534; }
+      .status-badge { display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 11px; font-weight: 600; margin-left: 8px; }
+      .status-ready { background: #dcfce7; color: #166534; }
       .status-warning { background: #fef3c7; color: #92400e; }
       .status-info { background: #dbeafe; color: #1e40af; }
       .result-section { margin-top: 30px; }
@@ -349,11 +347,12 @@ window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, sem
       .debug-box { background: #fef3c7; padding: 16px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f59e0b; font-size: 13px; }
       .debug-success { background: #dcfce7; border-left-color: #166534; }
       .debug-error { background: #fef2f2; border-left-color: #ef4444; }
-      .result-separator { border: none; border-top: 1px dashed #e5e7eb; margin: 24px 0; }
+      
       @media print {
         .cta-generator-form h2, .subtitle, .section-title, .cta-generator-form label, .btn-generate, .btn-save, .btn-secondary, .btn-print, .btn-download, .btn-back, .debug-box, #cta-form, .mt-12 { display: none !important; }
         #cta-result { display: block !important; }
-        #result-cp, #result-tp, #result-atp { border: none !important; background: white !important; color: black !important; font-size: 12pt; min-height: auto; }
+        .cta-result-table { border: 1px solid #000; }
+        .cta-result-table th, .cta-result-table td { border: 1px solid #000; color: #000; }
         body { background: white; }
       }
     </style>
@@ -382,38 +381,55 @@ window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, sem
         </div>
         <button type="button" id="btn-generate" class="btn-generate"><i class="fas fa-magic"></i> Generate dengan AI</button>
       </form>
+      
+      <!-- ✅ FIX 3: TABLE FORMAT OUTPUT -->
       <div id="cta-result" class="hidden result-section">
         <h3 class="text-xl font-bold mb-4 text-gray-800">📋 Hasil Generate</h3>
-        <label for="result-cp"><i class="fas fa-bullseye mr-2"></i>Capaian Pembelajaran (CP)</label><textarea id="result-cp" placeholder="CP akan muncul setelah generate..." readonly></textarea>
-        <hr class="result-separator">
-        <label for="result-tp"><i class="fas fa-flag-checkered mr-2"></i>Tujuan Pembelajaran (TP)</label><textarea id="result-tp" placeholder="TP akan muncul setelah generate..." readonly></textarea>
-        <hr class="result-separator">
-        <label for="result-atp"><i class="fas fa-stream mr-2"></i>Alur Tujuan Pembelajaran (ATP)</label><textarea id="result-atp" placeholder="ATP akan muncul setelah generate..." readonly></textarea>
+        <table class="cta-result-table">
+          <thead>
+            <tr>
+              <th class="label-col">Komponen</th>
+              <th class="content-col">Konten</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="label-col">🎯 Capaian Pembelajaran (CP)</td>
+              <td class="content-col" id="result-cp">CP akan muncul setelah generate...</td>
+            </tr>
+            <tr>
+              <td class="label-col">🏁 Tujuan Pembelajaran (TP)</td>
+              <td class="content-col" id="result-tp">TP akan muncul setelah generate...</td>
+            </tr>
+            <tr>
+              <td class="label-col">📊 Alur Tujuan Pembelajaran (ATP)</td>
+              <td class="content-col" id="result-atp">ATP akan muncul setelah generate...</td>
+            </tr>
+          </tbody>
+        </table>
         <div style="display: flex; gap: 12px; margin-top: 16px;">
-          <button type="button" id="btn-print" class="btn-print" style="flex: 1;"><i class="fas fa-print"></i> Print</button>          <button type="button" id="btn-download" class="btn-download" style="flex: 1;"><i class="fas fa-download"></i> Download</button>
+          <button type="button" id="btn-print" class="btn-print" style="flex: 1;"><i class="fas fa-print"></i> Print</button>
+          <button type="button" id="btn-download" class="btn-download" style="flex: 1;"><i class="fas fa-download"></i> Download</button>
           <button type="button" id="btn-save" class="btn-save" style="flex: 1;"><i class="fas fa-save"></i> Simpan</button>
           <button type="button" id="btn-regenerate" class="btn-secondary" style="flex: 1;"><i class="fas fa-redo"></i> Ulang</button>
         </div>
       </div>
+      
       <div class="mt-12"><h3 class="text-xl font-bold mb-4 text-gray-800"><i class="fas fa-archive mr-2"></i>Dokumen Tersimpan (<span id="saved-count">0</span>)</h3><div id="cta-list" class="space-y-4"><div class="loading-spinner"><i class="fas fa-spinner fa-spin text-2xl mb-3"></i><p>Memuat...</p></div></div></div>
     </div>`;
   
   // ✅ NEW: Populate mapel dropdown AFTER UI render + Auto-lock if user has registered mapel
   const jenjangSelect = document.getElementById('cta-jenjang');
   if (jenjangSelect) {
-    // Set initial jenjang from param or user profile
     const initialJenjang = jenjangFromParam || (userProfile?.exists() ? userProfile.data().jenjang_sekolah : null);
     if (initialJenjang) {
       jenjangSelect.value = initialJenjang;
-      // Populate mapel for initial jenjang
       await populateMapelDropdown(initialJenjang, userMapelFromReg);
     }
     
-    // ✅ Listen for jenjang change to reload mapel dynamically
     jenjangSelect.addEventListener('change', async function() {
       const newJenjang = this.value;
       if (newJenjang) {
-        // Clear auto-lock badge if jenjang changes (user might have different mapel per jenjang)
         const existingBadge = document.getElementById('cta-mapel')?.parentNode?.querySelector('.lock-indicator');
         if (existingBadge) existingBadge.remove();
         await populateMapelDropdown(newJenjang, userMapelFromReg);
@@ -433,25 +449,46 @@ window.renderCTAGenerator = async function(jenjangFromParam, kelasFromParam, sem
   })();
   
   const btnPrint = document.getElementById('btn-print');
-  if (btnPrint) btnPrint.addEventListener('click', () => { const cp = document.getElementById('result-cp')?.value; if (!cp || cp.includes('⏳') || cp.includes('Error')) { alert('⚠️ Generate data dulu sebelum print!'); return; } window.print(); });
+  if (btnPrint) btnPrint.addEventListener('click', () => { const cp = document.getElementById('result-cp')?.textContent || ''; if (!cp || cp.includes('⏳') || cp.includes('Error')) { alert('⚠️ Generate data dulu sebelum print!'); return; } window.print(); });
   
   const btnDownload = document.getElementById('btn-download');
   if (btnDownload) btnDownload.addEventListener('click', downloadCTAResult);
   
   const testKeyBtn = document.getElementById('btn-test-global-key');
   if (testKeyBtn && userRole === 'admin') testKeyBtn.addEventListener('click', async () => { try { const { getNextApiKey } = await import('./global-api-key.js'), key = await getNextApiKey(); if (key) { alert('✅ Global API Key ditemukan!'); location.reload(); } else alert('❌ Global API Key TIDAK ditemukan.'); } catch (e) { console.error('❌ [CTA Generator] Test error:', e); alert('❌ Error: ' + e.message); } });  
-  hideDashboardSections(); container.classList.remove('hidden'); setupEventHandlers(); loadCTAData(); console.log('✅ [CTA Generator] UI rendered');
+  
+  hideDashboardSections(); 
+  container.classList.remove('hidden'); 
+  setupEventHandlers(); 
+  loadCTAData(); 
+  console.log('✅ [CTA Generator] UI rendered to #cita-container');
 };
 
-function hideDashboardSections() { document.querySelector('.dashboard-hero')?.closest('section')?.classList.add('hidden'); document.querySelector('[aria-labelledby="rooms-heading"]')?.classList.add('hidden'); document.querySelectorAll('#sd-section, #smp-section, #sma-section, #tk-section, #mi-section, #mts-section, #ma-section').forEach(s => s.classList.add('hidden')); }
-function setupEventHandlers() { const btnGenerate = document.getElementById('btn-generate'), btnSave = document.getElementById('btn-save'), btnRegenerate = document.getElementById('btn-regenerate'); if (btnGenerate) btnGenerate.addEventListener('click', handleGenerate); if (btnSave) btnSave.addEventListener('click', handleSave); if (btnRegenerate) btnRegenerate.addEventListener('click', handleGenerate); }
+// ✅ LEGACY FUNCTION for backward compatibility (if router calls old name)
+async function renderCTAGeneratorLegacy(jenjangFromParam, kelasFromParam, semesterFromParam, container) {
+  console.log('⚠️ [CTA Generator] Using legacy renderCTAGenerator (fallback)');
+  // Call the main function with custom container
+  return window.renderCitaGenerator(jenjangFromParam, kelasFromParam, semesterFromParam);
+}
+
+function hideDashboardSections() { 
+  document.querySelector('.dashboard-hero')?.closest('section')?.classList.add('hidden'); 
+  document.querySelector('[aria-labelledby="rooms-heading"]')?.classList.add('hidden'); 
+  document.querySelectorAll('#sd-section, #smp-section, #sma-section, #tk-section, #mi-section, #mts-section, #ma-section').forEach(s => s.classList.add('hidden')); 
+}
+
+function setupEventHandlers() { 
+  const btnGenerate = document.getElementById('btn-generate'), btnSave = document.getElementById('btn-save'), btnRegenerate = document.getElementById('btn-regenerate'); 
+  if (btnGenerate) btnGenerate.addEventListener('click', handleGenerate); 
+  if (btnSave) btnSave.addEventListener('click', handleSave); 
+  if (btnRegenerate) btnRegenerate.addEventListener('click', handleGenerate); 
+}
 
 async function handleGenerate() {
   console.log('🪄 [CTA Generator] Generate clicked');
   const user = auth.currentUser; if (!user) { alert('⚠️ Silakan login dulu!'); return; }
   const jenjang = document.getElementById('cta-jenjang')?.value, kelas = document.getElementById('cta-kelas')?.value, semester = document.getElementById('cta-semester')?.value, mapel = document.getElementById('cta-mapel')?.value, sekolah = document.getElementById('kop-sekolah')?.value, tahun = document.getElementById('kop-tahun')?.value, guru = document.getElementById('cta-guru')?.value, topik = document.getElementById('cta-topik')?.value;
   
-  // ✅ ADMIN BYPASS: Skip validation for admin users
   if (userRole !== 'admin') {
     const validation = validateInputWithFilter({ sekolah, jenjang, kelas, semester, mapel, topik }, { jenjang_sekolah: jenjang, kelas_diampu: userKelasDiampu, mapel_diampu: userMapelDiampu, sd_mapel_type: userSdMapelType });
     if (!validation.valid) { alert('⚠️ ' + validation.errors.join('\n')); return; }
@@ -460,23 +497,25 @@ async function handleGenerate() {
   const aiReady = await isAiReady(); if (!aiReady) { const userDoc = await getDoc(doc(db, 'users', user.uid)), isAdmin = userDoc.exists() && userDoc.data()?.role === 'admin'; if (isAdmin) alert('⚠️ Global API Key belum terdeteksi.'); else alert('⚠️ AI belum aktif. Hubungi admin.'); return; }
   
   const resultDiv = document.getElementById('cta-result'); if (resultDiv) resultDiv.classList.remove('hidden');
-  document.getElementById('result-cp').value = `⏳ Generating CP...`; document.getElementById('result-tp').value = `⏳ Generating TP...`; document.getElementById('result-atp').value = `⏳ Generating ATP...`; resultDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  
+  // ✅ FIX: Update table cells instead of textareas
+  document.getElementById('result-cp').textContent = `⏳ Generating CP...`; 
+  document.getElementById('result-tp').textContent = `⏳ Generating TP...`; 
+  document.getElementById('result-atp').textContent = `⏳ Generating ATP...`; 
+  resultDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
   
   try {
     console.log('🤖 [CTA Generator] Calling AI...');
     const inputData = { sekolah, jenjang, kelas, semester, mapel, guru, topik, tahun }, result = await generateWithGroq(inputData);
-    document.getElementById('result-cp').value = result.cp; document.getElementById('result-tp').value = result.tp; document.getElementById('result-atp').value = result.atp;
     
-    // ✅ Auto-expand all textareas after content is loaded
-    setTimeout(() => {
-      autoExpandTextarea(document.getElementById('result-cp'));
-      autoExpandTextarea(document.getElementById('result-tp'));
-      autoExpandTextarea(document.getElementById('result-atp'));
-    }, 100);
+    // ✅ FIX: Set table cell content (not textarea value)
+    document.getElementById('result-cp').textContent = result.cp; 
+    document.getElementById('result-tp').textContent = result.tp; 
+    document.getElementById('result-atp').textContent = result.atp;
     
     console.log('✅ [CTA Generator] Generation complete!');
     
-    // ✅ AUTO-SAVE TO ADM.PEMBELAJARAN (NEW - Non-blocking)
+    // ✅ AUTO-SAVE TO ADM.PEMBELAJARAN
     try {
       const { storage } = await import('./adm-pembelajaran/storage.js');
       storage.setUserId(user.uid);
@@ -488,15 +527,14 @@ async function handleGenerate() {
         mapel: mapel || '',
         judul: `${mapel?.toUpperCase() || 'CTA'} - Kelas ${kelas || ''} - ${topik || ''}`.trim(),
         konten: `CP:\n${result.cp}\n\nTP:\n${result.tp}\n\nATP:\n${result.atp}`,
-        tags: ['cta', mapel?.toLowerCase()],        source: 'cta-generator',
+        tags: ['cta', mapel?.toLowerCase()],
+        source: 'cta-generator',
         metadata: { sekolah, tahun, guru, semester }
       };
       
-      // ✅ FIX: Use autoSaveFromExternal for consistency with new storage architecture
       await storage.autoSaveFromExternal('cta-generator', docData);
       console.log('✅ [CTA Generator] Auto-save to Adm.Pembelajaran successful');
       
-      // Show non-blocking notification
       const notification = document.createElement('div');
       notification.className = 'fixed bottom-4 right-4 bg-emerald-600 text-white px-4 py-3 rounded-xl shadow-lg z-50 animate-fade-in';
       notification.innerHTML = `<div class="flex items-center gap-2"><i class="fas fa-check-circle"></i><span>Tersimpan di Adm.Pembelajaran!</span></div>`;
@@ -504,7 +542,6 @@ async function handleGenerate() {
       setTimeout(() => { notification.style.opacity = '0'; setTimeout(() => notification.remove(), 300); }, 3000);
       
     } catch (autoSaveError) {
-      // Non-blocking: log but don't alert user
       console.warn('⚠️ [CTA Generator] Auto-save skipped:', autoSaveError.message);
     }
     
@@ -514,7 +551,12 @@ async function handleGenerate() {
     if (error.message.includes('API key')) errorMessage = 'API Key tidak valid.';
     else if (error.message.includes('quota') || error.message.includes('429')) errorMessage = 'Limit AI harian habis.';
     else if (error.message.includes('koneksi') || error.message.includes('network')) errorMessage = 'Koneksi internet bermasalah.';
-    document.getElementById('result-cp').value = `❌ Error: ${errorMessage}`; document.getElementById('result-tp').value = ''; document.getElementById('result-atp').value = '';
+    
+    // ✅ FIX: Update table cells for error display
+    document.getElementById('result-cp').textContent = `❌ Error: ${errorMessage}`; 
+    document.getElementById('result-tp').textContent = ''; 
+    document.getElementById('result-atp').textContent = '';
+    
     alert('❌ Gagal generate:\n\n' + errorMessage);
   }
 }
@@ -522,11 +564,36 @@ async function handleGenerate() {
 async function handleSave() {
   console.log('💾 [CTA Generator] Save clicked');
   const user = auth.currentUser; if (!user) { alert('⚠️ Silakan login dulu!'); return; }
-  const cp = document.getElementById('result-cp')?.value, tp = document.getElementById('result-tp')?.value, atp = document.getElementById('result-atp')?.value;
+  
+  // ✅ FIX: Get content from table cells (not textareas)
+  const cp = document.getElementById('result-cp')?.textContent || '', 
+        tp = document.getElementById('result-tp')?.textContent || '', 
+        atp = document.getElementById('result-atp')?.textContent || '';
+        
   if (!cp || !tp || !atp || cp.includes('Error') || cp.includes('Loading') || cp.includes('⏳')) { alert('⚠️ Generate data dulu sebelum menyimpan!'); return; }
+  
   try {
     const userDoc = await getDoc(doc(db, 'users', user.uid)), isAdmin = userDoc.exists() && userDoc.data()?.role === 'admin';
-    await addDoc(collection(db, 'cp_tp_atp'), { userId: user.uid, userEmail: user.email, userName: user.displayName || 'Guru', sekolah: document.getElementById('kop-sekolah')?.value, tahun: document.getElementById('kop-tahun')?.value, jenjang: document.getElementById('cta-jenjang')?.value, kelas: document.getElementById('cta-kelas')?.value, semester: document.getElementById('cta-semester')?.value, mapel: document.getElementById('cta-mapel')?.value, guru: document.getElementById('cta-guru')?.value, topik: document.getElementById('cta-topik')?.value, mode: 'AI', cp: cp, tp: tp, atp: atp, createdAt: serverTimestamp(), updatedAt: serverTimestamp(), isAdmin: isAdmin });
+    await addDoc(collection(db, 'cp_tp_atp'), { 
+      userId: user.uid, 
+      userEmail: user.email, 
+      userName: user.displayName || 'Guru', 
+      sekolah: document.getElementById('kop-sekolah')?.value, 
+      tahun: document.getElementById('kop-tahun')?.value, 
+      jenjang: document.getElementById('cta-jenjang')?.value, 
+      kelas: document.getElementById('cta-kelas')?.value, 
+      semester: document.getElementById('cta-semester')?.value, 
+      mapel: document.getElementById('cta-mapel')?.value, 
+      guru: document.getElementById('cta-guru')?.value, 
+      topik: document.getElementById('cta-topik')?.value, 
+      mode: 'AI', 
+      cp: cp, 
+      tp: tp, 
+      atp: atp, 
+      createdAt: serverTimestamp(), 
+      updatedAt: serverTimestamp(), 
+      isAdmin: isAdmin 
+    });
     console.log('✅ [CTA Generator] Data saved!'); alert('✅ Berhasil disimpan!'); loadCTAData();
   } catch (error) { console.error('❌ [CTA Generator] Save error:', error); alert('❌ Gagal simpan: ' + error.message); }
 }
@@ -537,7 +604,8 @@ function loadCTAData() {
   const user = auth.currentUser; if (!user) { list.innerHTML = `<div class="text-center py-8 text-gray-500"><p>Silakan login untuk melihat data</p></div>`; return; }
   (async () => {
     try {
-      const userDoc = await getDoc(doc(db, 'users', user.uid)), isAdmin = userDoc.exists() && userDoc.data()?.role === 'admin';      let q; if (isAdmin) q = query(collection(db, 'cp_tp_atp'), orderBy('createdAt', 'desc')); else q = query(collection(db, 'cp_tp_atp'), where('userId', '==', user.uid), orderBy('createdAt', 'desc'));
+      const userDoc = await getDoc(doc(db, 'users', user.uid)), isAdmin = userDoc.exists() && userDoc.data()?.role === 'admin';
+      let q; if (isAdmin) q = query(collection(db, 'cp_tp_atp'), orderBy('createdAt', 'desc')); else q = query(collection(db, 'cp_tp_atp'), where('userId', '==', user.uid), orderBy('createdAt', 'desc'));
       onSnapshot(q, (snapshot) => {
         if (snapshot.empty) { list.innerHTML = `<div class="text-center py-8 text-gray-500"><p>Belum ada dokumen tersimpan</p></div>`; return; }
         if (countSpan) countSpan.textContent = snapshot.docs.length;
@@ -547,23 +615,11 @@ function loadCTAData() {
   })();
 }
 
-// ============================================
-// ✅ AUTO-SAVE TO ADM.PEMBELAJARAN (NEW)
-// ============================================
-
-/**
- * Auto-save generated CTA to Adm.Pembelajaran
- * Call this after successful generation
- * Non-blocking: errors don't affect user experience
- */
 export async function autoSaveCTA(generatedContent, metadata) {
   console.log('💾 [CTA Generator] Auto-saving to Adm.Pembelajaran...');
   
   try {
-    // Import storage from adm-pembelajaran
     const { storage } = await import('./adm-pembelajaran/storage.js');
-    
-    // Get current user from Firebase auth
     const { auth } = await import('./firebase-config.js');
     const currentUser = auth.currentUser;
     
@@ -572,10 +628,8 @@ export async function autoSaveCTA(generatedContent, metadata) {
       return null;
     }
     
-    // Set userId for storage
     storage.setUserId(currentUser.uid);
     
-    // Prepare document data
     const docData = {
       jenis: 'cta',
       jenjang: metadata.jenjang || '',
@@ -587,12 +641,11 @@ export async function autoSaveCTA(generatedContent, metadata) {
       source: 'cta-generator',
       createdAt: new Date().toISOString()
     };    
-    // ✅ FIX: Use autoSaveFromExternal for consistency with new storage architecture
+    
     const savedDoc = await storage.autoSaveFromExternal('cta-generator', docData);
     
     console.log('✅ [CTA Generator] Auto-save successful:', savedDoc.id);
     
-    // Show notification to user (non-blocking)
     if (typeof document !== 'undefined') {
       const notification = document.createElement('div');
       notification.className = 'fixed bottom-4 right-4 bg-emerald-600 text-white px-4 py-3 rounded-xl shadow-lg z-50 animate-fade-in';
@@ -613,9 +666,8 @@ export async function autoSaveCTA(generatedContent, metadata) {
     
   } catch (e) {
     console.error('❌ [CTA Generator] Auto-save error:', e.message);
-    // Don't block user - auto-save is optional
     return null;
   }
 }
 
-console.log('🟢 [CTA Generator] READY — Dynamic Mapel Loading + Auto-Lock + Zero Breaking Change');
+console.log('🟢 [CTA Generator] READY — Fixed: Function Name + Container + Table Output');
