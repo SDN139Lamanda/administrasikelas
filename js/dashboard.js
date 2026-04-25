@@ -1,21 +1,28 @@
 /**
  * ============================================
  * DASHBOARD LOGIC - Platform Administrasi Kelas
- * VERSI: Berdasarkan kode user + Fix logout & approval
+ * VERSI: Fix logout redirect persistence + double-execution guard
  * ============================================
  */
+
+// ✅ Flag to prevent double-execution of logout (shared with dashboard.html shim)
+if (typeof window.__logoutExecuted === 'undefined') {
+    window.__logoutExecuted = false;
+}
 
 // ✅ CRITICAL: Define window.logout SYNCHRONOUSLY at file top (before any async code)
 // This ensures inline onclick="logout()" in dashboard.html works even before module fully loads
 if (typeof window.logout !== 'function') {
     window.logout = function() {
+        // Prevent double-execution
+        if (window.__logoutExecuted) return;
+        window.__logoutExecuted = true;
+        
         console.log('🚪 [Dashboard] Logout called (sync shim)');
-        // Immediate fallback redirect
-        try {
-            localStorage.clear();
-            sessionStorage.clear();
-        } catch(e) {}
-        window.location.href = 'index.html?loggedout=' + Date.now();
+        try { localStorage.clear(); sessionStorage.clear(); } catch(e) {}
+        const redirectUrl = 'index.html?loggedout=' + Date.now() + '&' + Math.random().toString(36).substr(2, 9);
+        window.location.replace(redirectUrl);
+        setTimeout(function() { if (window.__logoutExecuted) window.location.href = redirectUrl; }, 100);
     };
 }
 
@@ -235,11 +242,18 @@ window.backToDashboard = function() {
 };
 
 // ============================================
-// ✅ ASYNC LOGOUT - Overrides sync shim after module loads
+// ✅ ASYNC LOGOUT - Overrides sync shim after module loads (with persistence fix)
 // ============================================
 
-// ✅ UPDATED: Fungsi logout dengan fix cache & storage clear (async full implementation - overrides sync shim)
+// ✅ UPDATED: Fungsi logout dengan fix redirect persistence + double-execution guard
 window.logout = async function() {
+    // Prevent double-execution
+    if (window.__logoutExecuted) {
+        console.log('🚪 [Dashboard] Logout already executed, skipping');
+        return;
+    }
+    window.__logoutExecuted = true;
+    
     console.log('🚪 [Dashboard] logout DIPANGGIL (async full implementation)');
     
     try {
@@ -249,26 +263,34 @@ window.logout = async function() {
         await signOut(auth);
         console.log('✅ [Dashboard] Firebase signOut successful');
         
+    } catch (error) {
+        console.warn('⚠️ [Dashboard] Firebase signOut failed (continuing with redirect):', error);
+        // Continue with redirect even if Firebase signOut fails
+    }
+    
+    try {
         // ✅ 2. Clear localStorage & sessionStorage
         localStorage.clear();
         sessionStorage.clear();
         console.log('✅ [Dashboard] Storage cleared');
-        
-        // ✅ 3. Force redirect to index.html dengan timestamp (bypass cache)
-        window.location.href = 'index.html?loggedout=' + Date.now();
-        
-        // ✅ 4. Force reload setelah redirect (untuk mobile)
-        setTimeout(() => {
-            if (window.location.href.includes('index.html')) {
-                window.location.reload(true);
-            }
-        }, 200);
-        
-    } catch (error) {
-        console.error('❌ [Dashboard] Logout error:', error);
-        // Fallback: force redirect anyway
-        window.location.href = 'index.html?loggedout=' + Date.now();
+    } catch (e) {
+        console.warn('⚠️ [Dashboard] Storage clear failed:', e);
     }
+    
+    // ✅ 3. Force redirect using replace() + cache busting
+    // replace() prevents browser back-button from returning to dashboard
+    const redirectUrl = 'index.html?loggedout=' + Date.now() + '&' + Math.random().toString(36).substr(2, 9);
+    
+    console.log('🔄 [Dashboard] Redirecting to:', redirectUrl);
+    window.location.replace(redirectUrl);
+    
+    // ✅ 4. Extra safety: force reload after delay if replace didn't work
+    setTimeout(function() {
+        if (window.__logoutExecuted) {
+            console.log('🔄 [Dashboard] Fallback redirect via href');
+            window.location.href = redirectUrl;
+        }
+    }, 200);
 };
 
 // ============================================
@@ -282,7 +304,7 @@ console.log('   • showSubFeatureModal(jenjang, kelas)');
 console.log('   • closeSubFeatureModal()');
 console.log('   • loadSubFeature(subfitur)');
 console.log('   • backToDashboard()');
-console.log('   • logout() ← UPDATED with sync shim + async override!');
+console.log('   • logout() ← UPDATED with replace() + cache busting + double-execution guard!');
 console.log('   • isUserApproved() ← NEW helper');
 console.log('   • showPendingApprovalUI() ← NEW helper');
 console.log('🚀 READY TO USE!');
