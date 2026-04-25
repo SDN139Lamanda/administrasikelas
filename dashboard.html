@@ -149,7 +149,8 @@
                             <a href="change-password.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem"><i class="fas fa-lock mr-2"></i>Ganti Password</a>
                             <a href="profile.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem"><i class="fas fa-user-edit mr-2"></i>Edit Profil</a>
                             <div class="border-t border-gray-100 my-1"></div>
-                            <button onclick="logout()" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50" role="menuitem"><i class="fas fa-sign-out-alt mr-2"></i>Logout</button>                        </div>
+                            <button onclick="logout()" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50" role="menuitem"><i class="fas fa-sign-out-alt mr-2"></i>Logout</button>
+                        </div>
                     </div>
                     <button onclick="logout()" class="btn btn-ghost sm:hidden" aria-label="Logout"><i class="fas fa-sign-out-alt mr-2" aria-hidden="true"></i>Keluar</button>
                 </div>
@@ -167,7 +168,7 @@
             </div>
         </section>
 
-        <!-- ✅ ADMIN ACCESS BADGE (New) -->
+        <!-- ✅ ADMIN ACCESS BADGE -->
         <div id="admin-access-badge" class="container hidden mb-4 transition-all duration-300">
             <div class="bg-gradient-to-r from-purple-100 to-cyan-100 border border-purple-200 rounded-lg p-3 flex items-center gap-3">
                 <i class="fas fa-crown text-purple-600 text-lg"></i>
@@ -175,7 +176,7 @@
             </div>
         </div>
 
-        <!-- ✅ 7 MAIN JENJANG CARDS (Updated) -->
+        <!-- ✅ 7 MAIN JENJANG CARDS -->
         <section class="section" aria-labelledby="rooms-heading">
             <div class="container">
                 <h2 id="rooms-heading" class="section-title text-center mb-8"><i class="fas fa-door-open mr-2" aria-hidden="true"></i>JENJANG PENDIDIKAN</h2>
@@ -191,7 +192,7 @@
             </div>
         </section>
 
-        <!-- JENJANG SECTIONS (TK, SD, MI, SMP, MTs, SMA, MA) -->
+        <!-- JENJANG SECTIONS -->
         <section id="tk-section" class="section bg-white hidden" data-jenjang="tk"><div class="container"><div class="section-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"><div><h2 class="section-title"><i class="fas fa-child mr-2"></i>TK - Pilih Kelas</h2><p class="section-subtitle">Kemudian pilih fitur yang ingin diakses</p></div><button onclick="backToDashboard()" class="btn btn-ghost btn-sm self-start sm:self-auto"><i class="fas fa-arrow-left mr-2"></i>Kembali</button></div><div class="kelas-grid"><article class="kelas-card" data-kelas="A"><a href="javascript:void(0)" class="kelas-link" onclick="showSubFeatureModal('tk', 'A'); return false;"><div class="kelas-number bg-pink-100 text-pink-700">A</div><h3>Kelas A</h3><p><span class="class-badge">TK</span> 10 Sub-fitur</p></a></article><article class="kelas-card" data-kelas="B"><a href="javascript:void(0)" class="kelas-link" onclick="showSubFeatureModal('tk', 'B'); return false;"><div class="kelas-number bg-pink-100 text-pink-700">B</div><h3>Kelas B</h3><p><span class="class-badge">TK</span> 10 Sub-fitur</p></a></article></div></div></section>
 
         <section id="sd-section" class="section bg-white hidden" data-jenjang="sd"><div class="container"><div class="section-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"><div><h2 class="section-title"><i class="fas fa-elementary mr-2"></i>SD - Pilih Kelas</h2><p class="section-subtitle">Kemudian pilih fitur yang ingin diakses</p></div><button onclick="backToDashboard()" class="btn btn-ghost btn-sm self-start sm:self-auto"><i class="fas fa-arrow-left mr-2"></i>Kembali</button></div><div class="kelas-grid"><article class="kelas-card" data-kelas="1"><a href="javascript:void(0)" class="kelas-link" onclick="showSubFeatureModal('sd', '1'); return false;"><div class="kelas-number">1</div><h3>Kelas 1</h3><p><span class="class-badge">Fase A</span> 10 Sub-fitur</p></a></article><article class="kelas-card" data-kelas="2"><a href="javascript:void(0)" class="kelas-link" onclick="showSubFeatureModal('sd', '2'); return false;"><div class="kelas-number">2</div><h3>Kelas 2</h3><p><span class="class-badge">Fase A</span> 10 Sub-fitur</p></a></article><article class="kelas-card" data-kelas="3"><a href="javascript:void(0)" class="kelas-link" onclick="showSubFeatureModal('sd', '3'); return false;"><div class="kelas-number">3</div><h3>Kelas 3</h3><p><span class="class-badge">Fase B</span> 10 Sub-fitur</p></a></article><article class="kelas-card" data-kelas="4"><a href="javascript:void(0)" class="kelas-link" onclick="showSubFeatureModal('sd', '4'); return false;"><div class="kelas-number">4</div><h3>Kelas 4</h3><p><span class="class-badge">Fase B</span> 10 Sub-fitur</p></a></article><article class="kelas-card" data-kelas="5"><a href="javascript:void(0)" class="kelas-link" onclick="showSubFeatureModal('sd', '5'); return false;"><div class="kelas-number">5</div><h3>Kelas 5</h3><p><span class="class-badge">Fase C</span> 10 Sub-fitur</p></a></article><article class="kelas-card" data-kelas="6"><a href="javascript:void(0)" class="kelas-link" onclick="showSubFeatureModal('sd', '6'); return false;"><div class="kelas-number">6</div><h3>Kelas 6</h3><p><span class="class-badge">Fase C</span> 10 Sub-fitur</p></a></article></div></div></section>
@@ -205,7 +206,7 @@
 
         <section id="ma-section" class="section bg-white hidden" data-jenjang="ma"><div class="container"><div class="section-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"><div><h2 class="section-title"><i class="fas fa-graduation-cap mr-2"></i>MA - Pilih Kelas</h2><p class="section-subtitle">Kemudian pilih fitur yang ingin diakses</p></div><button onclick="backToDashboard()" class="btn btn-ghost btn-sm self-start sm:self-auto"><i class="fas fa-arrow-left mr-2"></i>Kembali</button></div><div class="kelas-grid"><article class="kelas-card" data-kelas="10"><a href="javascript:void(0)" class="kelas-link" onclick="showSubFeatureModal('ma', '10'); return false;"><div class="kelas-number">10</div><h3>Kelas 10</h3><p><span class="class-badge">Fase E</span> 10 Sub-fitur</p></a></article><article class="kelas-card" data-kelas="11"><a href="javascript:void(0)" class="kelas-link" onclick="showSubFeatureModal('ma', '11'); return false;"><div class="kelas-number">11</div><h3>Kelas 11</h3><p><span class="class-badge">Fase F</span> 10 Sub-fitur</p></a></article><article class="kelas-card" data-kelas="12"><a href="javascript:void(0)" class="kelas-link" onclick="showSubFeatureModal('ma', '12'); return false;"><div class="kelas-number">12</div><h3>Kelas 12</h3><p><span class="class-badge">Fase F</span> 10 Sub-fitur</p></a></article></div></div></section>
 
-        <!-- ✅ SUB-FEATURE SELECTION MODAL (10 slots: 6 active + 4 coming soon) -->
+        <!-- ✅ SUB-FEATURE SELECTION MODAL -->
         <div id="subfeature-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60] hidden" role="dialog" aria-modal="true">
             <div class="modal-content bg-white rounded-xl shadow-2xl w-full max-w-2xl mx-4 overflow-hidden">
                 <div class="p-4 border-b border-gray-200 bg-gradient-to-r from-purple-600 to-cyan-600 text-white flex items-center justify-between">
@@ -214,7 +215,6 @@
                 </div>
                 <div class="p-4">
                     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-                        <!-- Active Sub-features (6) -->
                         <button class="subfeature-card p-3 border border-gray-200 rounded-lg text-left hover:bg-gray-50" onclick="loadSubFeature('cita-generator')"><div class="flex items-center gap-2 mb-1"><i class="fas fa-wand-magic-sparkles text-pink-500"></i><span class="font-medium text-sm">Cita Generator</span></div><p class="text-xs text-gray-500">Template & AI</p></button>
                         <button class="subfeature-card p-3 border border-gray-200 rounded-lg text-left hover:bg-gray-50" onclick="loadSubFeature('adm-pembelajaran')"><div class="flex items-center gap-2 mb-1"><i class="fas fa-book-open text-teal-500"></i><span class="font-medium text-sm">Adm. Pembelajaran</span></div><p class="text-xs text-gray-500">Modul & RPP</p></button>
                         <button class="subfeature-card p-3 border border-gray-200 rounded-lg text-left hover:bg-gray-50" onclick="loadSubFeature('adm-kelas')"><div class="flex items-center gap-2 mb-1"><i class="fas fa-users text-orange-500"></i><span class="font-medium text-sm">Adm. Kelas</span></div><p class="text-xs text-gray-500">Data siswa & absensi</p></button>
@@ -222,7 +222,6 @@
                         <button class="subfeature-card p-3 border border-gray-200 rounded-lg text-left hover:bg-gray-50" onclick="loadSubFeature('refleksi')"><div class="flex items-center gap-2 mb-1"><i class="fas fa-pen-fancy text-purple-500"></i><span class="font-medium text-sm">Refleksi</span></div><p class="text-xs text-gray-500">Jurnal pembelajaran</p></button>
                         <button class="subfeature-card p-3 border border-gray-200 rounded-lg text-left hover:bg-gray-50" onclick="loadSubFeature('asisten-modul')"><div class="flex items-center gap-2 mb-1"><i class="fas fa-robot text-blue-500"></i><span class="font-medium text-sm">Asisten Modul</span></div><p class="text-xs text-gray-500">Bantuan cerdas</p></button>
                         
-                        <!-- Coming Soon (4) -->
                         <button class="subfeature-card coming-soon p-3 border border-gray-200 rounded-lg text-left" disabled><div class="flex items-center gap-2 mb-1"><i class="fas fa-hourglass-half text-gray-400"></i><span class="font-medium text-sm text-gray-500">Fitur 7</span></div><p class="text-xs text-gray-400">Segera hadir</p></button>
                         <button class="subfeature-card coming-soon p-3 border border-gray-200 rounded-lg text-left" disabled><div class="flex items-center gap-2 mb-1"><i class="fas fa-hourglass-half text-gray-400"></i><span class="font-medium text-sm text-gray-500">Fitur 8</span></div><p class="text-xs text-gray-400">Segera hadir</p></button>
                         <button class="subfeature-card coming-soon p-3 border border-gray-200 rounded-lg text-left" disabled><div class="flex items-center gap-2 mb-1"><i class="fas fa-hourglass-half text-gray-400"></i><span class="font-medium text-sm text-gray-500">Fitur 9</span></div><p class="text-xs text-gray-400">Segera hadir</p></button>
@@ -233,11 +232,10 @@
             </div>
         </div>
 
-        <!-- ✅ MODULE CONTAINERS (Original + New) -->
+        <!-- ✅ MODULE CONTAINERS -->
         <section id="module-container" class="section bg-gray-50"><div class="container"></div></section>
         <section id="refleksi-container" class="section bg-gray-50 hidden"></section>
         <section id="penilaian-container" class="section bg-gray-50 hidden"></section>
-        <!-- ✅ NEW CONTAINERS -->
         <section id="asisten-container" class="section bg-gray-50 hidden"><div class="container"></div></section>
         <section id="cita-container" class="section bg-gray-50 hidden"><div class="container"></div></section>
 
@@ -247,7 +245,8 @@
         <div class="container"><p>&copy; 2026 Platform Administrasi Kelas Digital.</p><p class="mt-2">Dibuat untuk Guru TK/SD/MI/SMP/MTs/SMA/MA</p></div>
     </footer>
 
-    <!-- ✅ GLOBAL API KEY MODULE (PRESERVED EXACTLY) -->    <script type="module">
+    <!-- ✅ GLOBAL API KEY MODULE -->
+    <script type="module">
         console.log('🔴 [Global API Key] Module START');
         window.GLOBAL_API_KEY = null;
         
@@ -281,58 +280,61 @@
         console.log('🟢 [Global API Key] Module READY');
     </script>
 
-    <!-- ✅ DASHBOARD MAIN SCRIPT - SIMPLIFIED: Only UI updates, NO auth check (handled by js/dashboard.js) -->
+    <!-- ✅ DASHBOARD MAIN SCRIPT - UI ONLY, NO LOGIC (FIXED: Removed initAdminWidget call) -->
     <script type="module">
-        import { auth, onAuthStateChanged, db, doc, getDoc } from './modules/firebase-config.js';
+        import { auth, onAuthStateChanged } from './modules/firebase-config.js';
         
-        console.log('🔴 [Dashboard Simple] START');
+        console.log('🔴 [Dashboard Inline] START - UI Only');
         
         document.addEventListener('DOMContentLoaded', async () => {
-            console.log('✅ [Dashboard] DOM loaded');
+            console.log('✅ [Dashboard Inline] DOM loaded');
             
             const els = {
-                profileMenuBtn: document.getElementById('profileMenuBtn'), profileDropdown: document.getElementById('profileDropdown'),
-                profileName: document.getElementById('profileName'), profileEmailSub: document.getElementById('profileEmailSub'),
-                userEmail: document.getElementById('userEmail'), userAvatar: document.getElementById('userAvatar'),
-                userContextBadge: document.getElementById('userContextBadge'), userContextText: document.getElementById('userContextText')
+                profileMenuBtn: document.getElementById('profileMenuBtn'),
+                profileDropdown: document.getElementById('profileDropdown'),
+                profileName: document.getElementById('profileName'),
+                profileEmailSub: document.getElementById('profileEmailSub'),
+                userEmail: document.getElementById('userEmail'),
+                userAvatar: document.getElementById('userAvatar'),
+                userContextText: document.getElementById('userContextText')
             };
             
+            // Profile dropdown toggle
             if (els.profileMenuBtn && els.profileDropdown) {
                 els.profileMenuBtn.addEventListener('click', (e) => {
-                    e.stopPropagation(); els.profileDropdown.classList.toggle('hidden');
+                    e.stopPropagation();
+                    els.profileDropdown.classList.toggle('hidden');
                 });
                 document.addEventListener('click', (e) => {
-                    if (!els.profileDropdown?.contains(e.target) && !els.profileMenuBtn?.contains(e.target)) els.profileDropdown?.classList.add('hidden');
+                    if (!els.profileDropdown?.contains(e.target) && !els.profileMenuBtn?.contains(e.target)) {
+                        els.profileDropdown?.classList.add('hidden');
+                    }
                 });
             }
             
-            // ✅ SIMPLIFIED: Only update UI elements, NO approval logic here
-            // Approval check is handled entirely by js/dashboard.js checkAuthStatus()
+            // ✅ ONLY update basic UI elements - NO logic, NO initAdminWidget
             onAuthStateChanged(auth, async (user) => {
-                console.log('🔐 [Dashboard] Auth:', user ? `IN (${user.uid})` : 'OUT');
+                console.log('🔐 [Dashboard Inline] Auth:', user ? `IN (${user.uid})` : 'OUT');
                 if (!user) return;
                 
-                // Only update basic UI, don't set approval state here
+                // Update UI only
                 if (els.userEmail) els.userEmail.textContent = user.email;
-                if (els.userAvatar) els.userAvatar.src = user.photoURL || `https://ui-avatars.com/api/?name=${user.displayName || 'User'}&background=7c3aed&color=fff`;
-                if (els.userContextText) els.userContextText.textContent = user.displayName || user.email;
-                
-                // ✅ Init admin widget (role check only, no approval)
-                if (typeof window.initAdminWidget === 'function') {
-                    // Get role from localStorage (set by js/dashboard.js)
-                    const role = localStorage.getItem('user_role') || 'teacher';
-                    window.initAdminWidget(role);
+                if (els.userAvatar) {
+                    els.userAvatar.src = user.photoURL || `https://ui-avatars.com/api/?name=${user.displayName || 'User'}&background=7c3aed&color=fff`;
+                }
+                if (els.userContextText) {
+                    els.userContextText.textContent = user.displayName || user.email;
                 }
                 
-                console.log('🟢 [Dashboard Simple] UI updated, waiting for js/dashboard.js to handle approval');
+                // ✅ DO NOT call initAdminWidget here - js/dashboard.js handles it
+                console.log('🟢 [Dashboard Inline] UI updated only, waiting for js/dashboard.js logic');
             });
-            console.log('🟢 [Dashboard Simple] READY');
+            console.log('🟢 [Dashboard Inline] READY - UI Only');
         });
     </script>
 
-    <!-- ✅ SAFE MODULE WRAPPERS + NEW ROUTING + BACKWARD COMPATIBILITY + ACCESS CONTROL -->
+    <!-- ✅ NAVIGATION FUNCTIONS -->
     <script>
-        // 🔐 VISIBILITY FIX FUNCTION - UPDATED: ALL CARDS ALWAYS VISIBLE, ACCESS CHECK ONLY ON CLICK
         window.applyJenjangVisibility = function(role, userJenjang) {
             const cards = document.querySelectorAll('.room-card[data-jenjang]');
             const adminBadge = document.getElementById('admin-access-badge');
@@ -600,15 +602,15 @@
             else { console.warn('⚠️ renderGeneratorModule not ready yet'); alert('⚠️ Modul Generator sedang dimuat. Silakan coba lagi dalam beberapa detik.'); }
         };
         
-        console.log('✅ [Dashboard] Safe module wrappers + new navigation loaded');
+        console.log('✅ [Dashboard] Navigation functions loaded');
     </script>
 
-    <!-- ✅ EXTERNAL LIBRARIES (UNCHANGED) -->
+    <!-- ✅ EXTERNAL LIBRARIES -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/docx@7.8.2/build/index.js" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js" crossorigin="anonymous"></script>
 
-    <!-- ✅ MODULE IMPORTS (UNCHANGED) -->
+    <!-- ✅ MODULE IMPORTS -->
     <script type="module" src="modules/firebase-config.js"></script>
     <script type="module" src="js/main.js"></script>
     <script type="module" src="js/dashboard.js"></script>
@@ -633,9 +635,9 @@
     <script type="module" src="modules/adm-pembelajaran/section3-template.js"></script>
     <script type="module" src="modules/penilaian/penilaian-template.js"></script>
     <script type="module" src="modules/penilaian/penilaian-storage.js"></script>
-    <script type="module" src="modules/penilaian/penilaian.js"></script> 
+    <script type="module" src="modules/penilaian/penilaian.js"></script>
     
-    <!-- ✅ ADMIN FLOATING WIDGET & LOGIC (RESTORED EXACTLY) -->
+    <!-- ✅ ADMIN WIDGET -->
     <button id="admin-widget-btn" class="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-gradient-to-r from-purple-600 to-cyan-600 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 flex items-center justify-center z-40 hidden" aria-label="Admin Approval Panel"><i class="fas fa-crown text-xl"></i></button>
 
     <div id="admin-approval-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] hidden" role="dialog" aria-modal="true" aria-labelledby="admin-modal-title">
@@ -647,7 +649,8 @@
             <div class="flex-1 overflow-y-auto p-4">
                 <div class="grid grid-cols-2 gap-3 mb-4">
                     <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 text-center"><div class="text-2xl font-bold text-amber-600" id="admin-stat-pending">0</div><div class="text-xs text-gray-600">Menunggu</div></div>
-                    <div class="bg-green-50 border border-green-200 rounded-lg p-3 text-center"><div class="text-2xl font-bold text-green-600" id="admin-stat-approved">0</div><div class="text-xs text-gray-600">Disetujui</div></div>                </div>
+                    <div class="bg-green-50 border border-green-200 rounded-lg p-3 text-center"><div class="text-2xl font-bold text-green-600" id="admin-stat-approved">0</div><div class="text-xs text-gray-600">Disetujui</div></div>
+                </div>
                 <div class="relative mb-4"><i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i><input type="text" id="admin-search-input" placeholder="Cari nama atau email..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" oninput="filterAdminUsers()"></div>
                 <div class="admin-table-wrapper border border-gray-200 rounded-lg overflow-hidden">
                     <table class="w-full"><thead class="bg-gray-50"><tr><th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">User</th><th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">Email</th><th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">Sekolah</th><th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase whitespace-nowrap">Aksi</th></tr></thead><tbody id="admin-pending-tbody" class="divide-y divide-gray-100"><tr><td colspan="4" class="px-4 py-8 text-center text-gray-500"><i class="fas fa-spinner fa-spin text-xl mb-2"></i><p>Memuat data...</p></td></tr></tbody></table>
@@ -661,10 +664,10 @@
         </div>
     </div>
 
-   <!-- ✅ ADMIN WIDGET LOGIC (RESTORED EXACTLY) -->
+   <!-- ✅ ADMIN WIDGET LOGIC -->
 <script>
 (function() {
-    console.log('👑 [Admin Widget v3] Script initializing...');
+    console.log('👑 [Admin Widget] Script initializing...');
     let adminPendingUsers = [];
     
     function initAdminWidgetScript() {
@@ -696,7 +699,8 @@
             const el = document.getElementById('admin-stat-pending'); if (el) el.textContent = adminPendingUsers.length;
             renderAdminPendingTable();
         } catch (error) {
-            const tbody = document.getElementById('admin-pending-tbody');            if (tbody) tbody.innerHTML = `<tr><td colspan="4" class="px-4 py-8 text-center text-red-600">❌ ${error.message}</td></tr>`;
+            const tbody = document.getElementById('admin-pending-tbody');
+            if (tbody) tbody.innerHTML = `<tr><td colspan="4" class="px-4 py-8 text-center text-red-600">❌ ${error.message}</td></tr>`;
         }
     }
     
@@ -729,6 +733,7 @@
     };
     window.initAdminWidget = (role) => {
         const btn = document.getElementById('admin-widget-btn'); if (!btn) return; btn.classList.toggle('hidden', role !== 'admin');
+        console.log('👑 [Admin Widget] Init with role:', role, 'visible:', role === 'admin');
     };
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initAdminWidgetScript); else initAdminWidgetScript();
 })();
