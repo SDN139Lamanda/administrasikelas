@@ -1,13 +1,14 @@
 /**
  * ============================================
  * DASHBOARD LOGIC - Platform Administrasi Kelas
- * VERSI: Clean Sync with dashboard.html - FIXED IMPORT PATH
+ * VERSI: Clean Sync with dashboard.html + Protsma Compatible
  * 
  * CATATAN ARSITEKTUR:
- * • dashboard.html inline script = UI ONLY
+ * • dashboard.html inline script = UI ONLY + routing
  * • File ini = LOGIC ONLY (auth + approval + state)
  * • Admin widget init di sini (setelah role diketahui)
- * • ✅ FIX: Import path ../modules/ (bukan ./modules/)
+ * • ✅ Import path: ../modules/ (karena file ini di js/)
+ * • ✅ Compatible dengan protsma module (modules/protsma/)
  * ============================================
  */
 
@@ -264,3 +265,4 @@ console.log('   • logout() ← Sign out + redirect');
 console.log('   • initAuth() ← Main entry (auto-run)');
 console.log('🎯 Sync with dashboard.html: UI-only inline script');
 console.log('✅ FIX: Import path ../modules/ (bukan ./modules/)');
+console.log('✅ Compatible with protsma module (modules/protsma/protsma.js)');
