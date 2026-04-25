@@ -1,12 +1,13 @@
 /**
  * ============================================
  * DASHBOARD LOGIC - Platform Administrasi Kelas
- * VERSI: Clean Sync with dashboard.html
+ * VERSI: Clean Sync with dashboard.html - FIXED IMPORT PATH
  * 
  * CATATAN ARSITEKTUR:
  * • dashboard.html inline script = UI ONLY
  * • File ini = LOGIC ONLY (auth + approval + state)
  * • Admin widget init di sini (setelah role diketahui)
+ * • ✅ FIX: Import path ../modules/ (bukan ./modules/)
  * ============================================
  */
 
@@ -72,7 +73,8 @@ async function initAuth() {
     console.log('🔐 [Dashboard.js] initAuth START');
     
     try {
-        const { auth, onAuthStateChanged, db, doc, getDoc } = await import('./modules/firebase-config.js');
+        // ✅ FIX: Import path corrected to ../modules/
+        const { auth, onAuthStateChanged, db, doc, getDoc } = await import('../modules/firebase-config.js');
         
         onAuthStateChanged(auth, async (user) => {
             // Not authenticated → redirect to login
@@ -99,6 +101,9 @@ async function initAuth() {
             
             // Fetch user data from Firestore
             try {
+                // ✅ FIX: Import path corrected to ../modules/
+                const { db, doc, getDoc } = await import('../modules/firebase-config.js');
+                
                 const snap = await getDoc(doc(db, 'users', user.uid));
                 
                 if (!snap.exists()) {
@@ -206,7 +211,8 @@ window.logout = async function() {
     
     // Try Firebase signOut
     try {
-        const { auth, signOut } = await import('./modules/firebase-config.js');
+        // ✅ FIX: Import path corrected to ../modules/
+        const { auth, signOut } = await import('../modules/firebase-config.js');
         await signOut(auth);
         console.log('✅ [Dashboard.js] Firebase signOut success');
     } catch (e) {
@@ -257,3 +263,4 @@ console.log('   • showPendingApprovalUI() ← Show pending state');
 console.log('   • logout() ← Sign out + redirect');
 console.log('   • initAuth() ← Main entry (auto-run)');
 console.log('🎯 Sync with dashboard.html: UI-only inline script');
+console.log('✅ FIX: Import path ../modules/ (bukan ./modules/)');
