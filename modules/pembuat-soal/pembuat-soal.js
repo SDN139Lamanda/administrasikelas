@@ -4,11 +4,10 @@
  * Folder: modules/pembuat-soal/pembuat-soal.js
  * ============================================
  * 
- * ✅ UPDATE: buildPrompt() diubah untuk menghasilkan SOAL UJIAN (Bukan CP).
  * ✅ FIXES APPLIED:
- * 1. Dropdown populate: Populate select di table row (bukan header).
- * 2. TDZ Error: Use 'foundRow' instead of 'row' in event listeners.
- * 3. API parsing: Handle string & object response dari generateWithGroq.
+ * 1. parseAIOutput: Regex-based parsing untuk handle variasi marker
+ * 2. buildPrompt: Lebih strict + contoh output konkret + negative constraints
+ * 3. Debug logging: Tampilkan raw AI response di console untuk troubleshooting
  * ============================================
  */
 
@@ -445,9 +444,18 @@ async function generateSoal() {
         
         console.log('🤖 [PembuatSoal] AI Response received');
         
+        // ✅ DEBUG: Tampilkan raw response di console untuk troubleshooting
+        console.log('🔍 [PembuatSoal] Raw AI response:', typeof result === 'string' ? result.substring(0, 500) + '...' : result);
+        
         // PARSE RESPONSE
         const aiContent = typeof result === 'string' ? result : (result?.content || JSON.stringify(result));
         const parsedOutput = parseAIOutput(aiContent);
+        
+        // ✅ DEBUG: Tampilkan hasil parsing di console
+        console.log('🔍 [PembuatSoal] Parsed output:', {
+            questionsPreview: parsedOutput.questions?.substring(0, 200),
+            answersPreview: parsedOutput.answers?.substring(0, 200)
+        });
         
         generatedOutput = parsedOutput;
         
@@ -474,7 +482,7 @@ async function generateSoal() {
 }
 
 // ============================================
-// ✅ BUILD PROMPT (UPDATED: SOAL, BUKAN CP)
+// ✅ BUILD PROMPT (UPDATED: Lebih Strict + Contoh Konkret)
 // ============================================
 
 function buildPrompt(tahun) {
@@ -488,12 +496,16 @@ function buildPrompt(tahun) {
     }));
     
     const rowsText = rowsData.map((r, i) => {
-        const modelMap = { 'ganda': 'Pilihan Ganda (4 opsi)', 'isian': 'Isian Singkat', 'uraian': 'Uraian/Essay' };
+        const modelMap = { 
+            'ganda': 'Pilihan Ganda (4 opsi: A, B, C, D)', 
+            'isian': 'Isian Singkat', 
+            'uraian': 'Uraian/Essay' 
+        };
         const untukMap = { 'harian': 'Tugas Harian', 'pts': 'PTS', 'pas': 'PAS' };
         return `${i+1}. Topik: "${r.topik}" | ${r.jumlah} soal | ${modelMap[r.model]} | ${untukMap[r.untuk]}`;
     }).join('\n');
     
-    // ⚠️ PROMPT INI KHUSUS UNTUK MEMBUAT SOAL
+    // ⚠️ PROMPT INI KHUSUS UNTUK MEMBUAT SOAL - VERSI STRICT
     return `Anda adalah guru profesional ahli pembuat soal ujian.
 TUGAS: Buatkan soal ujian berdasarkan rincian berikut.
 
@@ -504,59 +516,148 @@ INFORMASI:
 RINCIAN SOAL:
 ${rowsText}
 
-ATURAN:
-1. Buat soal sesuai jumlah yang diminta.
-2. Jika "Pilihan Ganda", buat 4 opsi (A, B, C, D) DAN tentukan kunci jawaban.
-3. Jika "Isian", buat soal dengan jawaban singkat.
-4. Jika "Uraian", buat soal analisis/esai.
-5. Pisahkan SOAL dan KUNCI JAWABAN dengan jelas.
+ATURAN WAJIB:
+1. Buat soal sesuai JUMLAH yang diminta untuk setiap topik.
+2. Jika "Pilihan Ganda", buat 4 opsi (A, B, C, D) DAN tentukan kunci jawaban yang benar.
+3. Jika "Isian", buat soal dengan jawaban singkat yang tepat.
+4. Jika "Uraian", buat soal analisis/esai dengan poin-poin kunci di jawaban.
+5. Tingkat kesulitan disesuaikan dengan jenjang pendidikan.
+6. Gunakan bahasa Indonesia baku dan mudah dipahami siswa.
 
-FORMAT OUTPUT (WAJIB IKUTI PERSIS):
+🚫 JANGAN LAKUKAN INI:
+- JANGAN tambahkan kata pengantar seperti "Berikut soal...", "Silakan kerjakan...", dll.
+- JANGAN tambahkan penutup seperti "Semoga membantu", "Terima kasih", dll.
+- JANGAN jelaskan format output, langsung mulai dengan marker.
+- JANGAN gunakan markdown header (#, ##) untuk section, gunakan marker teks biasa.
+
+✅ FORMAT OUTPUT (WAJIB IKUTI PERSIS):
 
 === SOAL ===
-[Daftar semua soal di sini, dikelompokkan per Topik, beri nomor urut]
-[Contoh untuk Pilihan Ganda:
-1. Soal?
-   A. ...
-   B. ...
-   C. ...
-   D. ...
-]
+[Langsung mulai dengan soal pertama, dikelompokkan per topik]
+
+TOPIK: [Nama Topik]
+1. [Soal pilihan ganda nomor 1]
+   A. [Opsi A]
+   B. [Opsi B]
+   C. [Opsi C]
+   D. [Opsi D]
+
+2. [Soal isian nomor 2]
+   ...
+
+TOPIK: [Nama Topik Berikutnya]
+[Soal-soal untuk topik ini]
+[dan seterusnya...]
 
 === KUNCI JAWABAN ===
-[Daftar kunci jawaban di sini sesuai nomor soal]
-[Contoh: 1. Jawaban: B (Alasan)]
+[Langsung mulai dengan kunci jawaban, sesuai nomor soal]
 
-JANGAN MENAMBAH KATA PENGANTAR ATAU PENUTUP LAINNYA. MULAI LANGSUNG DENGAN "=== SOAL ===".`;
+TOPIK: [Nama Topik]
+1. Jawaban: B
+2. Jawaban: [jawaban singkat]
+
+TOPIK: [Nama Topik Berikutnya]
+[Kunci jawaban untuk topik ini]
+[dan seterusnya...]
+
+⚠️ PENTING:
+- Gunakan EXACT marker "=== SOAL ===" dan "=== KUNCI JAWABAN ===" (3 tanda sama dengan, spasi, huruf kapital)
+- Mulai LANGSUNG dengan "=== SOAL ===" tanpa teks sebelumnya
+- Tidak ada teks setelah "=== KUNCI JAWABAN ===" selain kunci jawaban
+- Output HARUS hanya berisi 2 section tersebut, tidak ada lainnya`;
 }
 
 // ============================================
-// ✅ PARSE OUTPUT
+// ✅ PARSE OUTPUT (FIXED: Regex-based, handle variasi)
 // ============================================
 
 function parseAIOutput(content) {
-    const soalMarker = '=== SOAL ===';
-    const jawabanMarker = '=== KUNCI JAWABAN ===';
+    console.log('🔍 [parseAIOutput] Input length:', content?.length);
+    
+    // ✅ Regex patterns untuk handle variasi marker (case-insensitive, flexible spacing)
+    const patterns = {
+        soal: [
+            /^\s*={3,}\s*SOAL\s*={3,}\s*$/im,      // === SOAL ===
+            /^\s*={2,}\s*SOAL\s*={2,}\s*$/im,       // == SOAL ==
+            /^\s*#+\s*SOAL\s*$/im,                  // # SOAL atau ## SOAL
+            /^\s*===\s*soal\s*===\s*$/im,           // === soal === (lowercase)
+        ],
+        jawaban: [
+            /^\s*={3,}\s*KUNCI\s*JAWABAN\s*={3,}\s*$/im,  // === KUNCI JAWABAN ===
+            /^\s*={2,}\s*KUNCI\s*JAWABAN\s*={2,}\s*$/im,  // == KUNCI JAWABAN ==
+            /^\s*#+\s*KUNCI\s*JAWABAN\s*$/im,             // # KUNCI JAWABAN
+            /^\s*===\s*kunci\s*jawaban\s*===\s*$/im,      // lowercase
+        ]
+    };
     
     let questions = '';
     let answers = '';
     
-    const soalIdx = content.indexOf(soalMarker);
-    const jawabIdx = content.indexOf(jawabanMarker);
-    
-    if (soalIdx !== -1 && jawabIdx !== -1) {
-        questions = content.substring(soalIdx + soalMarker.length, jawabIdx).trim();
-        answers = content.substring(jawabIdx + jawabanMarker.length).trim();
-    } else if (soalIdx !== -1) {
-        questions = content.substring(soalIdx + soalMarker.length).trim();
-        answers = 'Kunci jawaban tidak ditemukan dalam output.';
-    } else {
-        questions = content;
-        answers = 'Kunci jawaban tidak ditemukan dalam output.';
+    // ✅ Cari marker SOAL dengan regex
+    let soalMatch = null;
+    for (const pattern of patterns.soal) {
+        const match = content.match(pattern);
+        if (match) {
+            soalMatch = match;
+            break;
+        }
     }
     
+    // ✅ Cari marker KUNCI JAWABAN dengan regex
+    let jawabMatch = null;
+    for (const pattern of patterns.jawaban) {
+        const match = content.match(pattern);
+        if (match) {
+            jawabMatch = match;
+            break;
+        }
+    }
+    
+    // ✅ Parse berdasarkan marker yang ditemukan
+    if (soalMatch && jawabMatch) {
+        // Kedua marker ditemukan
+        const soalIdx = soalMatch.index + soalMatch[0].length;
+        const jawabIdx = jawabMatch.index;
+        
+        if (soalIdx < jawabIdx) {
+            questions = content.substring(soalIdx, jawabIdx).trim();
+            answers = content.substring(jawabIdx + jawabMatch[0].length).trim();
+        }
+    } else if (soalMatch) {
+        // Hanya marker SOAL ditemukan
+        const soalIdx = soalMatch.index + soalMatch[0].length;
+        questions = content.substring(soalIdx).trim();
+        
+        // Coba cari kunci jawaban dengan keyword alternatif
+        if (/kunci\s*jawaban|jawaban|answer/i.test(questions)) {
+            // Ada kemungkinan jawaban tercampur, coba pisahkan manual
+            const parts = questions.split(/(?:kunci\s*jawaban|jawaban|answer)\s*:/i);
+            if (parts.length >= 2) {
+                questions = parts[0].trim();
+                answers = parts.slice(1).join('Jawaban: ').trim();
+            }
+        } else {
+            answers = 'Kunci jawaban tidak ditemukan dalam output. Silakan periksa format AI response.';
+        }
+    } else {
+        // Tidak ada marker ditemukan - fallback: anggap seluruh content sebagai soal
+        console.warn('⚠️ [parseAIOutput] No markers found, using fallback');
+        questions = content.trim();
+        answers = 'Kunci jawaban tidak ditemukan. Format output AI tidak sesuai instruksi.';
+    }
+    
+    // ✅ Clean up: hapus intro/outro yang mungkin masih tersisa
+    questions = questions.replace(/^(Berikut|Silakan|Tugas|Soal|Jawab)\s*[:\-\s]*/i, '').trim();
+    answers = answers.replace(/^(Berikut|Silakan|Tugas|Soal|Jawab)\s*[:\-\s]*/i, '').trim();
+    
+    // ✅ Convert newlines ke <br> untuk display HTML
     questions = questions.replace(/\n/g, '<br>');
     answers = answers.replace(/\n/g, '<br>');
+    
+    console.log('✅ [parseAIOutput] Parsing complete:', {
+        questionsLength: questions.length,
+        answersLength: answers.length
+    });
     
     return { questions, answers };
 }
@@ -571,8 +672,11 @@ function displayOutput(output) {
     const aDiv = document.getElementById('ps-output-answers');
     
     if (section) section.classList.remove('hidden');
-    if (qDiv) qDiv.innerHTML = output.questions;
-    if (aDiv) aDiv.innerHTML = output.answers;
+    if (qDiv) qDiv.innerHTML = output.questions || '<em class="text-gray-500">Soal tidak tersedia</em>';
+    if (aDiv) aDiv.innerHTML = output.answers || '<em class="text-gray-500">Kunci jawaban tidak tersedia</em>';
+    
+    // ✅ Scroll ke output agar user langsung lihat hasil
+    section?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 // ============================================
