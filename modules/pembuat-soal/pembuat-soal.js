@@ -680,10 +680,7 @@ function showAlert(message, status = 'success') {
     }, 5000);
 }
 
-// ============================================
-// ✅ EXPORT FOR MODULE IMPORT
-// ============================================
-
-export { renderPembuatSoal };
+// ✅ EXPORT sudah di function declaration (line ~25)
+// Tidak perlu export lagi di sini
 
 console.log('🟢 [PembuatSoal] Module READY');
