@@ -4,17 +4,18 @@
  * Folder: modules/pembuat-soal/pembuat-soal.js
  * ============================================
  * 
- * ✅ FIXES APPLIED (based on cta-generator.js pattern):
+ * ✅ FIXES APPLIED:
  * 1. TDZ Error: Use 'foundRow' instead of 'row' in event listeners
  * 2. Mapel: Load from data/mapel/*.json + auto-lock based on user registration
  * 3. Groq API: Use generateWithGroq() pattern + ensure output is displayed
+ * 4. ✅ FIX: Import path ../groq-api.js (bukan ./groq-api.js)
  * ============================================
  */
 
 console.log('🔴 [PembuatSoal] Module START');
 
-// ✅ IMPORTS (same pattern as cta-generator.js)
-import { generateWithGroq, getGroqApiKey } from './groq-api.js';
+// ✅ IMPORTS (FIXED: ../groq-api.js, bukan ./groq-api.js)
+import { generateWithGroq, getGroqApiKey } from '../groq-api.js';
 import { db, auth, doc, getDoc, collection, addDoc, serverTimestamp } from '../firebase-config.js';
 
 console.log('✅ [PembuatSoal] All imports successful');
