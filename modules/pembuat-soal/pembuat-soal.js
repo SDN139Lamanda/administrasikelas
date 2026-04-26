@@ -4,10 +4,12 @@
  * Folder: modules/pembuat-soal/pembuat-soal.js
  * ============================================
  * 
+ * ✅ FIX UTAMA: Tambah 'prompt: prompt' ke generateWithGroq()
  * ✅ FIXES APPLIED:
- * 1. parseAIOutput: Regex-based parsing untuk handle variasi marker
- * 2. buildPrompt: Lebih strict + contoh output konkret + negative constraints
- * 3. Debug logging: Tampilkan raw AI response di console untuk troubleshooting
+ * 1. generateWithGroq: Kirim prompt custom agar AI generate soal (bukan CP)
+ * 2. parseAIOutput: Regex-based parsing untuk handle variasi marker
+ * 3. buildPrompt: Lebih strict + contoh output konkret + negative constraints
+ * 4. Debug logging: Tampilkan raw AI response untuk troubleshooting
  * ============================================
  */
 
@@ -408,7 +410,7 @@ window.removePembuatSoalRow = function(rowId) {
 };
 
 // ============================================
-// ✅ GENERATE SOAL
+// ✅ GENERATE SOAL (FIXED: Kirim prompt custom ke API)
 // ============================================
 
 async function generateSoal() {
@@ -432,8 +434,11 @@ async function generateSoal() {
         // ✅ BUILD PROMPT (SOAL, BUKAN CP)
         const prompt = buildPrompt(tahun);
         
-        // CALL GROQ
+        console.log('🔍 [PembuatSoal] Custom prompt length:', prompt.length);
+        
+        // ✅ CALL GROQ - FIX UTAMA: Kirim prompt custom!
         const result = await generateWithGroq({
+            prompt: prompt,  // ✅ INI FIX KRITIS: Kirim prompt custom agar AI generate soal
             sekolah: document.getElementById('ps-sekolah')?.value || '-',
             tahun: tahun,
             topik: soalRows.map(r => r.topik).filter(t => t).join(', '),
@@ -444,14 +449,14 @@ async function generateSoal() {
         
         console.log('🤖 [PembuatSoal] AI Response received');
         
-        // ✅ DEBUG: Tampilkan raw response di console untuk troubleshooting
-        console.log('🔍 [PembuatSoal] Raw AI response:', typeof result === 'string' ? result.substring(0, 500) + '...' : result);
+        // ✅ DEBUG: Tampilkan raw response untuk troubleshooting
+        const aiContent = typeof result === 'string' ? result : (result?.content || JSON.stringify(result));
+        console.log('🔍 [PembuatSoal] Raw AI response preview:', aiContent.substring(0, 500) + '...');
         
         // PARSE RESPONSE
-        const aiContent = typeof result === 'string' ? result : (result?.content || JSON.stringify(result));
         const parsedOutput = parseAIOutput(aiContent);
         
-        // ✅ DEBUG: Tampilkan hasil parsing di console
+        // ✅ DEBUG: Tampilkan hasil parsing
         console.log('🔍 [PembuatSoal] Parsed output:', {
             questionsPreview: parsedOutput.questions?.substring(0, 200),
             answersPreview: parsedOutput.answers?.substring(0, 200)
@@ -506,7 +511,9 @@ function buildPrompt(tahun) {
     }).join('\n');
     
     // ⚠️ PROMPT INI KHUSUS UNTUK MEMBUAT SOAL - VERSI STRICT
-    return `Anda adalah guru profesional ahli pembuat soal ujian.
+    return `[SYSTEM: MODE = EXAM_QUESTION_GENERATOR. IGNORE ANY PREVIOUS CONTEXT ABOUT CP/TP/ATP. ONLY GENERATE EXAM QUESTIONS.]
+
+Anda adalah guru profesional ahli pembuat soal ujian.
 TUGAS: Buatkan soal ujian berdasarkan rincian berikut.
 
 INFORMASI:
@@ -529,6 +536,7 @@ ATURAN WAJIB:
 - JANGAN tambahkan penutup seperti "Semoga membantu", "Terima kasih", dll.
 - JANGAN jelaskan format output, langsung mulai dengan marker.
 - JANGAN gunakan markdown header (#, ##) untuk section, gunakan marker teks biasa.
+- JANGAN hasilkan CP, TP, ATP, modul, RPP, atau dokumen kurikulum apapun.
 
 ✅ FORMAT OUTPUT (WAJIB IKUTI PERSIS):
 
@@ -577,16 +585,23 @@ function parseAIOutput(content) {
     // ✅ Regex patterns untuk handle variasi marker (case-insensitive, flexible spacing)
     const patterns = {
         soal: [
-            /^\s*={3,}\s*SOAL\s*={3,}\s*$/im,      // === SOAL ===
-            /^\s*={2,}\s*SOAL\s*={2,}\s*$/im,       // == SOAL ==
-            /^\s*#+\s*SOAL\s*$/im,                  // # SOAL atau ## SOAL
-            /^\s*===\s*soal\s*===\s*$/im,           // === soal === (lowercase)
+            /^\s*={3,}\s*SOAL\s*={3,}\s*$/im,           // === SOAL ===
+            /^\s*={2,}\s*SOAL\s*={2,}\s*$/im,            // == SOAL ==
+            /^\s*#+\s*SOAL\s*$/im,                       // # SOAL / ## SOAL
+            /^\s*===\s*soal\s*===\s*$/im,                // lowercase
+            /^\s*[-*]{3,}\s*SOAL\s*[-*]{3,}\s*$/im,      // --- SOAL --- atau *** SOAL ***
+            /^\s*SOAL\s*:/im,                             // SOAL:
+            /^\s*\*\*\s*SOAL\s*\*\*\s*$/im,              // ** SOAL **
         ],
         jawaban: [
             /^\s*={3,}\s*KUNCI\s*JAWABAN\s*={3,}\s*$/im,  // === KUNCI JAWABAN ===
             /^\s*={2,}\s*KUNCI\s*JAWABAN\s*={2,}\s*$/im,  // == KUNCI JAWABAN ==
             /^\s*#+\s*KUNCI\s*JAWABAN\s*$/im,             // # KUNCI JAWABAN
             /^\s*===\s*kunci\s*jawaban\s*===\s*$/im,      // lowercase
+            /^\s*[-*]{3,}\s*KUNCI\s*JAWABAN\s*[-*]{3,}\s*$/im, // --- KUNCI JAWABAN ---
+            /^\s*KUNCI\s*JAWABAN\s*:/im,                   // KUNCI JAWABAN:
+            /^\s*JAWABAN\s*:/im,                           // JAWABAN:
+            /^\s*\*\*\s*KUNCI\s*JAWABAN\s*\*\*\s*$/im,    // ** KUNCI JAWABAN **
         ]
     };
     
@@ -599,6 +614,7 @@ function parseAIOutput(content) {
         const match = content.match(pattern);
         if (match) {
             soalMatch = match;
+            console.log('✅ [parseAIOutput] Found SOAL marker with pattern:', pattern);
             break;
         }
     }
@@ -609,6 +625,7 @@ function parseAIOutput(content) {
         const match = content.match(pattern);
         if (match) {
             jawabMatch = match;
+            console.log('✅ [parseAIOutput] Found JAWABAN marker with pattern:', pattern);
             break;
         }
     }
@@ -629,26 +646,43 @@ function parseAIOutput(content) {
         questions = content.substring(soalIdx).trim();
         
         // Coba cari kunci jawaban dengan keyword alternatif
-        if (/kunci\s*jawaban|jawaban|answer/i.test(questions)) {
-            // Ada kemungkinan jawaban tercampur, coba pisahkan manual
-            const parts = questions.split(/(?:kunci\s*jawaban|jawaban|answer)\s*:/i);
-            if (parts.length >= 2) {
-                questions = parts[0].trim();
-                answers = parts.slice(1).join('Jawaban: ').trim();
+        const answerKeywords = [
+            /(?:^|\n)\s*(?:KUNCI\s*JAWABAN|JAWABAN|ANSWER|Kunci):\s*/im,
+            /(?:^|\n)\s*###\s*(?:KUNCI\s*JAWABAN|JAWABAN|ANSWER)\s*###/im,
+            /(?:^|\n)\s*---\s*(?:KUNCI\s*JAWABAN|JAWABAN|ANSWER)\s*---/im,
+        ];
+        
+        for (const kw of answerKeywords) {
+            if (kw.test(questions)) {
+                const parts = questions.split(kw);
+                if (parts.length >= 2) {
+                    questions = parts[0].trim();
+                    answers = parts.slice(1).join('\n').trim();
+                    break;
+                }
             }
-        } else {
-            answers = 'Kunci jawaban tidak ditemukan dalam output. Silakan periksa format AI response.';
+        }
+        
+        if (!answers || answers.length < 10) {
+            answers = 'Kunci jawaban tidak ditemukan dalam output.';
         }
     } else {
-        // Tidak ada marker ditemukan - fallback: anggap seluruh content sebagai soal
-        console.warn('⚠️ [parseAIOutput] No markers found, using fallback');
-        questions = content.trim();
-        answers = 'Kunci jawaban tidak ditemukan. Format output AI tidak sesuai instruksi.';
+        // Tidak ada marker ditemukan - fallback: coba keyword sederhana
+        console.warn('⚠️ [parseAIOutput] No markers found, trying keyword fallback');
+        
+        const simpleSplit = content.split(/(?:^|\n)\s*(?:Jawaban:|Kunci:|Answer:)/i);
+        if (simpleSplit.length >= 2) {
+            questions = simpleSplit[0].trim();
+            answers = simpleSplit.slice(1).join('\n').trim();
+        } else {
+            questions = content.trim();
+            answers = 'Kunci jawaban tidak ditemukan. Format output AI tidak sesuai instruksi.';
+        }
     }
     
     // ✅ Clean up: hapus intro/outro yang mungkin masih tersisa
-    questions = questions.replace(/^(Berikut|Silakan|Tugas|Soal|Jawab)\s*[:\-\s]*/i, '').trim();
-    answers = answers.replace(/^(Berikut|Silakan|Tugas|Soal|Jawab)\s*[:\-\s]*/i, '').trim();
+    questions = questions.replace(/^(Berikut|Silakan|Tugas|Soal|Jawab|Output|Hasil)\s*[:\-\s]*/i, '').trim();
+    answers = answers.replace(/^(Berikut|Silakan|Tugas|Soal|Jawab|Output|Hasil)\s*[:\-\s]*/i, '').trim();
     
     // ✅ Convert newlines ke <br> untuk display HTML
     questions = questions.replace(/\n/g, '<br>');
