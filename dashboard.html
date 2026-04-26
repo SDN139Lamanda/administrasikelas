@@ -428,7 +428,7 @@
             if (targetJenjang === 'sd') {
                 if (userData.sd_mapel_type === 'kelas') {
                     // Guru Kelas: hanya kelas_diampu
-                    return userData.kelas_diampu?.includes(targetKelas) || false;
+                    return Array.isArray(userData.kelas_diampu) && userData.kelas_diampu.includes(targetKelas);
                 } else {
                     // Guru Mapel (PAI/PJOK): semua kelas 1-6
                     return true;
@@ -437,12 +437,12 @@
             
             // SMP/SMA/MI/MTs/MA: guru mapel akses semua kelas
             if (['smp', 'sma', 'mi', 'mts', 'ma'].includes(targetJenjang)) {
-                if (userData.mapel_yang_diampu?.length > 0) {
+                if (Array.isArray(userData.mapel_yang_diampu) && userData.mapel_yang_diampu.length > 0) {
                     // Guru Mapel: semua kelas di jenjang ini
                     return true;
                 } else {
                     // Fallback: hanya kelas_diampu
-                    return userData.kelas_diampu?.includes(targetKelas) || false;
+                    return Array.isArray(userData.kelas_diampu) && userData.kelas_diampu.includes(targetKelas);
                 }
             }
             
@@ -491,7 +491,7 @@
                 });
         };
         
-        // ✅ UPDATED: showSubFeatureModal with jenjang AND class validation (triple security)
+        // ✅ UPDATED: showSubFeatureModal with jenjang AND class validation (triple security) - FIXED DATA SOURCE
         window.showSubFeatureModal = function(jenjang, kelas) {
             // ✅ GATE 1: Cek approval status (existing)
             if (!window.isUserApproved?.() && window.currentUserRole !== 'admin') {
@@ -516,25 +516,65 @@
                 return;
             }
             
-            // ✅ GATE 3: Cek akses kelas berdasarkan data registrasi (NEW FIX)
-            // Load user data from localStorage or window
-            const userRole = window.currentUserRole || localStorage.getItem('user_role') || 'teacher';
-            const kelasDiampu = JSON.parse(localStorage.getItem('user_kelas_diampu') || '[]');
-            const sdMapelType = localStorage.getItem('user_sd_mapel_type') || '';
-            const mapelYangDiampu = JSON.parse(localStorage.getItem('user_mapel_yang_diampu') || '[]');
+            // ✅ GATE 3: Cek akses kelas berdasarkan data registrasi (FIXED: Robust data source)
+            console.log('🔍 [ClassAccess] Checking access for:', { jenjang, kelas });
             
-            const mockUserData = {
-                role: userRole,
-                kelas_diampu: kelasDiampu,
-                sd_mapel_type: sdMapelType,
-                mapel_yang_diampu: mapelYangDiampu
-            };
+            // Prioritaskan window.currentUserData jika ada (lebih reliable)
+            let userData = window.currentUserData;
             
-            if (!isClassAccessible(mockUserData, jenjang, kelas)) {
+            // Fallback ke localStorage jika window.currentUserData tidak ada
+            if (!userData) {
+                console.log('⚠️ [ClassAccess] window.currentUserData not found, using localStorage fallback');
+                
+                const userRole = window.currentUserRole || localStorage.getItem('user_role') || 'teacher';
+                const jenjangSekolah = window.currentUserJenjang || localStorage.getItem('user_jenjang') || '';
+                
+                // Parse dengan try-catch untuk mencegah crash
+                let kelasDiampu = [];
+                try {
+                    const raw = localStorage.getItem('user_kelas_diampu');
+                    kelasDiampu = raw ? JSON.parse(raw) : [];
+                } catch (e) {
+                    console.warn('⚠️ [ClassAccess] Failed to parse user_kelas_diampu:', e);
+                    kelasDiampu = [];
+                }
+                
+                let mapelYangDiampu = [];
+                try {
+                    const raw = localStorage.getItem('user_mapel_yang_diampu');
+                    mapelYangDiampu = raw ? JSON.parse(raw) : [];
+                } catch (e) {
+                    console.warn('⚠️ [ClassAccess] Failed to parse user_mapel_yang_diampu:', e);
+                    mapelYangDiampu = [];
+                }
+                
+                const sdMapelType = localStorage.getItem('user_sd_mapel_type') || '';
+                
+                userData = {
+                    role: userRole,
+                    jenjang_sekolah: jenjangSekolah,
+                    kelas_diampu: kelasDiampu,
+                    sd_mapel_type: sdMapelType,
+                    mapel_yang_diampu: mapelYangDiampu
+                };
+                
+                console.log('📦 [ClassAccess] userData from localStorage:', userData);
+            } else {
+                console.log('📦 [ClassAccess] userData from window.currentUserData:', userData);
+            }
+            
+            // Validasi akses
+            if (!isClassAccessible(userData, jenjang, kelas)) {
                 const jenjangLabel = getJenjangLabel(jenjang);
-                alert(`🔒 Akses Kelas Ditolak\n\nAnda tidak terdaftar sebagai pengampu Kelas ${kelas} di jenjang ${jenjangLabel}.\n\nSilakan pilih kelas yang sesuai dengan data registrasi Anda.`);
+                const accessibleClasses = userData.kelas_diampu?.join(', ') || 'tidak ada';
+                
+                console.log('❌ [ClassAccess] Access DENIED for class:', kelas, 'accessible:', accessibleClasses);
+                
+                alert(`🔒 Akses Kelas Ditolak\n\nAnda tidak terdaftar sebagai pengampu Kelas ${kelas} di jenjang ${jenjangLabel}.\n\nKelas yang dapat Anda akses: ${accessibleClasses}\n\nSilakan pilih kelas yang sesuai dengan data registrasi Anda.`);
                 return;
             }
+            
+            console.log('✅ [ClassAccess] Access GRANTED for class:', kelas);
             
             // ✅ Jika lolos semua validasi, lanjutkan ke modal
             window.currentJenjang = jenjang; 
