@@ -4,14 +4,20 @@
  * Folder: modules/pembuat-soal/pembuat-soal.js
  * ============================================
  * 
- * ✅ FIXES APPLIED:
+ * ✅ FIXES APPLIED (based on cta-generator.js pattern):
  * 1. TDZ Error: Use 'foundRow' instead of 'row' in event listeners
- * 2. Dropdown: Async getJenjangMapelOptions() reads user data from Firestore
- * 3. Groq API: Ensure apiKey is fetched & output is displayed
+ * 2. Mapel: Load from data/mapel/*.json + auto-lock based on user registration
+ * 3. Groq API: Use generateWithGroq() pattern + ensure output is displayed
  * ============================================
  */
 
 console.log('🔴 [PembuatSoal] Module START');
+
+// ✅ IMPORTS (same pattern as cta-generator.js)
+import { generateWithGroq, getGroqApiKey } from './groq-api.js';
+import { db, auth, doc, getDoc, collection, addDoc, serverTimestamp } from '../firebase-config.js';
+
+console.log('✅ [PembuatSoal] All imports successful');
 
 // ============================================
 // ✅ GLOBAL STATE
@@ -22,6 +28,9 @@ let generatedOutput = {
     questions: '',
     answers: ''
 };
+
+// Cache for mapel data (same pattern as cta-generator.js)
+let _mapelCache = {};
 
 // ============================================
 // ✅ MAIN RENDER FUNCTION (Called from dashboard)
@@ -58,7 +67,7 @@ export async function renderPembuatSoal() {
     // Initialize event listeners
     initPembuatSoalListeners();
     
-    // Load user data for auto-fill
+    // Load user data for auto-fill + populate mapel dropdown
     await loadUserData();
     
     console.log('🟢 [PembuatSoal] Module READY');
@@ -195,14 +204,12 @@ function initPembuatSoalListeners() {
 }
 
 // ============================================
-// ✅ LOAD USER DATA FOR AUTO-FILL
+// ✅ LOAD USER DATA FOR AUTO-FILL + POPULATE MAPEL
 // ============================================
 
 async function loadUserData() {
     try {
-        const { auth, db, doc, getDoc } = await import('../firebase-config.js');
         const user = auth.currentUser;
-        
         if (!user) return;
         
         const snap = await getDoc(doc(db, 'users', user.uid));
@@ -243,7 +250,89 @@ async function loadUserData() {
 }
 
 // ============================================
-// ✅ ADD ROW TO TABLE (FIXED: TDZ + Async Options)
+// ✅ FETCH MAPEL DATA FROM JSON (COPIED FROM cta-generator.js PATTERN)
+// ============================================
+
+async function fetchMapelData(jenjang) {
+    if (!jenjang) return [];
+    if (_mapelCache[jenjang]) return _mapelCache[jenjang];
+    
+    try {
+        console.log(`📥 [Mapel] Fetching ./data/mapel/${jenjang}.json`);
+        const response = await fetch(`./data/mapel/${jenjang}.json`, { cache: 'no-store' });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        if (!Array.isArray(data)) throw new Error('Invalid JSON structure');
+        _mapelCache[jenjang] = data;
+        console.log(`✅ [Mapel] Loaded ${data.length} subjects for ${jenjang.toUpperCase()}`);
+        return data;
+    } catch (error) {
+        console.warn(`⚠️ [Mapel] Failed to fetch ${jenjang}.json:`, error.message);
+        // Fallback data
+        const fallback = [
+            { nama: 'Matematika', jenjang },
+            { nama: 'Bahasa Indonesia', jenjang },
+            { nama: 'IPA/IPAS', jenjang },
+            { nama: 'Lainnya', jenjang }
+        ];
+        _mapelCache[jenjang] = fallback;
+        return fallback;
+    }
+}
+
+// ============================================
+// ✅ POPULATE MAPEL DROPDOWN WITH AUTO-LOCK (COPIED FROM cta-generator.js PATTERN)
+// ============================================
+
+async function populateMapelDropdown(jenjang, userMapelFromReg = null) {
+    const mapelSelect = document.getElementById('ps-mapel');
+    if (!mapelSelect || !jenjang) return;
+    
+    const originalValue = mapelSelect.value;
+    mapelSelect.innerHTML = '<option value="">Memuat daftar mapel...</option>';
+    mapelSelect.disabled = true;
+    
+    try {
+        const mapelList = await fetchMapelData(jenjang);
+        mapelSelect.innerHTML = '<option value="">Pilih Mata Pelajaran</option>';
+        
+        mapelList.forEach(item => {
+            const opt = document.createElement('option');
+            opt.value = item.nama;
+            opt.textContent = item.nama;
+            mapelSelect.appendChild(opt);
+        });
+        
+        // Auto-lock if user has registered mapel
+        if (userMapelFromReg && mapelList.some(m => m.nama === userMapelFromReg)) {
+            mapelSelect.value = userMapelFromReg;
+            mapelSelect.disabled = true;
+            
+            const lockBadge = document.createElement('span');
+            lockBadge.className = 'lock-indicator';
+            lockBadge.innerHTML = `<i class="fas fa-lock text-emerald-600"></i> <strong>${userMapelFromReg}</strong> - Terkunci`;
+            lockBadge.style.cssText = 'display:block;margin-top:6px;font-size:12px;color:#059669';
+            
+            const existingBadge = mapelSelect.parentNode.querySelector('.lock-indicator');
+            if (existingBadge) existingBadge.remove();
+            
+            mapelSelect.parentNode.appendChild(lockBadge);
+            console.log(`🔐 [Mapel] Auto-locked to: ${userMapelFromReg}`);
+        } else {
+            if (originalValue && mapelList.some(m => m.nama === originalValue)) {
+                mapelSelect.value = originalValue;
+            }
+            mapelSelect.disabled = false;
+        }    
+    } catch (error) {
+        console.error('❌ [Mapel] Populate error:', error);
+        mapelSelect.innerHTML = '<option value="">Gagal memuat mapel</option>';
+        mapelSelect.disabled = false;
+    }
+}
+
+// ============================================
+// ✅ ADD ROW TO TABLE (FIXED: TDZ + Async Mapel Options)
 // ============================================
 
 async function addRow() {
@@ -252,12 +341,45 @@ async function addRow() {
     
     const rowIndex = soalRows.length;
     
-    // Get jenjang & mapel options (async - reads user data)
-    const jenjangOptions = await getJenjangMapelOptions();
+    // Get jenjang & mapel options (async - reads from data/mapel/*.json)
+    const user = auth.currentUser;
+    let userMapelFromReg = null;
+    
+    if (user) {
+        try {
+            const snap = await getDoc(doc(db, 'users', user.uid));
+            if (snap.exists()) {
+                const userData = snap.data();
+                if (userData.jenjang_sekolah === 'sd' && userData.sd_mapel_type !== 'kelas') {
+                    userMapelFromReg = userData.sd_mapel_type.toUpperCase();
+                } else if (userData.mapel_yang_diampu?.length > 0) {
+                    userMapelFromReg = userData.mapel_yang_diampu[0];
+                }
+            }
+        } catch (e) {
+            console.warn('⚠️ [PembuatSoal] Could not load user mapel:', e.message);
+        }
+    }
+    
+    // Get jenjang from user or default
+    let userJenjang = 'sd'; // default
+    if (user) {
+        try {
+            const snap = await getDoc(doc(db, 'users', user.uid));
+            if (snap.exists()) {
+                userJenjang = snap.data().jenjang_sekolah || 'sd';
+            }
+        } catch (e) {
+            console.warn('⚠️ [PembuatSoal] Could not load user jenjang:', e.message);
+        }
+    }
+    
+    // Populate mapel dropdown for this row
+    await populateMapelDropdown(userJenjang, userMapelFromReg);
     
     const row = {
         id: Date.now() + rowIndex,
-        jenjangMapel: '',
+        jenjangMapel: userJenjang,
         topik: '',
         jumlahNomor: 5,
         modelSoal: 'ganda',
@@ -272,7 +394,6 @@ async function addRow() {
         <td>
             <select class="ps-jenjang-mapel" data-row="${row.id}">
                 <option value="">Pilih Jenjang & Mapel</option>
-                ${jenjangOptions}
             </select>
         </td>
         <td>
@@ -348,82 +469,6 @@ async function addRow() {
 }
 
 // ============================================
-// ✅ HELPER: Get jenjang & mapel options (FIXED: Async + User Data)
-// ============================================
-
-async function getJenjangMapelOptions() {
-    try {
-        const { auth, db, doc, getDoc } = await import('../firebase-config.js');
-        const user = auth.currentUser;
-        
-        if (!user) {
-            // Fallback: return jenjang saja
-            return getJenjangOnlyOptions();
-        }
-        
-        const snap = await getDoc(doc(db, 'users', user.uid));
-        if (!snap.exists()) {
-            return getJenjangOnlyOptions();
-        }
-        
-        const userData = snap.data();
-        const options = [];
-        
-        // Get jenjang user
-        const jenjang = userData.jenjang_sekolah;
-        if (!jenjang) return getJenjangOnlyOptions();
-        
-        const jenjangLabel = {
-            'tk': 'TK', 'sd': 'SD', 'mi': 'MI', 'smp': 'SMP',
-            'mts': 'MTs', 'sma': 'SMA', 'ma': 'MA'
-        }[jenjang] || jenjang.toUpperCase();
-        
-        // Get mapel options based on user type
-        let mapelOptions = [];
-        
-        if (jenjang === 'sd' && userData.sd_mapel_type === 'kelas') {
-            // SD Guru Kelas: mapel umum
-            mapelOptions = ['Tematik', 'Bahasa Indonesia', 'Matematika', 'IPA', 'IPS', 'SBdP', 'PJOK', 'PPKn'];
-        } else if (jenjang === 'sd' && ['pai', 'pjok'].includes(userData.sd_mapel_type)) {
-            // SD Guru Mapel: hanya mapel spesifik
-            mapelOptions = [userData.sd_mapel_type.toUpperCase()];
-        } else if (userData.mapel_yang_diampu && userData.mapel_yang_diampu.length > 0) {
-            // SMP/SMA: mapel dari array
-            mapelOptions = userData.mapel_yang_diampu;
-        } else {
-            // Fallback: jenjang saja
-            return getJenjangOnlyOptions();
-        }
-        
-        // Build options: "JENJANG - MAPEL"
-        for (const mapel of mapelOptions) {
-            const value = `${jenjang}-${mapel.toLowerCase().replace(/\s+/g, '-')}`;
-            const label = `${jenjangLabel} - ${mapel}`;
-            options.push(`<option value="${value}">${label}</option>`);
-        }
-        
-        return options.join('');
-        
-    } catch (error) {
-        console.error('❌ [PembuatSoal] Get jenjang mapel options error:', error);
-        return getJenjangOnlyOptions();
-    }
-}
-
-// Helper: Return jenjang only (fallback)
-function getJenjangOnlyOptions() {
-    const jenjangMap = {
-        'tk': 'TK', 'sd': 'SD', 'mi': 'MI', 'smp': 'SMP',
-        'mts': 'MTs', 'sma': 'SMA', 'ma': 'MA'
-    };
-    const options = [];
-    for (const [key, label] of Object.entries(jenjangMap)) {
-        options.push(`<option value="${key}">${label}</option>`);
-    }
-    return options.join('');
-}
-
-// ============================================
 // ✅ REMOVE ROW (Global function for onclick)
 // ============================================
 
@@ -437,7 +482,7 @@ window.removePembuatSoalRow = function(rowId) {
 };
 
 // ============================================
-// ✅ GENERATE SOAL (Groq API) - FIXED: Ensure API key & output
+// ✅ GENERATE SOAL (Groq API) - FIXED: Use cta-generator.js pattern
 // ============================================
 
 async function generateSoal() {
@@ -470,8 +515,8 @@ async function generateSoal() {
     downloadBtn.disabled = true;
     
     try {
-        // Get Groq API key (FIXED: Ensure it's fetched)
-        const apiKey = await window.getApiKey?.();
+        // Get Groq API key (same pattern as cta-generator.js)
+        const apiKey = await getGroqApiKey();
         
         if (!apiKey) {
             showAlert('API Key tidak ditemukan. Silakan hubungi admin.', 'error');
@@ -480,39 +525,24 @@ async function generateSoal() {
         
         console.log('🔑 [PembuatSoal] API Key found, calling Groq...');
         
-        // Build prompt for AI
+        // Build prompt for AI (same structure as cta-generator.js)
         const prompt = buildPrompt(tahun);
         
-        // Call Groq API
-        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${apiKey}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                model: 'llama-3.1-8b-instant',
-                messages: [
-                    { role: 'system', content: 'Anda adalah guru profesional yang ahli membuat soal penilaian. Buat soal sesuai permintaan dengan format yang jelas dan terstruktur.' },
-                    { role: 'user', content: prompt }
-                ],
-                temperature: 0.7,
-                max_tokens: 4000
-            })
+        // Call Groq API using generateWithGroq (same pattern as cta-generator.js)
+        const result = await generateWithGroq({
+            sekolah: document.getElementById('ps-sekolah')?.value || '-',
+            mapel: document.getElementById('ps-mapel')?.value || '-',
+            tahun: tahun,
+            topik: soalRows.map(r => r.topik).join(', '),
+            jumlahSoal: soalRows.reduce((sum, r) => sum + (r.jumlahNomor || 5), 0),
+            modelSoal: soalRows[0]?.modelSoal || 'ganda',
+            soalUntuk: soalRows[0]?.soalUntuk || 'harian'
         });
-        
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`API Error ${response.status}: ${errorText}`);
-        }
-        
-        const data = await response.json();
-        const aiContent = data.choices?.[0]?.message?.content || '';
         
         console.log('🤖 [PembuatSoal] AI Response received');
         
         // Parse AI output (expecting 2 sections: SOAL and KUNCI JAWABAN)
-        const parsedOutput = parseAIOutput(aiContent);
+        const parsedOutput = parseAIOutput(result.content || result);
         
         generatedOutput = parsedOutput;
         
@@ -529,7 +559,12 @@ async function generateSoal() {
         
     } catch (error) {
         console.error('❌ [PembuatSoal] Generate error:', error);
-        showAlert(`❌ Gagal generate soal: ${error.message}`, 'error');
+        let errorMessage = error.message;
+        if (error.message.includes('API key')) errorMessage = 'API Key tidak valid.';
+        else if (error.message.includes('quota') || error.message.includes('429')) errorMessage = 'Limit AI harian habis.';
+        else if (error.message.includes('koneksi') || error.message.includes('network')) errorMessage = 'Koneksi internet bermasalah.';
+        
+        showAlert(`❌ Gagal generate soal: ${errorMessage}`, 'error');
     } finally {
         // Re-enable buttons
         generateBtn.disabled = false;
@@ -537,7 +572,7 @@ async function generateSoal() {
     }
 }
 
-// Build prompt for AI
+// Build prompt for AI (same structure as cta-generator.js)
 function buildPrompt(tahun) {
     const sekolah = document.getElementById('ps-sekolah')?.value || '-';
     const mapel = document.getElementById('ps-mapel')?.value || '-';
@@ -581,7 +616,7 @@ PENTING:
 5. Tingkat kesulitan disesuaikan dengan jenjang`;
 }
 
-// Parse AI output into 2 sections
+// Parse AI output into 2 sections (same pattern as cta-generator.js)
 function parseAIOutput(content) {
     const soalMarker = '=== SOAL ===';
     const jawabanMarker = '=== KUNCI JAWABAN ===';
@@ -610,7 +645,7 @@ function parseAIOutput(content) {
     return { questions, answers };
 }
 
-// Display output (FIXED: Ensure it shows)
+// Display output (FIXED: Ensure it shows - same pattern as cta-generator.js)
 function displayOutput(output) {
     const outputSection = document.getElementById('pembuat-soal-output');
     const questionsDiv = document.getElementById('ps-output-questions');
@@ -636,13 +671,10 @@ function displayOutput(output) {
 
 async function saveToFirebase(tahun, output) {
     try {
-        const { db, collection, addDoc, serverTimestamp, auth } = await import('../firebase-config.js');
-        
         const user = auth.currentUser;
         if (!user) return;
         
         // Get user data for additional info
-        const { doc, getDoc } = await import('../firebase-config.js');
         const userSnap = await getDoc(doc(db, 'users', user.uid));
         const userData = userSnap.exists() ? userSnap.data() : {};
         
