@@ -416,18 +416,41 @@
             return labels[jenjang] || jenjang.toUpperCase();
         }
 
+        // ✅ UPDATED: showJenjangSection with jenjang validation
         window.showJenjangSection = function(jenjang) {
+            // ✅ GATE 1: Cek approval status (existing)
             if (!window.isUserApproved?.() && window.currentUserRole !== 'admin') {
                 alert('⏳ Akun Anda masih menunggu persetujuan admin.\n\nFitur belum dapat diakses.');
                 return;
             }
             
+            // ✅ GATE 2: Cek kesesuaian jenjang (NEW FIX)
+            const userJenjang = window.currentUserJenjang || localStorage.getItem('user_jenjang') || '';
+            
+            // Admin bisa akses semua, member hanya jenjang sendiri
+            if (window.currentUserRole !== 'admin' && jenjang !== userJenjang) {
+                // Map jenjang code ke label untuk alert yang user-friendly
+                const jenjangLabel = {
+                    'tk': 'TK', 'sd': 'SD', 'mi': 'MI', 
+                    'smp': 'SMP', 'mts': 'MTs', 
+                    'sma': 'SMA', 'ma': 'MA'
+                };
+                const userLabel = jenjangLabel[userJenjang] || userJenjang.toUpperCase();
+                const targetLabel = jenjangLabel[jenjang] || jenjang.toUpperCase();
+                
+                alert(`🔒 Akses Ditolak\n\nAnda terdaftar sebagai Guru ${userLabel}.\n\nAnda hanya dapat mengakses fitur untuk jenjang ${userLabel}.\n\nJenjang "${targetLabel}" tidak tersedia untuk akun Anda.`);
+                return;
+            }
+            
+            // ✅ Jika lolos validasi, tampilkan section
             document.querySelectorAll('section[data-jenjang]').forEach(sec => sec.classList.add('hidden'));
             const target = document.getElementById(`${jenjang}-section`);
             if (target) { 
                 target.classList.remove('hidden'); 
                 window.scrollTo({ top: 0, behavior: 'smooth' }); 
             }
+            
+            // Hide all module containers
             ['module-container','refleksi-container','penilaian-container','asisten-container','cita-container','protsma-container','pembuat-soal-container']
                 .forEach(id => {
                     const el = document.getElementById(id); 
@@ -435,13 +458,32 @@
                 });
         };
         
+        // ✅ UPDATED: showSubFeatureModal with jenjang validation (double security)
         window.showSubFeatureModal = function(jenjang, kelas) {
+            // ✅ GATE 1: Cek approval status (existing)
             if (!window.isUserApproved?.() && window.currentUserRole !== 'admin') {
                 console.log('🔒 [SubFeature] User pending, blocking modal');
                 alert('⏳ Akun Anda masih menunggu persetujuan admin.\n\nFitur belum dapat diakses.');
                 return;
             }
             
+            // ✅ GATE 2: Cek kesesuaian jenjang (NEW FIX - Double Security)
+            const userJenjang = window.currentUserJenjang || localStorage.getItem('user_jenjang') || '';
+            
+            if (window.currentUserRole !== 'admin' && jenjang !== userJenjang) {
+                const jenjangLabel = {
+                    'tk': 'TK', 'sd': 'SD', 'mi': 'MI', 
+                    'smp': 'SMP', 'mts': 'MTs', 
+                    'sma': 'SMA', 'ma': 'MA'
+                };
+                const userLabel = jenjangLabel[userJenjang] || userJenjang.toUpperCase();
+                const targetLabel = jenjangLabel[jenjang] || jenjang.toUpperCase();
+                
+                alert(`🔒 Akses Ditolak\n\nAnda hanya dapat mengakses fitur untuk jenjang ${userLabel}.\n\nJenjang "${targetLabel}" tidak tersedia.`);
+                return;
+            }
+            
+            // ✅ Jika lolos, lanjutkan ke modal
             window.currentJenjang = jenjang; 
             window.currentKelas = kelas;
             window.currentUserJenjang = localStorage.getItem('user_jenjang') || '';
