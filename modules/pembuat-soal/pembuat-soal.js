@@ -3,6 +3,12 @@
  * GENERATOR PEMBUAT SOAL - Main Logic
  * Folder: modules/pembuat-soal/pembuat-soal.js
  * ============================================
+ * 
+ * ✅ FIXES APPLIED:
+ * 1. TDZ Error: Use 'foundRow' instead of 'row' in event listeners
+ * 2. Dropdown: Async getJenjangMapelOptions() reads user data from Firestore
+ * 3. Groq API: Ensure apiKey is fetched & output is displayed
+ * ============================================
  */
 
 console.log('🔴 [PembuatSoal] Module START');
@@ -228,8 +234,8 @@ async function loadUserData() {
                 document.getElementById('ps-tahun').value = `${currentYear}/${nextYear}`;
             }
             
-            // Add first row by default
-            addRow();
+            // Add first row by default (async for jenjang+mapel options)
+            await addRow();
         }
     } catch (error) {
         console.error('❌ [PembuatSoal] Load user data error:', error);
@@ -237,17 +243,17 @@ async function loadUserData() {
 }
 
 // ============================================
-// ✅ ADD ROW TO TABLE
+// ✅ ADD ROW TO TABLE (FIXED: TDZ + Async Options)
 // ============================================
 
-function addRow() {
+async function addRow() {
     const tbody = document.getElementById('ps-tbody');
     if (!tbody) return;
     
     const rowIndex = soalRows.length;
     
-    // Get jenjang & mapel options from user data
-    const jenjangOptions = getJenjangMapelOptions();
+    // Get jenjang & mapel options (async - reads user data)
+    const jenjangOptions = await getJenjangMapelOptions();
     
     const row = {
         id: Date.now() + rowIndex,
@@ -298,7 +304,7 @@ function addRow() {
     
     tbody.appendChild(tr);
     
-    // Add event listeners for row inputs
+    // Add event listeners for row inputs (FIXED: use different variable names to avoid TDZ)
     const jenjangSelect = tr.querySelector('.ps-jenjang-mapel');
     const topikInput = tr.querySelector('.ps-topik');
     const jumlahInput = tr.querySelector('.ps-jumlah');
@@ -307,57 +313,113 @@ function addRow() {
     
     if (jenjangSelect) {
         jenjangSelect.addEventListener('change', (e) => {
-            const row = soalRows.find(r => r.id === row.id);
-            if (row) row.jenjangMapel = e.target.value;
+            const foundRow = soalRows.find(r => r.id === row.id);  // ✅ Different name to avoid TDZ
+            if (foundRow) foundRow.jenjangMapel = e.target.value;
         });
     }
     
     if (topikInput) {
         topikInput.addEventListener('input', (e) => {
-            const row = soalRows.find(r => r.id === row.id);
-            if (row) row.topik = e.target.value;
+            const foundRow = soalRows.find(r => r.id === row.id);  // ✅ Different name
+            if (foundRow) foundRow.topik = e.target.value;
         });
     }
     
     if (jumlahInput) {
         jumlahInput.addEventListener('input', (e) => {
-            const row = soalRows.find(r => r.id === row.id);
-            if (row) row.jumlahNomor = parseInt(e.target.value) || 5;
+            const foundRow = soalRows.find(r => r.id === row.id);  // ✅ Different name
+            if (foundRow) foundRow.jumlahNomor = parseInt(e.target.value) || 5;
         });
     }
     
     if (modelSelect) {
         modelSelect.addEventListener('change', (e) => {
-            const row = soalRows.find(r => r.id === row.id);
-            if (row) row.modelSoal = e.target.value;
+            const foundRow = soalRows.find(r => r.id === row.id);  // ✅ Different name
+            if (foundRow) foundRow.modelSoal = e.target.value;
         });
     }
     
     if (untukSelect) {
         untukSelect.addEventListener('change', (e) => {
-            const row = soalRows.find(r => r.id === row.id);
-            if (row) row.soalUntuk = e.target.value;
+            const foundRow = soalRows.find(r => r.id === row.id);  // ✅ Different name
+            if (foundRow) foundRow.soalUntuk = e.target.value;
         });
     }
 }
 
-// Helper: Get jenjang & mapel options
-function getJenjangMapelOptions() {
+// ============================================
+// ✅ HELPER: Get jenjang & mapel options (FIXED: Async + User Data)
+// ============================================
+
+async function getJenjangMapelOptions() {
+    try {
+        const { auth, db, doc, getDoc } = await import('../firebase-config.js');
+        const user = auth.currentUser;
+        
+        if (!user) {
+            // Fallback: return jenjang saja
+            return getJenjangOnlyOptions();
+        }
+        
+        const snap = await getDoc(doc(db, 'users', user.uid));
+        if (!snap.exists()) {
+            return getJenjangOnlyOptions();
+        }
+        
+        const userData = snap.data();
+        const options = [];
+        
+        // Get jenjang user
+        const jenjang = userData.jenjang_sekolah;
+        if (!jenjang) return getJenjangOnlyOptions();
+        
+        const jenjangLabel = {
+            'tk': 'TK', 'sd': 'SD', 'mi': 'MI', 'smp': 'SMP',
+            'mts': 'MTs', 'sma': 'SMA', 'ma': 'MA'
+        }[jenjang] || jenjang.toUpperCase();
+        
+        // Get mapel options based on user type
+        let mapelOptions = [];
+        
+        if (jenjang === 'sd' && userData.sd_mapel_type === 'kelas') {
+            // SD Guru Kelas: mapel umum
+            mapelOptions = ['Tematik', 'Bahasa Indonesia', 'Matematika', 'IPA', 'IPS', 'SBdP', 'PJOK', 'PPKn'];
+        } else if (jenjang === 'sd' && ['pai', 'pjok'].includes(userData.sd_mapel_type)) {
+            // SD Guru Mapel: hanya mapel spesifik
+            mapelOptions = [userData.sd_mapel_type.toUpperCase()];
+        } else if (userData.mapel_yang_diampu && userData.mapel_yang_diampu.length > 0) {
+            // SMP/SMA: mapel dari array
+            mapelOptions = userData.mapel_yang_diampu;
+        } else {
+            // Fallback: jenjang saja
+            return getJenjangOnlyOptions();
+        }
+        
+        // Build options: "JENJANG - MAPEL"
+        for (const mapel of mapelOptions) {
+            const value = `${jenjang}-${mapel.toLowerCase().replace(/\s+/g, '-')}`;
+            const label = `${jenjangLabel} - ${mapel}`;
+            options.push(`<option value="${value}">${label}</option>`);
+        }
+        
+        return options.join('');
+        
+    } catch (error) {
+        console.error('❌ [PembuatSoal] Get jenjang mapel options error:', error);
+        return getJenjangOnlyOptions();
+    }
+}
+
+// Helper: Return jenjang only (fallback)
+function getJenjangOnlyOptions() {
     const jenjangMap = {
-        'tk': 'TK',
-        'sd': 'SD',
-        'mi': 'MI',
-        'smp': 'SMP',
-        'mts': 'MTs',
-        'sma': 'SMA',
-        'ma': 'MA'
+        'tk': 'TK', 'sd': 'SD', 'mi': 'MI', 'smp': 'SMP',
+        'mts': 'MTs', 'sma': 'SMA', 'ma': 'MA'
     };
-    
     const options = [];
     for (const [key, label] of Object.entries(jenjangMap)) {
         options.push(`<option value="${key}">${label}</option>`);
     }
-    
     return options.join('');
 }
 
@@ -375,7 +437,7 @@ window.removePembuatSoalRow = function(rowId) {
 };
 
 // ============================================
-// ✅ GENERATE SOAL (Groq API)
+// ✅ GENERATE SOAL (Groq API) - FIXED: Ensure API key & output
 // ============================================
 
 async function generateSoal() {
@@ -408,13 +470,15 @@ async function generateSoal() {
     downloadBtn.disabled = true;
     
     try {
-        // Get Groq API key
+        // Get Groq API key (FIXED: Ensure it's fetched)
         const apiKey = await window.getApiKey?.();
         
         if (!apiKey) {
             showAlert('API Key tidak ditemukan. Silakan hubungi admin.', 'error');
             return;
         }
+        
+        console.log('🔑 [PembuatSoal] API Key found, calling Groq...');
         
         // Build prompt for AI
         const prompt = buildPrompt(tahun);
@@ -438,18 +502,21 @@ async function generateSoal() {
         });
         
         if (!response.ok) {
-            throw new Error(`API Error: ${response.status}`);
+            const errorText = await response.text();
+            throw new Error(`API Error ${response.status}: ${errorText}`);
         }
         
         const data = await response.json();
         const aiContent = data.choices?.[0]?.message?.content || '';
+        
+        console.log('🤖 [PembuatSoal] AI Response received');
         
         // Parse AI output (expecting 2 sections: SOAL and KUNCI JAWABAN)
         const parsedOutput = parseAIOutput(aiContent);
         
         generatedOutput = parsedOutput;
         
-        // Display output
+        // Display output (FIXED: Ensure it shows)
         displayOutput(parsedOutput);
         
         // Enable download button
@@ -543,15 +610,24 @@ function parseAIOutput(content) {
     return { questions, answers };
 }
 
-// Display output
+// Display output (FIXED: Ensure it shows)
 function displayOutput(output) {
     const outputSection = document.getElementById('pembuat-soal-output');
     const questionsDiv = document.getElementById('ps-output-questions');
     const answersDiv = document.getElementById('ps-output-answers');
     
-    if (outputSection) outputSection.classList.remove('hidden');
-    if (questionsDiv) questionsDiv.innerHTML = output.questions;
-    if (answersDiv) answersDiv.innerHTML = output.answers;
+    console.log('📤 [PembuatSoal] Displaying output:', { hasQuestions: !!output.questions, hasAnswers: !!output.answers });
+    
+    if (outputSection) {
+        outputSection.classList.remove('hidden');
+        console.log('✅ [PembuatSoal] Output section shown');
+    }
+    if (questionsDiv) {
+        questionsDiv.innerHTML = output.questions || '<em>Soal tidak tersedia</em>';
+    }
+    if (answersDiv) {
+        answersDiv.innerHTML = output.answers || '<em>Kunci jawaban tidak tersedia</em>';
+    }
 }
 
 // ============================================
