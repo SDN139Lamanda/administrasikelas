@@ -5,10 +5,11 @@
  * ============================================
  * 
  * ✅ FIXES APPLIED:
- * 1. TDZ Error: Use 'foundRow' instead of 'row' in event listeners
- * 2. Mapel: Load from data/mapel/*.json + auto-lock based on user registration
- * 3. Groq API: Use generateWithGroq() pattern + ensure output is displayed
- * 4. ✅ FIX: Import path ../groq-api.js (bukan ./groq-api.js)
+ * 1. Dropdown populate: Populate select di table row (bukan header)
+ * 2. TDZ Error: Use 'foundRow' instead of 'row' in event listeners
+ * 3. buildPrompt: Ambil data dari soalRows, bukan header input
+ * 4. API parsing: Handle string & object response dari generateWithGroq
+ * 5. Import path: ../groq-api.js (bukan ./groq-api.js)
  * ============================================
  */
 
@@ -205,7 +206,7 @@ function initPembuatSoalListeners() {
 }
 
 // ============================================
-// ✅ LOAD USER DATA FOR AUTO-FILL + POPULATE MAPEL
+// ✅ LOAD USER DATA FOR AUTO-FILL
 // ============================================
 
 async function loadUserData() {
@@ -282,7 +283,7 @@ async function fetchMapelData(jenjang) {
 }
 
 // ============================================
-// ✅ POPULATE MAPEL DROPDOWN WITH AUTO-LOCK (COPIED FROM cta-generator.js PATTERN)
+// ✅ POPULATE MAPEL DROPDOWN WITH AUTO-LOCK (FOR HEADER - COPIED FROM cta-generator.js PATTERN)
 // ============================================
 
 async function populateMapelDropdown(jenjang, userMapelFromReg = null) {
@@ -333,7 +334,57 @@ async function populateMapelDropdown(jenjang, userMapelFromReg = null) {
 }
 
 // ============================================
-// ✅ ADD ROW TO TABLE (FIXED: TDZ + Async Mapel Options)
+// ✅ POPULATE ROW MAPEL DROPDOWN (NEW - for table rows)
+// ============================================
+
+async function populateRowMapelDropdown(selectEl, jenjang, userMapelFromReg = null) {
+    if (!selectEl || !jenjang) return;
+    
+    selectEl.innerHTML = '<option value="">Memuat...</option>';
+    selectEl.disabled = true;
+    
+    try {
+        const mapelList = await fetchMapelData(jenjang);
+        selectEl.innerHTML = '<option value="">Pilih Mata Pelajaran</option>';
+        
+        mapelList.forEach(item => {
+            const opt = document.createElement('option');
+            opt.value = `${jenjang}-${item.nama.toLowerCase().replace(/\s+/g, '-')}`;
+            opt.textContent = `${jenjang.toUpperCase()} - ${item.nama}`;
+            selectEl.appendChild(opt);
+        });
+        
+        // Auto-select & lock if user has registered mapel
+        if (userMapelFromReg) {
+            const match = Array.from(selectEl.options).find(opt => 
+                opt.textContent.includes(userMapelFromReg)
+            );
+            if (match) {
+                selectEl.value = match.value;
+                selectEl.disabled = true;
+                
+                // Add lock indicator
+                const lockBadge = document.createElement('span');
+                lockBadge.className = 'lock-indicator';
+                lockBadge.innerHTML = `<i class="fas fa-lock text-emerald-600"></i> ${userMapelFromReg}`;
+                lockBadge.style.cssText = 'display:block;margin-top:4px;font-size:11px;color:#059669';
+                
+                const existing = selectEl.parentNode.querySelector('.lock-indicator');
+                if (existing) existing.remove();
+                selectEl.parentNode.appendChild(lockBadge);
+            }
+        }
+        
+        selectEl.disabled = false;
+    } catch (error) {
+        console.error('❌ [PembuatSoal] Populate row mapel error:', error);
+        selectEl.innerHTML = '<option value="">Gagal memuat</option>';
+        selectEl.disabled = false;
+    }
+}
+
+// ============================================
+// ✅ ADD ROW TO TABLE (FIXED: Populate row dropdown + TDZ)
 // ============================================
 
 async function addRow() {
@@ -342,15 +393,17 @@ async function addRow() {
     
     const rowIndex = soalRows.length;
     
-    // Get jenjang & mapel options (async - reads from data/mapel/*.json)
+    // Get user data for jenjang & mapel
     const user = auth.currentUser;
     let userMapelFromReg = null;
+    let userJenjang = 'sd';
     
     if (user) {
         try {
             const snap = await getDoc(doc(db, 'users', user.uid));
             if (snap.exists()) {
                 const userData = snap.data();
+                userJenjang = userData.jenjang_sekolah || 'sd';
                 if (userData.jenjang_sekolah === 'sd' && userData.sd_mapel_type !== 'kelas') {
                     userMapelFromReg = userData.sd_mapel_type.toUpperCase();
                 } else if (userData.mapel_yang_diampu?.length > 0) {
@@ -358,25 +411,9 @@ async function addRow() {
                 }
             }
         } catch (e) {
-            console.warn('⚠️ [PembuatSoal] Could not load user mapel:', e.message);
+            console.warn('⚠️ [PembuatSoal] Could not load user data:', e.message);
         }
     }
-    
-    // Get jenjang from user or default
-    let userJenjang = 'sd'; // default
-    if (user) {
-        try {
-            const snap = await getDoc(doc(db, 'users', user.uid));
-            if (snap.exists()) {
-                userJenjang = snap.data().jenjang_sekolah || 'sd';
-            }
-        } catch (e) {
-            console.warn('⚠️ [PembuatSoal] Could not load user jenjang:', e.message);
-        }
-    }
-    
-    // Populate mapel dropdown for this row
-    await populateMapelDropdown(userJenjang, userMapelFromReg);
     
     const row = {
         id: Date.now() + rowIndex,
@@ -389,12 +426,13 @@ async function addRow() {
     
     soalRows.push(row);
     
+    // Create row HTML FIRST
     const tr = document.createElement('tr');
     tr.dataset.rowId = row.id;
     tr.innerHTML = `
         <td>
             <select class="ps-jenjang-mapel" data-row="${row.id}">
-                <option value="">Pilih Jenjang & Mapel</option>
+                <option value="">Memuat mapel...</option>
             </select>
         </td>
         <td>
@@ -426,8 +464,11 @@ async function addRow() {
     
     tbody.appendChild(tr);
     
-    // Add event listeners for row inputs (FIXED: use different variable names to avoid TDZ)
+    // NOW populate the select in this specific row
     const jenjangSelect = tr.querySelector('.ps-jenjang-mapel');
+    await populateRowMapelDropdown(jenjangSelect, userJenjang, userMapelFromReg);
+    
+    // Add event listeners (FIXED: use 'foundRow' to avoid TDZ)
     const topikInput = tr.querySelector('.ps-topik');
     const jumlahInput = tr.querySelector('.ps-jumlah');
     const modelSelect = tr.querySelector('.ps-model');
@@ -435,35 +476,35 @@ async function addRow() {
     
     if (jenjangSelect) {
         jenjangSelect.addEventListener('change', (e) => {
-            const foundRow = soalRows.find(r => r.id === row.id);  // ✅ Different name to avoid TDZ
+            const foundRow = soalRows.find(r => r.id === row.id);
             if (foundRow) foundRow.jenjangMapel = e.target.value;
         });
     }
     
     if (topikInput) {
         topikInput.addEventListener('input', (e) => {
-            const foundRow = soalRows.find(r => r.id === row.id);  // ✅ Different name
+            const foundRow = soalRows.find(r => r.id === row.id);
             if (foundRow) foundRow.topik = e.target.value;
         });
     }
     
     if (jumlahInput) {
         jumlahInput.addEventListener('input', (e) => {
-            const foundRow = soalRows.find(r => r.id === row.id);  // ✅ Different name
+            const foundRow = soalRows.find(r => r.id === row.id);
             if (foundRow) foundRow.jumlahNomor = parseInt(e.target.value) || 5;
         });
     }
     
     if (modelSelect) {
         modelSelect.addEventListener('change', (e) => {
-            const foundRow = soalRows.find(r => r.id === row.id);  // ✅ Different name
+            const foundRow = soalRows.find(r => r.id === row.id);
             if (foundRow) foundRow.modelSoal = e.target.value;
         });
     }
     
     if (untukSelect) {
         untukSelect.addEventListener('change', (e) => {
-            const foundRow = soalRows.find(r => r.id === row.id);  // ✅ Different name
+            const foundRow = soalRows.find(r => r.id === row.id);
             if (foundRow) foundRow.soalUntuk = e.target.value;
         });
     }
@@ -526,15 +567,14 @@ async function generateSoal() {
         
         console.log('🔑 [PembuatSoal] API Key found, calling Groq...');
         
-        // Build prompt for AI (same structure as cta-generator.js)
+        // Build prompt for AI (FIXED: get data from table rows)
         const prompt = buildPrompt(tahun);
         
-        // Call Groq API using generateWithGroq (same pattern as cta-generator.js)
+        // Call Groq API using generateWithGroq
         const result = await generateWithGroq({
             sekolah: document.getElementById('ps-sekolah')?.value || '-',
-            mapel: document.getElementById('ps-mapel')?.value || '-',
             tahun: tahun,
-            topik: soalRows.map(r => r.topik).join(', '),
+            topik: soalRows.map(r => r.topik).filter(t => t).join(', '),
             jumlahSoal: soalRows.reduce((sum, r) => sum + (r.jumlahNomor || 5), 0),
             modelSoal: soalRows[0]?.modelSoal || 'ganda',
             soalUntuk: soalRows[0]?.soalUntuk || 'harian'
@@ -542,8 +582,9 @@ async function generateSoal() {
         
         console.log('🤖 [PembuatSoal] AI Response received');
         
-        // Parse AI output (expecting 2 sections: SOAL and KUNCI JAWABAN)
-        const parsedOutput = parseAIOutput(result.content || result);
+        // Parse AI output (FIXED: handle both string and object responses)
+        const aiContent = typeof result === 'string' ? result : (result?.content || JSON.stringify(result));
+        const parsedOutput = parseAIOutput(aiContent);
         
         generatedOutput = parsedOutput;
         
@@ -573,12 +614,20 @@ async function generateSoal() {
     }
 }
 
-// Build prompt for AI (same structure as cta-generator.js)
+// Build prompt for AI (FIXED: get data from table rows)
 function buildPrompt(tahun) {
     const sekolah = document.getElementById('ps-sekolah')?.value || '-';
-    const mapel = document.getElementById('ps-mapel')?.value || '-';
     
-    const rowsText = soalRows.map((row, index) => {
+    // Get data from soalRows, not header inputs
+    const rowsData = soalRows.map(row => ({
+        jenjang: row.jenjangMapel,
+        topik: row.topik,
+        jumlah: row.jumlahNomor,
+        model: row.modelSoal,
+        untuk: row.soalUntuk
+    }));
+    
+    const rowsText = rowsData.map((r, index) => {
         const modelMap = {
             'ganda': 'Pilihan Ganda',
             'isian': 'Isian',
@@ -590,13 +639,12 @@ function buildPrompt(tahun) {
             'pas': 'Penilaian Akhir Semester (PAS)'
         };
         
-        return `${index + 1}. Jenjang: ${row.jenjangMapel.toUpperCase()}, Topik: ${row.topik}, Jumlah: ${row.jumlahNomor} soal, Model: ${modelMap[row.modelSoal]}, Untuk: ${untukMap[row.soalUntuk]}`;
+        return `${index + 1}. ${r.jenjang?.toUpperCase() || '-'} - ${r.topik || '-'} | ${r.jumlah || 5} soal | ${modelMap[r.model] || 'Pilihan Ganda'} | ${untukMap[r.untuk] || 'Tugas Harian'}`;
     }).join('\n');
     
     return `Buatkan soal penilaian dengan detail berikut:
 
 SEKOLAH: ${sekolah}
-MATA PELAJARAN: ${mapel}
 TAHUN PELAJARAN: ${tahun}
 
 DAFTAR TOPIK & SOAL:
