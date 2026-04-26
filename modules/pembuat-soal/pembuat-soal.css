@@ -1,0 +1,175 @@
+/**
+ * ============================================
+ * GENERATOR PEMBUAT SOAL - Styles
+ * Folder: modules/pembuat-soal/pembuat-soal.css
+ * ============================================
+ */
+
+/* Container Styles */
+.pembuat-soal-container {
+    @apply max-w-6xl mx-auto p-6;
+}
+
+.pembuat-soal-header {
+    @apply mb-6;
+}
+
+.pembuat-soal-header h2 {
+    @apply text-2xl font-bold text-gray-800 mb-2;
+}
+
+.pembuat-soal-header p {
+    @apply text-gray-600;
+}
+
+/* Form Styles */
+.pembuat-soal-form {
+    @apply bg-white rounded-lg shadow p-6 mb-6;
+}
+
+.pembuat-soal-form-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4;
+}
+
+.pembuat-soal-form-group {
+    @apply space-y-1;
+}
+
+.pembuat-soal-form-group label {
+    @apply block text-sm font-medium text-gray-700;
+}
+
+.pembuat-soal-form-group input,
+.pembuat-soal-form-group select {
+    @apply w-full px-4 py-2 border border-gray-300 rounded-lg 
+           focus:ring-2 focus:ring-purple-500 focus:border-transparent;
+}
+
+/* Table Styles */
+.pembuat-soal-table-container {
+    @apply overflow-x-auto mb-4;
+}
+
+.pembuat-soal-table {
+    @apply w-full border-collapse bg-white rounded-lg shadow overflow-hidden;
+}
+
+.pembuat-soal-table th {
+    @apply bg-gray-50 px-4 py-3 text-left text-sm font-semibold text-gray-700 
+           border-b border-gray-200 whitespace-nowrap;
+}
+
+.pembuat-soal-table td {
+    @apply px-4 py-3 text-sm text-gray-600 border-b border-gray-100;
+}
+
+.pembuat-soal-table tr:hover {
+    @apply bg-gray-50;
+}
+
+.pembuat-soal-table input,
+.pembuat-soal-table select {
+    @apply w-full px-3 py-2 border border-gray-300 rounded 
+           focus:ring-2 focus:ring-purple-500 focus:border-transparent;
+}
+
+/* Action Buttons */
+.pembuat-soal-actions {
+    @apply flex gap-3 flex-wrap;
+}
+
+.pembuat-soal-btn {
+    @apply px-6 py-3 rounded-lg font-medium transition-all duration-200 
+           flex items-center gap-2;
+}
+
+.pembuat-soal-btn-primary {
+    @apply bg-purple-600 text-white hover:bg-purple-700;
+}
+
+.pembuat-soal-btn-secondary {
+    @apply bg-gray-100 text-gray-700 hover:bg-gray-200;
+}
+
+.pembuat-soal-btn-success {
+    @apply bg-green-600 text-white hover:bg-green-700;
+}
+
+.pembuat-soal-btn:disabled {
+    @apply opacity-50 cursor-not-allowed;
+}
+
+/* Output Sections */
+.pembuat-soal-output {
+    @apply mt-6 space-y-6;
+}
+
+.pembuat-soal-output-section {
+    @apply bg-white rounded-lg shadow p-6;
+}
+
+.pembuat-soal-output-section h3 {
+    @apply text-lg font-bold text-gray-800 mb-4 pb-2 border-b border-gray-200;
+}
+
+.pembuat-soal-output-content {
+    @apply prose max-w-none;
+}
+
+.pembuat-soal-output-content p {
+    @apply mb-2;
+}
+
+.pembuat-soal-output-content ol {
+    @apply list-decimal list-inside space-y-3;
+}
+
+/* Alert Messages */
+.pembuat-soal-alert {
+    @apply p-4 rounded-lg mb-4;
+}
+
+.pembuat-soal-alert-success {
+    @apply bg-green-50 text-green-800 border border-green-200;
+}
+
+.pembuat-soal-alert-error {
+    @apply bg-red-50 text-red-800 border border-red-200;
+}
+
+.pembuat-soal-alert-warning {
+    @apply bg-yellow-50 text-yellow-800 border border-yellow-200;
+}
+
+/* Loading State */
+.pembuat-soal-loading {
+    @apply flex items-center justify-center py-8;
+}
+
+.pembuat-soal-loading-spinner {
+    @apply animate-spin h-8 w-8 text-purple-600 mr-3;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .pembuat-soal-form-grid {
+        @apply grid-cols-1;
+    }
+    
+    .pembuat-soal-actions {
+        @apply flex-col;
+    }
+    
+    .pembuat-soal-btn {
+        @apply w-full justify-center;
+    }
+    
+    .pembuat-soal-table {
+        @apply text-xs;
+    }
+    
+    .pembuat-soal-table th,
+    .pembuat-soal-table td {
+        @apply px-2 py-2;
+    }
+}
