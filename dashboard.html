@@ -222,10 +222,12 @@
                         <button class="subfeature-card p-3 border border-gray-200 rounded-lg text-left hover:bg-gray-50" onclick="loadSubFeature('refleksi')"><div class="flex items-center gap-2 mb-1"><i class="fas fa-pen-fancy text-purple-500"></i><span class="font-medium text-sm">Refleksi</span></div><p class="text-xs text-gray-500">Jurnal pembelajaran</p></button>
                         <button class="subfeature-card p-3 border border-gray-200 rounded-lg text-left hover:bg-gray-50" onclick="loadSubFeature('asisten-modul')"><div class="flex items-center gap-2 mb-1"><i class="fas fa-robot text-blue-500"></i><span class="font-medium text-sm">Asisten Modul</span></div><p class="text-xs text-gray-500">Bantuan cerdas</p></button>
                         
-                        <!-- ✅ UPDATED: Fitur 7 - Prota & Promes Generator (Coming Soon #1) -->
+                        <!-- ✅ UPDATED: Fitur 7 - Prota & Promes Generator -->
                         <button class="subfeature-card p-3 border border-gray-200 rounded-lg text-left hover:bg-gray-50" onclick="loadSubFeature('protsma')"><div class="flex items-center gap-2 mb-1"><i class="fas fa-calendar-alt text-cyan-500"></i><span class="font-medium text-sm">Prota & Promes</span></div><p class="text-xs text-gray-500">Generator dengan AI</p></button>
                         
-                        <button class="subfeature-card coming-soon p-3 border border-gray-200 rounded-lg text-left" disabled><div class="flex items-center gap-2 mb-1"><i class="fas fa-hourglass-half text-gray-400"></i><span class="font-medium text-sm text-gray-500">Fitur 8</span></div><p class="text-xs text-gray-400">Segera hadir</p></button>
+                        <!-- ✅ UPDATED: Fitur 8 - Pembuat Soal Generator (Coming Soon #2) -->
+                        <button class="subfeature-card p-3 border border-gray-200 rounded-lg text-left hover:bg-gray-50" onclick="loadSubFeature('pembuat-soal')"><div class="flex items-center gap-2 mb-1"><i class="fas fa-file-alt text-green-500"></i><span class="font-medium text-sm">Pembuat Soal</span></div><p class="text-xs text-gray-500">Generator dengan AI</p></button>
+                        
                         <button class="subfeature-card coming-soon p-3 border border-gray-200 rounded-lg text-left" disabled><div class="flex items-center gap-2 mb-1"><i class="fas fa-hourglass-half text-gray-400"></i><span class="font-medium text-sm text-gray-500">Fitur 9</span></div><p class="text-xs text-gray-400">Segera hadir</p></button>
                         <button class="subfeature-card coming-soon p-3 border border-gray-200 rounded-lg text-left" disabled><div class="flex items-center gap-2 mb-1"><i class="fas fa-hourglass-half text-gray-400"></i><span class="font-medium text-sm text-gray-500">Fitur 10</span></div><p class="text-xs text-gray-400">Segera hadir</p></button>
                     </div>
@@ -243,6 +245,9 @@
         
         <!-- ✅ NEW: PROTA & PROMES CONTAINER -->
         <section id="protsma-container" class="section bg-gray-50 hidden"><div class="container"></div></section>
+        
+        <!-- ✅ NEW: PEMBUAT SOAL CONTAINER -->
+        <section id="pembuat-soal-container" class="section bg-gray-50 hidden"><div class="container"></div></section>
 
     </main>
 
@@ -391,7 +396,7 @@
                 window.applyJenjangVisibility(userRole, userJenjang);
             }
             
-            ['module-container','refleksi-container','penilaian-container','asisten-container','cita-container','protsma-container']
+            ['module-container','refleksi-container','penilaian-container','asisten-container','cita-container','protsma-container','pembuat-soal-container']
                 .forEach(id => {
                     const el = document.getElementById(id); 
                     if(el) { el.classList.add('hidden'); el.innerHTML = ''; }
@@ -423,7 +428,7 @@
                 target.classList.remove('hidden'); 
                 window.scrollTo({ top: 0, behavior: 'smooth' }); 
             }
-            ['module-container','refleksi-container','penilaian-container','asisten-container','cita-container','protsma-container']
+            ['module-container','refleksi-container','penilaian-container','asisten-container','cita-container','protsma-container','pembuat-soal-container']
                 .forEach(id => {
                     const el = document.getElementById(id); 
                     if(el) { el.classList.add('hidden'); el.innerHTML = ''; }
@@ -467,7 +472,7 @@
         function showMainSectionsFallback() {
             document.querySelector('.dashboard-hero')?.closest('section')?.classList.remove('hidden');
             document.querySelector('[aria-labelledby="rooms-heading"]')?.classList.remove('hidden');
-            ['module-container','refleksi-container','penilaian-container','asisten-container','cita-container','protsma-container']
+            ['module-container','refleksi-container','penilaian-container','asisten-container','cita-container','protsma-container','pembuat-soal-container']
                 .forEach(id => {
                     const el = document.getElementById(id); 
                     if(el) { el.classList.add('hidden'); el.innerHTML = ''; }
@@ -475,7 +480,7 @@
         }
 
         function hideModuleContainers() {
-            ['module-container','refleksi-container','penilaian-container','asisten-container','cita-container','protsma-container'].forEach(id => {
+            ['module-container','refleksi-container','penilaian-container','asisten-container','cita-container','protsma-container','pembuat-soal-container'].forEach(id => {
                 const el = document.getElementById(id); if(el) { el.classList.add('hidden'); el.innerHTML = ''; }
             });
         }
@@ -508,7 +513,8 @@
                 'refleksi': 'refleksi-container',
                 'asisten-modul': 'asisten-container',
                 'cita-generator': 'cita-container',
-                'protsma': 'protsma-container'  // ✅ NEW: Prota & Promes
+                'protsma': 'protsma-container',
+                'pembuat-soal': 'pembuat-soal-container'  // ✅ NEW: Pembuat Soal
             };
             const targetContainer = document.getElementById(containerMap[subfitur] || 'module-container');
             if (targetContainer) targetContainer.classList.remove('hidden');
@@ -534,6 +540,15 @@
                         } else {
                             const m = await import('./modules/protsma/protsma.js');
                             (m.renderProtsma || m.default)?.();
+                        }
+                        break;
+                    // ✅ NEW: Pembuat Soal case
+                    case 'pembuat-soal':
+                        if (typeof window.renderPembuatSoal === 'function') {
+                            await window.renderPembuatSoal();
+                        } else {
+                            const m = await import('./modules/pembuat-soal/pembuat-soal.js');
+                            (m.renderPembuatSoal || m.default)?.();
                         }
                         break;
                     default: 
