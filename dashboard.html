@@ -192,7 +192,7 @@
             </div>
         </section>
 
-        <!-- JENJANG SECTIONS -->
+        <!-- JENJANG SECTIONS (FULL) -->
         <section id="tk-section" class="section bg-white hidden" data-jenjang="tk"><div class="container"><div class="section-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"><div><h2 class="section-title"><i class="fas fa-child mr-2"></i>TK - Pilih Kelas</h2><p class="section-subtitle">Kemudian pilih fitur yang ingin diakses</p></div><button onclick="backToDashboard()" class="btn btn-ghost btn-sm self-start sm:self-auto"><i class="fas fa-arrow-left mr-2"></i>Kembali</button></div><div class="kelas-grid"><article class="kelas-card" data-kelas="A"><a href="javascript:void(0)" class="kelas-link" onclick="showSubFeatureModal('tk', 'A'); return false;"><div class="kelas-number bg-pink-100 text-pink-700">A</div><h3>Kelas A</h3><p><span class="class-badge">TK</span> 10 Sub-fitur</p></a></article><article class="kelas-card" data-kelas="B"><a href="javascript:void(0)" class="kelas-link" onclick="showSubFeatureModal('tk', 'B'); return false;"><div class="kelas-number bg-pink-100 text-pink-700">B</div><h3>Kelas B</h3><p><span class="class-badge">TK</span> 10 Sub-fitur</p></a></article></div></div></section>
 
         <section id="sd-section" class="section bg-white hidden" data-jenjang="sd"><div class="container"><div class="section-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"><div><h2 class="section-title"><i class="fas fa-elementary mr-2"></i>SD - Pilih Kelas</h2><p class="section-subtitle">Kemudian pilih fitur yang ingin diakses</p></div><button onclick="backToDashboard()" class="btn btn-ghost btn-sm self-start sm:self-auto"><i class="fas fa-arrow-left mr-2"></i>Kembali</button></div><div class="kelas-grid"><article class="kelas-card" data-kelas="1"><a href="javascript:void(0)" class="kelas-link" onclick="showSubFeatureModal('sd', '1'); return false;"><div class="kelas-number">1</div><h3>Kelas 1</h3><p><span class="class-badge">Fase A</span> 10 Sub-fitur</p></a></article><article class="kelas-card" data-kelas="2"><a href="javascript:void(0)" class="kelas-link" onclick="showSubFeatureModal('sd', '2'); return false;"><div class="kelas-number">2</div><h3>Kelas 2</h3><p><span class="class-badge">Fase A</span> 10 Sub-fitur</p></a></article><article class="kelas-card" data-kelas="3"><a href="javascript:void(0)" class="kelas-link" onclick="showSubFeatureModal('sd', '3'); return false;"><div class="kelas-number">3</div><h3>Kelas 3</h3><p><span class="class-badge">Fase B</span> 10 Sub-fitur</p></a></article><article class="kelas-card" data-kelas="4"><a href="javascript:void(0)" class="kelas-link" onclick="showSubFeatureModal('sd', '4'); return false;"><div class="kelas-number">4</div><h3>Kelas 4</h3><p><span class="class-badge">Fase B</span> 10 Sub-fitur</p></a></article><article class="kelas-card" data-kelas="5"><a href="javascript:void(0)" class="kelas-link" onclick="showSubFeatureModal('sd', '5'); return false;"><div class="kelas-number">5</div><h3>Kelas 5</h3><p><span class="class-badge">Fase C</span> 10 Sub-fitur</p></a></article><article class="kelas-card" data-kelas="6"><a href="javascript:void(0)" class="kelas-link" onclick="showSubFeatureModal('sd', '6'); return false;"><div class="kelas-number">6</div><h3>Kelas 6</h3><p><span class="class-badge">Fase C</span> 10 Sub-fitur</p></a></article></div></div></section>
@@ -343,7 +343,7 @@
         });
     </script>
 
-    <!-- ✅ NAVIGATION FUNCTIONS -->
+    <!-- ✅ NAVIGATION FUNCTIONS - FIXED (PART 1) -->
     <script>
         window.applyJenjangVisibility = function(role, userJenjang) {
             const cards = document.querySelectorAll('.room-card[data-jenjang]');
@@ -416,71 +416,45 @@
             return labels[jenjang] || jenjang.toUpperCase();
         }
 
-        // ✅ NEW: Check if user can access a specific class based on registration data - FIXED LOGIC
+        // ✅ FIXED: isClassAccessible - SD logic lebih ketat (LENGKAP)
         function isClassAccessible(userData, targetJenjang, targetKelas) {
-            console.log('🔍 [isClassAccessible] Input:', { userData, targetJenjang, targetKelas });
-            
             // Admin: akses semua
-            if (userData.role === 'admin') {
-                console.log('✅ [isClassAccessible] Admin - access granted');
-                return true;
-            }
+            if (userData.role === 'admin') return true;
             
             // TK: semua guru bisa akses A & B
-            if (targetJenjang === 'tk') {
-                console.log('✅ [isClassAccessible] TK - access granted');
-                return true;
-            }
+            if (targetJenjang === 'tk') return true;
             
-            // SD: beda logic untuk guru kelas vs guru mapel
+            // SD: logic khusus - HANYA guru mapel PAI/PJOK yang akses semua kelas
             if (targetJenjang === 'sd') {
-                const sdMapelType = userData.sd_mapel_type;
-                console.log(`🔍 [isClassAccessible] SD check - sd_mapel_type: "${sdMapelType}"`);
+                const sdType = userData.sd_mapel_type;
                 
-                // Jika sd_mapel_type === 'kelas' → Guru Kelas: hanya kelas_diampu
-                if (sdMapelType === 'kelas') {
-                    const canAccess = Array.isArray(userData.kelas_diampu) && userData.kelas_diampu.includes(targetKelas);
-                    console.log(`🔍 [isClassAccessible] Guru Kelas - kelas_diampu: ${JSON.stringify(userData.kelas_diampu)}, canAccess: ${canAccess}`);
-                    return canAccess;
+                // Guru Kelas: hanya akses kelas_diampu
+                if (sdType === 'kelas') {
+                    return Array.isArray(userData.kelas_diampu) && userData.kelas_diampu.includes(targetKelas);
                 }
                 
-                // Jika sd_mapel_type === 'pai' atau 'pjok' → Guru Mapel: semua kelas
-                if (['pai', 'pjok'].includes(sdMapelType)) {
-                    console.log(`✅ [isClassAccessible] Guru Mapel SD (${sdMapelType}) - access granted`);
+                // Guru Mapel PAI/PJOK: akses semua kelas 1-6
+                if (sdType === 'pai' || sdType === 'pjok') {
                     return true;
                 }
                 
-                // DEFAULT: Jika sd_mapel_type kosong/undefined/tidak dikenal,
-                // cek mapel_yang_diampu dulu (untuk kompatibilitas dengan jenjang lain)
-                if (Array.isArray(userData.mapel_yang_diampu) && userData.mapel_yang_diampu.length > 0) {
-                    console.log(`✅ [isClassAccessible] Fallback: mapel_yang_diampu ada - access granted`);
-                    return true;
-                }
-                
-                // FALLBACK TERAKHIR: Anggap sebagai guru kelas, hanya akses kelas_diampu
-                const canAccess = Array.isArray(userData.kelas_diampu) && userData.kelas_diampu.includes(targetKelas);
-                console.log(`🔍 [isClassAccessible] Fallback default (guru kelas) - kelas_diampu: ${JSON.stringify(userData.kelas_diampu)}, canAccess: ${canAccess}`);
-                return canAccess;
+                // DEFAULT: Jika sd_mapel_type kosong/tidak dikenal, ANGGAP sebagai guru kelas
+                // JANGAN fallback ke mapel_yang_diampu untuk SD!
+                return Array.isArray(userData.kelas_diampu) && userData.kelas_diampu.includes(targetKelas);
             }
             
-            // SMP/SMA/MI/MTs/MA: guru mapel akses semua kelas
+            // SMP/SMA/MI/MTs/MA: guru mapel akses semua kelas di jenjangnya
             if (['smp', 'sma', 'mi', 'mts', 'ma'].includes(targetJenjang)) {
                 if (Array.isArray(userData.mapel_yang_diampu) && userData.mapel_yang_diampu.length > 0) {
-                    console.log(`✅ [isClassAccessible] Guru Mapel ${targetJenjang.toUpperCase()} - access granted`);
                     return true;
-                } else {
-                    // Fallback: hanya kelas_diampu
-                    const canAccess = Array.isArray(userData.kelas_diampu) && userData.kelas_diampu.includes(targetKelas);
-                    console.log(`🔍 [isClassAccessible] Fallback ${targetJenjang.toUpperCase()} - kelas_diampu: ${JSON.stringify(userData.kelas_diampu)}, canAccess: ${canAccess}`);
-                    return canAccess;
                 }
+                return Array.isArray(userData.kelas_diampu) && userData.kelas_diampu.includes(targetKelas);
             }
             
-            console.log('❌ [isClassAccessible] Default deny');
             return false;
         }
 
-        // ✅ UPDATED: showJenjangSection with jenjang validation
+        // ✅ UPDATED: showJenjangSection with jenjang validation (LENGKAP)
         window.showJenjangSection = function(jenjang) {
             // ✅ GATE 1: Cek approval status (existing)
             if (!window.isUserApproved?.() && window.currentUserRole !== 'admin') {
@@ -522,7 +496,7 @@
                 });
         };
         
-        // ✅ UPDATED: showSubFeatureModal with jenjang AND class validation (triple security) - FIXED LOGIC + DEBUG
+        // ✅ FIXED: showSubFeatureModal with jenjang AND class validation (LENGKAP)
         window.showSubFeatureModal = function(jenjang, kelas) {
             // ✅ GATE 1: Cek approval status (existing)
             if (!window.isUserApproved?.() && window.currentUserRole !== 'admin') {
@@ -547,16 +521,10 @@
                 return;
             }
             
-            // ✅ GATE 3: Cek akses kelas berdasarkan data registrasi (FIXED: Robust logic + debug)
-            console.log('🔍 [ClassAccess] Checking access for:', { jenjang, kelas });
-            
-            // Prioritaskan window.currentUserData jika ada (lebih reliable)
+            // ✅ GATE 3: Cek akses kelas berdasarkan data registrasi (FIXED)
+            // Ambil userData
             let userData = window.currentUserData;
-            
-            // Fallback ke localStorage jika window.currentUserData tidak ada
             if (!userData) {
-                console.log('⚠️ [ClassAccess] window.currentUserData not found, using localStorage fallback');
-                
                 const userRole = window.currentUserRole || localStorage.getItem('user_role') || 'teacher';
                 const jenjangSekolah = window.currentUserJenjang || localStorage.getItem('user_jenjang') || '';
                 
@@ -588,35 +556,20 @@
                     sd_mapel_type: sdMapelType,
                     mapel_yang_diampu: mapelYangDiampu
                 };
-                
-                console.log('📦 [ClassAccess] userData from localStorage:', {
-                    role: userData.role,
-                    jenjang: userData.jenjang_sekolah,
-                    sd_mapel_type: userData.sd_mapel_type,
-                    kelas_diampu: userData.kelas_diampu,
-                    mapel_yang_diampu: userData.mapel_yang_diampu
-                });
-            } else {
-                console.log('📦 [ClassAccess] userData from window.currentUserData:', userData);
             }
             
-            // Validasi akses dengan logging detail
+            // Validasi akses
             const canAccess = isClassAccessible(userData, jenjang, kelas);
             
             if (!canAccess) {
                 const jenjangLabel = getJenjangLabel(jenjang);
-                const accessibleClasses = userData.kelas_diampu?.filter(c => c).join(', ') || 'tidak ada';
+                const accessible = (userData.kelas_diampu || []).filter(c => c).join(', ') || '-';
                 const userType = userData.sd_mapel_type === 'kelas' ? 'Guru Kelas' : 
-                                ['pai','pjok'].includes(userData.sd_mapel_type) ? `Guru Mapel (${userData.sd_mapel_type.toUpperCase()})` :
-                                userData.mapel_yang_diampu?.length > 0 ? 'Guru Mapel' : 'Tidak teridentifikasi';
-                
-                console.log('❌ [ClassAccess] Access DENIED for class:', kelas, 'accessible:', accessibleClasses, 'userType:', userType);
-                
-                alert(`🔒 Akses Kelas Ditolak\n\nAnda tidak terdaftar sebagai pengampu Kelas ${kelas} di jenjang ${jenjangLabel}.\n\nTipe guru: ${userType}\nKelas yang dapat Anda akses: ${accessibleClasses || '-'}\n\nSilakan pilih kelas yang sesuai dengan data registrasi Anda.`);
+                                (userData.sd_mapel_type === 'pai' || userData.sd_mapel_type === 'pjok') ? `Guru Mapel (${userData.sd_mapel_type.toUpperCase()})` :
+                                'Tidak teridentifikasi (default: Guru Kelas)';
+                alert(`🔒 Akses Kelas Ditolak\n\nJenjang: ${jenjangLabel}\nKelas: ${kelas}\nTipe: ${userType}\nKelas yang bisa diakses: ${accessible}\n\nSilakan pilih kelas yang sesuai.`);
                 return;
             }
-            
-            console.log('✅ [ClassAccess] Access GRANTED for class:', kelas);
             
             // ✅ Jika lolos semua validasi, lanjutkan ke modal
             window.currentJenjang = jenjang; 
@@ -630,7 +583,6 @@
             
             window.hideMainSectionsForSubFeature?.() || hideMainSectionsForSubFeatureFallback();
         };
-        
         window.closeSubFeatureModal = function() {
             document.getElementById('subfeature-modal').classList.add('hidden');
             document.body.style.overflow = ''; 
