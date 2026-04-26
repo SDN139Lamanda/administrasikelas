@@ -416,36 +416,67 @@
             return labels[jenjang] || jenjang.toUpperCase();
         }
 
-        // ✅ NEW: Check if user can access a specific class based on registration data
+        // ✅ NEW: Check if user can access a specific class based on registration data - FIXED LOGIC
         function isClassAccessible(userData, targetJenjang, targetKelas) {
+            console.log('🔍 [isClassAccessible] Input:', { userData, targetJenjang, targetKelas });
+            
             // Admin: akses semua
-            if (userData.role === 'admin') return true;
+            if (userData.role === 'admin') {
+                console.log('✅ [isClassAccessible] Admin - access granted');
+                return true;
+            }
             
             // TK: semua guru bisa akses A & B
-            if (targetJenjang === 'tk') return true;
+            if (targetJenjang === 'tk') {
+                console.log('✅ [isClassAccessible] TK - access granted');
+                return true;
+            }
             
             // SD: beda logic untuk guru kelas vs guru mapel
             if (targetJenjang === 'sd') {
-                if (userData.sd_mapel_type === 'kelas') {
-                    // Guru Kelas: hanya kelas_diampu
-                    return Array.isArray(userData.kelas_diampu) && userData.kelas_diampu.includes(targetKelas);
-                } else {
-                    // Guru Mapel (PAI/PJOK): semua kelas 1-6
+                const sdMapelType = userData.sd_mapel_type;
+                console.log(`🔍 [isClassAccessible] SD check - sd_mapel_type: "${sdMapelType}"`);
+                
+                // Jika sd_mapel_type === 'kelas' → Guru Kelas: hanya kelas_diampu
+                if (sdMapelType === 'kelas') {
+                    const canAccess = Array.isArray(userData.kelas_diampu) && userData.kelas_diampu.includes(targetKelas);
+                    console.log(`🔍 [isClassAccessible] Guru Kelas - kelas_diampu: ${JSON.stringify(userData.kelas_diampu)}, canAccess: ${canAccess}`);
+                    return canAccess;
+                }
+                
+                // Jika sd_mapel_type === 'pai' atau 'pjok' → Guru Mapel: semua kelas
+                if (['pai', 'pjok'].includes(sdMapelType)) {
+                    console.log(`✅ [isClassAccessible] Guru Mapel SD (${sdMapelType}) - access granted`);
                     return true;
                 }
+                
+                // DEFAULT: Jika sd_mapel_type kosong/undefined/tidak dikenal,
+                // cek mapel_yang_diampu dulu (untuk kompatibilitas dengan jenjang lain)
+                if (Array.isArray(userData.mapel_yang_diampu) && userData.mapel_yang_diampu.length > 0) {
+                    console.log(`✅ [isClassAccessible] Fallback: mapel_yang_diampu ada - access granted`);
+                    return true;
+                }
+                
+                // FALLBACK TERAKHIR: Anggap sebagai guru kelas, hanya akses kelas_diampu
+                const canAccess = Array.isArray(userData.kelas_diampu) && userData.kelas_diampu.includes(targetKelas);
+                console.log(`🔍 [isClassAccessible] Fallback default (guru kelas) - kelas_diampu: ${JSON.stringify(userData.kelas_diampu)}, canAccess: ${canAccess}`);
+                return canAccess;
             }
             
             // SMP/SMA/MI/MTs/MA: guru mapel akses semua kelas
             if (['smp', 'sma', 'mi', 'mts', 'ma'].includes(targetJenjang)) {
                 if (Array.isArray(userData.mapel_yang_diampu) && userData.mapel_yang_diampu.length > 0) {
-                    // Guru Mapel: semua kelas di jenjang ini
+                    console.log(`✅ [isClassAccessible] Guru Mapel ${targetJenjang.toUpperCase()} - access granted`);
                     return true;
                 } else {
                     // Fallback: hanya kelas_diampu
-                    return Array.isArray(userData.kelas_diampu) && userData.kelas_diampu.includes(targetKelas);
+                    const canAccess = Array.isArray(userData.kelas_diampu) && userData.kelas_diampu.includes(targetKelas);
+                    console.log(`🔍 [isClassAccessible] Fallback ${targetJenjang.toUpperCase()} - kelas_diampu: ${JSON.stringify(userData.kelas_diampu)}, canAccess: ${canAccess}`);
+                    return canAccess;
                 }
             }
             
+            console.log('❌ [isClassAccessible] Default deny');
             return false;
         }
 
@@ -491,7 +522,7 @@
                 });
         };
         
-        // ✅ UPDATED: showSubFeatureModal with jenjang AND class validation (triple security) - FIXED DATA SOURCE
+        // ✅ UPDATED: showSubFeatureModal with jenjang AND class validation (triple security) - FIXED LOGIC + DEBUG
         window.showSubFeatureModal = function(jenjang, kelas) {
             // ✅ GATE 1: Cek approval status (existing)
             if (!window.isUserApproved?.() && window.currentUserRole !== 'admin') {
@@ -516,7 +547,7 @@
                 return;
             }
             
-            // ✅ GATE 3: Cek akses kelas berdasarkan data registrasi (FIXED: Robust data source)
+            // ✅ GATE 3: Cek akses kelas berdasarkan data registrasi (FIXED: Robust logic + debug)
             console.log('🔍 [ClassAccess] Checking access for:', { jenjang, kelas });
             
             // Prioritaskan window.currentUserData jika ada (lebih reliable)
@@ -558,19 +589,30 @@
                     mapel_yang_diampu: mapelYangDiampu
                 };
                 
-                console.log('📦 [ClassAccess] userData from localStorage:', userData);
+                console.log('📦 [ClassAccess] userData from localStorage:', {
+                    role: userData.role,
+                    jenjang: userData.jenjang_sekolah,
+                    sd_mapel_type: userData.sd_mapel_type,
+                    kelas_diampu: userData.kelas_diampu,
+                    mapel_yang_diampu: userData.mapel_yang_diampu
+                });
             } else {
                 console.log('📦 [ClassAccess] userData from window.currentUserData:', userData);
             }
             
-            // Validasi akses
-            if (!isClassAccessible(userData, jenjang, kelas)) {
+            // Validasi akses dengan logging detail
+            const canAccess = isClassAccessible(userData, jenjang, kelas);
+            
+            if (!canAccess) {
                 const jenjangLabel = getJenjangLabel(jenjang);
-                const accessibleClasses = userData.kelas_diampu?.join(', ') || 'tidak ada';
+                const accessibleClasses = userData.kelas_diampu?.filter(c => c).join(', ') || 'tidak ada';
+                const userType = userData.sd_mapel_type === 'kelas' ? 'Guru Kelas' : 
+                                ['pai','pjok'].includes(userData.sd_mapel_type) ? `Guru Mapel (${userData.sd_mapel_type.toUpperCase()})` :
+                                userData.mapel_yang_diampu?.length > 0 ? 'Guru Mapel' : 'Tidak teridentifikasi';
                 
-                console.log('❌ [ClassAccess] Access DENIED for class:', kelas, 'accessible:', accessibleClasses);
+                console.log('❌ [ClassAccess] Access DENIED for class:', kelas, 'accessible:', accessibleClasses, 'userType:', userType);
                 
-                alert(`🔒 Akses Kelas Ditolak\n\nAnda tidak terdaftar sebagai pengampu Kelas ${kelas} di jenjang ${jenjangLabel}.\n\nKelas yang dapat Anda akses: ${accessibleClasses}\n\nSilakan pilih kelas yang sesuai dengan data registrasi Anda.`);
+                alert(`🔒 Akses Kelas Ditolak\n\nAnda tidak terdaftar sebagai pengampu Kelas ${kelas} di jenjang ${jenjangLabel}.\n\nTipe guru: ${userType}\nKelas yang dapat Anda akses: ${accessibleClasses || '-'}\n\nSilakan pilih kelas yang sesuai dengan data registrasi Anda.`);
                 return;
             }
             
