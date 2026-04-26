@@ -4,18 +4,17 @@
  * Folder: modules/pembuat-soal/pembuat-soal.js
  * ============================================
  * 
+ * ✅ UPDATE: buildPrompt() diubah untuk menghasilkan SOAL UJIAN (Bukan CP).
  * ✅ FIXES APPLIED:
- * 1. Dropdown populate: Populate select di table row (bukan header)
- * 2. TDZ Error: Use 'foundRow' instead of 'row' in event listeners
- * 3. buildPrompt: Ambil data dari soalRows, bukan header input
- * 4. API parsing: Handle string & object response dari generateWithGroq
- * 5. Import path: ../groq-api.js (bukan ./groq-api.js)
+ * 1. Dropdown populate: Populate select di table row (bukan header).
+ * 2. TDZ Error: Use 'foundRow' instead of 'row' in event listeners.
+ * 3. API parsing: Handle string & object response dari generateWithGroq.
  * ============================================
  */
 
 console.log('🔴 [PembuatSoal] Module START');
 
-// ✅ IMPORTS (FIXED: ../groq-api.js, bukan ./groq-api.js)
+// ✅ IMPORTS
 import { generateWithGroq, getGroqApiKey } from '../groq-api.js';
 import { db, auth, doc, getDoc, collection, addDoc, serverTimestamp } from '../firebase-config.js';
 
@@ -31,11 +30,11 @@ let generatedOutput = {
     answers: ''
 };
 
-// Cache for mapel data (same pattern as cta-generator.js)
+// Cache for mapel data
 let _mapelCache = {};
 
 // ============================================
-// ✅ MAIN RENDER FUNCTION (Called from dashboard)
+// ✅ MAIN RENDER FUNCTION
 // ============================================
 
 export async function renderPembuatSoal() {
@@ -69,7 +68,7 @@ export async function renderPembuatSoal() {
     // Initialize event listeners
     initPembuatSoalListeners();
     
-    // Load user data for auto-fill + populate mapel dropdown
+    // Load user data
     await loadUserData();
     
     console.log('🟢 [PembuatSoal] Module READY');
@@ -186,27 +185,18 @@ function loadPembuatSoalCSS() {
 // ============================================
 
 function initPembuatSoalListeners() {
-    // Add row button
     const addRowBtn = document.getElementById('ps-add-row-btn');
-    if (addRowBtn) {
-        addRowBtn.addEventListener('click', addRow);
-    }
+    if (addRowBtn) addRowBtn.addEventListener('click', addRow);
     
-    // Generate button
     const generateBtn = document.getElementById('ps-generate-btn');
-    if (generateBtn) {
-        generateBtn.addEventListener('click', generateSoal);
-    }
+    if (generateBtn) generateBtn.addEventListener('click', generateSoal);
     
-    // Download button
     const downloadBtn = document.getElementById('ps-download-btn');
-    if (downloadBtn) {
-        downloadBtn.addEventListener('click', downloadWord);
-    }
+    if (downloadBtn) downloadBtn.addEventListener('click', downloadWord);
 }
 
 // ============================================
-// ✅ LOAD USER DATA FOR AUTO-FILL
+// ✅ LOAD USER DATA
 // ============================================
 
 async function loadUserData() {
@@ -219,12 +209,12 @@ async function loadUserData() {
             const data = snap.data();
             
             // Auto-fill sekolah
-            if (document.getElementById('ps-sekolah')) {
-                document.getElementById('ps-sekolah').value = data.nama_sekolah || '-';
-            }
+            const sekolahInput = document.getElementById('ps-sekolah');
+            if (sekolahInput) sekolahInput.value = data.nama_sekolah || '-';
             
-            // Auto-fill mapel (get from mapel_yang_diampu or jenjang)
-            if (document.getElementById('ps-mapel')) {
+            // Auto-fill mapel
+            const mapelInput = document.getElementById('ps-mapel');
+            if (mapelInput) {
                 let mapelText = '-';
                 if (data.jenjang_sekolah === 'sd' && data.sd_mapel_type === 'kelas') {
                     mapelText = 'Guru Kelas (' + (data.jenjang_sekolah || '').toUpperCase() + ')';
@@ -233,17 +223,16 @@ async function loadUserData() {
                 } else if (data.sd_mapel_type && ['pai', 'pjok'].includes(data.sd_mapel_type)) {
                     mapelText = data.sd_mapel_type.toUpperCase();
                 }
-                document.getElementById('ps-mapel').value = mapelText;
+                mapelInput.value = mapelText;
             }
             
-            // Auto-fill tahun pelajaran (current year)
-            if (document.getElementById('ps-tahun')) {
+            // Auto-fill tahun
+            const tahunInput = document.getElementById('ps-tahun');
+            if (tahunInput) {
                 const currentYear = new Date().getFullYear();
-                const nextYear = currentYear + 1;
-                document.getElementById('ps-tahun').value = `${currentYear}/${nextYear}`;
+                tahunInput.value = `${currentYear}/${currentYear + 1}`;
             }
             
-            // Add first row by default (async for jenjang+mapel options)
             await addRow();
         }
     } catch (error) {
@@ -252,7 +241,7 @@ async function loadUserData() {
 }
 
 // ============================================
-// ✅ FETCH MAPEL DATA FROM JSON (COPIED FROM cta-generator.js PATTERN)
+// ✅ FETCH MAPEL DATA FROM JSON
 // ============================================
 
 async function fetchMapelData(jenjang) {
@@ -266,75 +255,17 @@ async function fetchMapelData(jenjang) {
         const data = await response.json();
         if (!Array.isArray(data)) throw new Error('Invalid JSON structure');
         _mapelCache[jenjang] = data;
-        console.log(`✅ [Mapel] Loaded ${data.length} subjects for ${jenjang.toUpperCase()}`);
         return data;
     } catch (error) {
         console.warn(`⚠️ [Mapel] Failed to fetch ${jenjang}.json:`, error.message);
-        // Fallback data
-        const fallback = [
-            { nama: 'Matematika', jenjang },
-            { nama: 'Bahasa Indonesia', jenjang },
-            { nama: 'IPA/IPAS', jenjang },
-            { nama: 'Lainnya', jenjang }
-        ];
+        const fallback = [{ nama: 'Matematika', jenjang }, { nama: 'Bahasa Indonesia', jenjang }];
         _mapelCache[jenjang] = fallback;
         return fallback;
     }
 }
 
 // ============================================
-// ✅ POPULATE MAPEL DROPDOWN WITH AUTO-LOCK (FOR HEADER - COPIED FROM cta-generator.js PATTERN)
-// ============================================
-
-async function populateMapelDropdown(jenjang, userMapelFromReg = null) {
-    const mapelSelect = document.getElementById('ps-mapel');
-    if (!mapelSelect || !jenjang) return;
-    
-    const originalValue = mapelSelect.value;
-    mapelSelect.innerHTML = '<option value="">Memuat daftar mapel...</option>';
-    mapelSelect.disabled = true;
-    
-    try {
-        const mapelList = await fetchMapelData(jenjang);
-        mapelSelect.innerHTML = '<option value="">Pilih Mata Pelajaran</option>';
-        
-        mapelList.forEach(item => {
-            const opt = document.createElement('option');
-            opt.value = item.nama;
-            opt.textContent = item.nama;
-            mapelSelect.appendChild(opt);
-        });
-        
-        // Auto-lock if user has registered mapel
-        if (userMapelFromReg && mapelList.some(m => m.nama === userMapelFromReg)) {
-            mapelSelect.value = userMapelFromReg;
-            mapelSelect.disabled = true;
-            
-            const lockBadge = document.createElement('span');
-            lockBadge.className = 'lock-indicator';
-            lockBadge.innerHTML = `<i class="fas fa-lock text-emerald-600"></i> <strong>${userMapelFromReg}</strong> - Terkunci`;
-            lockBadge.style.cssText = 'display:block;margin-top:6px;font-size:12px;color:#059669';
-            
-            const existingBadge = mapelSelect.parentNode.querySelector('.lock-indicator');
-            if (existingBadge) existingBadge.remove();
-            
-            mapelSelect.parentNode.appendChild(lockBadge);
-            console.log(`🔐 [Mapel] Auto-locked to: ${userMapelFromReg}`);
-        } else {
-            if (originalValue && mapelList.some(m => m.nama === originalValue)) {
-                mapelSelect.value = originalValue;
-            }
-            mapelSelect.disabled = false;
-        }    
-    } catch (error) {
-        console.error('❌ [Mapel] Populate error:', error);
-        mapelSelect.innerHTML = '<option value="">Gagal memuat mapel</option>';
-        mapelSelect.disabled = false;
-    }
-}
-
-// ============================================
-// ✅ POPULATE ROW MAPEL DROPDOWN (NEW - for table rows)
+// ✅ POPULATE ROW MAPEL DROPDOWN (FIXED)
 // ============================================
 
 async function populateRowMapelDropdown(selectEl, jenjang, userMapelFromReg = null) {
@@ -354,16 +285,12 @@ async function populateRowMapelDropdown(selectEl, jenjang, userMapelFromReg = nu
             selectEl.appendChild(opt);
         });
         
-        // Auto-select & lock if user has registered mapel
         if (userMapelFromReg) {
-            const match = Array.from(selectEl.options).find(opt => 
-                opt.textContent.includes(userMapelFromReg)
-            );
+            const match = Array.from(selectEl.options).find(opt => opt.textContent.includes(userMapelFromReg));
             if (match) {
                 selectEl.value = match.value;
                 selectEl.disabled = true;
                 
-                // Add lock indicator
                 const lockBadge = document.createElement('span');
                 lockBadge.className = 'lock-indicator';
                 lockBadge.innerHTML = `<i class="fas fa-lock text-emerald-600"></i> ${userMapelFromReg}`;
@@ -374,17 +301,16 @@ async function populateRowMapelDropdown(selectEl, jenjang, userMapelFromReg = nu
                 selectEl.parentNode.appendChild(lockBadge);
             }
         }
-        
         selectEl.disabled = false;
     } catch (error) {
-        console.error('❌ [PembuatSoal] Populate row mapel error:', error);
+        console.error('❌ Populate row mapel error:', error);
         selectEl.innerHTML = '<option value="">Gagal memuat</option>';
         selectEl.disabled = false;
     }
 }
 
 // ============================================
-// ✅ ADD ROW TO TABLE (FIXED: Populate row dropdown + TDZ)
+// ✅ ADD ROW TO TABLE
 // ============================================
 
 async function addRow() {
@@ -392,8 +318,6 @@ async function addRow() {
     if (!tbody) return;
     
     const rowIndex = soalRows.length;
-    
-    // Get user data for jenjang & mapel
     const user = auth.currentUser;
     let userMapelFromReg = null;
     let userJenjang = 'sd';
@@ -402,17 +326,12 @@ async function addRow() {
         try {
             const snap = await getDoc(doc(db, 'users', user.uid));
             if (snap.exists()) {
-                const userData = snap.data();
-                userJenjang = userData.jenjang_sekolah || 'sd';
-                if (userData.jenjang_sekolah === 'sd' && userData.sd_mapel_type !== 'kelas') {
-                    userMapelFromReg = userData.sd_mapel_type.toUpperCase();
-                } else if (userData.mapel_yang_diampu?.length > 0) {
-                    userMapelFromReg = userData.mapel_yang_diampu[0];
-                }
+                const d = snap.data();
+                userJenjang = d.jenjang_sekolah || 'sd';
+                if (d.jenjang_sekolah === 'sd' && d.sd_mapel_type !== 'kelas') userMapelFromReg = d.sd_mapel_type.toUpperCase();
+                else if (d.mapel_yang_diampu?.length > 0) userMapelFromReg = d.mapel_yang_diampu[0];
             }
-        } catch (e) {
-            console.warn('⚠️ [PembuatSoal] Could not load user data:', e.message);
-        }
+        } catch (e) { console.warn('Load user data error:', e); }
     }
     
     const row = {
@@ -426,7 +345,6 @@ async function addRow() {
     
     soalRows.push(row);
     
-    // Create row HTML FIRST
     const tr = document.createElement('tr');
     tr.dataset.rowId = row.id;
     tr.innerHTML = `
@@ -451,8 +369,8 @@ async function addRow() {
         <td>
             <select class="ps-untuk" data-row="${row.id}">
                 <option value="harian">Tugas Harian</option>
-                <option value="pts">Penilaian Tengah Semester</option>
-                <option value="pas">Soal Semester</option>
+                <option value="pts">PTS</option>
+                <option value="pas">PAS</option>
             </select>
         </td>
         <td>
@@ -464,113 +382,58 @@ async function addRow() {
     
     tbody.appendChild(tr);
     
-    // NOW populate the select in this specific row
     const jenjangSelect = tr.querySelector('.ps-jenjang-mapel');
     await populateRowMapelDropdown(jenjangSelect, userJenjang, userMapelFromReg);
     
-    // Add event listeners (FIXED: use 'foundRow' to avoid TDZ)
     const topikInput = tr.querySelector('.ps-topik');
     const jumlahInput = tr.querySelector('.ps-jumlah');
     const modelSelect = tr.querySelector('.ps-model');
     const untukSelect = tr.querySelector('.ps-untuk');
     
-    if (jenjangSelect) {
-        jenjangSelect.addEventListener('change', (e) => {
-            const foundRow = soalRows.find(r => r.id === row.id);
-            if (foundRow) foundRow.jenjangMapel = e.target.value;
-        });
-    }
-    
-    if (topikInput) {
-        topikInput.addEventListener('input', (e) => {
-            const foundRow = soalRows.find(r => r.id === row.id);
-            if (foundRow) foundRow.topik = e.target.value;
-        });
-    }
-    
-    if (jumlahInput) {
-        jumlahInput.addEventListener('input', (e) => {
-            const foundRow = soalRows.find(r => r.id === row.id);
-            if (foundRow) foundRow.jumlahNomor = parseInt(e.target.value) || 5;
-        });
-    }
-    
-    if (modelSelect) {
-        modelSelect.addEventListener('change', (e) => {
-            const foundRow = soalRows.find(r => r.id === row.id);
-            if (foundRow) foundRow.modelSoal = e.target.value;
-        });
-    }
-    
-    if (untukSelect) {
-        untukSelect.addEventListener('change', (e) => {
-            const foundRow = soalRows.find(r => r.id === row.id);
-            if (foundRow) foundRow.soalUntuk = e.target.value;
-        });
-    }
+    if (jenjangSelect) jenjangSelect.addEventListener('change', (e) => { const f = soalRows.find(r => r.id === row.id); if (f) f.jenjangMapel = e.target.value; });
+    if (topikInput) topikInput.addEventListener('input', (e) => { const f = soalRows.find(r => r.id === row.id); if (f) f.topik = e.target.value; });
+    if (jumlahInput) jumlahInput.addEventListener('input', (e) => { const f = soalRows.find(r => r.id === row.id); if (f) f.jumlahNomor = parseInt(e.target.value) || 5; });
+    if (modelSelect) modelSelect.addEventListener('change', (e) => { const f = soalRows.find(r => r.id === row.id); if (f) f.modelSoal = e.target.value; });
+    if (untukSelect) untukSelect.addEventListener('change', (e) => { const f = soalRows.find(r => r.id === row.id); if (f) f.soalUntuk = e.target.value; });
 }
 
 // ============================================
-// ✅ REMOVE ROW (Global function for onclick)
+// ✅ REMOVE ROW
 // ============================================
 
 window.removePembuatSoalRow = function(rowId) {
     soalRows = soalRows.filter(r => r.id !== rowId);
-    
     const tr = document.querySelector(`tr[data-row="${rowId}"]`);
     if (tr) tr.remove();
-    
     showAlert('Baris berhasil dihapus', 'success');
 };
 
 // ============================================
-// ✅ GENERATE SOAL (Groq API) - FIXED: Use cta-generator.js pattern
+// ✅ GENERATE SOAL
 // ============================================
 
 async function generateSoal() {
-    // Validate inputs
     const tahun = document.getElementById('ps-tahun')?.value;
-    if (!tahun) {
-        showAlert('Silakan isi Tahun Pelajaran!', 'warning');
-        return;
-    }
-    
-    if (soalRows.length === 0) {
-        showAlert('Silakan tambah minimal 1 baris topik!', 'warning');
-        return;
-    }
-    
-    // Validate all rows
+    if (!tahun) { showAlert('Isi Tahun Pelajaran!', 'warning'); return; }
+    if (soalRows.length === 0) { showAlert('Tambah minimal 1 baris!', 'warning'); return; }
     for (const row of soalRows) {
-        if (!row.jenjangMapel || !row.topik) {
-            showAlert('Silakan lengkapi semua baris (Jenjang & Topik wajib diisi)!', 'warning');
-            return;
-        }
+        if (!row.jenjangMapel || !row.topik) { showAlert('Lengkapi Jenjang & Topik!', 'warning'); return; }
     }
     
-    const generateBtn = document.getElementById('ps-generate-btn');
-    const downloadBtn = document.getElementById('ps-download-btn');
-    
-    // Disable buttons during generation
-    generateBtn.disabled = true;
-    generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses AI...';
-    downloadBtn.disabled = true;
+    const btn = document.getElementById('ps-generate-btn');
+    const dwnBtn = document.getElementById('ps-download-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses AI...';
+    dwnBtn.disabled = true;
     
     try {
-        // Get Groq API key (same pattern as cta-generator.js)
         const apiKey = await getGroqApiKey();
+        if (!apiKey) { showAlert('API Key tidak ditemukan.', 'error'); return; }
         
-        if (!apiKey) {
-            showAlert('API Key tidak ditemukan. Silakan hubungi admin.', 'error');
-            return;
-        }
-        
-        console.log('🔑 [PembuatSoal] API Key found, calling Groq...');
-        
-        // Build prompt for AI (FIXED: get data from table rows)
+        // ✅ BUILD PROMPT (SOAL, BUKAN CP)
         const prompt = buildPrompt(tahun);
         
-        // Call Groq API using generateWithGroq
+        // CALL GROQ
         const result = await generateWithGroq({
             sekolah: document.getElementById('ps-sekolah')?.value || '-',
             tahun: tahun,
@@ -582,90 +445,95 @@ async function generateSoal() {
         
         console.log('🤖 [PembuatSoal] AI Response received');
         
-        // Parse AI output (FIXED: handle both string and object responses)
+        // PARSE RESPONSE
         const aiContent = typeof result === 'string' ? result : (result?.content || JSON.stringify(result));
         const parsedOutput = parseAIOutput(aiContent);
         
         generatedOutput = parsedOutput;
         
-        // Display output (FIXED: Ensure it shows)
+        // DISPLAY
         displayOutput(parsedOutput);
         
-        // Enable download button
-        downloadBtn.disabled = false;
+        dwnBtn.disabled = false;
         
-        // Save to Firebase
+        // SAVE
         await saveToFirebase(tahun, parsedOutput);
         
         showAlert('✅ Soal berhasil digenerate!', 'success');
         
     } catch (error) {
-        console.error('❌ [PembuatSoal] Generate error:', error);
-        let errorMessage = error.message;
-        if (error.message.includes('API key')) errorMessage = 'API Key tidak valid.';
-        else if (error.message.includes('quota') || error.message.includes('429')) errorMessage = 'Limit AI harian habis.';
-        else if (error.message.includes('koneksi') || error.message.includes('network')) errorMessage = 'Koneksi internet bermasalah.';
-        
-        showAlert(`❌ Gagal generate soal: ${errorMessage}`, 'error');
+        console.error('❌ Generate error:', error);
+        let err = error.message;
+        if (err.includes('API key')) err = 'API Key tidak valid.';
+        else if (err.includes('429')) err = 'Limit AI habis.';
+        showAlert(`❌ Gagal: ${err}`, 'error');
     } finally {
-        // Re-enable buttons
-        generateBtn.disabled = false;
-        generateBtn.innerHTML = '<i class="fas fa-robot"></i> Buatkan Soal';
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-robot"></i> Buatkan Soal';
     }
 }
 
-// Build prompt for AI (FIXED: get data from table rows)
+// ============================================
+// ✅ BUILD PROMPT (UPDATED: SOAL, BUKAN CP)
+// ============================================
+
 function buildPrompt(tahun) {
     const sekolah = document.getElementById('ps-sekolah')?.value || '-';
     
-    // Get data from soalRows, not header inputs
     const rowsData = soalRows.map(row => ({
-        jenjang: row.jenjangMapel,
         topik: row.topik,
         jumlah: row.jumlahNomor,
         model: row.modelSoal,
         untuk: row.soalUntuk
     }));
     
-    const rowsText = rowsData.map((r, index) => {
-        const modelMap = {
-            'ganda': 'Pilihan Ganda',
-            'isian': 'Isian',
-            'uraian': 'Uraian/Essay'
-        };
-        const untukMap = {
-            'harian': 'Tugas Harian',
-            'pts': 'Penilaian Tengah Semester (PTS)',
-            'pas': 'Penilaian Akhir Semester (PAS)'
-        };
-        
-        return `${index + 1}. ${r.jenjang?.toUpperCase() || '-'} - ${r.topik || '-'} | ${r.jumlah || 5} soal | ${modelMap[r.model] || 'Pilihan Ganda'} | ${untukMap[r.untuk] || 'Tugas Harian'}`;
+    const rowsText = rowsData.map((r, i) => {
+        const modelMap = { 'ganda': 'Pilihan Ganda (4 opsi)', 'isian': 'Isian Singkat', 'uraian': 'Uraian/Essay' };
+        const untukMap = { 'harian': 'Tugas Harian', 'pts': 'PTS', 'pas': 'PAS' };
+        return `${i+1}. Topik: "${r.topik}" | ${r.jumlah} soal | ${modelMap[r.model]} | ${untukMap[r.untuk]}`;
     }).join('\n');
     
-    return `Buatkan soal penilaian dengan detail berikut:
+    // ⚠️ PROMPT INI KHUSUS UNTUK MEMBUAT SOAL
+    return `Anda adalah guru profesional ahli pembuat soal ujian.
+TUGAS: Buatkan soal ujian berdasarkan rincian berikut.
 
-SEKOLAH: ${sekolah}
-TAHUN PELAJARAN: ${tahun}
+INFORMASI:
+- Sekolah: ${sekolah}
+- Tahun: ${tahun}
 
-DAFTAR TOPIK & SOAL:
+RINCIAN SOAL:
 ${rowsText}
 
-FORMAT OUTPUT (WAJIB IKUTI FORMAT INI):
+ATURAN:
+1. Buat soal sesuai jumlah yang diminta.
+2. Jika "Pilihan Ganda", buat 4 opsi (A, B, C, D) DAN tentukan kunci jawaban.
+3. Jika "Isian", buat soal dengan jawaban singkat.
+4. Jika "Uraian", buat soal analisis/esai.
+5. Pisahkan SOAL dan KUNCI JAWABAN dengan jelas.
+
+FORMAT OUTPUT (WAJIB IKUTI PERSIS):
+
 === SOAL ===
-[Daftar semua soal di sini, dikelompokkan per topik, dengan nomor urut]
+[Daftar semua soal di sini, dikelompokkan per Topik, beri nomor urut]
+[Contoh untuk Pilihan Ganda:
+1. Soal?
+   A. ...
+   B. ...
+   C. ...
+   D. ...
+]
 
 === KUNCI JAWABAN ===
-[Daftar kunci jawaban di sini, untuk pilihan ganda tulis huruf jawaban, untuk isian tulis jawaban singkat, untuk uraian tulis poin-poin penting yang harus ada]
+[Daftar kunci jawaban di sini sesuai nomor soal]
+[Contoh: 1. Jawaban: B (Alasan)]
 
-PENTING:
-1. Pisahkan dengan jelas antara bagian SOAL dan KUNCI JAWABAN
-2. Gunakan marker "=== SOAL ===" dan "=== KUNCI JAWABAN ==="
-3. Soal harus sesuai dengan jumlah yang diminta
-4. Untuk soal pilihan ganda, berikan 4 pilihan (A, B, C, D)
-5. Tingkat kesulitan disesuaikan dengan jenjang`;
+JANGAN MENAMBAH KATA PENGANTAR ATAU PENUTUP LAINNYA. MULAI LANGSUNG DENGAN "=== SOAL ===".`;
 }
 
-// Parse AI output into 2 sections (same pattern as cta-generator.js)
+// ============================================
+// ✅ PARSE OUTPUT
+// ============================================
+
 function parseAIOutput(content) {
     const soalMarker = '=== SOAL ===';
     const jawabanMarker = '=== KUNCI JAWABAN ===';
@@ -673,45 +541,38 @@ function parseAIOutput(content) {
     let questions = '';
     let answers = '';
     
-    const soalIndex = content.indexOf(soalMarker);
-    const jawabanIndex = content.indexOf(jawabanMarker);
+    const soalIdx = content.indexOf(soalMarker);
+    const jawabIdx = content.indexOf(jawabanMarker);
     
-    if (soalIndex !== -1 && jawabanIndex !== -1) {
-        questions = content.substring(soalIndex + soalMarker.length, jawabanIndex).trim();
-        answers = content.substring(jawabanIndex + jawabanMarker.length).trim();
-    } else if (soalIndex !== -1) {
-        questions = content.substring(soalIndex + soalMarker.length).trim();
-        answers = 'Kunci jawaban tidak tersedia dalam output AI.';
+    if (soalIdx !== -1 && jawabIdx !== -1) {
+        questions = content.substring(soalIdx + soalMarker.length, jawabIdx).trim();
+        answers = content.substring(jawabIdx + jawabanMarker.length).trim();
+    } else if (soalIdx !== -1) {
+        questions = content.substring(soalIdx + soalMarker.length).trim();
+        answers = 'Kunci jawaban tidak ditemukan dalam output.';
     } else {
         questions = content;
-        answers = 'Kunci jawaban tidak tersedia dalam output AI.';
+        answers = 'Kunci jawaban tidak ditemukan dalam output.';
     }
     
-    // Convert markdown-style lists to HTML
     questions = questions.replace(/\n/g, '<br>');
     answers = answers.replace(/\n/g, '<br>');
     
     return { questions, answers };
 }
 
-// Display output (FIXED: Ensure it shows - same pattern as cta-generator.js)
+// ============================================
+// ✅ DISPLAY OUTPUT
+// ============================================
+
 function displayOutput(output) {
-    const outputSection = document.getElementById('pembuat-soal-output');
-    const questionsDiv = document.getElementById('ps-output-questions');
-    const answersDiv = document.getElementById('ps-output-answers');
+    const section = document.getElementById('pembuat-soal-output');
+    const qDiv = document.getElementById('ps-output-questions');
+    const aDiv = document.getElementById('ps-output-answers');
     
-    console.log('📤 [PembuatSoal] Displaying output:', { hasQuestions: !!output.questions, hasAnswers: !!output.answers });
-    
-    if (outputSection) {
-        outputSection.classList.remove('hidden');
-        console.log('✅ [PembuatSoal] Output section shown');
-    }
-    if (questionsDiv) {
-        questionsDiv.innerHTML = output.questions || '<em>Soal tidak tersedia</em>';
-    }
-    if (answersDiv) {
-        answersDiv.innerHTML = output.answers || '<em>Kunci jawaban tidak tersedia</em>';
-    }
+    if (section) section.classList.remove('hidden');
+    if (qDiv) qDiv.innerHTML = output.questions;
+    if (aDiv) aDiv.innerHTML = output.answers;
 }
 
 // ============================================
@@ -722,44 +583,20 @@ async function saveToFirebase(tahun, output) {
     try {
         const user = auth.currentUser;
         if (!user) return;
+        const snap = await getDoc(doc(db, 'users', user.uid));
+        const ud = snap.exists() ? snap.data() : {};
         
-        // Get user data for additional info
-        const userSnap = await getDoc(doc(db, 'users', user.uid));
-        const userData = userSnap.exists() ? userSnap.data() : {};
-        
-        // Save to pembuat_soal collection
         await addDoc(collection(db, 'pembuat_soal'), {
             uid: user.uid,
-            sekolah: userData.nama_sekolah || '',
-            mapel: userData.mapel_yang_diampu?.join(', ') || userData.sd_mapel_type || '',
+            sekolah: ud.nama_sekolah || '',
+            mapel: ud.mapel_yang_diampu?.join(', ') || ud.sd_mapel_type || '',
             tahunPelajaran: tahun,
             topics: soalRows,
             output: output,
             createdAt: serverTimestamp(),
-            jenjang: userData.jenjang_sekolah || ''
+            jenjang: ud.jenjang_sekolah || ''
         });
-        
-        // Also save to pembelajaran collection (as requested)
-        await addDoc(collection(db, 'pembelajaran'), {
-            uid: user.uid,
-            type: 'pembuat_soal',
-            sekolah: userData.nama_sekolah || '',
-            mapel: userData.mapel_yang_diampu?.join(', ') || userData.sd_mapel_type || '',
-            tahunPelajaran: tahun,
-            data: {
-                topics: soalRows,
-                output: output
-            },
-            createdAt: serverTimestamp(),
-            jenjang: userData.jenjang_sekolah || ''
-        });
-        
-        console.log('✅ [PembuatSoal] Saved to Firebase');
-        
-    } catch (error) {
-        console.error('❌ [PembuatSoal] Save error:', error);
-        // Don't show error to user, save is optional
-    }
+    } catch (e) { console.error('Save error:', e); }
 }
 
 // ============================================
@@ -767,77 +604,43 @@ async function saveToFirebase(tahun, output) {
 // ============================================
 
 function downloadWord() {
-    if (!generatedOutput.questions) {
-        showAlert('Belum ada soal untuk diunduh!', 'warning');
-        return;
-    }
-    
+    if (!generatedOutput.questions) return;
     const sekolah = document.getElementById('ps-sekolah')?.value || '-';
     const mapel = document.getElementById('ps-mapel')?.value || '-';
     const tahun = document.getElementById('ps-tahun')?.value || '-';
     
-    // Create Word document content (HTML format that Word can open)
     const content = `
         <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-        <head><meta charset='utf-8'><title>Soal Penilaian</title></head>
+        <head><meta charset='utf-8'></head>
         <body>
-            <h1 style="text-align: center;">SOAL PENILAIAN</h1>
-            <p><strong>Sekolah:</strong> ${sekolah}</p>
-            <p><strong>Mata Pelajaran:</strong> ${mapel}</p>
-            <p><strong>Tahun Pelajaran:</strong> ${tahun}</p>
-            <hr>
+            <h1 style="text-align:center">SOAL PENILAIAN</h1>
+            <p>Sekolah: ${sekolah}<br>Mapel: ${mapel}<br>Tahun: ${tahun}</p><hr>
             <h2>SOAL</h2>
             <div>${generatedOutput.questions}</div>
             <hr>
             <h2>KUNCI JAWABAN</h2>
             <div>${generatedOutput.answers}</div>
-        </body>
-        </html>
-    `;
+        </body></html>`;
     
-    // Create blob and download
-    const blob = new Blob(['\ufeff', content], {
-        type: 'application/msword'
-    });
-    
+    const blob = new Blob(['\ufeff', content], { type: 'application/msword' });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `Soal_${mapel}_${tahun}.doc`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    showAlert('✅ File Word sedang diunduh!', 'success');
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Soal_${mapel}_${tahun}.doc`;
+    a.click();
+    URL.revokeObjectURL(url);
 }
 
 // ============================================
 // ✅ SHOW ALERT
 // ============================================
 
-function showAlert(message, status = 'success') {
-    const container = document.getElementById('pembuat-soal-alert-container');
-    if (!container) return;
-    
-    const alertClass = {
-        'success': 'pembuat-soal-alert-success',
-        'error': 'pembuat-soal-alert-error',
-        'warning': 'pembuat-soal-alert-warning'
-    }[status];
-    
-    container.innerHTML = `
-        <div class="pembuat-soal-alert ${alertClass}">
-            ${message}
-        </div>
-    `;
-    
-    // Auto-hide after 5 seconds
-    setTimeout(() => {
-        container.innerHTML = '';
-    }, 5000);
+function showAlert(msg, type = 'success') {
+    const c = document.getElementById('pembuat-soal-alert-container');
+    if (!c) return;
+    const cls = type === 'error' ? 'pembuat-soal-alert-error' : (type === 'warning' ? 'pembuat-soal-alert-warning' : 'pembuat-soal-alert-success');
+    c.innerHTML = `<div class="pembuat-soal-alert ${cls}">${msg}</div>`;
+    setTimeout(() => { if(c) c.innerHTML = ''; }, 5000);
 }
-
-// ✅ EXPORT sudah di function declaration (line ~25)
-// Tidak perlu export lagi di sini
 
 console.log('🟢 [PembuatSoal] Module READY');
