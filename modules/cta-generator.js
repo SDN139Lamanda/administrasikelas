@@ -16,10 +16,10 @@
 console.log('🔴 [CTA Generator] Script START');
 
 // ✅ IMPORTS
-import { generateWithGroq, getGroqApiKey } from '../groq-api.js';
+import { generateWithGroq, getGroqApiKey } from './groq-api.js';
 import { validateInput, validateInputWithFilter, isMapelAllowedForUser, formatMapelName, getFase, formatSemester } from './cta-templates.js';
 import { getCP, getTP, getATP, processContent } from './cta-loader.js';
-import { db, auth, collection, addDoc, query, where, orderBy, onSnapshot, doc, getDoc, serverTimestamp } from '../firebase-config.js';
+import { db, auth, collection, addDoc, query, where, orderBy, onSnapshot, doc, getDoc, serverTimestamp } from './firebase-config.js';
 
 console.log('✅ [CTA Generator] All imports successful');
 
