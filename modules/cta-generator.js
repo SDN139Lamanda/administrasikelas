@@ -2,16 +2,11 @@
  * ============================================
  * MODULE: CTA GENERATOR (CP/TP/ATP)
  * Platform Administrasi Kelas Digital
- * ============================================
- * ✅ FULL VERSION - All original functionality preserved
- * ✅ ADDED: Robust filtering logic for mapel dropdown (SKEMA COMPLIANT)
- * ✅ FIXED: 'paibd' without slash + case-insensitive matching
- * ✅ FIXED: Proper window attachment for renderCitaGenerator
+ * FINAL VERSION - Clean, Production-Ready
  * ============================================
  */
 console.log('🔴 [CTA Generator] Script START');
 
-// ✅ IMPORTS
 import { hasGroqApiKey, generateWithGroq, getGroqApiKey } from './groq-api.js';
 import { validateInput, validateInputWithFilter } from './cta-templates.js';
 import { db, auth, collection, addDoc, query, where, orderBy, onSnapshot, doc, getDoc, serverTimestamp } from './firebase-config.js';
@@ -21,7 +16,6 @@ console.log('✅ [CTA Generator] All imports successful');
 // ============================================
 // ✅ GLOBAL STATE
 // ============================================
-
 let userRole = 'teacher';
 let userKelasDiampu = [];
 let userMapelDiampu = [];
@@ -33,56 +27,33 @@ let _mapelCache = {};
 // ============================================
 // ✅ HELPER FUNCTIONS
 // ============================================
-
 function isMapelExcludedForGuruKelas(mapelNama) {
-  const excluded = ['pai', 'pjok', 'paibd', 'pendidikan agama', 'pendidikan jasmani', 'pendidikan keagamaan'];
+  const excluded = ['pai', 'pjok', 'paibd', 'pendidikan agama', 'pendidikan jasmani'];
   const namaLower = mapelNama.toLowerCase();
   return excluded.some(ex => namaLower.includes(ex));
-}
-
-function isMapelAllowedForGuruMapel(mapelNama, sdMapelType) {
-  const namaLower = mapelNama.toLowerCase();
-  const target = (sdMapelType || '').toLowerCase();
-  return namaLower.includes(target) || target.includes(namaLower);
-}
-
-function isMapelInAssignedList(mapelNama, assignedList) {
-  if (!assignedList || assignedList.length === 0) return true;
-  const namaLower = mapelNama.toLowerCase();
-  return assignedList.some(m => {
-    const mLower = (m || '').toLowerCase();
-    return namaLower.includes(mLower) || mLower.includes(namaLower);
-  });
 }
 
 // ============================================
 // ✅ FETCH MAPEL DATA
 // ============================================
-
 export async function fetchMapelData(jenjang) {
   if (!jenjang) return [];
   if (_mapelCache[jenjang]) return _mapelCache[jenjang];
   
   try {
-    console.log(`📥 [Mapel] Fetching ./data/mapel/${jenjang}.json`);
     const response = await fetch(`./data/mapel/${jenjang}.json`, { cache: 'no-store' });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
     if (!Array.isArray(data)) throw new Error('Invalid JSON structure');
     _mapelCache[jenjang] = data;
-    console.log(`✅ [Mapel] Loaded ${data.length} subjects for ${jenjang.toUpperCase()}`);
     return data;
   } catch (error) {
     console.warn(`⚠️ [Mapel] Failed to fetch ${jenjang}.json:`, error.message);
     const fallback = [
-      { nama: 'Matematika', jenjang },
-      { nama: 'Bahasa Indonesia', jenjang },
-      { nama: 'IPA/IPAS', jenjang },
-      { nama: 'PJOK', jenjang },
-      { nama: 'PAIBD', jenjang },
-      { nama: 'Seni Budaya', jenjang },
-      { nama: 'Bahasa Inggris', jenjang },
-      { nama: 'Lainnya', jenjang }
+      { nama: 'Matematika', jenjang }, { nama: 'Bahasa Indonesia', jenjang },
+      { nama: 'IPA/IPAS', jenjang }, { nama: 'PJOK', jenjang },
+      { nama: 'PAIBD', jenjang }, { nama: 'Seni Budaya', jenjang },
+      { nama: 'Bahasa Inggris', jenjang }, { nama: 'Lainnya', jenjang }
     ];
     _mapelCache[jenjang] = fallback;
     return fallback;
@@ -92,7 +63,6 @@ export async function fetchMapelData(jenjang) {
 // ============================================
 // ✅ POPULATE MAPEL DROPDOWN (ROBUST FILTERING)
 // ============================================
-
 async function populateMapelDropdown(jenjang, userMapelFromReg = null, userData = null) {
   const mapelSelect = document.getElementById('cta-mapel');
   if (!mapelSelect || !jenjang) return;
@@ -105,11 +75,12 @@ async function populateMapelDropdown(jenjang, userMapelFromReg = null, userData 
     const mapelList = await fetchMapelData(jenjang);
     mapelSelect.innerHTML = '<option value="">Pilih Mata Pelajaran</option>';
     
+    // Determine filter rule
     const getFilterRule = () => {
       if (!userData) return { type: 'none' };
       let { jenjang_sekolah, sd_mapel_type, mapel_yang_diampu, role } = userData;
       
-      // Fallback ke localStorage
+      // Fallback to localStorage
       if (!jenjang_sekolah) jenjang_sekolah = localStorage.getItem('user_jenjang') || jenjang_sekolah;
       if (!sd_mapel_type) sd_mapel_type = localStorage.getItem('user_sd_mapel_type') || sd_mapel_type;
       if (!mapel_yang_diampu) {
@@ -121,21 +92,23 @@ async function populateMapelDropdown(jenjang, userMapelFromReg = null, userData 
       if (role === 'admin') return { type: 'none' };
       if (jenjang_sekolah === 'tk') return { type: 'none' };
 
+      // SD/MI Guru Kelas: exclude PAI/PJOK/PAIBD
       if (['sd', 'mi'].includes(jenjang_sekolah) && sd_mapel_type?.toLowerCase() === 'kelas') {
         return { type: 'exclude', values: ['pai', 'pjok', 'paibd', 'pendidikan agama', 'pendidikan jasmani'] };
       }
 
+      // SD/MI Guru Mapel: include only assigned subject
       let targetMapel = '';
       if (sd_mapel_type && sd_mapel_type.toLowerCase() !== 'kelas') {
         targetMapel = sd_mapel_type.toLowerCase();
       } else if (mapel_yang_diampu && mapel_yang_diampu.length > 0) {
         targetMapel = mapel_yang_diampu[0].toLowerCase();
       }
-
       if (['sd', 'mi'].includes(jenjang_sekolah) && targetMapel) {
         return { type: 'include', values: [targetMapel] };
       }
 
+      // SMP/MTs/SMA/MA: include only assigned subjects
       if (['smp', 'mts', 'sma', 'ma'].includes(jenjang_sekolah) && mapel_yang_diampu?.length > 0) {
         return { type: 'include', values: mapel_yang_diampu.map(m => (m || '').toLowerCase()) };
       }
@@ -144,7 +117,6 @@ async function populateMapelDropdown(jenjang, userMapelFromReg = null, userData 
     };
     
     const filterRule = getFilterRule();
-    console.log('🔍 [Mapel] Filter rule:', filterRule);
     
     mapelList.forEach(item => {
       const namaLower = (item.nama || '').toLowerCase();
@@ -157,6 +129,7 @@ async function populateMapelDropdown(jenjang, userMapelFromReg = null, userData 
       mapelSelect.appendChild(opt);
     });
     
+    // Auto-lock if registered mapel matches
     if (userMapelFromReg) {
       const match = Array.from(mapelSelect.options).find(opt => 
         (opt.value || '').toLowerCase().includes(userMapelFromReg.toLowerCase()) || 
@@ -191,10 +164,9 @@ async function populateMapelDropdown(jenjang, userMapelFromReg = null, userData 
 // ============================================
 // ✅ FILTER DROPDOWN OPTIONS
 // ============================================
-
 function filterCTAOptions(userData) {
   if (!userData) return;
-  const { jenjang_sekolah, kelas_diampu, mapel_yang_diampu, sd_mapel_type, role } = userData;
+  const { jenjang_sekolah, kelas_diampu, sd_mapel_type, role } = userData;
   
   const kelasSelect = document.getElementById('cta-kelas');
   if (kelasSelect) {
@@ -215,15 +187,14 @@ function filterCTAOptions(userData) {
 // ============================================
 // ✅ SETUP JENJANG DROPDOWN
 // ============================================
-
 function setupJenjangDropdown(userData) {
-  if (!userData) { console.warn('⚠️ [Jenjang] No userData, skip'); return; }
+  if (!userData) return;
   const userJenjang = userData.jenjang_sekolah;
-  if (!userJenjang) { console.warn('⚠️ [Jenjang] userJenjang empty, skip'); return; }
+  if (!userJenjang) return;
   
   setTimeout(() => {
     const jenjangSelect = document.getElementById('cta-jenjang');
-    if (!jenjangSelect) { console.error('❌ [Jenjang] #cta-jenjang not found!'); return; }
+    if (!jenjangSelect) return;
     jenjangSelect.value = userJenjang;
     const newSelect = jenjangSelect.cloneNode(true);
     jenjangSelect.replaceWith(newSelect);
@@ -241,11 +212,8 @@ function setupJenjangDropdown(userData) {
 // ============================================
 // ✅ DOWNLOAD FUNCTION
 // ============================================
-
 function downloadCTAResult() {
   const cp = document.getElementById('result-cp')?.textContent || '';
-  const tp = document.getElementById('result-tp')?.textContent || '';
-  const atp = document.getElementById('result-atp')?.textContent || '';
   if (!cp || cp.includes('⏳') || cp.includes('Error')) { alert('⚠️ Generate data dulu sebelum download!'); return; }
   
   const jenjang = document.getElementById('cta-jenjang')?.value || '';
@@ -260,14 +228,12 @@ function downloadCTAResult() {
   const labelSemester = semester === '1' ? 'Ganjil' : 'Genap';
   
   let content = `═══════════════════════════════════════════════════════════\n`;
-  content += `              CAPAIAN PEMBELAJARAN (CP/TP/ATP)\n`;
-  content += `                  KURIKULUM MERDEKA\n`;
-  content += `═══════════════════════════════════════════════════════════\n\n`;
+  content += `              CAPAIAN PEMBELAJARAN (CP/TP/ATP)\n                  KURIKULUM MERDEKA\n═══════════════════════════════════════════════════════════\n\n`;
   content += `INFORMASI DOKUMEN\n───────────────────────────────────────────────────────────\n`;
   content += `Nama Sekolah  : ${sekolah}\nTahun Ajaran  : ${tahun}\nJenjang       : ${labelJenjang}\nKelas         : ${kelas}\nSemester      : ${labelSemester}\nMata Pelajaran: ${mapel}\nGuru Pengampu : ${guru}\nTopik/Materi  : ${topik}\n\n`;
-  content += `═══════════════════════════════════════════════════════════\n                    CAPAIAN PEMBELAJARAN (CP)\n═══════════════════════════════════════════════════════════\n\n${cp}\n\n`;
-  content += `═══════════════════════════════════════════════════════════\n                    TUJUAN PEMBELAJARAN (TP)\n═══════════════════════════════════════════════════════════\n\n${tp}\n\n`;
-  content += `═══════════════════════════════════════════════════════════\n              ALUR TUJUAN PEMBELAJARAN (ATP)\n═══════════════════════════════════════════════════════════\n\n${atp}\n\n`;
+  content += `═══════════════════════════════════════════════════════════\n                    CAPAIAN PEMBELAJARAN (CP)\n═══════════════════════════════════════════════════════════\n\n${document.getElementById('result-cp')?.textContent || ''}\n\n`;
+  content += `═══════════════════════════════════════════════════════════\n                    TUJUAN PEMBELAJARAN (TP)\n═══════════════════════════════════════════════════════════\n\n${document.getElementById('result-tp')?.textContent || ''}\n\n`;
+  content += `═══════════════════════════════════════════════════════════\n              ALUR TUJUAN PEMBELAJARAN (ATP)\n═══════════════════════════════════════════════════════════\n\n${document.getElementById('result-atp')?.textContent || ''}\n\n`;
   content += `═══════════════════════════════════════════════════════════\n`;
   
   const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
@@ -281,16 +247,9 @@ function downloadCTAResult() {
   URL.revokeObjectURL(url);
 }
 
-function autoExpandTextarea(textarea) {
-  if (!textarea) return;
-  textarea.style.height = 'auto';
-  textarea.style.height = textarea.scrollHeight + 'px';
-}
-
 // ============================================
 // ✅ AI READINESS CHECK
 // ============================================
-
 export async function isAiReady() {
   if (_aiReadyCache !== null) return _aiReadyCache;
   try {
@@ -299,26 +258,15 @@ export async function isAiReady() {
     const localKey = localStorage.getItem('groq_api_key');
     if (localKey && localKey.startsWith('gsk_') && localKey.length >= 20) { _aiReadyCache = true; return true; }
     _aiReadyCache = false; return false;
-  } catch (error) { console.error('❌ [CTA Generator] Error checking AI readiness:', error); _aiReadyCache = false; return false; }
+  } catch (error) { _aiReadyCache = false; return false; }
 }
 
 // ============================================
-// ✅ MAIN RENDER FUNCTION (FIXED: window attachment)
+// ✅ MAIN RENDER FUNCTION (INTERNAL)
 // ============================================
-
 async function _renderCitaGenerator(jenjangFromParam, kelasFromParam, semesterFromParam) {
-  console.log('📝 [CTA Generator] renderCitaGenerator() called');
-  
   const container = document.getElementById('cita-container');
-  if (!container) { 
-    console.error('❌ Container #cita-container not found!'); 
-    const fallbackContainer = document.getElementById('module-container');
-    if (fallbackContainer) {
-      console.warn('⚠️ Using #module-container as fallback');
-      return _renderCitaGenerator(jenjangFromParam, kelasFromParam, semesterFromParam);
-    }
-    return; 
-  }
+  if (!container) return;
   
   const user = auth.currentUser;
   if (!user) { alert('⚠️ Silakan login dulu!'); return; }
@@ -328,10 +276,9 @@ async function _renderCitaGenerator(jenjangFromParam, kelasFromParam, semesterFr
   const userMapelFromReg = localStorage.getItem('user_mapel') || null;
   const aiReady = await isAiReady();
   
-  let userProfile = null;
   let userData = null;
   try {
-    userProfile = await getDoc(doc(db, 'users', user.uid));
+    const userProfile = await getDoc(doc(db, 'users', user.uid));
     if (userProfile.exists()) {
       userData = userProfile.data();
       userRole = userData.role || 'teacher';
@@ -342,8 +289,9 @@ async function _renderCitaGenerator(jenjangFromParam, kelasFromParam, semesterFr
       filterCTAOptions(userData);
       setupJenjangDropdown(userData);
     }
-  } catch (e) { console.error('❌ [CTA Generator] Failed to load user ', e); }
+  } catch (e) { console.error('❌ [CTA Generator] Failed to load user', e); }
   
+  // Determine available classes
   const allClasses = ['1','2','3','4','5','6','7','8','9','10','11','12'];
   let availableClasses = allClasses;
   let isClassLocked = false;
@@ -356,7 +304,7 @@ async function _renderCitaGenerator(jenjangFromParam, kelasFromParam, semesterFr
   let defaultClass = kelasFromParam || '';
   if (isClassLocked && availableClasses.length > 0) defaultClass = availableClasses[0];
   
-  // ✅ RENDER UI (FULL CSS PRESERVED)
+  // Render UI
   container.innerHTML = `
     <style>
       .cta-generator-form { max-width: 950px; margin: auto; padding: 30px; background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
@@ -365,7 +313,6 @@ async function _renderCitaGenerator(jenjangFromParam, kelasFromParam, semesterFr
       .section-title { font-size: 18px; font-weight: 700; color: #374151; margin: 25px 0 15px 0; padding-bottom: 8px; border-bottom: 2px solid #e5e7eb; display: flex; align-items: center; gap: 8px; }
       .cta-generator-form label { display: block; margin-top: 12px; font-weight: 600; color: #374151; font-size: 14px; }
       .cta-generator-form input, .cta-generator-form select { width: 100%; margin-top: 8px; padding: 12px; border-radius: 8px; border: 1px solid #d1d5db; font-size: 14px; font-family: inherit; box-sizing: border-box; }
-      .cta-generator-form input:focus, .cta-generator-form select:focus { outline: none; border-color: #0891b2; }
       .cta-generator-form select:disabled { background: #f3f4f6; color: #6b7280; cursor: not-allowed; }
       .cta-result-table { width: 100%; border-collapse: collapse; margin-top: 16px; background: white; }
       .cta-result-table th { background: #0891b2; color: white; padding: 12px 16px; text-align: left; font-weight: 600; }
@@ -374,26 +321,21 @@ async function _renderCitaGenerator(jenjangFromParam, kelasFromParam, semesterFr
       .cta-result-table .content-col { white-space: pre-wrap; line-height: 1.6; color: #1f2937; }
       .btn-generate, .btn-save, .btn-secondary, .btn-print, .btn-download { margin-top: 20px; padding: 14px 30px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; }
       .btn-generate { background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%); color: white; }
-      .btn-generate:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(8,145,178,0.3); }
       .btn-save { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; }
-      .btn-save:hover { background: linear-gradient(135deg, #059669 0%, #047857 100%); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(16,185,129,0.3); }
       .btn-print { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white; }
-      .btn-print:hover { background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(99,102,241,0.3); }
       .btn-download { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; }
-      .btn-download:hover { background: linear-gradient(135deg, #d97706 0%, #b45309 100%); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(245,158,11,0.3); }
       .btn-secondary { background: #6b7280; color: white; margin-top: 10px; }
-      .btn-secondary:hover { background: #4b5563; transform: translateY(-2px); }
       .btn-back { margin-top: 20px; padding: 12px 30px; background: #6b7280; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; width: auto; }
       .hidden { display: none !important; }
       .auto-filled { background: #f0fdf4; border-color: #10b981 !important; }
-      .grid-cols-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
-      .grid-cols-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+      .grid-cols-2, .grid-cols-3 { display: grid; gap: 16px; }
+      .grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+      .grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
       @media (max-width: 768px) { .grid-cols-2, .grid-cols-3 { grid-template-columns: 1fr; } }
       .cta-item { background: white; padding: 20px; margin-top: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
       .status-badge { display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 11px; font-weight: 600; margin-left: 8px; }
       .status-ready { background: #dcfce7; color: #166534; }
       .status-warning { background: #fef3c7; color: #92400e; }
-      .status-info { background: #dbeafe; color: #1e40af; }
       .result-section { margin-top: 30px; }
       .lock-indicator { font-size: 11px; color: #6b7280; margin-top: 4px; display: flex; align-items: center; gap: 4px; }
       @media print {
@@ -446,6 +388,7 @@ async function _renderCitaGenerator(jenjangFromParam, kelasFromParam, semesterFr
       <div class="mt-12"><h3 class="text-xl font-bold mb-4 text-gray-800"><i class="fas fa-archive mr-2"></i>Dokumen Tersimpan (<span id="saved-count">0</span>)</h3><div id="cta-list" class="space-y-4"><div class="loading-spinner"><i class="fas fa-spinner fa-spin text-2xl mb-3"></i><p>Memuat...</p></div></div></div>
     </div>`;
   
+  // Populate mapel dropdown
   const jenjangSelect = document.getElementById('cta-jenjang');
   if (jenjangSelect) {
     const initialJenjang = jenjangFromParam || userJenjangSekolah;
@@ -455,14 +398,17 @@ async function _renderCitaGenerator(jenjangFromParam, kelasFromParam, semesterFr
     }
     jenjangSelect.addEventListener('change', async function() {
       const newJenjang = this.value;
-      if (newJenjang) {
-        await populateMapelDropdown(newJenjang, userMapelFromReg, userData);
-      }
+      if (newJenjang) await populateMapelDropdown(newJenjang, userMapelFromReg, userData);
     });
   }
   
+  // Event listeners
   const btnPrint = document.getElementById('btn-print');
-  if (btnPrint) btnPrint.addEventListener('click', () => { const cp = document.getElementById('result-cp')?.textContent || ''; if (!cp || cp.includes('⏳') || cp.includes('Error')) { alert('⚠️ Generate data dulu sebelum print!'); return; } window.print(); });
+  if (btnPrint) btnPrint.addEventListener('click', () => { 
+    const cp = document.getElementById('result-cp')?.textContent || ''; 
+    if (!cp || cp.includes('⏳') || cp.includes('Error')) { alert('⚠️ Generate data dulu sebelum print!'); return; } 
+    window.print(); 
+  });
   const btnDownload = document.getElementById('btn-download');
   if (btnDownload) btnDownload.addEventListener('click', downloadCTAResult);
   
@@ -470,17 +416,14 @@ async function _renderCitaGenerator(jenjangFromParam, kelasFromParam, semesterFr
   container.classList.remove('hidden'); 
   setupEventHandlers(); 
   loadCTAData(); 
-  console.log('✅ [CTA Generator] UI rendered to #cita-container');
 }
 
-// ✅ FIX: Attach to window AFTER module load
+// ✅ FIX: Attach to window AFTER module load (NO FALLBACK CODE)
 window.renderCitaGenerator = _renderCitaGenerator;
 
-// ✅ LEGACY FUNCTION
-async function renderCTAGeneratorLegacy(jenjangFromParam, kelasFromParam, semesterFromParam, container) {
-  return window.renderCitaGenerator(jenjangFromParam, kelasFromParam, semesterFromParam);
-}
-
+// ============================================
+// ✅ SUPPORT FUNCTIONS
+// ============================================
 function hideDashboardSections() { 
   document.querySelector('.dashboard-hero')?.closest('section')?.classList.add('hidden'); 
   document.querySelector('[aria-labelledby="rooms-heading"]')?.classList.add('hidden'); 
@@ -495,7 +438,6 @@ function setupEventHandlers() {
 }
 
 async function handleGenerate() {
-  console.log('🪄 [CTA Generator] Generate clicked');
   const user = auth.currentUser; if (!user) { alert('⚠️ Silakan login dulu!'); return; }
   const jenjang = document.getElementById('cta-jenjang')?.value, kelas = document.getElementById('cta-kelas')?.value, semester = document.getElementById('cta-semester')?.value, mapel = document.getElementById('cta-mapel')?.value, sekolah = document.getElementById('kop-sekolah')?.value, tahun = document.getElementById('kop-tahun')?.value, guru = document.getElementById('cta-guru')?.value, topik = document.getElementById('cta-topik')?.value;
   
@@ -517,17 +459,14 @@ async function handleGenerate() {
     document.getElementById('result-cp').textContent = result.cp; 
     document.getElementById('result-tp').textContent = result.tp; 
     document.getElementById('result-atp').textContent = result.atp;
-    console.log('✅ [CTA Generator] Generation complete!');
     showAlert('✅ Berhasil generate!', 'success');
   } catch (error) {
-    console.error('❌ [CTA Generator] Error:', error);
     document.getElementById('result-cp').textContent = `❌ Error: ${error.message}`; 
     alert('❌ Gagal generate:\n\n' + error.message);
   }
 }
 
 async function handleSave() {
-  console.log('💾 [CTA Generator] Save clicked');
   const user = auth.currentUser; if (!user) return;
   const cp = document.getElementById('result-cp')?.textContent || '', tp = document.getElementById('result-tp')?.textContent || '', atp = document.getElementById('result-atp')?.textContent || '';
   if (!cp || cp.includes('⏳') || cp.includes('Error')) { alert('⚠️ Generate data dulu!'); return; }
@@ -576,4 +515,4 @@ export async function autoSaveCTA(generatedContent, metadata) {
   } catch(e) { console.warn('⚠️ Auto-save skipped:', e); return null; }
 }
 
-console.log('🟢 [CTA Generator] READY — Full functionality preserved + SKEMA COMPLIANT');
+console.log('🟢 [CTA Generator] READY — Clean Production Version');
