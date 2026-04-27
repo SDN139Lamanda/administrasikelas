@@ -3,8 +3,8 @@
  * MODULE: CTA GENERATOR (CP/TP/ATP)
  * Platform Administrasi Kelas Digital
  * ✅ UPDATED: Fix function name + container + table output format
+ * ✅ UPDATED: Dynamic mapel loading + Auto-lock based on user registration (SKEMA COMPLIANT)
  * ============================================
- * UPDATE: Dynamic mapel loading from data/mapel/*.json + Auto-lock based on user registration
  */
 console.log('🔴 [CTA Generator] Script START');
 
@@ -18,8 +18,29 @@ let userRole = 'teacher';
 let userKelasDiampu = [];
 let userMapelDiampu = [];
 let userSdMapelType = 'kelas';
+let userJenjangSekolah = '';
 let _aiReadyCache = null;
 let _mapelCache = {};
+
+// ✅ HELPER: Check if mapel should be excluded for Guru Kelas SD/MI
+function isMapelExcludedForGuruKelas(mapelNama) {
+  const excluded = ['pai', 'pjok', 'bd', 'pai/bd', 'pendidikan agama islam', 'pendidikan jasmani', 'pendidikan keagamaan'];
+  const namaLower = mapelNama.toLowerCase();
+  return excluded.some(ex => namaLower.includes(ex));
+}
+
+// ✅ HELPER: Check if mapel should be included for Guru Mapel SD/MI
+function isMapelAllowedForGuruMapel(mapelNama, sdMapelType) {
+  const namaLower = mapelNama.toLowerCase();
+  return namaLower.includes(sdMapelType);
+}
+
+// ✅ HELPER: Check if mapel is in user's assigned mapel list (for SMP/MTs/SMA/MA)
+function isMapelInAssignedList(mapelNama, assignedList) {
+  if (!assignedList || assignedList.length === 0) return true;
+  const namaLower = mapelNama.toLowerCase();
+  return assignedList.some(m => namaLower.includes(m.toLowerCase()));
+}
 
 export async function fetchMapelData(jenjang) {
   if (!jenjang) return [];
@@ -47,7 +68,8 @@ export async function fetchMapelData(jenjang) {
   }
 }
 
-async function populateMapelDropdown(jenjang, userMapelFromReg = null) {
+// ✅ UPDATED: Populate mapel dropdown WITH FILTERING based on user registration (SKEMA COMPLIANT)
+async function populateMapelDropdown(jenjang, userMapelFromReg = null, userData = null) {
   const mapelSelect = document.getElementById('cta-mapel');
   if (!mapelSelect || !jenjang) return;
   
@@ -59,29 +81,79 @@ async function populateMapelDropdown(jenjang, userMapelFromReg = null) {
     const mapelList = await fetchMapelData(jenjang);
     mapelSelect.innerHTML = '<option value="">Pilih Mata Pelajaran</option>';
     
+    // ✅ DETERMINE FILTER RULE based on skema
+    const getFilterRule = () => {
+      if (!userData) return { type: 'none' };
+      const { jenjang_sekolah, sd_mapel_type, mapel_yang_diampu, role } = userData;
+      
+      if (role === 'admin') return { type: 'none' };
+      if (jenjang_sekolah === 'tk') return { type: 'none' }; // TK: all mapel
+      
+      // SD/MI Guru Kelas: EXCLUDE PAI/PJOK/BD
+      if (['sd', 'mi'].includes(jenjang_sekolah) && sd_mapel_type === 'kelas') {
+        return { type: 'exclude', values: ['pai', 'pjok', 'bd', 'pai/bd'] };
+      }
+      
+      // SD/MI Guru Mapel: ONLY include PAI/PJOK/BD
+      if (['sd', 'mi'].includes(jenjang_sekolah) && ['pai', 'pjok', 'bd'].includes(sd_mapel_type)) {
+        return { type: 'include', values: [sd_mapel_type] };
+      }
+      
+      // SMP/MTs/SMA/MA: ONLY include mapel_yang_diampu
+      if (['smp', 'mts', 'sma', 'ma'].includes(jenjang_sekolah) && mapel_yang_diampu?.length > 0) {
+        return { type: 'include', values: mapel_yang_diampu.map(m => m.toLowerCase()) };
+      }
+      
+      return { type: 'none' };
+    };
+    
+    const filterRule = getFilterRule();
+    console.log('🔍 [Mapel] Filter rule:', filterRule);
+    
     mapelList.forEach(item => {
+      const namaLower = item.nama.toLowerCase();
+      
+      // ✅ APPLY FILTER
+      if (filterRule.type === 'exclude' && filterRule.values.some(v => namaLower.includes(v))) {
+        return; // Skip this option
+      }
+      if (filterRule.type === 'include' && !filterRule.values.some(v => namaLower.includes(v))) {
+        return; // Skip this option
+      }
+      
       const opt = document.createElement('option');
       opt.value = item.nama;
       opt.textContent = item.nama;
       mapelSelect.appendChild(opt);
     });
     
-    if (userMapelFromReg && mapelList.some(m => m.nama === userMapelFromReg)) {
-      mapelSelect.value = userMapelFromReg;
-      mapelSelect.disabled = true;
-      
-      const lockBadge = document.createElement('span');
-      lockBadge.className = 'lock-indicator';
-      lockBadge.innerHTML = `<i class="fas fa-lock text-emerald-600"></i> <strong>${userMapelFromReg}</strong> - Terkunci`;
-      lockBadge.style.cssText = 'display:block;margin-top:6px;font-size:12px;color:#059669';
-      
-      const existingBadge = mapelSelect.parentNode.querySelector('.lock-indicator');
-      if (existingBadge) existingBadge.remove();
-      
-      mapelSelect.parentNode.appendChild(lockBadge);
-      console.log(`🔐 [Mapel] Auto-locked to: ${userMapelFromReg}`);
+    // ✅ AUTO-LOCK if user has registered mapel AND it's in the filtered list
+    if (userMapelFromReg) {
+      const match = Array.from(mapelSelect.options).find(opt => 
+        opt.value.toLowerCase() === userMapelFromReg.toLowerCase() || 
+        opt.textContent.toLowerCase().includes(userMapelFromReg.toLowerCase())
+      );
+      if (match) {
+        mapelSelect.value = match.value;
+        mapelSelect.disabled = true;
+        
+        const lockBadge = document.createElement('span');
+        lockBadge.className = 'lock-indicator';
+        lockBadge.innerHTML = `<i class="fas fa-lock text-emerald-600"></i> <strong>${userMapelFromReg}</strong> - Terkunci`;
+        lockBadge.style.cssText = 'display:block;margin-top:6px;font-size:12px;color:#059669';
+        
+        const existingBadge = mapelSelect.parentNode.querySelector('.lock-indicator');
+        if (existingBadge) existingBadge.remove();
+        
+        mapelSelect.parentNode.appendChild(lockBadge);
+        console.log(`🔐 [Mapel] Auto-locked to: ${userMapelFromReg}`);
+      } else {
+        // Registered mapel not in filtered list — show warning
+        console.warn(`⚠️ [Mapel] Registered mapel "${userMapelFromReg}" not available after filtering`);
+        mapelSelect.disabled = false;
+      }
     } else {
-      if (originalValue && mapelList.some(m => m.nama === originalValue)) {
+      if (originalValue && Array.from(mapelSelect.options).some(opt => opt.value === originalValue)) {
         mapelSelect.value = originalValue;
       }
       mapelSelect.disabled = false;
@@ -93,51 +165,52 @@ async function populateMapelDropdown(jenjang, userMapelFromReg = null) {
   }
 }
 
-export async function isAiReady() {
-  if (_aiReadyCache !== null) return _aiReadyCache;
-  try {
-    const globalKey = await getGroqApiKey();
-    if (globalKey) { _aiReadyCache = true; return true; }
-    const localKey = localStorage.getItem('groq_api_key');
-    if (localKey && localKey.startsWith('gsk_') && localKey.length >= 20) { _aiReadyCache = true; return true; }
-    _aiReadyCache = false; return false;
-  } catch (error) { console.error('❌ [CTA Generator] Error checking AI readiness:', error); _aiReadyCache = false; return false; }
-}
-
+// ✅ UPDATED: Filter dropdown options based on user registration (SKEMA COMPLIANT)
 function filterCTAOptions(userData) {
   if (!userData) return;
-  const { jenjang_sekolah, kelas_diampu, mapel_diampu, sd_mapel_type, role } = userData;
+  const { jenjang_sekolah, kelas_diampu, mapel_yang_diampu, sd_mapel_type, role } = userData;
   
+  // ✅ FILTER KELAS DROPDOWN
   const kelasSelect = document.getElementById('cta-kelas');
-  if (kelasSelect && kelas_diampu?.length > 0) {
+  if (kelasSelect) {
     if (role === 'admin') {
-      enableOptions(kelasSelect, 'all');
+      // Admin: all classes enabled
+      Array.from(kelasSelect.options).forEach(opt => opt.disabled = false);
       console.log('👑 [Filter] Admin: All classes enabled');
-    } else if (jenjang_sekolah === 'sd' && sd_mapel_type !== 'kelas') {
-      enableOptions(kelasSelect, ['1','2','3','4','5','6']);
+    } else if (jenjang_sekolah === 'tk') {
+      // TK: only A/B enabled
+      Array.from(kelasSelect.options).forEach(opt => {
+        opt.disabled = !['A', 'B'].includes(opt.value);
+      });
+      console.log('🔐 [Filter] TK: Only classes A/B enabled');
+    } else if (['sd', 'mi'].includes(jenjang_sekolah) && sd_mapel_type === 'kelas') {
+      // SD/MI Guru Kelas: only kelas_diampu enabled
+      Array.from(kelasSelect.options).forEach(opt => {
+        opt.disabled = !kelas_diampu?.includes(opt.value);
+      });
+      console.log('🔐 [Filter] SD/MI Guru Kelas: Only assigned classes enabled:', kelas_diampu);
     } else {
-      enableOptions(kelasSelect, kelas_diampu);
+      // SD/MI Guru Mapel, SMP/MTs/SMA/MA: all classes in jenjang enabled
+      const allClasses = jenjang_sekolah === 'sd' || jenjang_sekolah === 'mi' ? ['1','2','3','4','5','6'] :
+                         jenjang_sekolah === 'smp' || jenjang_sekolah === 'mts' ? ['7','8','9'] :
+                         ['10','11','12'];
+      Array.from(kelasSelect.options).forEach(opt => {
+        opt.disabled = !allClasses.includes(opt.value);
+      });
+      console.log('🔐 [Filter] Guru Mapel: All classes in jenjang enabled');
     }
   }
   
+  // ✅ FILTER MAPEL DROPDOWN (visual disable, not remove)
   const mapelSelect = document.getElementById('cta-mapel');
-  if (mapelSelect && role === 'admin') {
-    enableOptions(mapelSelect, 'all');
-    console.log('👑 [Filter] Admin: All subjects enabled (fallback)');
+  if (mapelSelect && role !== 'admin') {
+    // Note: Actual filtering is done in populateMapelDropdown()
+    // This function just ensures no admin bypass issues
+    console.log('🔐 [Filter] Mapel filtering handled in populateMapelDropdown()');
   }
 }
 
-function enableOptions(selectEl, allowedValues) {
-  if (!selectEl) return;
-  Array.from(selectEl.options).forEach(opt => {
-    if (allowedValues === 'all' || allowedValues.includes(opt.value)) {
-      opt.disabled = false;
-    } else {
-      opt.disabled = true;
-    }
-  });
-}
-
+// ✅ SETUP JENJANG DROPDOWN (unchanged — already locked)
 function setupJenjangDropdown(userData) {
   if (!userData) { console.warn('⚠️ [Jenjang] No userData, skip'); return; }
   const userJenjang = userData.jenjang_sekolah;
@@ -162,10 +235,11 @@ function setupJenjangDropdown(userData) {
   }, 150);
 }
 
+// ✅ DOWNLOAD FUNCTION (unchanged)
 function downloadCTAResult() {
-  const cp = document.getElementById('result-cp')?.value || '';
-  const tp = document.getElementById('result-tp')?.value || '';
-  const atp = document.getElementById('result-atp')?.value || '';
+  const cp = document.getElementById('result-cp')?.textContent || '';
+  const tp = document.getElementById('result-tp')?.textContent || '';
+  const atp = document.getElementById('result-atp')?.textContent || '';
   
   if (!cp || cp.includes('⏳') || cp.includes('Error')) {
     alert('⚠️ Generate data dulu sebelum download!');
@@ -230,17 +304,13 @@ function autoExpandTextarea(textarea) {
   textarea.style.height = textarea.scrollHeight + 'px';
 }
 
-// ✅ FIX 1: Rename function to match router expectation: renderCitaGenerator (not renderCTAGenerator)
-// ✅ FIX 2: Render to #cita-container (not #module-container)
-// ✅ FIX 3: Output format as TABLE (per roadmap)
+// ✅ MAIN RENDER FUNCTION (UPDATED: pass userData to populateMapelDropdown)
 window.renderCitaGenerator = async function(jenjangFromParam, kelasFromParam, semesterFromParam) {
   console.log('📝 [CTA Generator] renderCitaGenerator() called');
   
-  // ✅ FIX: Use #cita-container instead of #module-container
   const container = document.getElementById('cita-container');
   if (!container) { 
     console.error('❌ Container #cita-container not found!'); 
-    // Fallback to module-container for backward compat
     const fallbackContainer = document.getElementById('module-container');
     if (fallbackContainer) {
       console.warn('⚠️ Using #module-container as fallback');
@@ -261,22 +331,27 @@ window.renderCitaGenerator = async function(jenjangFromParam, kelasFromParam, se
   console.log('🤖 [CTA Generator] AI Ready:', aiReady);
   
   let userProfile = null;
+  let userData = null;
   try {
     userProfile = await getDoc(doc(db, 'users', user.uid));
     if (userProfile.exists()) {
-      const userData = userProfile.data();
+      userData = userProfile.data();
       userRole = userData.role || 'teacher';
       userKelasDiampu = userData.kelas_diampu || [];
-      userMapelDiampu = userData.mapel_diampu || [];
+      userMapelDiampu = userData.mapel_yang_diampu || [];
       userSdMapelType = userData.sd_mapel_type || 'kelas';
-      console.log('👤 [CTA Generator] User:', { role: userRole, kelas: userKelasDiampu, mapel: userMapelDiampu, sdType: userSdMapelType });
+      userJenjangSekolah = userData.jenjang_sekolah || '';
+      console.log('👤 [CTA Generator] User:', { role: userRole, jenjang: userJenjangSekolah, kelas: userKelasDiampu, mapel: userMapelDiampu, sdType: userSdMapelType });
+      
+      // ✅ APPLY FILTERS to dropdowns
       filterCTAOptions(userData);
       setupJenjangDropdown(userData);
     } else {
-      userRole = 'teacher'; userKelasDiampu = []; userMapelDiampu = []; userSdMapelType = 'kelas';
+      userRole = 'teacher'; userKelasDiampu = []; userMapelDiampu = []; userSdMapelType = 'kelas'; userJenjangSekolah = '';
     }
   } catch (e) { console.error('❌ [CTA Generator] Failed to load user ', e); userRole = 'teacher'; userKelasDiampu = []; }
   
+  // ✅ DETERMINE AVAILABLE CLASSES based on skema
   const allClasses = ['1','2','3','4','5','6','7','8','9','10','11','12'];
   let availableClasses = allClasses;
   let isClassLocked = false;
@@ -285,21 +360,32 @@ window.renderCitaGenerator = async function(jenjangFromParam, kelasFromParam, se
     availableClasses = allClasses;
     isClassLocked = false;
     console.log('👑 [CTA Generator] Admin mode: All classes unlocked');
-  } else if (userRole === 'teacher' && userKelasDiampu.length > 0) {
-    if (userSdMapelType !== 'kelas') {
-      availableClasses = ['1','2','3','4','5','6'];
-    } else {
-      availableClasses = userKelasDiampu;
-    }
+  } else if (userJenjangSekolah === 'tk') {
+    availableClasses = ['A', 'B'];
     isClassLocked = true;
-    console.log('👤 [CTA Generator] Teacher mode: Classes locked to', userKelasDiampu);
-  }  
+    console.log('🔐 [CTA Generator] TK mode: Only classes A/B');
+  } else if (['sd', 'mi'].includes(userJenjangSekolah) && userSdMapelType === 'kelas') {
+    availableClasses = userKelasDiampu.length > 0 ? userKelasDiampu : ['1','2','3','4','5','6'];
+    isClassLocked = true;
+    console.log('🔐 [CTA Generator] SD/MI Guru Kelas mode: Classes locked to', availableClasses);
+  } else {
+    // SD/MI Guru Mapel, SMP/MTs/SMA/MA: all classes in jenjang
+    if (userJenjangSekolah === 'sd' || userJenjangSekolah === 'mi') {
+      availableClasses = ['1','2','3','4','5','6'];
+    } else if (userJenjangSekolah === 'smp' || userJenjangSekolah === 'mts') {
+      availableClasses = ['7','8','9'];
+    } else if (userJenjangSekolah === 'sma' || userJenjangSekolah === 'ma') {
+      availableClasses = ['10','11','12'];
+    }
+    isClassLocked = false;
+    console.log('🔐 [CTA Generator] Guru Mapel mode: All classes in jenjang enabled');
+  }
   
   let defaultClass = kelasFromParam || '';
   if (isClassLocked && availableClasses.length > 0) defaultClass = availableClasses[0];
   console.log('📚 [CTA Generator] Available classes:', availableClasses);
   
-  // ✅ FIX 3: Render UI with TABLE format output (per roadmap)
+  // ✅ RENDER UI WITH TABLE FORMAT OUTPUT
   container.innerHTML = `
     <style>
       .cta-generator-form { max-width: 950px; margin: auto; padding: 30px; background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
@@ -311,7 +397,7 @@ window.renderCitaGenerator = async function(jenjangFromParam, kelasFromParam, se
       .cta-generator-form input:focus, .cta-generator-form select:focus { outline: none; border-color: #0891b2; }
       .cta-generator-form select:disabled { background: #f3f4f6; color: #6b7280; cursor: not-allowed; }
       
-      /* ✅ FIX 3: TABLE FORMAT OUTPUT (per roadmap) */
+      /* TABLE FORMAT OUTPUT */
       .cta-result-table { width: 100%; border-collapse: collapse; margin-top: 16px; background: white; }
       .cta-result-table th { background: #0891b2; color: white; padding: 12px 16px; text-align: left; font-weight: 600; }
       .cta-result-table td { padding: 16px; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
@@ -372,7 +458,7 @@ window.renderCitaGenerator = async function(jenjangFromParam, kelasFromParam, se
         <div class="section-title"><i class="fas fa-book-open"></i><span>2. Informasi Pembelajaran</span></div>
         <div class="grid-cols-3">
           <div><label for="cta-jenjang"><i class="fas fa-school mr-2"></i>Jenjang</label><select id="cta-jenjang" required><option value="">Pilih</option><option value="tk">TK</option><option value="sd">SD</option><option value="mi">MI</option><option value="smp">SMP</option><option value="mts">MTs</option><option value="sma">SMA</option><option value="ma">MA</option></select></div>
-          <div><label for="cta-kelas"><i class="fas fa-users mr-2"></i>Kelas</label><select id="cta-kelas" required ${isClassLocked ? 'disabled' : ''}><option value="">Pilih</option>${availableClasses.map(k => `<option value="${k}" ${k === defaultClass ? 'selected' : ''}>${k}</option>`).join('')}</select>${isClassLocked && userRole !== 'admin' ? `<p class="lock-indicator"><i class="fas fa-lock"></i> Terkunci untuk kelas yang Anda ampu</p>` : ''}</div>
+          <div><label for="cta-kelas"><i class="fas fa-users mr-2"></i>Kelas</label><select id="cta-kelas" required ${isClassLocked && userRole !== 'admin' ? 'disabled' : ''}><option value="">Pilih</option>${availableClasses.map(k => `<option value="${k}" ${k === defaultClass ? 'selected' : ''}>${k}</option>`).join('')}</select>${isClassLocked && userRole !== 'admin' ? `<p class="lock-indicator"><i class="fas fa-lock"></i> Terkunci untuk kelas yang Anda ampu</p>` : ''}</div>
           <div><label for="cta-semester"><i class="fas fa-clock mr-2"></i>Semester</label><select id="cta-semester" required><option value="">Pilih</option><option value="1" ${semesterFromParam === '1' ? 'selected' : ''}>1 (Ganjil)</option><option value="2" ${semesterFromParam === '2' ? 'selected' : ''}>2 (Genap)</option></select></div>
         </div>
         <div class="grid-cols-2">
@@ -382,7 +468,7 @@ window.renderCitaGenerator = async function(jenjangFromParam, kelasFromParam, se
         <button type="button" id="btn-generate" class="btn-generate"><i class="fas fa-magic"></i> Generate dengan AI</button>
       </form>
       
-      <!-- ✅ FIX 3: TABLE FORMAT OUTPUT -->
+      <!-- TABLE FORMAT OUTPUT -->
       <div id="cta-result" class="hidden result-section">
         <h3 class="text-xl font-bold mb-4 text-gray-800">📋 Hasil Generate</h3>
         <table class="cta-result-table">
@@ -418,13 +504,14 @@ window.renderCitaGenerator = async function(jenjangFromParam, kelasFromParam, se
       <div class="mt-12"><h3 class="text-xl font-bold mb-4 text-gray-800"><i class="fas fa-archive mr-2"></i>Dokumen Tersimpan (<span id="saved-count">0</span>)</h3><div id="cta-list" class="space-y-4"><div class="loading-spinner"><i class="fas fa-spinner fa-spin text-2xl mb-3"></i><p>Memuat...</p></div></div></div>
     </div>`;
   
-  // ✅ NEW: Populate mapel dropdown AFTER UI render + Auto-lock if user has registered mapel
+  // ✅ POPULATE MAPEL DROPDOWN WITH FILTERING + PASS userData
   const jenjangSelect = document.getElementById('cta-jenjang');
   if (jenjangSelect) {
-    const initialJenjang = jenjangFromParam || (userProfile?.exists() ? userProfile.data().jenjang_sekolah : null);
+    const initialJenjang = jenjangFromParam || userJenjangSekolah;
     if (initialJenjang) {
       jenjangSelect.value = initialJenjang;
-      await populateMapelDropdown(initialJenjang, userMapelFromReg);
+      // ✅ PASS userData for filtering
+      await populateMapelDropdown(initialJenjang, userMapelFromReg, userData);
     }
     
     jenjangSelect.addEventListener('change', async function() {
@@ -432,11 +519,13 @@ window.renderCitaGenerator = async function(jenjangFromParam, kelasFromParam, se
       if (newJenjang) {
         const existingBadge = document.getElementById('cta-mapel')?.parentNode?.querySelector('.lock-indicator');
         if (existingBadge) existingBadge.remove();
-        await populateMapelDropdown(newJenjang, userMapelFromReg);
+        // ✅ PASS userData for filtering
+        await populateMapelDropdown(newJenjang, userMapelFromReg, userData);
       }
     });
   }
   
+  // ✅ DEBUG API STATUS
   (async function showDebugStatus() {
     const debugBox = document.getElementById('debug-api-status'), debugMsg = document.getElementById('debug-api-message');
     if (!debugBox || !debugMsg) return;
@@ -448,6 +537,7 @@ window.renderCitaGenerator = async function(jenjangFromParam, kelasFromParam, se
     } catch (e) { debugBox.className = 'debug-box debug-error'; debugMsg.innerHTML = `<span style="color:#991b1b;"><strong>❌ ERROR</strong></span><br>${e.message}`; }
   })();
   
+  // ✅ EVENT LISTENERS
   const btnPrint = document.getElementById('btn-print');
   if (btnPrint) btnPrint.addEventListener('click', () => { const cp = document.getElementById('result-cp')?.textContent || ''; if (!cp || cp.includes('⏳') || cp.includes('Error')) { alert('⚠️ Generate data dulu sebelum print!'); return; } window.print(); });
   
@@ -464,10 +554,9 @@ window.renderCitaGenerator = async function(jenjangFromParam, kelasFromParam, se
   console.log('✅ [CTA Generator] UI rendered to #cita-container');
 };
 
-// ✅ LEGACY FUNCTION for backward compatibility (if router calls old name)
+// ✅ LEGACY FUNCTION for backward compatibility
 async function renderCTAGeneratorLegacy(jenjangFromParam, kelasFromParam, semesterFromParam, container) {
   console.log('⚠️ [CTA Generator] Using legacy renderCTAGenerator (fallback)');
-  // Call the main function with custom container
   return window.renderCitaGenerator(jenjangFromParam, kelasFromParam, semesterFromParam);
 }
 
@@ -484,13 +573,21 @@ function setupEventHandlers() {
   if (btnRegenerate) btnRegenerate.addEventListener('click', handleGenerate); 
 }
 
+// ✅ HANDLE GENERATE WITH SKEMA-COMPLIANT VALIDATION
 async function handleGenerate() {
   console.log('🪄 [CTA Generator] Generate clicked');
   const user = auth.currentUser; if (!user) { alert('⚠️ Silakan login dulu!'); return; }
   const jenjang = document.getElementById('cta-jenjang')?.value, kelas = document.getElementById('cta-kelas')?.value, semester = document.getElementById('cta-semester')?.value, mapel = document.getElementById('cta-mapel')?.value, sekolah = document.getElementById('kop-sekolah')?.value, tahun = document.getElementById('kop-tahun')?.value, guru = document.getElementById('cta-guru')?.value, topik = document.getElementById('cta-topik')?.value;
   
+  // ✅ VALIDATE WITH SKEMA-COMPLIANT FUNCTION
   if (userRole !== 'admin') {
-    const validation = validateInputWithFilter({ sekolah, jenjang, kelas, semester, mapel, topik }, { jenjang_sekolah: jenjang, kelas_diampu: userKelasDiampu, mapel_diampu: userMapelDiampu, sd_mapel_type: userSdMapelType });
+    const validation = validateInputWithFilter({ sekolah, jenjang, kelas, semester, mapel, topik }, { 
+      jenjang_sekolah: userJenjangSekolah, 
+      kelas_diampu: userKelasDiampu, 
+      mapel_yang_diampu: userMapelDiampu, 
+      sd_mapel_type: userSdMapelType,
+      role: userRole
+    });
     if (!validation.valid) { alert('⚠️ ' + validation.errors.join('\n')); return; }
   }
   
@@ -498,7 +595,6 @@ async function handleGenerate() {
   
   const resultDiv = document.getElementById('cta-result'); if (resultDiv) resultDiv.classList.remove('hidden');
   
-  // ✅ FIX: Update table cells instead of textareas
   document.getElementById('result-cp').textContent = `⏳ Generating CP...`; 
   document.getElementById('result-tp').textContent = `⏳ Generating TP...`; 
   document.getElementById('result-atp').textContent = `⏳ Generating ATP...`; 
@@ -508,7 +604,6 @@ async function handleGenerate() {
     console.log('🤖 [CTA Generator] Calling AI...');
     const inputData = { sekolah, jenjang, kelas, semester, mapel, guru, topik, tahun }, result = await generateWithGroq(inputData);
     
-    // ✅ FIX: Set table cell content (not textarea value)
     document.getElementById('result-cp').textContent = result.cp; 
     document.getElementById('result-tp').textContent = result.tp; 
     document.getElementById('result-atp').textContent = result.atp;
@@ -552,7 +647,6 @@ async function handleGenerate() {
     else if (error.message.includes('quota') || error.message.includes('429')) errorMessage = 'Limit AI harian habis.';
     else if (error.message.includes('koneksi') || error.message.includes('network')) errorMessage = 'Koneksi internet bermasalah.';
     
-    // ✅ FIX: Update table cells for error display
     document.getElementById('result-cp').textContent = `❌ Error: ${errorMessage}`; 
     document.getElementById('result-tp').textContent = ''; 
     document.getElementById('result-atp').textContent = '';
@@ -565,7 +659,6 @@ async function handleSave() {
   console.log('💾 [CTA Generator] Save clicked');
   const user = auth.currentUser; if (!user) { alert('⚠️ Silakan login dulu!'); return; }
   
-  // ✅ FIX: Get content from table cells (not textareas)
   const cp = document.getElementById('result-cp')?.textContent || '', 
         tp = document.getElementById('result-tp')?.textContent || '', 
         atp = document.getElementById('result-atp')?.textContent || '';
@@ -613,6 +706,17 @@ function loadCTAData() {
       });
     } catch (e) { console.error('❌ [CTA Generator] Load error:', e); if (e.message?.includes('index')) list.innerHTML = `<div class="text-center py-8 text-yellow-600"><p>⚠️ Index Firestore belum siap.</p></div>`; }
   })();
+}
+
+export async function isAiReady() {
+  if (_aiReadyCache !== null) return _aiReadyCache;
+  try {
+    const globalKey = await getGroqApiKey();
+    if (globalKey) { _aiReadyCache = true; return true; }
+    const localKey = localStorage.getItem('groq_api_key');
+    if (localKey && localKey.startsWith('gsk_') && localKey.length >= 20) { _aiReadyCache = true; return true; }
+    _aiReadyCache = false; return false;
+  } catch (error) { console.error('❌ [CTA Generator] Error checking AI readiness:', error); _aiReadyCache = false; return false; }
 }
 
 export async function autoSaveCTA(generatedContent, metadata) {
@@ -670,4 +774,4 @@ export async function autoSaveCTA(generatedContent, metadata) {
   }
 }
 
-console.log('🟢 [CTA Generator] READY — Fixed: Function Name + Container + Table Output');
+console.log('🟢 [CTA Generator] READY — Fixed: Function Name + Container + Table Output + SKEMA COMPLIANT');
