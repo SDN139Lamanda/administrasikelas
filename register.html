@@ -11,34 +11,34 @@
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-      .register-card { background: white; border-radius: 12px; padding: 32px; max-width: 560px; width: 100%; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-top: 4px solid #7c3aed; }
-      .register-input { width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; margin-bottom: 4px; box-sizing: border-box; transition: border-color 0.2s; }
-      .register-input:focus { outline: none; border-color: #7c3aed; }
-      .register-input.error { border-color: #ef4444; }
-      .error-text { color: #ef4444; font-size: 12px; margin-top: 4px; display: none; }
-      .error-text.visible { display: block; }
-      .register-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, #7c3aed 0%, #0891b2 100%); color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: transform 0.2s, box-shadow 0.2s; }
-      .register-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(124,58,237,0.3); }
-      .register-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-      .message { padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 14px; display: none; line-height: 1.5; }
-      .message.success { background: #dcfce7; color: #166534; border: 1px solid #86efac; display: block; }
-      .message.error { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; display: block; }
-      .message.warning { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; display: block; }
-      .password-strength { height: 4px; background: #e5e7eb; border-radius: 2px; margin-top: 8px; overflow: hidden; }
-      .password-strength-fill { height: 100%; transition: width 0.3s, background 0.3s; }
-      .strength-weak { background: #ef4444; width: 33%; }
-      .strength-medium { background: #f59e0b; width: 66%; }
-      .strength-strong { background: #10b981; width: 100%; }
-      .debug-info { background: #f3f4f6; padding: 8px 12px; border-radius: 6px; font-size: 11px; color: #6b7280; margin-top: 8px; font-family: monospace; }
-      .checkbox-group { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-      .checkbox-label { display: flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer; }
-      .checkbox-label input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; }
-      .checkbox-label input[type="checkbox"]:disabled { opacity: 0.5; cursor: not-allowed; }
-      .mapel-checkbox-group { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; max-height: 120px; overflow-y: auto; padding: 8px; border: 1px solid #e5e7eb; border-radius: 6px; background: #f9fafb; }
-      .mapel-count { font-size: 11px; color: #6b7280; margin-top: 4px; text-align: right; }
-      .mapel-count.warning { color: #f59e0b; }
-      .mapel-count.error { color: #ef4444; }
-      .mapel-loading { font-size: 11px; color: #6b7280; text-align: center; padding: 8px; }
+        .register-card { background: white; border-radius: 12px; padding: 32px; max-width: 560px; width: 100%; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-top: 4px solid #7c3aed; }
+        .register-input { width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; margin-bottom: 4px; box-sizing: border-box; transition: border-color 0.2s; }
+        .register-input:focus { outline: none; border-color: #7c3aed; }
+        .register-input.error { border-color: #ef4444; }
+        .error-text { color: #ef4444; font-size: 12px; margin-top: 4px; display: none; }
+        .error-text.visible { display: block; }
+        .register-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, #7c3aed 0%, #0891b2 100%); color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: transform 0.2s, box-shadow 0.2s; }
+        .register-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(124,58,237,0.3); }
+        .register-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        .message { padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 14px; display: none; line-height: 1.5; }
+        .message.success { background: #dcfce7; color: #166534; border: 1px solid #86efac; display: block; }
+        .message.error { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; display: block; }
+        .message.warning { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; display: block; }
+        .password-strength { height: 4px; background: #e5e7eb; border-radius: 2px; margin-top: 8px; overflow: hidden; }
+        .password-strength-fill { height: 100%; transition: width 0.3s, background 0.3s; }
+        .strength-weak { background: #ef4444; width: 33%; }
+        .strength-medium { background: #f59e0b; width: 66%; }
+        .strength-strong { background: #10b981; width: 100%; }
+        .debug-info { background: #f3f4f6; padding: 8px 12px; border-radius: 6px; font-size: 11px; color: #6b7280; margin-top: 8px; font-family: monospace; }
+        .checkbox-group { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+        .checkbox-label { display: flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer; }
+        .checkbox-label input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; }
+        .checkbox-label input[type="checkbox"]:disabled { opacity: 0.5; cursor: not-allowed; }
+        .mapel-checkbox-group { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; max-height: 120px; overflow-y: auto; padding: 8px; border: 1px solid #e5e7eb; border-radius: 6px; background: #f9fafb; }
+        .mapel-count { font-size: 11px; color: #6b7280; margin-top: 4px; text-align: right; }
+        .mapel-count.warning { color: #f59e0b; }
+        .mapel-count.error { color: #ef4444; }
+        .mapel-loading { font-size: 11px; color: #6b7280; text-align: center; padding: 8px; }
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen flex items-center justify-center p-4">
@@ -50,15 +50,18 @@
         </div>
         <div id="message" class="message" role="alert" aria-live="polite"></div>
         <form id="registerForm">
+            <!-- Nama Lengkap -->
             <div class="mb-4">
                 <label for="namaLengkap" class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-user mr-2"></i>Nama Lengkap <span class="text-red-500">*</span></label>
                 <input type="text" id="namaLengkap" class="register-input" placeholder="Contoh: Siti Rahayu, S.Pd" required autocomplete="name">
             </div>
+            <!-- Email -->
             <div class="mb-4">
                 <label for="email" class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-envelope mr-2"></i>Email <span class="text-red-500">*</span></label>
                 <input type="email" id="email" class="register-input" placeholder="nama@sekolah.sch.id" required autocomplete="email">
                 <p class="error-text" id="emailError">Format email tidak valid</p>
             </div>
+            <!-- Password -->
             <div class="mb-4">
                 <label for="password" class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-lock mr-2"></i>Password <span class="text-red-500">*</span></label>
                 <input type="password" id="password" class="register-input" placeholder="Minimal 6 karakter" required minlength="6" autocomplete="new-password">
@@ -66,11 +69,13 @@
                 <p class="error-text" id="passwordError">Password minimal 6 karakter</p>
                 <p class="text-xs text-gray-500 mt-1"><i class="fas fa-info-circle mr-1"></i>Gunakan kombinasi huruf dan angka untuk keamanan</p>
             </div>
+            <!-- Konfirmasi Password -->
             <div class="mb-4">
                 <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-lock mr-2"></i>Konfirmasi Password <span class="text-red-500">*</span></label>
                 <input type="password" id="confirmPassword" class="register-input" placeholder="Ulangi password" required minlength="6" autocomplete="new-password">
                 <p class="error-text" id="confirmError">Password tidak sama</p>
             </div>
+            <!-- Jenjang 7 Options -->
             <div class="mb-4">
                 <label for="jenjang" class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-layer-group mr-2"></i>Jenjang <span class="text-red-500">*</span></label>
                 <select id="jenjang" class="register-input" required>
@@ -84,7 +89,9 @@
                     <option value="ma">MA (Madrasah Aliyah)</option>
                 </select>
             </div>
+            <!-- CONDITIONAL FIELDS for ALL 7 Jenjang -->
             <div id="conditionalFields" class="hidden mb-4">
+                <!-- TK: Kelompok A/B + Mapel from tk.json -->
                 <div id="tkFields" class="hidden">
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-users mr-2"></i>Kelompok Diampu <span class="text-red-500">*</span></label>
@@ -104,15 +111,16 @@
                         <p class="error-text" id="tkMapelError">Pilih minimal 1 mata pelajaran</p>
                     </div>
                 </div>
+
+                <!-- SD: ✅ UPDATED - 3 Opsi Statis -->
                 <div id="sdFields" class="hidden">
                     <div class="mb-4">
                         <label for="sdMapelType" class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-book mr-2"></i>Jenis Pengajaran <span class="text-red-500">*</span></label>
-                        <select id="sdMapelType" class="register-input">
+                        <select id="sdMapelType" class="register-input" required>
                             <option value="">Pilih Jenis</option>
-                            <option value="kelas">Guru Kelas</option>
-                            <option value="pai">Guru Mapel PAI/BD</option>
-                            <option value="pjok">Guru Mapel PJOK</option>
-                            <option value="bd">Guru Mapel BD</option>
+                            <option value="guru-kelas">Guru Kelas</option>
+                            <option value="guru-mapel-paibd">Guru Mapel PAIBD</option>
+                            <option value="guru-mapel-pjok">Guru Mapel PJOK</option>
                         </select>
                         <p class="text-xs text-gray-500 mt-1"><i class="fas fa-info-circle mr-1"></i>Pilih jenis pengajaran Anda</p>
                     </div>
@@ -129,24 +137,17 @@
                         <p class="error-text" id="kelasError">Pilih minimal 1 kelas</p>
                         <p class="text-xs text-gray-500 mt-1" id="sdKelasHint"><i class="fas fa-info-circle mr-1"></i>Pilih jenis pengajaran dulu</p>
                     </div>
-                    <div id="sdMapelGroup" class="hidden mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-list mr-2"></i>Mata Pelajaran <span class="text-red-500">*</span></label>
-                        <div id="sdMapelContainer" class="mapel-checkbox-group">
-                            <p class="mapel-loading">Memuat daftar mapel...</p>
-                        </div>
-                        <p class="mapel-count" id="sdMapelCount">0 dipilih</p>
-                        <p class="error-text" id="sdMapelError">Pilih minimal 1 mata pelajaran</p>
-                    </div>
                 </div>
-                                <div id="miFields" class="hidden">
+
+                <!-- MI: ✅ UPDATED - 3 Opsi Statis -->
+                <div id="miFields" class="hidden">
                     <div class="mb-4">
                         <label for="miMapelType" class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-book mr-2"></i>Jenis Pengajaran <span class="text-red-500">*</span></label>
-                        <select id="miMapelType" class="register-input">
+                        <select id="miMapelType" class="register-input" required>
                             <option value="">Pilih Jenis</option>
-                            <option value="kelas">Guru Kelas</option>
-                            <option value="pai">Guru Mapel PAI</option>
-                            <option value="pjok">Guru Mapel PJOK</option>
-                            <option value="bd">Guru Mapel BD</option>
+                            <option value="guru-kelas">Guru Kelas</option>
+                            <option value="guru-mapel-paibd">Guru Mapel PAIBD</option>
+                            <option value="guru-mapel-pjok">Guru Mapel PJOK</option>
                         </select>
                         <p class="text-xs text-gray-500 mt-1"><i class="fas fa-info-circle mr-1"></i>Pilih jenis pengajaran Anda</p>
                     </div>
@@ -163,14 +164,9 @@
                         <p class="error-text" id="kelasError">Pilih minimal 1 kelas</p>
                         <p class="text-xs text-gray-500 mt-1" id="miKelasHint"><i class="fas fa-info-circle mr-1"></i>Pilih jenis pengajaran dulu</p>
                     </div>
-                    <div id="miMapelGroup" class="hidden mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-list mr-2"></i>Mata Pelajaran <span class="text-red-500">*</span></label>
-                        <div id="miMapelContainer" class="mapel-checkbox-group">
-                            <p class="mapel-loading">Memuat daftar mapel...</p>
-                        </div>
-                        <p class="mapel-count" id="miMapelCount">0 dipilih</p>
-                        <p class="error-text" id="miMapelError">Pilih minimal 1 mata pelajaran</p>
-                    </div>
+                </div>
+
+                <!-- SMP: ✅ UPDATED - Dropdown Dinamis -->
                 <div id="smpFields" class="hidden">
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-users mr-2"></i>Kelas Diampu <span class="text-red-500">*</span></label>
@@ -183,14 +179,15 @@
                         <p class="text-xs text-gray-500 mt-1"><i class="fas fa-info-circle mr-1"></i>Max 3 kelas: 7, 8, 9</p>
                     </div>
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-list mr-2"></i>Mata Pelajaran (Pilih Max 2) <span class="text-red-500">*</span></label>
-                        <div id="smpMapelContainer" class="mapel-checkbox-group">
-                            <p class="mapel-loading">Memuat daftar mapel...</p>
-                        </div>
-                        <p class="mapel-count" id="smpMapelCount">0/2 dipilih</p>
-                        <p class="error-text" id="smpMapelError">Pilih 1-2 mata pelajaran</p>
+                        <label for="smpMapelSelect" class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-list mr-2"></i>Mata Pelajaran <span class="text-red-500">*</span></label>
+                        <select id="smpMapelSelect" class="register-input" required disabled>
+                            <option value="">Memuat daftar mapel...</option>
+                        </select>
+                        <p class="error-text" id="smpMapelError">Pilih 1 mata pelajaran</p>
                     </div>
                 </div>
+
+                <!-- MTs: ✅ UPDATED - Dropdown Dinamis -->
                 <div id="mtsFields" class="hidden">
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-users mr-2"></i>Kelas Diampu <span class="text-red-500">*</span></label>
@@ -203,14 +200,15 @@
                         <p class="text-xs text-gray-500 mt-1"><i class="fas fa-info-circle mr-1"></i>Max 3 kelas: 7, 8, 9</p>
                     </div>
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-list mr-2"></i>Mata Pelajaran (Pilih Max 2) <span class="text-red-500">*</span></label>
-                        <div id="mtsMapelContainer" class="mapel-checkbox-group">
-                            <p class="mapel-loading">Memuat daftar mapel...</p>
-                        </div>
-                        <p class="mapel-count" id="mtsMapelCount">0/2 dipilih</p>
-                        <p class="error-text" id="mtsMapelError">Pilih 1-2 mata pelajaran</p>
+                        <label for="mtsMapelSelect" class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-list mr-2"></i>Mata Pelajaran <span class="text-red-500">*</span></label>
+                        <select id="mtsMapelSelect" class="register-input" required disabled>
+                            <option value="">Memuat daftar mapel...</option>
+                        </select>
+                        <p class="error-text" id="mtsMapelError">Pilih 1 mata pelajaran</p>
                     </div>
                 </div>
+
+                <!-- SMA: ✅ UPDATED - Dropdown Dinamis -->
                 <div id="smaFields" class="hidden">
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-users mr-2"></i>Kelas Diampu <span class="text-red-500">*</span></label>
@@ -223,14 +221,15 @@
                         <p class="text-xs text-gray-500 mt-1"><i class="fas fa-info-circle mr-1"></i>Max 3 kelas: 10, 11, 12</p>
                     </div>
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-list mr-2"></i>Mata Pelajaran (Pilih Max 2) <span class="text-red-500">*</span></label>
-                        <div id="smaMapelContainer" class="mapel-checkbox-group">
-                            <p class="mapel-loading">Memuat daftar mapel...</p>
-                        </div>
-                        <p class="mapel-count" id="smaMapelCount">0/2 dipilih</p>
-                        <p class="error-text" id="smaMapelError">Pilih 1-2 mata pelajaran</p>
+                        <label for="smaMapelSelect" class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-list mr-2"></i>Mata Pelajaran <span class="text-red-500">*</span></label>
+                        <select id="smaMapelSelect" class="register-input" required disabled>
+                            <option value="">Memuat daftar mapel...</option>
+                        </select>
+                        <p class="error-text" id="smaMapelError">Pilih 1 mata pelajaran</p>
                     </div>
                 </div>
+
+                <!-- MA: ✅ UPDATED - Dropdown Dinamis -->
                 <div id="maFields" class="hidden">
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-users mr-2"></i>Kelas Diampu <span class="text-red-500">*</span></label>
@@ -243,22 +242,25 @@
                         <p class="text-xs text-gray-500 mt-1"><i class="fas fa-info-circle mr-1"></i>Max 3 kelas: 10, 11, 12</p>
                     </div>
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-list mr-2"></i>Mata Pelajaran (Pilih Max 2) <span class="text-red-500">*</span></label>
-                        <div id="maMapelContainer" class="mapel-checkbox-group">
-                            <p class="mapel-loading">Memuat daftar mapel...</p>
-                        </div>
-                        <p class="mapel-count" id="maMapelCount">0/2 dipilih</p>
-                        <p class="error-text" id="maMapelError">Pilih 1-2 mata pelajaran</p>
+                        <label for="maMapelSelect" class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-list mr-2"></i>Mata Pelajaran <span class="text-red-500">*</span></label>
+                        <select id="maMapelSelect" class="register-input" required disabled>
+                            <option value="">Memuat daftar mapel...</option>
+                        </select>
+                        <p class="error-text" id="maMapelError">Pilih 1 mata pelajaran</p>
                     </div>
                 </div>
+            </div>
+            <!-- Nama Sekolah -->
             <div class="mb-4">
                 <label for="namaSekolah" class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-school mr-2"></i>Nama Sekolah <span class="text-red-500">*</span></label>
                 <input type="text" id="namaSekolah" class="register-input" placeholder="Contoh: SDN 139 Lamanda" required>
             </div>
+            <!-- Nomor HP -->
             <div class="mb-6">
                 <label for="noHp" class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-phone mr-2"></i>Nomor HP <span class="text-gray-400">(Opsional)</span></label>
                 <input type="tel" id="noHp" class="register-input" placeholder="081234567890">
             </div>
+            <!-- Submit -->
             <button type="submit" id="submitBtn" class="register-btn"><i class="fas fa-user-plus"></i><span id="btnText">Daftar Sekarang</span><i id="loadingIcon" class="fas fa-spinner fa-spin hidden"></i></button>
         </form>
         <div class="text-center mt-6">
@@ -268,40 +270,53 @@
         <a href="index.html" class="back-link inline-flex items-center gap-2 text-gray-600 hover:text-purple-600 mt-6 text-sm"><i class="fas fa-arrow-left"></i> Kembali ke Beranda</a>
         <div id="debugInfo" class="debug-info hidden"></div>
     </div>
+
+    <!-- Firebase + Logic Script -->
     <script type="module">
         import { auth, db, createUserWithEmailAndPassword, sendEmailVerification, updateProfile, doc, setDoc, serverTimestamp } from './modules/firebase-config.js';
-        console.log('🔴 [Register] Script START - SYNCED CTA');
+        console.log('🔴 [Register] Script START');
+        
         const form = document.getElementById('registerForm'), messageDiv = document.getElementById('message'), submitBtn = document.getElementById('submitBtn'), btnText = document.getElementById('btnText'), loadingIcon = document.getElementById('loadingIcon'), debugInfo = document.getElementById('debugInfo');
         const namaLengkapInput = document.getElementById('namaLengkap'), emailInput = document.getElementById('email'), passwordInput = document.getElementById('password'), confirmPasswordInput = document.getElementById('confirmPassword'), jenjangSelect = document.getElementById('jenjang'), namaSekolahInput = document.getElementById('namaSekolah'), noHpInput = document.getElementById('noHp');
         const conditionalFields = document.getElementById('conditionalFields');
         const tkFields = document.getElementById('tkFields'), sdFields = document.getElementById('sdFields'), miFields = document.getElementById('miFields'), smpFields = document.getElementById('smpFields'), mtsFields = document.getElementById('mtsFields'), smaFields = document.getElementById('smaFields'), maFields = document.getElementById('maFields');
         const sdMapelType = document.getElementById('sdMapelType'), miMapelType = document.getElementById('miMapelType');
-        const sdMapelGroup = document.getElementById('sdMapelGroup'), miMapelGroup = document.getElementById('miMapelGroup');
-        const kelasError = document.getElementById('kelasError'), tkMapelError = document.getElementById('tkMapelError'), sdMapelError = document.getElementById('sdMapelError'), miMapelError = document.getElementById('miMapelError'), smpMapelError = document.getElementById('smpMapelError'), mtsMapelError = document.getElementById('mtsMapelError'), smaMapelError = document.getElementById('smaMapelError'), maMapelError = document.getElementById('maMapelError');
+        const smpMapelSelect = document.getElementById('smpMapelSelect'), mtsMapelSelect = document.getElementById('mtsMapelSelect'), smaMapelSelect = document.getElementById('smaMapelSelect'), maMapelSelect = document.getElementById('maMapelSelect');
+        const kelasError = document.getElementById('kelasError'), tkMapelError = document.getElementById('tkMapelError'), smpMapelError = document.getElementById('smpMapelError'), mtsMapelError = document.getElementById('mtsMapelError'), smaMapelError = document.getElementById('smaMapelError'), maMapelError = document.getElementById('maMapelError');
         const emailError = document.getElementById('emailError'), passwordError = document.getElementById('passwordError'), confirmError = document.getElementById('confirmError'), passwordStrength = document.getElementById('passwordStrength');
         const tkMapelCount = document.getElementById('tkMapelCount'), sdMapelCount = document.getElementById('sdMapelCount'), miMapelCount = document.getElementById('miMapelCount'), smpMapelCount = document.getElementById('smpMapelCount'), mtsMapelCount = document.getElementById('mtsMapelCount'), smaMapelCount = document.getElementById('smaMapelCount'), maMapelCount = document.getElementById('maMapelCount');
+        
+        // ✅ Cache for fetched mapel data
         const mapelCache = {};
+        
         function showMessage(text, type = 'success') { messageDiv.innerHTML = text; messageDiv.className = `message ${type}`; messageDiv.style.display = 'block'; if (type === 'success') setTimeout(() => { messageDiv.style.display = 'none'; }, 8000); }
-        function setLoading(loading) { submitBtn.disabled = loading; btnText.textContent = loading? 'Mendaftar...' : 'Daftar Sekarang'; loadingIcon.classList.toggle('hidden',!loading); }
+        function setLoading(loading) { submitBtn.disabled = loading; btnText.textContent = loading ? 'Mendaftar...' : 'Daftar Sekarang'; loadingIcon.classList.toggle('hidden', !loading); }
         function showFieldError(element, errorElement, show) { if (show) { if (element) element.classList.add('error'); if (errorElement) errorElement.classList.add('visible'); } else { if (element) element.classList.remove('error'); if (errorElement) errorElement.classList.remove('visible'); } }
         function checkPasswordStrength(password) { let strength = 0; if (password.length >= 6) strength++; if (password.length >= 10) strength++; if (/[A-Z]/.test(password)) strength++; if (/[0-9]/.test(password)) strength++; if (/[^A-Za-z0-9]/.test(password)) strength++; passwordStrength.className = 'password-strength-fill'; if (strength <= 2) passwordStrength.classList.add('strength-weak'); else if (strength <= 4) passwordStrength.classList.add('strength-medium'); else passwordStrength.classList.add('strength-strong'); return strength; }
+        
+        // ✅ NEW: Fetch mapel data from JSON file
         async function fetchMapelData(jenjang) {
             if (!jenjang) return [];
             if (mapelCache[jenjang]) return mapelCache[jenjang];
+            
             try {
+                console.log(`📥 [Mapel] Fetching ./data/mapel/${jenjang}.json`);
                 const response = await fetch(`./data/mapel/${jenjang}.json`, { cache: 'no-store' });
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
                 const data = await response.json();
                 if (!Array.isArray(data)) throw new Error('Invalid JSON structure');
                 mapelCache[jenjang] = data;
+                console.log(`✅ [Mapel] Loaded ${data.length} subjects for ${jenjang.toUpperCase()}`);
                 return data;
             } catch (error) {
+                console.warn(`⚠️ [Mapel] Failed to fetch ${jenjang}.json:`, error.message);
+                // ✅ Fallback: return minimal hardcoded list (non-breaking)
                 const fallback = {
                     'tk': [{ nama: 'Tematik' }, { nama: 'Agama' }, { nama: 'Bahasa' }, { nama: 'Seni' }],
-                    'sd': [{ nama: 'Matematika' }, { nama: 'Bahasa Indonesia' }, { nama: 'Ipas' }, { nama: 'Pjok' }, { nama: 'Paibd' }, { nama: 'Seni Budaya' }],
-                    'mi': [{ nama: 'Matematika' }, { nama: 'Bahasa Indonesia' }, { nama: 'IPA' }, { nama: 'Pjok' }, { nama: 'Paibd' }, { nama: 'Bahasa Arab' }],
-                    'smp': [{ nama: 'Matematika' }, { nama: 'Bahasa Indonesia' }, { nama: 'Bahasa Inggris' }, { nama: 'IPA' }, { nama: 'IPS' }, { nama: 'Pjok' }, { nama: 'Paibd' }],
-                    'mts': [{ nama: 'Matematika' }, { nama: 'Bahasa Indonesia' }, { nama: 'Bahasa Inggris' }, { nama: 'IPA' }, { nama: 'IPS' }, { nama: 'Pjok' }, { nama: 'Paibd' }, { nama: 'Bahasa Arab' }],
+                    'sd': [{ nama: 'Matematika' }, { nama: 'Bahasa Indonesia' }, { nama: 'IPAS' }, { nama: 'PJOK' }, { nama: 'PAIBD' }, { nama: 'Seni Budaya' }],
+                    'mi': [{ nama: 'Matematika' }, { nama: 'Bahasa Indonesia' }, { nama: 'IPA' }, { nama: 'PJOK' }, { nama: 'PAI' }, { nama: 'Bahasa Arab' }],
+                    'smp': [{ nama: 'Matematika' }, { nama: 'IPA' }, { nama: 'Bahasa Indonesia' }, { nama: 'Bahasa Inggris' }, { nama: 'IPS' }, { nama: 'PJOK' }, { nama: 'PAI' }],
+                    'mts': [{ nama: 'Matematika' }, { nama: 'IPA' }, { nama: 'Bahasa Indonesia' }, { nama: 'Bahasa Inggris' }, { nama: 'IPS' }, { nama: 'PJOK' }, { nama: 'PAI' }, { nama: 'Bahasa Arab' }],
                     'sma': [{ nama: 'Matematika' }, { nama: 'Bahasa Indonesia' }, { nama: 'Bahasa Inggris' }, { nama: 'Fisika' }, { nama: 'Kimia' }, { nama: 'Biologi' }, { nama: 'Sejarah' }, { nama: 'Ekonomi' }, { nama: 'Sosiologi' }, { nama: 'Geografi' }],
                     'ma': [{ nama: 'Matematika' }, { nama: 'Bahasa Indonesia' }, { nama: 'Bahasa Inggris' }, { nama: 'Fisika' }, { nama: 'Kimia' }, { nama: 'Biologi' }, { nama: 'Sejarah' }, { nama: 'Ekonomi' }, { nama: 'Sosiologi' }, { nama: 'Bahasa Arab' }]
                 };
@@ -309,6 +324,31 @@
                 return mapelCache[jenjang];
             }
         }
+        
+        // ✅ Populate dropdown mapel for secondary jenjangs
+        async function populateMapelDropdown(jenjang, selectEl) {
+            if (!selectEl) return;
+            selectEl.disabled = true;
+            selectEl.innerHTML = '<option value="">Memuat...</option>';
+            
+            try {
+                const mapelList = await fetchMapelData(jenjang);
+                let opts = '<option value="">Pilih Mata Pelajaran</option>';
+                mapelList.forEach(item => {
+                    const nama = item.nama || item;
+                    const val = nama.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+                    opts += `<option value="${val}">${nama}</option>`;
+                });
+                selectEl.innerHTML = opts;
+                selectEl.disabled = false;
+                console.log(`✅ [UI] Dropdown ${jenjang} populated with ${mapelList.length} items`);
+            } catch (error) {
+                console.error(`❌ [Mapel] Dropdown error for ${jenjang}:`, error);
+                selectEl.innerHTML = '<option value="">Gagal memuat data</option>';
+            }
+        }
+        
+        // ✅ Keep original populateMapelCheckboxes for TK/SD/MI if needed
         async function populateMapelCheckboxes(jenjang, containerId, excludeList = [], includeOnlyList = null) {
             const container = document.getElementById(containerId);
             if (!container) return;
@@ -317,12 +357,12 @@
                 const mapelList = await fetchMapelData(jenjang);
                 container.innerHTML = '';
                 mapelList.forEach(item => {
-                    const namaLower = item.nama.toLowerCase();
-                    if (excludeList && excludeList.includes(namaLower)) return;
-                    if (includeOnlyList &&!includeOnlyList.includes(namaLower)) return;
+                    const nama = item.nama || item;
+                    if (excludeList && excludeList.includes(nama.toLowerCase())) return;
+                    if (includeOnlyList && !includeOnlyList.includes(nama.toLowerCase())) return;
                     const label = document.createElement('label');
                     label.className = 'checkbox-label';
-                    label.innerHTML = `<input type="checkbox" name="${jenjang}Mapel" value="${item.nama}"><span>${item.nama}</span>`;
+                    label.innerHTML = `<input type="checkbox" name="${jenjang}Mapel" value="${nama.toLowerCase().replace(/\s+/g, '-')}"><span>${nama}</span>`;
                     container.appendChild(label);
                 });
                 container.querySelectorAll('input[type="checkbox"]').forEach(cb => {
@@ -332,125 +372,118 @@
                 container.innerHTML = '<p class="text-red-500 text-xs">Gagal memuat mapel</p>';
             }
         }
+        
         function getMaxMapel(jenjang) {
-            if (jenjang === 'tk' || jenjang === 'sd' || jenjang === 'mi') return 10;
-            return 2;
+            if (jenjang === 'tk' || jenjang === 'sd' || jenjang === 'mi') return 10; // No strict limit for these
+            return 2; // SMP/MTs/SMA/MA: max 2
         }
+        
         function updateMapelCount(containerId, countId, max) {
             const checked = document.querySelectorAll(`#${containerId} input[type="checkbox"]:checked`).length;
             const countEl = document.getElementById(countId);
             if (countEl) {
                 if (max === 10) {
                     countEl.textContent = `${checked} dipilih`;
-                    countEl.className = `mapel-count ${checked === 0? 'error' : ''}`;
+                    countEl.className = `mapel-count ${checked === 0 ? 'error' : ''}`;
                 } else {
                     countEl.textContent = `${checked}/${max} dipilih`;
-                    countEl.className = `mapel-count ${checked > max? 'error' : checked === max? 'warning' : ''}`;
+                    countEl.className = `mapel-count ${checked > max ? 'error' : checked === max ? 'warning' : ''}`;
                 }
             }
             return checked;
         }
-                passwordInput.addEventListener('input', () => { checkPasswordStrength(passwordInput.value); showFieldError(passwordInput, passwordError, passwordInput.value.length > 0 && passwordInput.value.length < 6); });
-        confirmPasswordInput.addEventListener('input', () => { showFieldError(confirmPasswordInput, confirmError, confirmPasswordInput.value.length > 0 && passwordInput.value!== confirmPasswordInput.value); });
-        emailInput.addEventListener('input', () => { const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; const value = emailInput.value.trim(); showFieldError(emailInput, emailError, value.length > 0 &&!emailRegex.test(value)); });
-
+        
+        // Real-time validation
+        passwordInput.addEventListener('input', () => { checkPasswordStrength(passwordInput.value); showFieldError(passwordInput, passwordError, passwordInput.value.length > 0 && passwordInput.value.length < 6); });
+        confirmPasswordInput.addEventListener('input', () => { showFieldError(confirmPasswordInput, confirmError, confirmPasswordInput.value.length > 0 && passwordInput.value !== confirmPasswordInput.value); });
+        emailInput.addEventListener('input', () => { const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; const value = emailInput.value.trim(); showFieldError(emailInput, emailError, value.length > 0 && !emailRegex.test(value)); });
+        
+        // ✅ UPDATED: Toggle conditional fields based on jenjang (7 options)
         jenjangSelect.addEventListener('change', async function() {
             const jenjang = this.value;
+            
+            // Hide all conditional fields first
             conditionalFields.classList.add('hidden');
             [tkFields, sdFields, miFields, smpFields, mtsFields, smaFields, maFields].forEach(f => f?.classList.add('hidden'));
+            
+            // Reset all checkboxes
             document.querySelectorAll('input[name="kelasDiampu"], input[name*="Mapel"]').forEach(cb => cb.checked = false);
+            
+            // Reset type selects
             if (sdMapelType) sdMapelType.value = '';
             if (miMapelType) miMapelType.value = '';
-            if (sdMapelGroup) sdMapelGroup.classList.add('hidden');
-            if (miMapelGroup) miMapelGroup.classList.add('hidden');
-
-            if (jenjang === 'tk') {
-                conditionalFields.classList.remove('hidden');
-                tkFields.classList.remove('hidden');
+            [smpMapelSelect, mtsMapelSelect, smaMapelSelect, maMapelSelect].forEach(s => { if(s) { s.value = ''; s.disabled = true; } });
+            
+            // Show appropriate fields and load mapel
+            if (jenjang === 'tk') { 
+                conditionalFields.classList.remove('hidden'); tkFields.classList.remove('hidden');
                 await populateMapelCheckboxes('tk', 'tkMapelContainer');
-            } else if (jenjang === 'sd') {
-                conditionalFields.classList.remove('hidden');
-                sdFields.classList.remove('hidden');
-                document.getElementById('sdKelasHint').textContent = 'Pilih jenis pengajaran dulu';
-            } else if (jenjang === 'mi') {
-                conditionalFields.classList.remove('hidden');
-                miFields.classList.remove('hidden');
-                document.getElementById('miKelasHint').textContent = 'Pilih jenis pengajaran dulu';
-            } else if (jenjang === 'smp') {
-                conditionalFields.classList.remove('hidden');
-                smpFields.classList.remove('hidden');
-                await populateMapelCheckboxes('smp', 'smpMapelContainer');
-            } else if (jenjang === 'mts') {
-                conditionalFields.classList.remove('hidden');
-                mtsFields.classList.remove('hidden');
-                await populateMapelCheckboxes('mts', 'mtsMapelContainer');
-            } else if (jenjang === 'sma') {
-                conditionalFields.classList.remove('hidden');
-                smaFields.classList.remove('hidden');
-                await populateMapelCheckboxes('sma', 'smaMapelContainer');
-            } else if (jenjang === 'ma') {
-                conditionalFields.classList.remove('hidden');
-                maFields.classList.remove('hidden');
-                await populateMapelCheckboxes('ma', 'maMapelContainer');
             }
+            else if (jenjang === 'sd') { 
+                conditionalFields.classList.remove('hidden'); sdFields.classList.remove('hidden'); 
+                document.getElementById('sdKelasHint').textContent = 'Pilih jenis pengajaran dulu';
+            }
+            else if (jenjang === 'mi') { 
+                conditionalFields.classList.remove('hidden'); miFields.classList.remove('hidden'); 
+                document.getElementById('miKelasHint').textContent = 'Pilih jenis pengajaran dulu';
+            }
+            else if (jenjang === 'smp') { 
+                conditionalFields.classList.remove('hidden'); smpFields.classList.remove('hidden'); 
+                await populateMapelDropdown(jenjang, smpMapelSelect);
+            }
+            else if (jenjang === 'mts') { 
+                conditionalFields.classList.remove('hidden'); mtsFields.classList.remove('hidden'); 
+                await populateMapelDropdown(jenjang, mtsMapelSelect);
+            }
+            else if (jenjang === 'sma') { 
+                conditionalFields.classList.remove('hidden'); smaFields.classList.remove('hidden'); 
+                await populateMapelDropdown(jenjang, smaMapelSelect);
+            }
+            else if (jenjang === 'ma') { 
+                conditionalFields.classList.remove('hidden'); maFields.classList.remove('hidden'); 
+                await populateMapelDropdown(jenjang, maMapelSelect);
+            }
+            
+            // Clear errors
             showFieldError(document.querySelector('[name="kelasDiampu"]'), kelasError, false);
-            [tkMapelError, sdMapelError, miMapelError, smpMapelError, mtsMapelError, smaMapelError, maMapelError].forEach(el => showFieldError(null, el, false));
-        });
-
+            [tkMapelError, smpMapelError, mtsMapelError, smaMapelError, maMapelError].forEach(el => showFieldError(null, el, false));
+        });        
+        // ✅ SD: Toggle hint based on sdMapelType
         if (sdMapelType) {
             sdMapelType.addEventListener('change', async function() {
                 const jenjang = 'sd';
-                document.querySelectorAll('input[name="kelasDiampu"]').forEach(cb => { cb.checked = false; cb.disabled = false; });
-                if (this.value === 'mapel') {
-                    sdMapelGroup.classList.remove('hidden');
-                    document.getElementById('sdKelasHint').textContent = 'Guru Mapel: bisa pilih sampai 6 kelas';
-                    await populateMapelCheckboxes(jenjang, 'sdMapelContainer', [], ['pjok', 'paibd']);
-                } else if (this.value === 'kelas') {
-                    sdMapelGroup.classList.add('hidden');
-                    document.querySelectorAll('input[name="sdMapel"]').forEach(cb => cb.checked = false);
-                    updateMapelCount('sdMapelContainer', 'sdMapelCount', 10);
-                    document.getElementById('sdKelasHint').textContent = 'Guru Kelas: hanya 1 kelas yang bisa dipilih';
-                } else if (this.value === 'pjok' || this.value === 'pai' || this.value === 'bd') {
-                    sdMapelGroup.classList.add('hidden');
-                    document.getElementById('sdKelasHint').textContent = 'Guru Mapel: bisa pilih sampai 6 kelas';
-                } else {
-                    document.getElementById('sdKelasHint').textContent = 'Pilih jenis pengajaran dulu';
-                }
+                document.getElementById('sdKelasHint').textContent = this.value === 'guru-kelas' 
+                    ? 'Guru Kelas: hanya 1 kelas yang bisa dipilih' 
+                    : 'Guru Mapel: bisa pilih sampai 6 kelas';
+                document.querySelectorAll('input[name="kelasDiampu"]').forEach(cb => cb.disabled = false);
             });
         }
-
+        
+        // ✅ MI: Same logic as SD
         if (miMapelType) {
             miMapelType.addEventListener('change', async function() {
                 const jenjang = 'mi';
-                document.querySelectorAll('input[name="kelasDiampu"]').forEach(cb => { cb.checked = false; cb.disabled = false; });
-                if (this.value === 'mapel') {
-                    miMapelGroup.classList.remove('hidden');
-                    document.getElementById('miKelasHint').textContent = 'Guru Mapel: bisa pilih sampai 6 kelas';
-                    await populateMapelCheckboxes(jenjang, 'miMapelContainer', [], ['pjok', 'paibd']);
-                } else if (this.value === 'kelas') {
-                    miMapelGroup.classList.add('hidden');
-                    document.querySelectorAll('input[name="miMapel"]').forEach(cb => cb.checked = false);
-                    updateMapelCount('miMapelContainer', 'miMapelCount', 10);
-                    document.getElementById('miKelasHint').textContent = 'Guru Kelas: hanya 1 kelas yang bisa dipilih';
-                } else if (this.value === 'pjok' || this.value === 'pai' || this.value === 'bd') {
-                    miMapelGroup.classList.add('hidden');
-                    document.getElementById('miKelasHint').textContent = 'Guru Mapel: bisa pilih sampai 6 kelas';
-                } else {
-                    document.getElementById('miKelasHint').textContent = 'Pilih jenis pengajaran dulu';
-                }
+                document.getElementById('miKelasHint').textContent = this.value === 'guru-kelas' 
+                    ? 'Guru Kelas: hanya 1 kelas yang bisa dipilih' 
+                    : 'Guru Mapel: bisa pilih sampai 6 kelas';
+                document.querySelectorAll('input[name="kelasDiampu"]').forEach(cb => cb.disabled = false);
             });
         }
-
+        
+        // ✅ Validate kelas checkboxes with DYNAMIC rules
         document.querySelectorAll('input[name="kelasDiampu"]').forEach(cb => {
             cb.addEventListener('change', function() {
                 const jenjang = jenjangSelect.value;
                 const checked = document.querySelectorAll('input[name="kelasDiampu"]:checked');
-                const isVisible =!conditionalFields.classList.contains('hidden');
+                const isVisible = !conditionalFields.classList.contains('hidden');
+                
+                // ✅ TK: max 2 (A and B)
                 if (jenjang === 'tk' && checked.length > 2) {
                     this.checked = false;
                     showMessage('⚠️ TK maksimal 2 kelompok (A dan B)', 'warning');
                 }
-                if ((jenjang === 'sd' || jenjang === 'mi') && (sdMapelType?.value === 'kelas' || miMapelType?.value === 'kelas')) {
+                // ✅ SD/MI Guru Kelas: max 1 kelas
+                if ((jenjang === 'sd' && sdMapelType?.value === 'guru-kelas') || (jenjang === 'mi' && miMapelType?.value === 'guru-kelas')) {
                     if (checked.length > 1) {
                         this.checked = false;
                         showMessage('⚠️ Guru Kelas hanya bisa memilih 1 kelas', 'warning');
@@ -463,151 +496,154 @@
                         document.querySelectorAll('input[name="kelasDiampu"]').forEach(box => box.disabled = false);
                     }
                 }
-                if ((jenjang === 'sd' || jenjang === 'mi') && ['pai', 'pjok', 'bd', 'mapel'].includes(sdMapelType?.value || miMapelType?.value) && checked.length > 6) {
-                    this.checked = false;
-                    showMessage('⚠️ Guru Mapel maksimal 6 kelas', 'warning');
+                // ✅ SD/MI Guru Mapel: max 6 kelas
+                if ((jenjang === 'sd' && sdMapelType?.value.startsWith('guru-mapel')) || 
+                    (jenjang === 'mi' && miMapelType?.value.startsWith('guru-mapel'))) {
+                    if (checked.length > 6) {
+                        this.checked = false;
+                        showMessage('⚠️ Guru Mapel maksimal 6 kelas', 'warning');
+                    }
                 }
+                // ✅ SMP/MTs/SMA/MA: max 3 kelas
                 if (['smp', 'mts', 'sma', 'ma'].includes(jenjang) && checked.length > 3) {
                     this.checked = false;
                     showMessage('⚠️ Maksimal 3 kelas untuk jenjang ini', 'warning');
                 }
+                
                 showFieldError(this, kelasError, checked.length === 0 && isVisible);
             });
         });
-
+        
+        // ✅ Form submit handler
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
+            console.log('📝 [Register] Form submitted, jenjang:', jenjangSelect.value);
+            
             showMessage('', 'success');
             showFieldError(emailInput, emailError, false); showFieldError(passwordInput, passwordError, false); showFieldError(confirmPasswordInput, confirmError, false);
+            
             const namaLengkap = namaLengkapInput.value.trim(), email = emailInput.value.trim(), password = passwordInput.value, confirmPassword = confirmPasswordInput.value, jenjang = jenjangSelect.value, namaSekolah = namaSekolahInput.value.trim(), noHp = noHpInput.value.trim();
+            
+            // Validate basic fields
             let hasError = false;
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(email)) { showFieldError(emailInput, emailError, true); hasError = true; }
             if (password.length < 6) { showFieldError(passwordInput, passwordError, true); hasError = true; }
-            if (password!== confirmPassword) { showFieldError(confirmPasswordInput, confirmError, true); hasError = true; }
-            if (jenjang &&!['tk', 'sd', 'mi', 'smp', 'mts', 'sma', 'ma'].includes(jenjang)) {
+            if (password !== confirmPassword) { showFieldError(confirmPasswordInput, confirmError, true); hasError = true; }
+            
+            // ✅ Validate conditional fields
+            if (jenjang && !['tk', 'sd', 'mi', 'smp', 'mts', 'sma', 'ma'].includes(jenjang)) {
                 showMessage('❌ Jenjang tidak valid', 'error'); hasError = true;
             }
+            
             if (jenjang) {
                 const checkedKelas = document.querySelectorAll('input[name="kelasDiampu"]:checked');
                 if (checkedKelas.length === 0) { showFieldError(document.querySelector('[name="kelasDiampu"]'), kelasError, true); hasError = true; }
             }
+            
+            // ✅ TK validation
             if (jenjang === 'tk') {
                 const checkedMapel = document.querySelectorAll('input[name="tkMapel"]:checked');
                 if (checkedMapel.length === 0) { showFieldError(null, tkMapelError, true); hasError = true; }
             }
+            
+            // ✅ SD validation
             if (jenjang === 'sd') {
                 if (!sdMapelType?.value) { showMessage('❌ Pilih jenis pengajaran', 'error'); hasError = true; }
-                if (sdMapelType?.value === 'mapel') {
-                    const checkedMapel = document.querySelectorAll('input[name="sdMapel"]:checked');
-                    if (checkedMapel.length === 0) { showFieldError(null, sdMapelError, true); hasError = true; }
-                }
             }
+            
+            // ✅ MI validation
             if (jenjang === 'mi') {
                 if (!miMapelType?.value) { showMessage('❌ Pilih jenis pengajaran', 'error'); hasError = true; }
-                if (miMapelType?.value === 'mapel') {
-                    const checkedMapel = document.querySelectorAll('input[name="miMapel"]:checked');
-                    if (checkedMapel.length === 0) { showFieldError(null, miMapelError, true); hasError = true; }
-                }
             }
+            
+            // ✅ SMP/MTs/SMA/MA validation: dropdown selected
             if (['smp', 'mts', 'sma', 'ma'].includes(jenjang)) {
-                const mapelName = `${jenjang}Mapel`;
+                const selectEl = document.getElementById(`${jenjang}MapelSelect`);
                 const errorEl = document.getElementById(`${jenjang}MapelError`);
-                const checkedMapel = document.querySelectorAll(`input[name="${mapelName}"]:checked`);
-                if (checkedMapel.length === 0 || checkedMapel.length > 2) { showFieldError(null, errorEl, true); hasError = true; }
+                if (!selectEl?.value || selectEl.disabled) { showFieldError(null, errorEl, true); hasError = true; }
             }
-            if (hasError) {
-                showMessage('❌ Mohon perbaiki error di atas sebelum mendaftar.', 'error');
-                return;
+            
+            if (hasError) { 
+                console.log('❌ [Register] Validation failed, hasError:', hasError);
+                showMessage('❌ Mohon perbaiki error di atas sebelum mendaftar.', 'error'); 
+                return; 
             }
+            
             setLoading(true);
             try {
+                console.log('📝 [Register] Starting for:', email);
+                // Create Auth user
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
                 await updateProfile(user, { displayName: namaLengkap });
+                
+                // Send email verification
                 let emailSent = false, emailErr = null;
                 try { await new Promise(r => setTimeout(r, 500)); await sendEmailVerification(user); emailSent = true; }
                 catch (err) { console.error('Email verification failed:', err.code); emailErr = err; emailSent = false; }
+                
+                // Collect form data
                 const kelasDiampu = [];
                 document.querySelectorAll('input[name="kelasDiampu"]:checked').forEach(cb => kelasDiampu.push(cb.value));
-                let mapelDiampu = [];
-                let sdMapelTypeValue = null;
-                let miMapelTypeValue = null;
+                
+                let jenisPengajaran = null, mapelDiampu = [];
                 if (jenjang === 'tk') {
                     document.querySelectorAll('input[name="tkMapel"]:checked').forEach(cb => mapelDiampu.push(cb.value));
+                } else if (jenjang === 'sd') {
+                    jenisPengajaran = sdMapelType?.value;
+                    if (jenisPengajaran?.startsWith('guru-mapel')) mapelDiampu = [jenisPengajaran.replace('guru-mapel-', '')];
+                } else if (jenjang === 'mi') {
+                    jenisPengajaran = miMapelType?.value;
+                    if (jenisPengajaran?.startsWith('guru-mapel')) mapelDiampu = [jenisPengajaran.replace('guru-mapel-', '')];
+                } else if (['smp', 'mts', 'sma', 'ma'].includes(jenjang)) {
+                    jenisPengajaran = document.getElementById(`${jenjang}MapelSelect`)?.value;
+                    if (jenisPengajaran) mapelDiampu = [jenisPengajaran];
                 }
-                if (jenjang === 'sd') {
-                    sdMapelTypeValue = sdMapelType?.value || '';
-                    if (sdMapelTypeValue === 'kelas') {
-                        mapelDiampu = [];
-                    } else if (sdMapelTypeValue === 'pai') {
-                        kelasDiampu.length = 0;
-                        mapelDiampu = ['Paibd'];
-                    } else if (sdMapelTypeValue === 'pjok') {
-                        kelasDiampu.length = 0;
-                        mapelDiampu = ['Pjok'];
-                    } else if (sdMapelTypeValue === 'bd') {
-                        kelasDiampu.length = 0;
-                        mapelDiampu = ['Paibd'];
-                    } else if (sdMapelTypeValue === 'mapel') {
-                        document.querySelectorAll('input[name="sdMapel"]:checked').forEach(cb => mapelDiampu.push(cb.value));
-                    }
-                }
-                if (jenjang === 'mi') {
-                    miMapelTypeValue = miMapelType?.value || '';
-                    if (miMapelTypeValue === 'kelas') {
-                        mapelDiampu = [];
-                    } else if (miMapelTypeValue === 'pai') {
-                        kelasDiampu.length = 0;
-                        mapelDiampu = ['Paibd'];
-                    } else if (miMapelTypeValue === 'pjok') {
-                        kelasDiampu.length = 0;
-                        mapelDiampu = ['Pjok'];
-                    } else if (miMapelTypeValue === 'bd') {
-                        kelasDiampu.length = 0;
-                        mapelDiampu = ['Paibd'];
-                    } else if (miMapelTypeValue === 'mapel') {
-                        document.querySelectorAll('input[name="miMapel"]:checked').forEach(cb => mapelDiampu.push(cb.value));
-                    }
-                }
-                if (['smp', 'mts', 'sma', 'ma'].includes(jenjang)) {
-                    document.querySelectorAll(`input[name="${jenjang}Mapel"]:checked`).forEach(cb => mapelDiampu.push(cb.value));
-                }
+                
+                // ✅ Save to Firestore with PENDING status
                 await setDoc(doc(db, 'users', user.uid), {
-                    email: email,
-                    nama_lengkap: namaLengkap,
-                    nama_sekolah: namaSekolah,
-                    jenjang_sekolah: jenjang,
-                    no_hp: noHp || '',
+                    email: email, nama_lengkap: namaLengkap, nama_sekolah: namaSekolah, jenjang_sekolah: jenjang, no_hp: noHp || '',
                     kelas_diampu: kelasDiampu,
+                    jenis_pengajaran: jenisPengajaran,
                     mapel_diampu: mapelDiampu,
-                    sd_mapel_type: sdMapelTypeValue,
-                    mi_mapel_type: miMapelTypeValue,
-                    role: 'teacher',
+                    sd_mapel_type: jenjang === 'sd' ? (sdMapelType?.value || null) : null,
+                    mi_mapel_type: jenjang === 'mi' ? (miMapelType?.value || null) : null,
+                    role: 'teacher', 
                     isActive: false,
                     isApproved: false,
                     isEmailVerified: user.emailVerified,
-                    emailSendStatus: emailSent? 'sent' : 'failed',
-                    emailSendError: emailErr? { code: emailErr.code, message: emailErr.message } : null,
-                    createdAt: serverTimestamp(),
-                    updatedAt: serverTimestamp(),
-                    lastLogin: null
+                    emailSendStatus: emailSent ? 'sent' : 'failed', 
+                    emailSendError: emailErr ? { code: emailErr.code, message: emailErr.message } : null,
+                    createdAt: serverTimestamp(), updatedAt: serverTimestamp(), lastLogin: null
                 });
+                
+                // Success message
                 let successMsg = `✅ <strong>Pendaftaran berhasil!</strong><br><br>`;
                 if (emailSent) {
-                    successMsg += `📧 Email verifikasi telah dikirim ke <strong>${email}</strong>.<br><br><strong>Langkah selanjutnya:</strong><br>1️⃣ Buka email inbox Anda<br>2️⃣ Cek folder <strong>Spam/Promotions/Updates</strong><br>3️⃣ Cari email dari <strong>noreply@firebaseapp.com</strong><br>4️⃣ Klik link <strong>"Verify email"</strong><br>5️⃣ Login dengan password Anda<br>6️⃣ <strong>Tunggu persetujuan admin</strong> (1-3 hari kerja)<br><br><small class="text-gray-500">⚠️ Akun dalam status <strong>pending</strong>. Fitur terbatas sampai admin approve.</small>`;
+                    successMsg += `📧 Email verifikasi telah dikirim ke <strong>${email}</strong>.<br><br>
+                    <strong>Langkah selanjutnya:</strong><br>
+                    1️⃣ Buka email inbox Anda<br>2️⃣ Cek folder <strong>Spam/Promotions/Updates</strong><br>
+                    3️⃣ Cari email dari <strong>noreply@firebaseapp.com</strong><br>4️⃣ Klik link <strong>"Verify email"</strong><br>
+                    5️⃣ Login dengan password Anda<br>6️⃣ <strong>Tunggu persetujuan admin</strong> (1-3 hari kerja)<br><br>
+                    <small class="text-gray-500">⚠️ Akun dalam status <strong>pending</strong>. Fitur terbatas sampai admin approve.</small>`;
                 } else {
-                    successMsg += `⚠️ <strong>Catatan:</strong> Email verifikasi <em>gagal terkirim</em>.<br><br><strong>Akun Anda tetap dibuat</strong> dalam status pending. Hubungi admin: radiah.tifarahs@gmail.com`;
+                    successMsg += `⚠️ <strong>Catatan:</strong> Email verifikasi <em>gagal terkirim</em>.<br><br>
+                    <strong>Akun Anda tetap dibuat</strong> dalam status pending. Hubungi admin: radiah.tifarahs@gmail.com`;
                 }
                 showMessage(successMsg, 'success');
                 form.reset(); passwordStrength.className = 'password-strength-fill';
                 if (sdMapelType) sdMapelType.value = '';
                 if (miMapelType) miMapelType.value = '';
-                if (sdMapelGroup) sdMapelGroup.classList.add('hidden');
-                if (miMapelGroup) miMapelGroup.classList.add('hidden');
+                [smpMapelSelect, mtsMapelSelect, smaMapelSelect, maMapelSelect].forEach(s => { if(s) { s.value = ''; s.disabled = true; } });
                 setTimeout(() => { window.location.href = 'login.html?registered=true&emailSent=' + emailSent; }, 8000);
+                console.log('🎉 [Register] Completed');
+                
             } catch (error) {
                 console.error('❌ [Register] Error:', error);
+                console.error('❌ [Register] Error code:', error.code);
+                console.error('❌ [Register] Error message:', error.message);
+                
                 let errorMessage = '❌ <strong>Gagal mendaftar.</strong><br><br>';
                 if (error.code === 'auth/email-already-in-use') { errorMessage += 'Email sudah terdaftar.'; showFieldError(emailInput, emailError, true); }
                 else if (error.code === 'auth/invalid-email') { errorMessage += 'Format email tidak valid.'; showFieldError(emailInput, emailError, true); }
@@ -616,7 +652,7 @@
                 showMessage(errorMessage, 'error');
             } finally { setLoading(false); }
         });
-        console.log('🟢 [Register] READY — SYNCED WITH CTA + sd.json');
+        console.log('🟢 [Register] READY — Dynamic Jenjang/Mapel from JSON (Preserved Original Logic)');
     </script>
 </body>
 </html>
