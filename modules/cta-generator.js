@@ -83,25 +83,36 @@ async function populateMapelDropdown(jenjang, userMapelFromReg = null, userData 
     
     // ✅ DETERMINE FILTER RULE based on skema
     const getFilterRule = () => {
-      if (!userData) return { type: 'none' };
-      const { jenjang_sekolah, sd_mapel_type, mapel_diampu, role } = userData;
-      
-      if (role === 'admin') return { type: 'none' };
-      if (jenjang_sekolah === 'tk') return { type: 'none' }; // TK: all mapel
-      
-      // SD/MI Guru Kelas: EXCLUDE PAI/PJOK/BD
-      if (['sd', 'mi'].includes(jenjang_sekolah) && sd_mapel_type === 'kelas') {
-        return { type: 'exclude', values: ['pai', 'pjok', 'bd', 'pai/bd'] };
-      }
-      
-      // SD/MI Guru Mapel: ONLY include PAI/PJOK/BD
-      if (['sd', 'mi'].includes(jenjang_sekolah) && ['pai', 'pjok', 'bd'].includes(sd_mapel_type)) {
-        return { type: 'include', values: [sd_mapel_type] };
-      }
-      
-      // SMP/MTs/SMA/MA: ONLY include mapel_yang_diampu
-      if (['smp', 'mts', 'sma', 'ma'].includes(jenjang_sekolah) && mapel_diampu?.length > 0) {
-        return { type: 'include', values: mapel_yang_diampu.map(m => m.toLowerCase()) };
+  if (!userData) return { type: 'none' };
+  const { jenjang_sekolah, sd_mapel_type, mapel_diampu, role } = userData;
+  
+  if (role === 'admin') return { type: 'none' };
+  if (jenjang_sekolah === 'tk') return { type: 'none' };
+  
+  // SD/MI Guru Kelas: EXCLUDE PAI/PJOK/BD
+  if (['sd', 'mi'].includes(jenjang_sekolah) && sd_mapel_type === 'kelas') {
+    return { type: 'exclude', values: ['pai', 'pjok', 'bd', 'pai/bd'] };
+  }
+  
+  // ✅ SD/MI Guru Mapel: HANDLE MULTI-FORMAT (baru & lama)
+  if (['sd', 'mi'].includes(jenjang_sekolah) && sd_mapel_type?.startsWith('guru-mapel')) {
+    // Format baru: "guru-mapel-paibd" → extract "paibd"
+    const extracted = sd_mapel_type.replace('guru-mapel-', '');
+    return { type: 'include', values: [extracted] };
+  }
+  
+  if (['sd', 'mi'].includes(jenjang_sekolah) && sd_mapel_type === 'mapel' && mapel_diampu?.length > 0) {
+    // Format lama: sd_mapel_type="mapel" + mapel_diampu=["paibd","pjok"]
+    return { type: 'include', values: mapel_diampu.map(m => m.toLowerCase()) };
+  }
+  
+  // ✅ SMP/MTs/SMA/MA: Use mapel_diampu array
+  if (['smp', 'mts', 'sma', 'ma'].includes(jenjang_sekolah) && mapel_diampu?.length > 0) {
+    return { type: 'include', values: mapel_diampu.map(m => m.toLowerCase()) };
+  }
+  
+  return { type: 'none' };
+};
       }
       
       return { type: 'none' };
