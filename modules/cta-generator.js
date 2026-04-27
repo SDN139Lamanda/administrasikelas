@@ -4,7 +4,7 @@
  * Folder: modules/cta-generator/cta-generator.js
  * Platform Administrasi Kelas Digital
  * ============================================
- * VERSI: NO-FILTER - USER KETIK MANUAL
+ * VERSI: NO-FILTER + AUTO SAVE ke adm_pembelajaran
  * ============================================
  */
 
@@ -42,44 +42,44 @@ export async function renderCitaGenerator(jenjangFromParam, kelasFromParam, seme
 
   container.innerHTML = `
     <style>
-    .cta-generator-form { max-width: 950px; margin: auto; padding: 30px; background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-    .cta-generator-form h2 { text-align: center; color: #0891b2; margin-bottom: 10px; font-size: 28px; }
-    .subtitle { text-align: center; color: #6b7280; margin-bottom: 30px; }
-    .section-title { font-size: 18px; font-weight: 700; color: #374151; margin: 25px 0 15px 0; padding-bottom: 8px; border-bottom: 2px solid #e5e7eb; display: flex; align-items: center; gap: 8px; }
-    .cta-generator-form label { display: block; margin-top: 12px; font-weight: 600; color: #374151; font-size: 14px; }
-    .cta-generator-form input,.cta-generator-form select { width: 100%; margin-top: 8px; padding: 12px; border-radius: 8px; border: 1px solid #d1d5db; font-size: 14px; font-family: inherit; box-sizing: border-box; }
-    .cta-result-table { width: 100%; border-collapse: collapse; margin-top: 16px; background: white; }
-    .cta-result-table th { background: #0891b2; color: white; padding: 12px 16px; text-align: left; font-weight: 600; }
-    .cta-result-table td { padding: 16px; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
-    .cta-result-table.label-col { width: 180px; background: #f8fafc; font-weight: 600; color: #374151; }
-    .cta-result-table.content-col { white-space: pre-wrap; line-height: 1.6; color: #1f2937; }
-    .btn-generate,.btn-save,.btn-secondary,.btn-print,.btn-download { margin-top: 20px; padding: 14px 30px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; }
-    .btn-generate { background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%); color: white; }
-    .btn-generate:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(8,145,178,0.3); }
-    .btn-save { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; }
-    .btn-save:hover { background: linear-gradient(135deg, #059669 0%, #047857 100%); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(16,185,129,0.3); }
-    .btn-print { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white; }
-    .btn-print:hover { background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(99,102,241,0.3); }
-    .btn-download { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; }
-    .btn-download:hover { background: linear-gradient(135deg, #d97706 0%, #b45309 100%); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(245,158,11,0.3); }
-    .btn-secondary { background: #6b7280; color: white; margin-top: 10px; }
-    .btn-secondary:hover { background: #4b5563; transform: translateY(-2px); }
-    .btn-back { margin-top: 20px; padding: 12px 30px; background: #6b7280; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; width: auto; }
-    .hidden { display: none!important; }
-    .auto-filled { background: #f0fdf4; border-color: #10b981!important; }
-    .grid-cols-2,.grid-cols-3 { display: grid; gap: 16px; }
-    .grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
-    .grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
+   .cta-generator-form { max-width: 950px; margin: auto; padding: 30px; background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+   .cta-generator-form h2 { text-align: center; color: #0891b2; margin-bottom: 10px; font-size: 28px; }
+   .subtitle { text-align: center; color: #6b7280; margin-bottom: 30px; }
+   .section-title { font-size: 18px; font-weight: 700; color: #374151; margin: 25px 0 15px 0; padding-bottom: 8px; border-bottom: 2px solid #e5e7eb; display: flex; align-items: center; gap: 8px; }
+   .cta-generator-form label { display: block; margin-top: 12px; font-weight: 600; color: #374151; font-size: 14px; }
+   .cta-generator-form input,.cta-generator-form select { width: 100%; margin-top: 8px; padding: 12px; border-radius: 8px; border: 1px solid #d1d5db; font-size: 14px; font-family: inherit; box-sizing: border-box; }
+   .cta-result-table { width: 100%; border-collapse: collapse; margin-top: 16px; background: white; }
+   .cta-result-table th { background: #0891b2; color: white; padding: 12px 16px; text-align: left; font-weight: 600; }
+   .cta-result-table td { padding: 16px; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
+   .cta-result-table.label-col { width: 180px; background: #f8fafc; font-weight: 600; color: #374151; }
+   .cta-result-table.content-col { white-space: pre-wrap; line-height: 1.6; color: #1f2937; }
+   .btn-generate,.btn-save,.btn-secondary,.btn-print,.btn-download { margin-top: 20px; padding: 14px 30px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; }
+   .btn-generate { background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%); color: white; }
+   .btn-generate:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(8,145,178,0.3); }
+   .btn-save { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; }
+   .btn-save:hover { background: linear-gradient(135deg, #059669 0%, #047857 100%); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(16,185,129,0.3); }
+   .btn-print { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white; }
+   .btn-print:hover { background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(99,102,241,0.3); }
+   .btn-download { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; }
+   .btn-download:hover { background: linear-gradient(135deg, #d97706 0%, #b45309 100%); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(245,158,11,0.3); }
+   .btn-secondary { background: #6b7280; color: white; margin-top: 10px; }
+   .btn-secondary:hover { background: #4b5563; transform: translateY(-2px); }
+   .btn-back { margin-top: 20px; padding: 12px 30px; background: #6b7280; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; width: auto; }
+   .hidden { display: none!important; }
+   .auto-filled { background: #f0fdf4; border-color: #10b981!important; }
+   .grid-cols-2,.grid-cols-3 { display: grid; gap: 16px; }
+   .grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+   .grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
      @media (max-width: 768px) {.grid-cols-2,.grid-cols-3 { grid-template-columns: 1fr; } }
-    .cta-item { background: white; padding: 20px; margin-top: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-    .status-badge { display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 11px; font-weight: 600; margin-left: 8px; }
-    .status-ready { background: #dcfce7; color: #166534; }
-    .status-warning { background: #fef3c7; color: #92400e; }
-    .result-section { margin-top: 30px; }
+   .cta-item { background: white; padding: 20px; margin-top: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+   .status-badge { display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 11px; font-weight: 600; margin-left: 8px; }
+   .status-ready { background: #dcfce7; color: #166534; }
+   .status-warning { background: #fef3c7; color: #92400e; }
+   .result-section { margin-top: 30px; }
      @media print {
-      .cta-generator-form h2,.subtitle,.section-title,.cta-generator-form label,.btn-generate,.btn-save,.btn-secondary,.btn-print,.btn-download,.btn-back, #cta-form,.mt-12 { display: none!important; }
+     .cta-generator-form h2,.subtitle,.section-title,.cta-generator-form label,.btn-generate,.btn-save,.btn-secondary,.btn-print,.btn-download,.btn-back, #cta-form,.mt-12 { display: none!important; }
        #cta-result { display: block!important; }
-      .cta-result-table { border: 1px solid #000; }
+     .cta-result-table { border: 1px solid #000; }
        body { background: white; }
      }
     </style>
@@ -119,7 +119,7 @@ export async function renderCitaGenerator(jenjangFromParam, kelasFromParam, seme
         <div style="display: flex; gap: 12px; margin-top: 16px;">
           <button type="button" id="btn-print" class="btn-print" style="flex: 1;"><i class="fas fa-print"></i> Print</button>
           <button type="button" id="btn-download" class="btn-download" style="flex: 1;"><i class="fas fa-download"></i> Download</button>
-          <button type="button" id="btn-save" class="btn-save" style="flex: 1;"><i class="fas fa-save"></i> Simpan</button>
+          <button type="button" id="btn-save" class="btn-save" style="flex: 1;"><i class="fas fa-save"></i> Simpan Manual</button>
           <button type="button" id="btn-regenerate" class="btn-secondary" style="flex: 1;"><i class="fas fa-redo"></i> Ulang</button>
         </div>
       </div>
@@ -174,8 +174,8 @@ async function handleGenerate() {
     document.getElementById('result-tp').textContent = result.tp;
     document.getElementById('result-atp').textContent = result.atp;
     console.log('✅ [CTA Generator] Generation complete!');
-    showAlert('✅ Berhasil generate!', 'success');
-    await autoSaveCTA(result, { sekolah, jenjang, kelas, semester, mapel, guru, topik, tahun });
+    showAlert('✅ Berhasil generate & auto-save ke Adm Pembelajaran!', 'success');
+    await autoSaveToAdmPembelajaran(result, { sekolah, jenjang, kelas, semester, mapel, guru, topik, tahun });
   } catch (error) {
     console.error('❌ [CTA Generator] Error:', error);
     document.getElementById('result-cp').textContent = `❌ Error: ${error.message}`;
@@ -230,7 +230,7 @@ async function handleSave() {
       mode: 'AI', cp: document.getElementById('result-cp')?.textContent, tp: document.getElementById('result-tp')?.textContent, atp: document.getElementById('result-atp')?.textContent,
       createdAt: serverTimestamp(), updatedAt: serverTimestamp(), isAdmin: userDoc.exists() && userDoc.data()?.role === 'admin'
     });
-    alert('✅ Berhasil disimpan!'); loadCTAData();
+    alert('✅ Berhasil disimpan ke cp_tp_atp!'); loadCTAData();
   } catch (error) { alert('❌ Gagal simpan: ' + error.message); }
 }
 
@@ -251,16 +251,48 @@ function loadCTAData() {
   })();
 }
 
-async function autoSaveCTA(result, metadata) {
+// ✅ AUTO SAVE KE adm_pembelajaran - INI YANG KAMU MAU
+async function autoSaveToAdmPembelajaran(result, metadata) {
   try {
     const user = auth.currentUser; if (!user) return null;
-    await addDoc(collection(db, 'cp_tp_atp'), {
-      userId: user.uid, userEmail: user.email, userName: user.displayName || 'Guru',
-    ...metadata, mode: 'AI', cp: result.cp, tp: result.tp, atp: result.atp,
-      createdAt: serverTimestamp(), updatedAt: serverTimestamp()
-    });
+    const userDoc = await getDoc(doc(db, 'users', user.uid));
+    const userData = userDoc.exists()? userDoc.data() : {};
+
+    const docData = {
+      userId: user.uid,
+      userEmail: user.email,
+      userName: user.displayName || metadata.guru || 'Guru',
+      nama_sekolah: metadata.sekolah,
+      tahun_ajaran: metadata.tahun,
+      jenjang: metadata.jenjang,
+      kelas: metadata.kelas,
+      semester: metadata.semester,
+      mapel: metadata.mapel,
+      guru: metadata.guru,
+      topik: metadata.topik,
+      jenis_dokumen: 'CP-TP-ATP',
+      cp: result.cp,
+      tp: result.tp,
+      atp: result.atp,
+      fase: getFase(metadata.kelas),
+      mode: 'AI-Generated',
+      status: 'draft',
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+      // Metadata tambahan biar kompatibel sama dashboard adm
+      jenjang_sekolah: metadata.jenjang,
+      kelas_diampu: [metadata.kelas],
+      mapel_diampu: [metadata.mapel],
+      role: userData.role || 'teacher'
+    };
+
+    await addDoc(collection(db, 'adm_pembelajaran'), docData);
+    console.log('✅ [CTA Generator] Auto-saved to adm_pembelajaran');
     return true;
-  } catch(e) { console.warn('⚠️ Auto-save skipped:', e); return null; }
+  } catch(e) {
+    console.warn('⚠️ Auto-save ke adm_pembelajaran gagal:', e);
+    return null;
+  }
 }
 
 function showAlert(msg, type='success') {
@@ -273,4 +305,4 @@ function hideDashboardSections() {
   document.querySelectorAll('#sd-section, #smp-section, #sma-section, #tk-section, #mi-section, #mts-section, #ma-section').forEach(s => s.classList.add('hidden'));
 }
 
-console.log('🟢 [CTA Generator] READY — NO FILTER MODE - USER KETIK MANUAL');
+console.log('🟢 [CTA Generator] READY — NO FILTER MODE + AUTO SAVE adm_pembelajaran');
