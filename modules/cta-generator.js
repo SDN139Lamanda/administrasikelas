@@ -80,21 +80,34 @@ async function populateMapelDropdown(jenjang, userMapelFromReg = null, userData 
     const mapelList = await fetchMapelData(jenjang);
     mapelSelect.innerHTML = '<option value="">Pilih Mata Pelajaran</option>';
     
-    // ✅ DETERMINE FILTER RULE (ROBUST + DEBUG LOG)
+    // ✅ DETERMINE FILTER RULE (COMPATIBLE WITH YOUR DATA)
     const getFilterRule = () => {
       if (!userData) return { type: 'none' };
-      let { jenjang_sekolah, sd_mapel_type, mapel_yang_diampu, role } = userData;
       
-      // Fallback to localStorage
+      // Ambil dari userData dulu
+      let { jenjang_sekolah, sd_mapel_type, mapel_yang_diampu, mapel_diampu, role } = userData;
+      
+      // ✅ FALLBACK ke localStorage jika userData kosong
       if (!jenjang_sekolah) jenjang_sekolah = localStorage.getItem('user_jenjang') || jenjang_sekolah;
       if (!sd_mapel_type) sd_mapel_type = localStorage.getItem('user_sd_mapel_type') || sd_mapel_type;
+      
+      // ✅ SUPPORT KEDUA NAMA FIELD: mapel_yang_diampu ATAU mapel_diampu
       if (!mapel_yang_diampu) {
-        try { mapel_yang_diampu = JSON.parse(localStorage.getItem('user_mapel_yang_diampu') || '[]'); } 
-        catch(e) { mapel_yang_diampu = []; }
+        try { 
+          mapel_yang_diampu = JSON.parse(localStorage.getItem('user_mapel_yang_diampu') || '[]'); 
+        } catch(e) { mapel_yang_diampu = []; }
       }
+      if (!mapel_diampu) {
+        try { 
+          mapel_diampu = JSON.parse(localStorage.getItem('user_mapel_diampu') || '[]'); 
+        } catch(e) { mapel_diampu = []; }
+      }
+      // Gabungkan jika salah satu ada
+      const assignedMapel = mapel_yang_diampu?.length > 0 ? mapel_yang_diampu : mapel_diampu || [];
+      
       if (!role) role = localStorage.getItem('user_role') || 'teacher';
 
-      console.log('🔍 [Mapel Debug] User data:', { jenjang_sekolah, sd_mapel_type, mapel_yang_diampu, role });
+      console.log('🔍 [Mapel Debug] Resolved ', { jenjang_sekolah, sd_mapel_type, assignedMapel, role });
 
       if (role === 'admin') return { type: 'none' };
       if (jenjang_sekolah === 'tk') return { type: 'none' };
@@ -105,28 +118,33 @@ async function populateMapelDropdown(jenjang, userMapelFromReg = null, userData 
         return { type: 'exclude', values: ['paibd', 'pjok', 'pendidikan agama', 'pendidikan jasmani', 'budi pekerti'] };
       }
 
-      // SD/MI Guru Mapel: ONLY include their specific subject (FLEXIBLE MATCHING)
+      // ✅ SD/MI Guru Mapel: Handle 'mapel' as generic subject teacher
       if (['sd', 'mi'].includes(jenjang_sekolah) && sd_mapel_type && sd_mapel_type.toLowerCase() !== 'kelas') {
-        const targetType = sd_mapel_type.toLowerCase();
-        console.log('🎯 [Mapel] Rule: SD/MI Guru Mapel - include ONLY:', targetType);
+        // Jika sd_mapel_type = 'mapel' (generic), pakai assignedMapel untuk filter
+        let targetValues = [];
         
-        // Map short codes to full names for flexible matching
-        const mapelAliases = {
-          'paibd': ['paibd', 'pai', 'pendidikan agama', 'agama', 'budi pekerti', 'akhlak'],
-          'pjok': ['pjok', 'penjas', 'pendidikan jasmani', 'jasmani', 'olahraga', 'pk']
-        };
+        if (sd_mapel_type.toLowerCase() === 'mapel' && assignedMapel?.length > 0) {
+          // ✅ Generic 'mapel' → use actual assigned subjects
+          targetValues = assignedMapel.map(m => (m || '').toLowerCase());
+          console.log('🎯 [Mapel] Rule: SD/MI Guru Mapel (generic) - include:', targetValues);
+        } else {
+          // ✅ Specific type like 'paibd' or 'pjok'
+          const targetType = sd_mapel_type.toLowerCase();
+          const mapelAliases = {
+            'paibd': ['paibd', 'pai', 'pendidikan agama', 'agama', 'budi pekerti', 'akhlak'],
+            'pjok': ['pjok', 'penjas', 'pendidikan jasmani', 'jasmani', 'olahraga', 'pk']
+          };
+          targetValues = mapelAliases[targetType] || [targetType];
+          console.log('🎯 [Mapel] Rule: SD/MI Guru Mapel (specific) - include:', targetValues);
+        }
         
-        return { 
-          type: 'include', 
-          values: mapelAliases[targetType] || [targetType],
-          debug: `Target: ${targetType}, Aliases: ${mapelAliases[targetType]?.join(', ')}`
-        };
+        return { type: 'include', values: targetValues };
       }
 
-      // SMP/MTs/SMA/MA: ONLY include mapel_yang_diampu
-      if (['smp', 'mts', 'sma', 'ma'].includes(jenjang_sekolah) && mapel_yang_diampu?.length > 0) {
-        console.log('🎯 [Mapel] Rule: SMP+ Guru Mapel - include assigned:', mapel_yang_diampu);
-        return { type: 'include', values: mapel_yang_diampu.map(m => (m || '').toLowerCase()) };
+      // SMP/MTs/SMA/MA: ONLY include assigned mapel
+      if (['smp', 'mts', 'sma', 'ma'].includes(jenjang_sekolah) && assignedMapel?.length > 0) {
+        console.log('🎯 [Mapel] Rule: SMP+ Guru Mapel - include assigned:', assignedMapel);
+        return { type: 'include', values: assignedMapel.map(m => (m || '').toLowerCase()) };
       }
 
       return { type: 'none' };
@@ -146,13 +164,13 @@ async function populateMapelDropdown(jenjang, userMapelFromReg = null, userData 
         return;
       }
       
-      // Include only if matches (with flexible alias matching)
+      // Include only if matches
       if (filterRule.type === 'include') {
         const matches = filterRule.values.some(v => 
           namaLower.includes(v) || v.includes(namaLower)
         );
         if (!matches) {
-          console.log(`⏭️ [Mapel] Not matched: ${namaOriginal} vs ${filterRule.debug || filterRule.values.join(', ')}`);
+          console.log(`⏭️ [Mapel] Not matched: ${namaOriginal} vs ${filterRule.values.join(', ')}`);
           return;
         }
         console.log(`✅ [Mapel] Included: ${namaOriginal}`);
@@ -180,7 +198,6 @@ async function populateMapelDropdown(jenjang, userMapelFromReg = null, userData 
         const existingBadge = mapelSelect.parentNode.querySelector('.lock-indicator');
         if (existingBadge) existingBadge.remove();
         mapelSelect.parentNode.appendChild(lockBadge);
-        console.log(`🔐 [Mapel] Auto-locked to: ${userMapelFromReg}`);
       } else {
         console.warn(`⚠️ [Mapel] Registered mapel "${userMapelFromReg}" not found in filtered list`);
         mapelSelect.disabled = false;
