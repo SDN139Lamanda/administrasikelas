@@ -809,6 +809,20 @@ export async function autoSaveCTA(generatedContent, metadata) {
     console.error('❌ [CTA Generator] Auto-save error:', e.message);
     return null;
   }
-}
+}// ✅ DIAGNOSTIC ONLY - HAPUS SETELAH FIX
+setTimeout(async () => {
+  if (window.location.href.includes('dashboard') && document.getElementById('cta-mapel')) {
+    const u = JSON.parse(localStorage.getItem('user_data') || '{}');
+    const sdType = localStorage.getItem('user_sd_mapel_type');
+    const mapelList = localStorage.getItem('user_mapel_yang_diampu');
+    console.log('🔍 DIAGNOSTIC:', {
+      user_sd_mapel_type: sdType,
+      user_mapel_yang_diampu: mapelList,
+      user_jenjang: localStorage.getItem('user_jenjang'),
+      filter_should_be: sdType?.toLowerCase() === 'kelas' ? 'exclude PAI/PJOK/PAIBD' : `include ONLY: ${sdType || mapelList?.[0]}`
+    });
+  }
+}, 5000);
+
 
 console.log('🟢 [CTA Generator] READY — Full functionality preserved + SKEMA COMPLIANT + ROBUST MATCHING');
