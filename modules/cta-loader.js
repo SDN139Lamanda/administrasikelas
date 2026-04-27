@@ -10,6 +10,7 @@
  * - Return CP, TP, ATP yang sudah di-process
  * - Graceful error handling (non-blocking)
  * ============================================
+ * ✅ STATUS: Tidak perlu perubahan — filtering handled di UI layer
  */
 
 console.log('🔴 [CTA Loader] Script START');
