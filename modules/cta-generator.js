@@ -115,3 +115,29 @@ async function populateMapelDropdown(jenjang, userMapelFromReg = null, userData 
     mapelSelect.disabled = false;
   }
 }
+// ✅ FALLBACK: Pastikan renderCitaGenerator tersedia secara global
+if (typeof window.renderCitaGenerator !== 'function') {
+  console.warn('⚠️ [CTA Generator] window.renderCitaGenerator not found, defining fallback...');
+  window.renderCitaGenerator = async function(jenjang, kelas, semester) {
+    alert('⚠️ Modul CTA Generator sedang dimuat. Silakan refresh halaman jika tidak muncul.');
+    console.log('🔄 [CTA Generator] Fallback render called with:', { jenjang, kelas, semester });
+  };
+}
+
+// ✅ DEBUG: Tambahkan listener global untuk deteksi klik
+document.addEventListener('click', function(e) {
+  if (e.target.closest('[data-cta-trigger]') || e.target.id === 'btn-cta-generator' || e.target.textContent?.includes('CTA Generator')) {
+    console.log('🖱️ [CTA Debug] Click detected on CTA trigger');
+    console.log('🖱️ [CTA Debug] window.renderCitaGenerator exists:', typeof window.renderCitaGenerator === 'function');
+  }
+}, true);
+
+// ✅ AUTO-CHECK: Jalankan check 3 detik setelah load
+setTimeout(() => {
+  console.log('🔍 [CTA Debug] Auto-check: window.renderCitaGenerator =', typeof window.renderCitaGenerator);
+  if (typeof window.renderCitaGenerator === 'function') {
+    console.log('✅ [CTA Debug] Function is ready');
+  } else {
+    console.error('❌ [CTA Debug] Function NOT ready - check module import/router');
+  }
+}, 3000);
