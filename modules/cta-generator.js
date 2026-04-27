@@ -84,7 +84,7 @@ async function populateMapelDropdown(jenjang, userMapelFromReg = null, userData 
     // ✅ DETERMINE FILTER RULE based on skema
     const getFilterRule = () => {
       if (!userData) return { type: 'none' };
-      const { jenjang_sekolah, sd_mapel_type, mapel_yang_diampu, role } = userData;
+      const { jenjang_sekolah, sd_mapel_type, mapel_diampu, role } = userData;
       
       if (role === 'admin') return { type: 'none' };
       if (jenjang_sekolah === 'tk') return { type: 'none' }; // TK: all mapel
@@ -100,7 +100,7 @@ async function populateMapelDropdown(jenjang, userMapelFromReg = null, userData 
       }
       
       // SMP/MTs/SMA/MA: ONLY include mapel_yang_diampu
-      if (['smp', 'mts', 'sma', 'ma'].includes(jenjang_sekolah) && mapel_yang_diampu?.length > 0) {
+      if (['smp', 'mts', 'sma', 'ma'].includes(jenjang_sekolah) && mapel_diampu?.length > 0) {
         return { type: 'include', values: mapel_yang_diampu.map(m => m.toLowerCase()) };
       }
       
