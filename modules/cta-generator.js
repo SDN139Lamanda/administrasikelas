@@ -786,3 +786,26 @@ export async function autoSaveCTA(generatedContent, metadata) {
 }
 
 console.log('🟢 [CTA Generator] READY — Fixed: Function Name + Container + Table Output + SKEMA COMPLIANT');
+// ✅ SAFE PATCH: Filter dropdown mapel untuk Guru Mapel SD/MI
+// Tidak mengubah fungsi existing, hanya tambah event listener
+(function safeMapelFilter() {
+  const filterMapel = () => {
+    const select = document.getElementById('cta-mapel');
+    if (!select) return;
+    const jenjang = localStorage.getItem('user_jenjang');
+    const sdType = (localStorage.getItem('user_sd_mapel_type') || '').toLowerCase();
+    const mapelList = JSON.parse(localStorage.getItem('user_mapel_yang_diampu') || '[]');
+    if (!['sd','mi'].includes(jenjang) || sdType === 'kelas') return;
+    const target = (sdType || mapelList[0] || '').toLowerCase();
+    if (!target) return;
+    [...select.options].forEach(opt => {
+      if (!opt.value) return;
+      const nama = opt.value.toLowerCase();
+      if (!nama.includes(target) && !target.includes(nama)) {
+        opt.disabled = true; opt.style.display = 'none';
+      }
+    });
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', filterMapel);
+  else setTimeout(filterMapel, 500);
+})();
