@@ -7,7 +7,7 @@
  * FUNGSI:
  * - Render UI form CP/TP/ATP generator
  * - Filter dropdown kelas sesuai skema akses user
- * - Input manual untuk Mata Pelajaran + suggestion
+ * - Input MANUAL untuk Mata Pelajaran (tanpa suggestion)
  * - Integrasi Groq API (pakai key dari Firestore)
  * - Validasi input sebelum generate
  * - Tampilkan hasil dalam format tabel + download
@@ -18,7 +18,7 @@ console.log('🔴 [CTA Generator] Script START');
 
 // ✅ IMPORTS
 import { generateWithGroq, getGroqApiKey } from './groq-api.js';
-import { validateInput, validateInputWithFilter, isMapelAllowedForUser, formatMapelName, getFase, formatSemester } from './cta-templates.js';
+import { validateInput, validateInputWithFilter, formatMapelName, getFase, formatSemester } from './cta-templates.js';
 import { getCP, getTP, getATP, processContent } from './cta-loader.js';
 import { db, auth, collection, addDoc, query, where, orderBy, onSnapshot, doc, getDoc, serverTimestamp } from './firebase-config.js';
 
@@ -33,60 +33,6 @@ let userMapelDiampu = [];
 let userSdMapelType = 'kelas';
 let userJenjangSekolah = '';
 let _aiReadyCache = null;
-let _mapelCache = {};
-
-// ============================================
-// ✅ HELPER: FETCH MAPEL DATA FOR SUGGESTIONS
-// ============================================
-async function fetchMapelData(jenjang) {
-  if (!jenjang) return [];
-  if (_mapelCache[jenjang]) return _mapelCache[jenjang];
-  
-  try {
-    const response = await fetch(`./data/mapel/${jenjang}.json`, { cache: 'no-store' });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const data = await response.json();
-    if (!Array.isArray(data)) throw new Error('Invalid JSON structure');
-    _mapelCache[jenjang] = data;
-    return data;
-  } catch (error) {
-    console.warn(`⚠️ [Mapel] Failed to fetch ${jenjang}.json:`, error.message);
-    // Fallback list for suggestions
-    const fallback = [
-      { nama: 'Matematika', jenjang }, { nama: 'Bahasa Indonesia', jenjang },
-      { nama: 'IPA', jenjang }, { nama: 'IPS', jenjang }, { nama: 'IPAS', jenjang },
-      { nama: 'PJOK', jenjang }, { nama: 'PAIBD', jenjang },
-      { nama: 'Seni Budaya', jenjang }, { nama: 'Bahasa Inggris', jenjang },
-      { nama: 'PKn', jenjang }, { nama: 'Prakarya', jenjang }, { nama: 'Lainnya', jenjang }
-    ];
-    _mapelCache[jenjang] = fallback;
-    return fallback;
-  }
-}
-
-// ============================================
-// ✅ POPULATE DATASLIST FOR SUGGESTIONS (NO FILTERING)
-// ============================================
-async function populateMapelSuggestions(jenjang) {
-  const datalist = document.getElementById('mapel-suggestions');
-  if (!datalist || !jenjang) return;
-  
-  try {
-    const mapelList = await fetchMapelData(jenjang);
-    datalist.innerHTML = ''; // Clear existing
-    
-    mapelList.forEach(item => {
-      const opt = document.createElement('option');
-      opt.value = item.nama;
-      datalist.appendChild(opt);
-    });
-    
-    console.log(`✅ [Mapel] Loaded ${mapelList.length} suggestions for ${jenjang.toUpperCase()}`);
-  } catch (error) {
-    console.warn('⚠️ [Mapel] Failed to load suggestions:', error.message);
-    // Keep default suggestions in HTML
-  }
-}
 
 // ============================================
 // ✅ FILTER KELAS DROPDOWN (UNCHANGED)
@@ -155,7 +101,7 @@ export async function isAiReady() {
 }
 
 // ============================================
-// ✅ MAIN RENDER FUNCTION (UPDATED: MANUAL INPUT MAPEL)
+// ✅ MAIN RENDER FUNCTION (FINAL: MANUAL INPUT MAPEL - NO SUGGESTIONS)
 // ============================================
 export async function renderCitaGenerator(jenjangFromParam, kelasFromParam, semesterFromParam) {
   console.log('📝 [CTA Generator] renderCitaGenerator() called');
@@ -186,7 +132,6 @@ export async function renderCitaGenerator(jenjangFromParam, kelasFromParam, seme
   const aiReady = await isAiReady();
   const userNama = localStorage.getItem('user_nama_lengkap') || '';
   const userSekolah = localStorage.getItem('user_nama_sekolah') || '';
-  const userMapelFromReg = localStorage.getItem('user_mapel') || null;
   
   // Determine available classes
   const allClasses = ['1','2','3','4','5','6','7','8','9','10','11','12'];
@@ -201,7 +146,7 @@ export async function renderCitaGenerator(jenjangFromParam, kelasFromParam, seme
   let defaultClass = kelasFromParam || '';
   if (isClassLocked && availableClasses.length > 0) defaultClass = availableClasses[0];
   
-  // ✅ RENDER UI WITH MANUAL INPUT FOR MAPEL + DATALIST SUGGESTIONS
+  // ✅ RENDER UI WITH PURE MANUAL INPUT FOR MAPEL (NO SUGGESTIONS)
   container.innerHTML = `
     <style>
       .cta-generator-form { max-width: 950px; margin: auto; padding: 30px; background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
@@ -266,12 +211,7 @@ export async function renderCitaGenerator(jenjangFromParam, kelasFromParam, seme
         </div>
         <div class="grid-cols-2">
           <div><label for="cta-mapel"><i class="fas fa-book mr-2"></i>Mata Pelajaran</label>
-            <input type="text" id="cta-mapel" placeholder="Ketik nama mapel (contoh: PAIBD, PJOK, Matematika)" required list="mapel-suggestions">
-            <datalist id="mapel-suggestions">
-              <option value="PAIBD"><option value="PJOK"><option value="Matematika">
-              <option value="Bahasa Indonesia"><option value="IPA"><option value="IPS">
-              <option value="Seni Budaya"><option value="Bahasa Inggris"><option value="PKn">
-            </datalist>
+            <input type="text" id="cta-mapel" placeholder="Ketik nama mapel (contoh: PAIBD, PJOK, Matematika)" required>
           </div>
           <div><label for="cta-topik"><i class="fas fa-tag mr-2"></i>Topik/Materi</label><input type="text" id="cta-topik" placeholder="Contoh: Bilangan 1-20" required></div>
         </div>
@@ -301,18 +241,14 @@ export async function renderCitaGenerator(jenjangFromParam, kelasFromParam, seme
   setupJenjangDropdown(userData);
   filterKelasDropdown(userData);
   
-  // ✅ POPULATE DATASLIST FOR MAPEL SUGGESTIONS (NO FILTERING)
+  // ✅ SETUP JENJANG CHANGE (NO MAPEL POPULATE NEEDED)
   const jenjangSelect = document.getElementById('cta-jenjang');
   if (jenjangSelect) {
     const initialJenjang = jenjangFromParam || userJenjangSekolah;
     if (initialJenjang) {
       jenjangSelect.value = initialJenjang;
-      await populateMapelSuggestions(initialJenjang);
     }
-    jenjangSelect.addEventListener('change', async function() {
-      const newJenjang = this.value;
-      if (newJenjang) await populateMapelSuggestions(newJenjang);
-    });
+    // No mapel populate needed - user types manually
   }
   
   // ✅ AUTO-UPPERCASE FOR MAPEL INPUT (UX IMPROVEMENT)
@@ -321,10 +257,6 @@ export async function renderCitaGenerator(jenjangFromParam, kelasFromParam, seme
     mapelInput.addEventListener('input', function() {
       this.value = this.value.toUpperCase();
     });
-    // Auto-fill if registered mapel exists
-    if (userMapelFromReg) {
-      mapelInput.value = userMapelFromReg.toUpperCase();
-    }
   }
   
   // Event listeners
@@ -356,7 +288,7 @@ export async function renderCitaGenerator(jenjangFromParam, kelasFromParam, seme
 }
 
 // ============================================
-// ✅ HANDLE GENERATE (UNCHANGED - VALIDATION STILL WORKS)
+// ✅ HANDLE GENERATE (VALIDATION STILL WORKS VIA cta-templates.js)
 // ============================================
 async function handleGenerate() {
   const user = auth.currentUser; if (!user) { alert('⚠️ Silakan login dulu!'); return; }
@@ -371,6 +303,7 @@ async function handleGenerate() {
   const topik = document.getElementById('cta-topik')?.value;
   
   // ✅ VALIDATION STILL WORKS via validateInputWithFilter() in cta-templates.js
+  // This checks access rules BEFORE calling AI
   if (userRole !== 'admin') {
     const validation = validateInputWithFilter({ sekolah, jenjang, kelas, semester, mapel, topik }, { 
       jenjang_sekolah: userJenjangSekolah, kelas_diampu: userKelasDiampu, mapel_yang_diampu: userMapelDiampu, sd_mapel_type: userSdMapelType, role: userRole 
@@ -523,4 +456,4 @@ function hideDashboardSections() {
   document.querySelectorAll('#sd-section, #smp-section, #sma-section, #tk-section, #mi-section, #mts-section, #ma-section').forEach(s => s.classList.add('hidden')); 
 }
 
-console.log('🟢 [CTA Generator] READY — MANUAL INPUT MAPEL + SKEMA COMPLIANT + GROQ API');
+console.log('🟢 [CTA Generator] READY — PURE MANUAL INPUT + SKEMA COMPLIANT + GROQ API');
