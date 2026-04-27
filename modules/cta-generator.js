@@ -4,6 +4,7 @@
  * Platform Administrasi Kelas Digital
  * ✅ UPDATED: Fix function name + container + table output format
  * ✅ UPDATED: Dynamic mapel loading + Auto-lock based on user registration (SKEMA COMPLIANT)
+ * ✅ FIXED: Preserve ALL original functionality + robust filtering
  * ============================================
  */
 console.log('🔴 [CTA Generator] Script START');
@@ -14,6 +15,10 @@ import { db, auth, collection, addDoc, query, where, orderBy, onSnapshot, doc, g
 
 console.log('✅ [CTA Generator] All imports successful');
 
+// ============================================
+// ✅ GLOBAL STATE
+// ============================================
+
 let userRole = 'teacher';
 let userKelasDiampu = [];
 let userMapelDiampu = [];
@@ -22,9 +27,13 @@ let userJenjangSekolah = '';
 let _aiReadyCache = null;
 let _mapelCache = {};
 
+// ============================================
+// ✅ HELPER FUNCTIONS (ORIGINAL + ENHANCED)
+// ============================================
+
 // ✅ HELPER: Check if mapel should be excluded for Guru Kelas SD/MI
 function isMapelExcludedForGuruKelas(mapelNama) {
-  const excluded = ['pai', 'pjok', 'bd', 'pai/bd', 'pendidikan agama islam', 'pendidikan jasmani', 'pendidikan keagamaan'];
+  const excluded = ['pai', 'pjok', 'paibd', 'pendidikan agama', 'pendidikan jasmani', 'pendidikan keagamaan'];
   const namaLower = mapelNama.toLowerCase();
   return excluded.some(ex => namaLower.includes(ex));
 }
@@ -32,15 +41,23 @@ function isMapelExcludedForGuruKelas(mapelNama) {
 // ✅ HELPER: Check if mapel should be included for Guru Mapel SD/MI
 function isMapelAllowedForGuruMapel(mapelNama, sdMapelType) {
   const namaLower = mapelNama.toLowerCase();
-  return namaLower.includes(sdMapelType);
+  const target = (sdMapelType || '').toLowerCase();
+  return namaLower.includes(target) || target.includes(namaLower);
 }
 
 // ✅ HELPER: Check if mapel is in user's assigned mapel list (for SMP/MTs/SMA/MA)
 function isMapelInAssignedList(mapelNama, assignedList) {
   if (!assignedList || assignedList.length === 0) return true;
   const namaLower = mapelNama.toLowerCase();
-  return assignedList.some(m => namaLower.includes(m.toLowerCase()));
+  return assignedList.some(m => {
+    const mLower = (m || '').toLowerCase();
+    return namaLower.includes(mLower) || mLower.includes(namaLower);
+  });
 }
+
+// ============================================
+// ✅ FETCH MAPEL DATA FROM JSON (ORIGINAL + FALLBACK)
+// ============================================
 
 export async function fetchMapelData(jenjang) {
   if (!jenjang) return [];
@@ -57,10 +74,15 @@ export async function fetchMapelData(jenjang) {
     return data;
   } catch (error) {
     console.warn(`⚠️ [Mapel] Failed to fetch ${jenjang}.json:`, error.message);
+    // ✅ FALLBACK: Minimal mapel list untuk graceful degradation
     const fallback = [
       { nama: 'Matematika', jenjang },
       { nama: 'Bahasa Indonesia', jenjang },
       { nama: 'IPA/IPAS', jenjang },
+      { nama: 'PJOK', jenjang },
+      { nama: 'PAIBD', jenjang },
+      { nama: 'Seni Budaya', jenjang },
+      { nama: 'Bahasa Inggris', jenjang },
       { nama: 'Lainnya', jenjang }
     ];
     _mapelCache[jenjang] = fallback;
@@ -68,7 +90,10 @@ export async function fetchMapelData(jenjang) {
   }
 }
 
-// ✅ UPDATED: Populate mapel dropdown WITH FILTERING based on user registration (SKEMA COMPLIANT)
+// ============================================
+// ✅ POPULATE MAPEL DROPDOWN (ENHANCED WITH ROBUST FILTERING)
+// ============================================
+
 async function populateMapelDropdown(jenjang, userMapelFromReg = null, userData = null) {
   const mapelSelect = document.getElementById('cta-mapel');
   if (!mapelSelect || !jenjang) return;
@@ -81,7 +106,7 @@ async function populateMapelDropdown(jenjang, userMapelFromReg = null, userData 
     const mapelList = await fetchMapelData(jenjang);
     mapelSelect.innerHTML = '<option value="">Pilih Mata Pelajaran</option>';
     
-    // ✅ DETERMINE FILTER RULE based on skema
+    // ✅ DETERMINE FILTER RULE based on skema (ROBUST + CASE-INSENSITIVE)
     const getFilterRule = () => {
       if (!userData) return { type: 'none' };
       const { jenjang_sekolah, sd_mapel_type, mapel_yang_diampu, role } = userData;
@@ -89,35 +114,35 @@ async function populateMapelDropdown(jenjang, userMapelFromReg = null, userData 
       if (role === 'admin') return { type: 'none' };
       if (jenjang_sekolah === 'tk') return { type: 'none' }; // TK: all mapel
       
-      // SD/MI Guru Kelas: EXCLUDE PAI/PJOK/BD
-      if (['sd', 'mi'].includes(jenjang_sekolah) && sd_mapel_type === 'kelas') {
-        return { type: 'exclude', values: ['pai', 'pjok', 'bd', 'pai/bd'] };
+      // SD/MI Guru Kelas: EXCLUDE PAI, PJOK, PAIBD
+      if (['sd', 'mi'].includes(jenjang_sekolah) && sd_mapel_type?.toLowerCase() === 'kelas') {
+        return { type: 'exclude', values: ['pai', 'pjok', 'paibd', 'pendidikan agama', 'pendidikan jasmani'] };
       }
       
-      // SD/MI Guru Mapel: ONLY include PAI/PJOK/BD
-      if (['sd', 'mi'].includes(jenjang_sekolah) && ['pai', 'pjok', 'bd'].includes(sd_mapel_type)) {
-        return { type: 'include', values: [sd_mapel_type] };
+      // SD/MI Guru Mapel: ONLY include their specific subject (case-insensitive, flexible matching)
+      if (['sd', 'mi'].includes(jenjang_sekolah) && sd_mapel_type && sd_mapel_type.toLowerCase() !== 'kelas') {
+        return { type: 'include', values: [sd_mapel_type.toLowerCase()] };
       }
       
       // SMP/MTs/SMA/MA: ONLY include mapel_yang_diampu
       if (['smp', 'mts', 'sma', 'ma'].includes(jenjang_sekolah) && mapel_yang_diampu?.length > 0) {
-        return { type: 'include', values: mapel_yang_diampu.map(m => m.toLowerCase()) };
+        return { type: 'include', values: mapel_yang_diampu.map(m => (m || '').toLowerCase()) };
       }
       
       return { type: 'none' };
     };
     
     const filterRule = getFilterRule();
-    console.log('🔍 [Mapel] Filter rule:', filterRule);
+    console.log('🔍 [Mapel] Filter rule applied:', filterRule);
     
     mapelList.forEach(item => {
-      const namaLower = item.nama.toLowerCase();
+      const namaLower = (item.nama || '').toLowerCase();
       
-      // ✅ APPLY FILTER
+      // ✅ APPLY ROBUST FILTER (2-way includes check)
       if (filterRule.type === 'exclude' && filterRule.values.some(v => namaLower.includes(v))) {
         return; // Skip this option
       }
-      if (filterRule.type === 'include' && !filterRule.values.some(v => namaLower.includes(v))) {
+      if (filterRule.type === 'include' && !filterRule.values.some(v => namaLower.includes(v) || v.includes(namaLower))) {
         return; // Skip this option
       }
       
@@ -130,8 +155,8 @@ async function populateMapelDropdown(jenjang, userMapelFromReg = null, userData 
     // ✅ AUTO-LOCK if user has registered mapel AND it's in the filtered list
     if (userMapelFromReg) {
       const match = Array.from(mapelSelect.options).find(opt => 
-        opt.value.toLowerCase() === userMapelFromReg.toLowerCase() || 
-        opt.textContent.toLowerCase().includes(userMapelFromReg.toLowerCase())
+        (opt.value || '').toLowerCase().includes(userMapelFromReg.toLowerCase()) || 
+        (opt.textContent || '').toLowerCase().includes(userMapelFromReg.toLowerCase())
       );
       if (match) {
         mapelSelect.value = match.value;
@@ -165,7 +190,10 @@ async function populateMapelDropdown(jenjang, userMapelFromReg = null, userData 
   }
 }
 
-// ✅ UPDATED: Filter dropdown options based on user registration (SKEMA COMPLIANT)
+// ============================================
+// ✅ FILTER DROPDOWN OPTIONS (ENHANCED)
+// ============================================
+
 function filterCTAOptions(userData) {
   if (!userData) return;
   const { jenjang_sekolah, kelas_diampu, mapel_yang_diampu, sd_mapel_type, role } = userData;
@@ -183,7 +211,7 @@ function filterCTAOptions(userData) {
         opt.disabled = !['A', 'B'].includes(opt.value);
       });
       console.log('🔐 [Filter] TK: Only classes A/B enabled');
-    } else if (['sd', 'mi'].includes(jenjang_sekolah) && sd_mapel_type === 'kelas') {
+    } else if (['sd', 'mi'].includes(jenjang_sekolah) && sd_mapel_type?.toLowerCase() === 'kelas') {
       // SD/MI Guru Kelas: only kelas_diampu enabled
       Array.from(kelasSelect.options).forEach(opt => {
         opt.disabled = !kelas_diampu?.includes(opt.value);
@@ -210,7 +238,10 @@ function filterCTAOptions(userData) {
   }
 }
 
-// ✅ SETUP JENJANG DROPDOWN (unchanged — already locked)
+// ============================================
+// ✅ SETUP JENJANG DROPDOWN (UNCHANGED)
+// ============================================
+
 function setupJenjangDropdown(userData) {
   if (!userData) { console.warn('⚠️ [Jenjang] No userData, skip'); return; }
   const userJenjang = userData.jenjang_sekolah;
@@ -235,7 +266,10 @@ function setupJenjangDropdown(userData) {
   }, 150);
 }
 
-// ✅ DOWNLOAD FUNCTION (unchanged)
+// ============================================
+// ✅ DOWNLOAD FUNCTION (UNCHANGED)
+// ============================================
+
 function downloadCTAResult() {
   const cp = document.getElementById('result-cp')?.textContent || '';
   const tp = document.getElementById('result-tp')?.textContent || '';
@@ -304,7 +338,10 @@ function autoExpandTextarea(textarea) {
   textarea.style.height = textarea.scrollHeight + 'px';
 }
 
-// ✅ MAIN RENDER FUNCTION (UPDATED: pass userData to populateMapelDropdown)
+// ============================================
+// ✅ MAIN RENDER FUNCTION (ENHANCED)
+// ============================================
+
 window.renderCitaGenerator = async function(jenjangFromParam, kelasFromParam, semesterFromParam) {
   console.log('📝 [CTA Generator] renderCitaGenerator() called');
   
@@ -364,7 +401,7 @@ window.renderCitaGenerator = async function(jenjangFromParam, kelasFromParam, se
     availableClasses = ['A', 'B'];
     isClassLocked = true;
     console.log('🔐 [CTA Generator] TK mode: Only classes A/B');
-  } else if (['sd', 'mi'].includes(userJenjangSekolah) && userSdMapelType === 'kelas') {
+  } else if (['sd', 'mi'].includes(userJenjangSekolah) && userSdMapelType?.toLowerCase() === 'kelas') {
     availableClasses = userKelasDiampu.length > 0 ? userKelasDiampu : ['1','2','3','4','5','6'];
     isClassLocked = true;
     console.log('🔐 [CTA Generator] SD/MI Guru Kelas mode: Classes locked to', availableClasses);
@@ -385,7 +422,7 @@ window.renderCitaGenerator = async function(jenjangFromParam, kelasFromParam, se
   if (isClassLocked && availableClasses.length > 0) defaultClass = availableClasses[0];
   console.log('📚 [CTA Generator] Available classes:', availableClasses);
   
-  // ✅ RENDER UI WITH TABLE FORMAT OUTPUT
+  // ✅ RENDER UI WITH TABLE FORMAT OUTPUT (FULL CSS PRESERVED)
   container.innerHTML = `
     <style>
       .cta-generator-form { max-width: 950px; margin: auto; padding: 30px; background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
@@ -624,7 +661,7 @@ async function handleGenerate() {
         konten: `CP:\n${result.cp}\n\nTP:\n${result.tp}\n\nATP:\n${result.atp}`,
         tags: ['cta', mapel?.toLowerCase()],
         source: 'cta-generator',
-        metadata: { sekolah, tahun, guru, semester }
+        meta { sekolah, tahun, guru, semester }
       };
       
       await storage.autoSaveFromExternal('cta-generator', docData);
@@ -774,4 +811,4 @@ export async function autoSaveCTA(generatedContent, metadata) {
   }
 }
 
-console.log('🟢 [CTA Generator] READY — Fixed: Function Name + Container + Table Output + SKEMA COMPLIANT');
+console.log('🟢 [CTA Generator] READY — Full functionality preserved + SKEMA COMPLIANT + ROBUST MATCHING');
