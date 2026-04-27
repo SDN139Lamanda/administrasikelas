@@ -338,7 +338,7 @@ window.renderCitaGenerator = async function(jenjangFromParam, kelasFromParam, se
       userData = userProfile.data();
       userRole = userData.role || 'teacher';
       userKelasDiampu = userData.kelas_diampu || [];
-      userMapelDiampu = userData.mapel_yang_diampu || [];
+      userMapelDiampu = userData.mapel_diampu || [];
       userSdMapelType = userData.sd_mapel_type || 'kelas';
       userJenjangSekolah = userData.jenjang_sekolah || '';
       console.log('👤 [CTA Generator] User:', { role: userRole, jenjang: userJenjangSekolah, kelas: userKelasDiampu, mapel: userMapelDiampu, sdType: userSdMapelType });
