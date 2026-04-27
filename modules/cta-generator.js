@@ -6,7 +6,8 @@
  * ============================================
  * FUNGSI:
  * - Render UI form CP/TP/ATP generator
- * - Filter dropdown kelas/mapel sesuai skema akses user
+ * - Filter dropdown kelas sesuai skema akses user
+ * - Input manual untuk Mata Pelajaran + suggestion
  * - Integrasi Groq API (pakai key dari Firestore)
  * - Validasi input sebelum generate
  * - Tampilkan hasil dalam format tabel + download
@@ -35,7 +36,7 @@ let _aiReadyCache = null;
 let _mapelCache = {};
 
 // ============================================
-// ✅ HELPER: FETCH MAPEL DATA FROM JSON
+// ✅ HELPER: FETCH MAPEL DATA FOR SUGGESTIONS
 // ============================================
 async function fetchMapelData(jenjang) {
   if (!jenjang) return [];
@@ -50,7 +51,7 @@ async function fetchMapelData(jenjang) {
     return data;
   } catch (error) {
     console.warn(`⚠️ [Mapel] Failed to fetch ${jenjang}.json:`, error.message);
-    // Fallback list
+    // Fallback list for suggestions
     const fallback = [
       { nama: 'Matematika', jenjang }, { nama: 'Bahasa Indonesia', jenjang },
       { nama: 'IPA', jenjang }, { nama: 'IPS', jenjang }, { nama: 'IPAS', jenjang },
@@ -64,109 +65,31 @@ async function fetchMapelData(jenjang) {
 }
 
 // ============================================
-// ✅ POPULATE MAPEL DROPDOWN (WITH FILTERING)
+// ✅ POPULATE DATASLIST FOR SUGGESTIONS (NO FILTERING)
 // ============================================
-async function populateMapelDropdown(jenjang, userMapelFromReg = null, userData = null) {
-  const mapelSelect = document.getElementById('cta-mapel');
-  if (!mapelSelect || !jenjang) return;
-  
-  const originalValue = mapelSelect.value;
-  mapelSelect.innerHTML = '<option value="">Memuat daftar mapel...</option>';
-  mapelSelect.disabled = true;
+async function populateMapelSuggestions(jenjang) {
+  const datalist = document.getElementById('mapel-suggestions');
+  if (!datalist || !jenjang) return;
   
   try {
     const mapelList = await fetchMapelData(jenjang);
-    mapelSelect.innerHTML = '<option value="">Pilih Mata Pelajaran</option>';
+    datalist.innerHTML = ''; // Clear existing
     
-    // Determine filter rule based on skema
-    const getFilterRule = () => {
-      if (!userData) return { type: 'none' };
-      let { jenjang_sekolah, sd_mapel_type, mapel_yang_diampu, role } = userData;
-      
-      // Fallback to localStorage
-      if (!jenjang_sekolah) jenjang_sekolah = localStorage.getItem('user_jenjang') || jenjang_sekolah;
-      if (!sd_mapel_type) sd_mapel_type = localStorage.getItem('user_sd_mapel_type') || sd_mapel_type;
-      if (!mapel_yang_diampu) {
-        try { mapel_yang_diampu = JSON.parse(localStorage.getItem('user_mapel_yang_diampu') || '[]'); } 
-        catch(e) { mapel_yang_diampu = []; }
-      }
-      if (!role) role = localStorage.getItem('user_role') || 'teacher';
-
-      if (role === 'admin') return { type: 'none' };
-      if (jenjang_sekolah === 'tk') return { type: 'none' };
-
-      // SD/MI Guru Kelas: exclude PAIBD/PJOK
-      if (['sd', 'mi'].includes(jenjang_sekolah) && sd_mapel_type?.toLowerCase() === 'kelas') {
-        return { type: 'exclude', values: ['paibd', 'pjok', 'pendidikan agama', 'pendidikan jasmani'] };
-      }
-
-      // SD/MI Guru Mapel: only their subject
-      let targetMapel = '';
-      if (sd_mapel_type && sd_mapel_type.toLowerCase() !== 'kelas') {
-        targetMapel = sd_mapel_type.toLowerCase();
-      } else if (mapel_yang_diampu && mapel_yang_diampu.length > 0) {
-        targetMapel = mapel_yang_diampu[0].toLowerCase();
-      }
-      if (['sd', 'mi'].includes(jenjang_sekolah) && targetMapel) {
-        return { type: 'include', values: [targetMapel] };
-      }
-
-      // SMP/MTs/SMA/MA: only assigned mapel
-      if (['smp', 'mts', 'sma', 'ma'].includes(jenjang_sekolah) && mapel_yang_diampu?.length > 0) {
-        return { type: 'include', values: mapel_yang_diampu.map(m => (m || '').toLowerCase()) };
-      }
-
-      return { type: 'none' };
-    };
-    
-    const filterRule = getFilterRule();
-    
-    // Populate options with filtering
     mapelList.forEach(item => {
-      const namaLower = (item.nama || '').toLowerCase();
-      if (filterRule.type === 'exclude' && filterRule.values.some(v => namaLower.includes(v))) return;
-      if (filterRule.type === 'include' && !filterRule.values.some(v => namaLower.includes(v) || v.includes(namaLower))) return;
-      
       const opt = document.createElement('option');
       opt.value = item.nama;
-      opt.textContent = item.nama;
-      mapelSelect.appendChild(opt);
+      datalist.appendChild(opt);
     });
     
-    // Auto-lock if registered mapel matches
-    if (userMapelFromReg) {
-      const match = Array.from(mapelSelect.options).find(opt => 
-        (opt.value || '').toLowerCase().includes(userMapelFromReg.toLowerCase()) || 
-        (opt.textContent || '').toLowerCase().includes(userMapelFromReg.toLowerCase())
-      );
-      if (match) {
-        mapelSelect.value = match.value;
-        mapelSelect.disabled = true;
-        const lockBadge = document.createElement('span');
-        lockBadge.className = 'lock-indicator';
-        lockBadge.innerHTML = `<i class="fas fa-lock text-emerald-600"></i> <strong>${userMapelFromReg}</strong> - Terkunci`;
-        lockBadge.style.cssText = 'display:block;margin-top:6px;font-size:12px;color:#059669';
-        const existingBadge = mapelSelect.parentNode.querySelector('.lock-indicator');
-        if (existingBadge) existingBadge.remove();
-        mapelSelect.parentNode.appendChild(lockBadge);
-      } else {
-        mapelSelect.disabled = false;
-      }
-    } else {
-      if (originalValue && Array.from(mapelSelect.options).some(opt => opt.value === originalValue)) {
-        mapelSelect.value = originalValue;
-      }
-      mapelSelect.disabled = false;
-    }    
+    console.log(`✅ [Mapel] Loaded ${mapelList.length} suggestions for ${jenjang.toUpperCase()}`);
   } catch (error) {
-    console.error('❌ [Mapel] Populate error:', error);
-    mapelSelect.innerHTML = '<option value="">Gagal memuat mapel</option>';
-    mapelSelect.disabled = false;
+    console.warn('⚠️ [Mapel] Failed to load suggestions:', error.message);
+    // Keep default suggestions in HTML
   }
 }
 
 // ============================================
-// ✅ FILTER KELAS DROPDOWN
+// ✅ FILTER KELAS DROPDOWN (UNCHANGED)
 // ============================================
 function filterKelasDropdown(userData) {
   if (!userData) return;
@@ -176,24 +99,20 @@ function filterKelasDropdown(userData) {
   if (!kelasSelect) return;
   
   if (role === 'admin') {
-    // Admin: all enabled
     Array.from(kelasSelect.options).forEach(opt => { opt.disabled = false; opt.style.display = ''; });
   } else if (jenjang_sekolah === 'tk') {
-    // TK: only A/B
     Array.from(kelasSelect.options).forEach(opt => {
       const allowed = ['A', 'B'].includes(opt.value);
       opt.disabled = !allowed;
       opt.style.display = allowed ? '' : 'none';
     });
   } else if (['sd', 'mi'].includes(jenjang_sekolah) && sd_mapel_type?.toLowerCase() === 'kelas') {
-    // SD/MI Guru Kelas: only assigned classes
     Array.from(kelasSelect.options).forEach(opt => {
       const allowed = !opt.value || kelas_diampu?.includes(opt.value);
       opt.disabled = !allowed;
       opt.style.display = allowed ? '' : 'none';
     });
   } else {
-    // Others: all classes in jenjang
     const allClasses = jenjang_sekolah === 'sd' || jenjang_sekolah === 'mi' ? ['1','2','3','4','5','6'] :
                        jenjang_sekolah === 'smp' || jenjang_sekolah === 'mts' ? ['7','8','9'] : ['10','11','12'];
     Array.from(kelasSelect.options).forEach(opt => {
@@ -205,7 +124,7 @@ function filterKelasDropdown(userData) {
 }
 
 // ============================================
-// ✅ SETUP JENJANG DROPDOWN (LOCKED)
+// ✅ SETUP JENJANG DROPDOWN (LOCKED) (UNCHANGED)
 // ============================================
 function setupJenjangDropdown(userData) {
   if (!userData) return;
@@ -222,7 +141,7 @@ function setupJenjangDropdown(userData) {
 }
 
 // ============================================
-// ✅ AI READINESS CHECK
+// ✅ AI READINESS CHECK (UNCHANGED)
 // ============================================
 export async function isAiReady() {
   if (_aiReadyCache !== null) return _aiReadyCache;
@@ -236,7 +155,7 @@ export async function isAiReady() {
 }
 
 // ============================================
-// ✅ MAIN RENDER FUNCTION
+// ✅ MAIN RENDER FUNCTION (UPDATED: MANUAL INPUT MAPEL)
 // ============================================
 export async function renderCitaGenerator(jenjangFromParam, kelasFromParam, semesterFromParam) {
   console.log('📝 [CTA Generator] renderCitaGenerator() called');
@@ -282,7 +201,7 @@ export async function renderCitaGenerator(jenjangFromParam, kelasFromParam, seme
   let defaultClass = kelasFromParam || '';
   if (isClassLocked && availableClasses.length > 0) defaultClass = availableClasses[0];
   
-  // Render UI
+  // ✅ RENDER UI WITH MANUAL INPUT FOR MAPEL + DATALIST SUGGESTIONS
   container.innerHTML = `
     <style>
       .cta-generator-form { max-width: 950px; margin: auto; padding: 30px; background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
@@ -291,6 +210,7 @@ export async function renderCitaGenerator(jenjangFromParam, kelasFromParam, seme
       .section-title { font-size: 18px; font-weight: 700; color: #374151; margin: 25px 0 15px 0; padding-bottom: 8px; border-bottom: 2px solid #e5e7eb; display: flex; align-items: center; gap: 8px; }
       .cta-generator-form label { display: block; margin-top: 12px; font-weight: 600; color: #374151; font-size: 14px; }
       .cta-generator-form input, .cta-generator-form select { width: 100%; margin-top: 8px; padding: 12px; border-radius: 8px; border: 1px solid #d1d5db; font-size: 14px; font-family: inherit; box-sizing: border-box; }
+      .cta-generator-form input:focus, .cta-generator-form select:focus { outline: none; border-color: #0891b2; }
       .cta-generator-form select:disabled { background: #f3f4f6; color: #6b7280; cursor: not-allowed; }
       .cta-result-table { width: 100%; border-collapse: collapse; margin-top: 16px; background: white; }
       .cta-result-table th { background: #0891b2; color: white; padding: 12px 16px; text-align: left; font-weight: 600; }
@@ -320,7 +240,6 @@ export async function renderCitaGenerator(jenjangFromParam, kelasFromParam, seme
       .status-ready { background: #dcfce7; color: #166534; }
       .status-warning { background: #fef3c7; color: #92400e; }
       .result-section { margin-top: 30px; }
-      .lock-indicator { font-size: 11px; color: #6b7280; margin-top: 4px; display: flex; align-items: center; gap: 4px; }
       @media print {
         .cta-generator-form h2, .subtitle, .section-title, .cta-generator-form label, .btn-generate, .btn-save, .btn-secondary, .btn-print, .btn-download, .btn-back, #cta-form, .mt-12 { display: none !important; }
         #cta-result { display: block !important; }
@@ -346,7 +265,14 @@ export async function renderCitaGenerator(jenjangFromParam, kelasFromParam, seme
           <div><label for="cta-semester"><i class="fas fa-clock mr-2"></i>Semester</label><select id="cta-semester" required><option value="">Pilih</option><option value="1">1 (Ganjil)</option><option value="2">2 (Genap)</option></select></div>
         </div>
         <div class="grid-cols-2">
-          <div><label for="cta-mapel"><i class="fas fa-book mr-2"></i>Mata Pelajaran</label><select id="cta-mapel" required><option value="">Memuat daftar mapel...</option></select></div>
+          <div><label for="cta-mapel"><i class="fas fa-book mr-2"></i>Mata Pelajaran</label>
+            <input type="text" id="cta-mapel" placeholder="Ketik nama mapel (contoh: PAIBD, PJOK, Matematika)" required list="mapel-suggestions">
+            <datalist id="mapel-suggestions">
+              <option value="PAIBD"><option value="PJOK"><option value="Matematika">
+              <option value="Bahasa Indonesia"><option value="IPA"><option value="IPS">
+              <option value="Seni Budaya"><option value="Bahasa Inggris"><option value="PKn">
+            </datalist>
+          </div>
           <div><label for="cta-topik"><i class="fas fa-tag mr-2"></i>Topik/Materi</label><input type="text" id="cta-topik" placeholder="Contoh: Bilangan 1-20" required></div>
         </div>
         <button type="button" id="btn-generate" class="btn-generate"><i class="fas fa-magic"></i> Generate dengan AI</button>
@@ -371,22 +297,34 @@ export async function renderCitaGenerator(jenjangFromParam, kelasFromParam, seme
       <div class="mt-12"><h3 class="text-xl font-bold mb-4 text-gray-800"><i class="fas fa-archive mr-2"></i>Dokumen Tersimpan (<span id="saved-count">0</span>)</h3><div id="cta-list" class="space-y-4"><div class="loading-spinner"><i class="fas fa-spinner fa-spin text-2xl mb-3"></i><p>Memuat...</p></div></div></div>
     </div>`;
   
-  // Apply filters
+  // Apply filters for kelas
   setupJenjangDropdown(userData);
   filterKelasDropdown(userData);
   
-  // Populate mapel dropdown
+  // ✅ POPULATE DATASLIST FOR MAPEL SUGGESTIONS (NO FILTERING)
   const jenjangSelect = document.getElementById('cta-jenjang');
   if (jenjangSelect) {
     const initialJenjang = jenjangFromParam || userJenjangSekolah;
     if (initialJenjang) {
       jenjangSelect.value = initialJenjang;
-      await populateMapelDropdown(initialJenjang, userMapelFromReg, userData);
+      await populateMapelSuggestions(initialJenjang);
     }
     jenjangSelect.addEventListener('change', async function() {
       const newJenjang = this.value;
-      if (newJenjang) await populateMapelDropdown(newJenjang, userMapelFromReg, userData);
+      if (newJenjang) await populateMapelSuggestions(newJenjang);
     });
+  }
+  
+  // ✅ AUTO-UPPERCASE FOR MAPEL INPUT (UX IMPROVEMENT)
+  const mapelInput = document.getElementById('cta-mapel');
+  if (mapelInput) {
+    mapelInput.addEventListener('input', function() {
+      this.value = this.value.toUpperCase();
+    });
+    // Auto-fill if registered mapel exists
+    if (userMapelFromReg) {
+      mapelInput.value = userMapelFromReg.toUpperCase();
+    }
   }
   
   // Event listeners
@@ -418,7 +356,7 @@ export async function renderCitaGenerator(jenjangFromParam, kelasFromParam, seme
 }
 
 // ============================================
-// ✅ HANDLE GENERATE
+// ✅ HANDLE GENERATE (UNCHANGED - VALIDATION STILL WORKS)
 // ============================================
 async function handleGenerate() {
   const user = auth.currentUser; if (!user) { alert('⚠️ Silakan login dulu!'); return; }
@@ -432,7 +370,7 @@ async function handleGenerate() {
   const guru = document.getElementById('cta-guru')?.value;
   const topik = document.getElementById('cta-topik')?.value;
   
-  // Validate with skema-compliant function
+  // ✅ VALIDATION STILL WORKS via validateInputWithFilter() in cta-templates.js
   if (userRole !== 'admin') {
     const validation = validateInputWithFilter({ sekolah, jenjang, kelas, semester, mapel, topik }, { 
       jenjang_sekolah: userJenjangSekolah, kelas_diampu: userKelasDiampu, mapel_yang_diampu: userMapelDiampu, sd_mapel_type: userSdMapelType, role: userRole 
@@ -472,7 +410,7 @@ async function handleGenerate() {
 }
 
 // ============================================
-// ✅ DOWNLOAD FUNCTION
+// ✅ DOWNLOAD FUNCTION (UNCHANGED)
 // ============================================
 function downloadCTAResult() {
   const cp = document.getElementById('result-cp')?.textContent || '';
@@ -510,7 +448,7 @@ function downloadCTAResult() {
 }
 
 // ============================================
-// ✅ SAVE TO FIRESTORE
+// ✅ SAVE TO FIRESTORE (UNCHANGED)
 // ============================================
 async function handleSave() {
   const user = auth.currentUser; if (!user) return;
@@ -533,7 +471,7 @@ async function handleSave() {
 }
 
 // ============================================
-// ✅ LOAD SAVED DATA LIST
+// ✅ LOAD SAVED DATA LIST (UNCHANGED)
 // ============================================
 function loadCTAData() {
   const list = document.getElementById('cta-list'), countSpan = document.getElementById('saved-count');
@@ -555,7 +493,7 @@ function loadCTAData() {
 }
 
 // ============================================
-// ✅ AUTO-SAVE HELPER
+// ✅ AUTO-SAVE HELPER (UNCHANGED)
 // ============================================
 async function autoSaveCTA(result, metadata) {
   try {
@@ -570,14 +508,14 @@ async function autoSaveCTA(result, metadata) {
 }
 
 // ============================================
-// ✅ SHOW ALERT HELPER
+// ✅ SHOW ALERT HELPER (UNCHANGED)
 // ============================================
 function showAlert(msg, type='success') {
   const c = document.createElement('div'); c.style.cssText='position:fixed;top:20px;right:20px;background:#10b981;color:white;padding:12px 20px;border-radius:8px;z-index:9999;'; c.textContent=msg; document.body.appendChild(c); setTimeout(()=>c.remove(), 3000);
 }
 
 // ============================================
-// ✅ HIDE DASHBOARD SECTIONS
+// ✅ HIDE DASHBOARD SECTIONS (UNCHANGED)
 // ============================================
 function hideDashboardSections() { 
   document.querySelector('.dashboard-hero')?.closest('section')?.classList.add('hidden'); 
@@ -585,4 +523,4 @@ function hideDashboardSections() {
   document.querySelectorAll('#sd-section, #smp-section, #sma-section, #tk-section, #mi-section, #mts-section, #ma-section').forEach(s => s.classList.add('hidden')); 
 }
 
-console.log('🟢 [CTA Generator] READY — SKEMA COMPLIANT + GROQ API INTEGRATION');
+console.log('🟢 [CTA Generator] READY — MANUAL INPUT MAPEL + SKEMA COMPLIANT + GROQ API');
