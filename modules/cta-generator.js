@@ -65,9 +65,7 @@ async function fetchMapelData(jenjang) {
 
 // ============================================
 // ✅ POPULATE MAPEL DROPDOWN (WITH FILTERING)
-// ============================================
-// ✅ REPLACE fungsi populateMapelDropdown() DI cta-generator.js DENGAN INI:
-
+// ============// ✅ FINAL PATCH: populateMapelDropdown() - Compatible dengan struktur Firebase Anda
 async function populateMapelDropdown(jenjang, userMapelFromReg = null, userData = null) {
   const mapelSelect = document.getElementById('cta-mapel');
   if (!mapelSelect || !jenjang) return;
@@ -80,35 +78,43 @@ async function populateMapelDropdown(jenjang, userMapelFromReg = null, userData 
     const mapelList = await fetchMapelData(jenjang);
     mapelSelect.innerHTML = '<option value="">Pilih Mata Pelajaran</option>';
     
-    // ✅ DETERMINE FILTER RULE (COMPATIBLE WITH YOUR DATA)
+    // ✅ EXPLICITLY GET FIELDS WITH FALLBACK (SUPPORT BOTH FIELD NAMES)
+    const getUserDataField = (field, fallbackField = null, localStorageKey = null) => {
+      // 1. Coba dari userData
+      if (userData && userData[field] !== undefined) return userData[field];
+      // 2. Coba fallback field name (untuk kompatibilitas)
+      if (fallbackField && userData && userData[fallbackField] !== undefined) return userData[fallbackField];
+      // 3. Coba localStorage
+      if (localStorageKey) {
+        try {
+          const val = localStorage.getItem(localStorageKey);
+          return val ? JSON.parse(val) : undefined;
+        } catch(e) { return undefined; }
+      }
+      return undefined;
+    };
+    
+    const jenjang_sekolah = getUserDataField('jenjang_sekolah', null, 'user_jenjang');
+    const sd_mapel_type = getUserDataField('sd_mapel_type', null, 'user_sd_mapel_type');
+    const role = getUserDataField('role', null, 'user_role');
+    
+    // ✅ SUPPORT KEDUA NAMA FIELD: mapel_diampu (Firebase Anda) ATAU mapel_yang_diampu (kode lama)
+    const assignedMapel = 
+      getUserDataField('mapel_diampu', 'mapel_yang_diampu', 'user_mapel_diampu') || 
+      getUserDataField('mapel_yang_diampu', null, 'user_mapel_yang_diampu') || 
+      [];
+    
+    console.log('🔍 [Mapel Debug] Resolved ', {
+      jenjang_sekolah,
+      sd_mapel_type,
+      role,
+      assignedMapel,
+      has_mapel_diampu: userData?.mapel_diampu !== undefined,
+      has_mapel_yang_diampu: userData?.mapel_yang_diampu !== undefined
+    });
+
+    // ✅ DETERMINE FILTER RULE
     const getFilterRule = () => {
-      if (!userData) return { type: 'none' };
-      
-      // Ambil dari userData dulu
-      let { jenjang_sekolah, sd_mapel_type, mapel_yang_diampu, mapel_diampu, role } = userData;
-      
-      // ✅ FALLBACK ke localStorage jika userData kosong
-      if (!jenjang_sekolah) jenjang_sekolah = localStorage.getItem('user_jenjang') || jenjang_sekolah;
-      if (!sd_mapel_type) sd_mapel_type = localStorage.getItem('user_sd_mapel_type') || sd_mapel_type;
-      
-      // ✅ SUPPORT KEDUA NAMA FIELD: mapel_yang_diampu ATAU mapel_diampu
-      if (!mapel_yang_diampu) {
-        try { 
-          mapel_yang_diampu = JSON.parse(localStorage.getItem('user_mapel_yang_diampu') || '[]'); 
-        } catch(e) { mapel_yang_diampu = []; }
-      }
-      if (!mapel_diampu) {
-        try { 
-          mapel_diampu = JSON.parse(localStorage.getItem('user_mapel_diampu') || '[]'); 
-        } catch(e) { mapel_diampu = []; }
-      }
-      // Gabungkan jika salah satu ada
-      const assignedMapel = mapel_yang_diampu?.length > 0 ? mapel_yang_diampu : mapel_diampu || [];
-      
-      if (!role) role = localStorage.getItem('user_role') || 'teacher';
-
-      console.log('🔍 [Mapel Debug] Resolved ', { jenjang_sekolah, sd_mapel_type, assignedMapel, role });
-
       if (role === 'admin') return { type: 'none' };
       if (jenjang_sekolah === 'tk') return { type: 'none' };
 
@@ -118,24 +124,29 @@ async function populateMapelDropdown(jenjang, userMapelFromReg = null, userData 
         return { type: 'exclude', values: ['paibd', 'pjok', 'pendidikan agama', 'pendidikan jasmani', 'budi pekerti'] };
       }
 
-      // ✅ SD/MI Guru Mapel: Handle 'mapel' as generic subject teacher
+      // ✅ SD/MI Guru Mapel: Handle 'mapel' as generic + use assignedMapel
       if (['sd', 'mi'].includes(jenjang_sekolah) && sd_mapel_type && sd_mapel_type.toLowerCase() !== 'kelas') {
-        // Jika sd_mapel_type = 'mapel' (generic), pakai assignedMapel untuk filter
         let targetValues = [];
         
+        // Jika sd_mapel_type = 'mapel' (generic) DAN ada assignedMapel, pakai assignedMapel
         if (sd_mapel_type.toLowerCase() === 'mapel' && assignedMapel?.length > 0) {
-          // ✅ Generic 'mapel' → use actual assigned subjects
           targetValues = assignedMapel.map(m => (m || '').toLowerCase());
-          console.log('🎯 [Mapel] Rule: SD/MI Guru Mapel (generic) - include:', targetValues);
-        } else {
-          // ✅ Specific type like 'paibd' or 'pjok'
+          console.log('🎯 [Mapel] Rule: SD/MI Guru Mapel (generic) - include assigned:', targetValues);
+        } 
+        // Jika sd_mapel_type spesifik (paibd/pjok), pakai alias matching
+        else if (['paibd', 'pjok'].includes(sd_mapel_type.toLowerCase())) {
           const targetType = sd_mapel_type.toLowerCase();
           const mapelAliases = {
             'paibd': ['paibd', 'pai', 'pendidikan agama', 'agama', 'budi pekerti', 'akhlak'],
             'pjok': ['pjok', 'penjas', 'pendidikan jasmani', 'jasmani', 'olahraga', 'pk']
           };
           targetValues = mapelAliases[targetType] || [targetType];
-          console.log('🎯 [Mapel] Rule: SD/MI Guru Mapel (specific) - include:', targetValues);
+          console.log('🎯 [Mapel] Rule: SD/MI Guru Mapel (specific) - include aliases:', targetValues);
+        }
+        // Fallback: gunakan sd_mapel_type sebagai string literal (kurang ideal)
+        else {
+          targetValues = [sd_mapel_type.toLowerCase()];
+          console.warn('⚠️ [Mapel] Unknown sd_mapel_type, using literal:', targetValues);
         }
         
         return { type: 'include', values: targetValues };
@@ -154,13 +165,13 @@ async function populateMapelDropdown(jenjang, userMapelFromReg = null, userData 
     console.log('🔍 [Mapel] Final filter rule:', filterRule);
     
     // ✅ POPULATE OPTIONS WITH ROBUST MATCHING
+    let includedCount = 0;
     mapelList.forEach(item => {
       const namaOriginal = item.nama || '';
       const namaLower = namaOriginal.toLowerCase();
       
       // Skip if excluded
       if (filterRule.type === 'exclude' && filterRule.values.some(v => namaLower.includes(v))) {
-        console.log(`⏭️ [Mapel] Excluded: ${namaOriginal}`);
         return;
       }
       
@@ -169,10 +180,8 @@ async function populateMapelDropdown(jenjang, userMapelFromReg = null, userData 
         const matches = filterRule.values.some(v => 
           namaLower.includes(v) || v.includes(namaLower)
         );
-        if (!matches) {
-          console.log(`⏭️ [Mapel] Not matched: ${namaOriginal} vs ${filterRule.values.join(', ')}`);
-          return;
-        }
+        if (!matches) return;
+        includedCount++;
         console.log(`✅ [Mapel] Included: ${namaOriginal}`);
       }
       
@@ -181,6 +190,8 @@ async function populateMapelDropdown(jenjang, userMapelFromReg = null, userData 
       opt.textContent = namaOriginal;
       mapelSelect.appendChild(opt);
     });
+    
+    console.log(`📊 [Mapel] Total included: ${includedCount} / ${mapelList.length}`);
     
     // ✅ AUTO-LOCK if registered mapel matches
     if (userMapelFromReg) {
@@ -199,7 +210,6 @@ async function populateMapelDropdown(jenjang, userMapelFromReg = null, userData 
         if (existingBadge) existingBadge.remove();
         mapelSelect.parentNode.appendChild(lockBadge);
       } else {
-        console.warn(`⚠️ [Mapel] Registered mapel "${userMapelFromReg}" not found in filtered list`);
         mapelSelect.disabled = false;
       }
     } else {
@@ -213,7 +223,7 @@ async function populateMapelDropdown(jenjang, userMapelFromReg = null, userData 
     mapelSelect.innerHTML = '<option value="">Gagal memuat mapel</option>';
     mapelSelect.disabled = false;
   }
-}
+}================================
 
 // ============================================
 // ✅ FILTER KELAS DROPDOWN
