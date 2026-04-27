@@ -4,6 +4,7 @@
  * Platform Administrasi Kelas Digital
  * ============================================
  * Helper functions for CTA Generator
+ * ✅ UPDATED: validateInputWithFilter() match skema akses user
  * ============================================
  */
 console.log('🔴 [CTA Templates] Script START');
@@ -19,7 +20,7 @@ export function generateHeader(kop, type) { const typeNames = { 'cp': 'CAPAIAN P
 // ✅ ORIGINAL: Basic validation (preserved)
 export function validateInput(d) { const errors = []; if (!d?.sekolah) errors.push('Nama Sekolah wajib'); if (!d?.jenjang) errors.push('Jenjang wajib'); if (!d?.kelas) errors.push('Kelas wajib'); if (!d?.semester) errors.push('Semester wajib'); if (!d?.mapel) errors.push('Mapel wajib'); if (!d?.topik) errors.push('Topik wajib'); return { valid: errors.length === 0, errors }; }
 
-// ✅ NEW: Validation with user's assigned classes/mapel filter
+// ✅ UPDATED: Validation with user's assigned classes/mapel filter — MATCH SKEMA 100%
 export function validateInputWithFilter(d, userData) {
   // First run basic validation
   const basic = validateInput(d);
@@ -28,25 +29,53 @@ export function validateInputWithFilter(d, userData) {
   // If no userData, return basic validation
   if (!userData) return basic;
   
-  const { jenjang_sekolah, kelas_diampu, mapel_diampu, sd_mapel_type } = userData;
+  const { jenjang_sekolah, kelas_diampu, mapel_yang_diampu, sd_mapel_type, role } = userData;
   
-  // Validate kelas against user's assigned classes
-  if (kelas_diampu?.length > 0 && !kelas_diampu.includes(d?.kelas)) {
-    return { valid: false, errors: [`Kelas ${d?.kelas} tidak termasuk dalam kelas yang Anda ampu`] };
+  // ✅ ADMIN: bypass all filters
+  if (role === 'admin') return basic;
+  
+  // ✅ VALIDATE KELAS based on skema
+  if (kelas_diampu?.length > 0) {
+    // TK: only A/B allowed
+    if (jenjang_sekolah === 'tk' && !['A', 'B'].includes(d?.kelas)) {
+      return { valid: false, errors: ['Kelas TK hanya A atau B'] };
+    }
+    
+    // SD/MI Guru Kelas: only kelas_diampu allowed
+    if (['sd', 'mi'].includes(jenjang_sekolah) && sd_mapel_type === 'kelas') {
+      if (!kelas_diampu.includes(d?.kelas)) {
+        return { valid: false, errors: [`Kelas ${d?.kelas} tidak termasuk dalam kelas yang Anda ampu`] };
+      }
+    }
+    
+    // SD/MI Guru Mapel, SMP/MTs/SMA/MA: all classes in jenjang allowed (no validation needed)
   }
   
-  // Validate mapel for SMP/SMA teachers
-  if ((jenjang_sekolah === 'smp' || jenjang_sekolah === 'sma') && mapel_diampu?.length > 0) {
-    if (!mapel_diampu.includes(d?.mapel)) {
-      return { valid: false, errors: [`Mapel ${d?.mapel} tidak termasuk dalam mapel yang Anda ampu`] };
+  // ✅ VALIDASI MAPEL based on skema
+  const mapelLower = d?.mapel?.toLowerCase() || '';
+  
+  // TK: all mapel allowed (no validation needed)
+  
+  // SD/MI Guru Kelas: EXCLUDE PAI, PJOK, BD
+  if (['sd', 'mi'].includes(jenjang_sekolah) && sd_mapel_type === 'kelas') {
+    const excluded = ['pai', 'pjok', 'bd', 'pai/bd', 'pendidikan agama islam', 'pendidikan jasmani'];
+    if (excluded.some(ex => mapelLower.includes(ex))) {
+      return { valid: false, errors: ['Mapel PAI/BD dan PJOK tidak tersedia untuk Guru Kelas'] };
     }
   }
   
-  // Validate mapel for SD Guru PAI/PJOK
-  if (jenjang_sekolah === 'sd' && sd_mapel_type !== 'kelas') {
-    const allowed = sd_mapel_type === 'pai' ? ['pai'] : ['pjok'];
-    if (!allowed.includes(d?.mapel)) {
+  // SD/MI Guru Mapel: ONLY PAI/PJOK/BD allowed
+  if (['sd', 'mi'].includes(jenjang_sekolah) && ['pai', 'pjok', 'bd'].includes(sd_mapel_type)) {
+    if (!mapelLower.includes(sd_mapel_type)) {
       return { valid: false, errors: [`Sebagai Guru ${sd_mapel_type.toUpperCase()}, hanya boleh memilih mapel ${sd_mapel_type.toUpperCase()}`] };
+    }
+  }
+  
+  // SMP/MTs/SMA/MA: ONLY mapel_yang_diampu allowed
+  if (['smp', 'mts', 'sma', 'ma'].includes(jenjang_sekolah) && mapel_yang_diampu?.length > 0) {
+    const allowed = mapel_yang_diampu.map(m => m.toLowerCase());
+    if (!allowed.some(a => mapelLower.includes(a))) {
+      return { valid: false, errors: [`Mapel ${d?.mapel} tidak termasuk dalam mapel yang Anda ampu`] };
     }
   }
   
