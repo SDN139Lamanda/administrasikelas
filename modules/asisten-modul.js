@@ -2,12 +2,13 @@
  * ============================================
  * MODULE: ASISTEN MODUL AJAR
  * Platform Administrasi Kelas Digital
- * ✅ UPDATED: Fix undefined result + Full Groq API + Signature Layout
+ * ✅ FINAL FIX: No Response Issue + Robust Event Listeners
  * ============================================
  */
 
 console.log('🔴 [Asisten Modul] Script START — Full Groq API Mode');
 
+// ✅ FIX: Static import Firebase (path dari modules/ ke modules/)
 import { 
   db, 
   auth, 
@@ -24,15 +25,19 @@ import {
 
 console.log('✅ [Asisten Modul] Firebase imports successful');
 
+// ✅ FIX: Static import Groq API (path dari modules/ ke modules/)
+import { generateWithGroq } from './groq-api.js';
+
+console.log('✅ [Asisten Modul] Groq API import successful');
+
 // ============================================
-// ✅ API-READY WRAPPER — NOW USING GROQ API
+// ✅ API-READY WRAPPER — USING STATIC IMPORT
 // ============================================
 
 async function generateModulWithAI(promptData) {
   console.log('🤖 [Asisten Modul] Generate called (Groq API Mode)');
   
   try {
-    const { generateWithGroq } = await import('./groq-api.js');
     const prompt = buildPromptForAI(promptData);
     
     const result = await generateWithGroq({
@@ -255,16 +260,30 @@ ${signatureBlock}
 }
 
 // ============================================
-// ✅ UI RENDER FUNCTION
+// ✅ UI RENDER FUNCTION — ROBUST + DEBUG LOGS
 // ============================================
 
-window.renderGeneratorModule = function() {
+// ✅ FIX: Pastikan fungsi terekspos ke window dengan fallback
+export async function renderGeneratorModule() {
   console.log('📝 [Asisten Modul] renderGeneratorModule() called');
   
+  // ✅ FIX: Cek container dengan error message jelas
   const container = document.getElementById('module-container');
-  if (!container) { console.error('❌ Container not found!'); return; }
+  if (!container) {
+    console.error('❌ [Asisten Modul] Container #module-container NOT FOUND!');
+    console.error('💡 Pastikan di dashboard.html ada: <div id="module-container"></div>');
+    alert('⚠️ Error: Container modul tidak ditemukan. Hubungi admin.');
+    return;
+  }
+  
+  console.log('✅ [Asisten Modul] Container found, rendering UI...');
   
   const user = auth.currentUser;
+  if (!user) {
+    console.warn('⚠️ [Asisten Modul] No user logged in');
+    container.innerHTML = '<div class="p-8 text-center text-gray-500">Silakan login dulu untuk menggunakan Asisten Modul.</div>';
+    return;
+  }
   
   const userNama = localStorage.getItem('user_nama_lengkap') || '';
   const userNIP = localStorage.getItem('user_nip') || '';
@@ -272,9 +291,33 @@ window.renderGeneratorModule = function() {
   const userNIPKepsek = localStorage.getItem('user_nip_kepsek') || '';
   const userSekolah = localStorage.getItem('user_nama_sekolah') || '';
   
-  console.log('👤 [Asisten Modul] User data from modal:', { userNama, userSekolah });
+  console.log('👤 [Asisten Modul] User data loaded:', { userNama, userSekolah });
   
-  container.innerHTML = `
+  // ✅ Render UI
+  container.innerHTML = getModulHTML(userNama, userNIP, userSekolah, userKepsek, userNIPKepsek);
+  
+  // ✅ FIX: Delay kecil untuk pastikan DOM fully rendered sebelum attach listeners
+  setTimeout(() => {
+    setupEventHandlers();
+    console.log('✅ [Asisten Modul] Event handlers attached');
+  }, 100);
+  
+  // ✅ Hide main sections, show container
+  hideDashboardSections();
+  container.classList.remove('hidden');
+  console.log('✅ [Asisten Modul] Container visible');
+  
+  // ✅ Load saved data
+  loadModulData();
+  
+  console.log('🟢 [Asisten Modul] UI render complete');
+}
+
+// ✅ FIX: Expose to window for router call
+window.renderGeneratorModule = renderGeneratorModule;
+
+function getModulHTML(userNama, userNIP, userSekolah, userKepsek, userNIPKepsek) {
+  return `
     <style>
       .modul-form { max-width: 950px; margin: auto; padding: 30px; background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
       .modul-form h2 { text-align: center; color: #7c3aed; margin-bottom: 10px; font-size: 28px; }
@@ -325,7 +368,7 @@ window.renderGeneratorModule = function() {
       <h2>📚 Asisten Modul Ajar</h2>
       <p class="subtitle">Buat Modul Ajar dengan Template Kurikulum Merdeka</p>
       
-      <button class="btn-back" onclick="backToDashboard()">
+      <button class="btn-back" id="btn-back-dashboard">
         <i class="fas fa-arrow-left mr-2"></i>Kembali ke Dashboard
       </button>
       
@@ -506,38 +549,80 @@ window.renderGeneratorModule = function() {
       </div>
     </div>
   `;
-  
-  hideDashboardSections();
-  container.classList.remove('hidden');
-  
-  if (user) {
-    setupEventHandlers();
-    loadModulData();
-  }
-};
+}
 
 // ============================================
-// ✅ HELPER FUNCTIONS
+// ✅ HELPER FUNCTIONS — ROBUST + DEBUG
 // ============================================
 
 function hideDashboardSections() {
   document.querySelector('.dashboard-hero')?.closest('section')?.classList.add('hidden');
   document.querySelector('[aria-labelledby="rooms-heading"]')?.classList.add('hidden');
   document.querySelectorAll('#sd-section, #smp-section, #sma-section').forEach(s => s.classList.add('hidden'));
+  console.log('✅ [Asisten Modul] Dashboard sections hidden');
 }
 
+// ✅ FIX: Robust event handler setup with element checks
 function setupEventHandlers() {
-  const btnGenerate = document.getElementById('btn-generate');
-  const btnSave = document.getElementById('btn-save');
-  const btnRegenerate = document.getElementById('btn-regenerate');
-  const btnPrint = document.getElementById('btn-print');
-  const btnDownload = document.getElementById('btn-download');
+  console.log('🔧 [Asisten Modul] Setting up event handlers...');
   
-  if (btnGenerate) btnGenerate.addEventListener('click', handleGenerate);
-  if (btnSave) btnSave.addEventListener('click', handleSave);
-  if (btnRegenerate) btnRegenerate.addEventListener('click', handleGenerate);
-  if (btnPrint) btnPrint.addEventListener('click', handlePrint);
-  if (btnDownload) btnDownload.addEventListener('click', handleDownload);
+  // ✅ Back to dashboard button
+  const btnBack = document.getElementById('btn-back-dashboard');
+  if (btnBack) {
+    btnBack.addEventListener('click', () => {
+      console.log('🔙 [Asisten Modul] Back to dashboard clicked');
+      // ✅ FIX: Cek fungsi global dengan fallback
+      if (typeof window.backToDashboard === 'function') {
+        window.backToDashboard();
+      } else if (typeof backToDashboard === 'function') {
+        backToDashboard();
+      } else {
+        console.warn('⚠️ [Asisten Modul] backToDashboard function not found');
+        // Fallback: hide container manually
+        const container = document.getElementById('module-container');
+        if (container) container.classList.add('hidden');
+      }
+    });
+  }
+  
+  // ✅ Generate button
+  const btnGenerate = document.getElementById('btn-generate');
+  if (btnGenerate) {
+    btnGenerate.addEventListener('click', handleGenerate);
+    console.log('✅ [Asisten Modul] Generate button listener attached');
+  } else {
+    console.error('❌ [Asisten Modul] btn-generate NOT FOUND!');
+  }
+  
+  // ✅ Save button
+  const btnSave = document.getElementById('btn-save');
+  if (btnSave) {
+    btnSave.addEventListener('click', handleSave);
+    console.log('✅ [Asisten Modul] Save button listener attached');
+  }
+  
+  // ✅ Regenerate button
+  const btnRegenerate = document.getElementById('btn-regenerate');
+  if (btnRegenerate) {
+    btnRegenerate.addEventListener('click', handleGenerate);
+    console.log('✅ [Asisten Modul] Regenerate button listener attached');
+  }
+  
+  // ✅ Print button
+  const btnPrint = document.getElementById('btn-print');
+  if (btnPrint) {
+    btnPrint.addEventListener('click', handlePrint);
+    console.log('✅ [Asisten Modul] Print button listener attached');
+  }
+  
+  // ✅ Download button
+  const btnDownload = document.getElementById('btn-download');
+  if (btnDownload) {
+    btnDownload.addEventListener('click', handleDownload);
+    console.log('✅ [Asisten Modul] Download button listener attached');
+  }
+  
+  console.log('✅ [Asisten Modul] All event handlers setup complete');
 }
 
 function handleDownload() {
@@ -574,7 +659,7 @@ function handlePrint() {
 }
 
 // ============================================
-// ✅ MAIN GENERATE HANDLER — FIXED UNDEFINED CHECK
+// ✅ MAIN GENERATE HANDLER — ROBUST + DEBUG
 // ============================================
 
 async function handleGenerate() {
@@ -624,11 +709,17 @@ async function handleGenerate() {
   const resultDiv = document.getElementById('modul-result');
   const resultTextarea = document.getElementById('result-modul');
   
+  if (!btnGenerate || !resultDiv || !resultTextarea) {
+    console.error('❌ [Asisten Modul] Required elements not found!');
+    alert('⚠️ Error: UI elements tidak ditemukan. Refresh halaman.');
+    return;
+  }
+  
   const originalBtnText = btnGenerate.innerHTML;
   btnGenerate.disabled = true;
   btnGenerate.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
   
-  if (resultDiv) resultDiv.classList.remove('hidden');
+  resultDiv.classList.remove('hidden');
   resultTextarea.value = '⏳ Sedang generate modul dengan AI...';
   resultDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
   
@@ -649,6 +740,7 @@ async function handleGenerate() {
     
     // Auto-save to Adm.Pembelajaran (non-blocking)
     try {
+      // ✅ FIX: Dynamic import dengan path yang benar
       const { storage } = await import('./adm-pembelajaran/storage.js');
       storage.setUserId(user.uid);
       
@@ -683,7 +775,7 @@ async function handleGenerate() {
 }
 
 // ============================================
-// ✅ SAVE HANDLER
+// ✅ SAVE HANDLER — ROBUST + DEBUG
 // ============================================
 
 async function handleSave() {
@@ -752,13 +844,13 @@ async function handleSave() {
 }
 
 // ============================================
-// ✅ LOAD DATA HANDLER
+// ✅ LOAD DATA HANDLER — ROBUST + DEBUG
 // ============================================
 
 function loadModulData() {
   const list = document.getElementById('modul-list');
   const countSpan = document.getElementById('saved-count');
-  if (!list) { console.error('❌ List container not found!'); return; }
+  if (!list) { console.error('❌ [Asisten Modul] List container not found!'); return; }
   
   const user = auth.currentUser;
   if (!user) {
@@ -808,4 +900,4 @@ function loadModulData() {
   })();
 }
 
-console.log('🟢 [Asisten Modul] READY — Full Groq API + Undefined Fix Applied');
+console.log('🟢 [Asisten Modul] READY — Full Groq API + Robust Event Listeners + Debug Logs');
