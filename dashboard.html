@@ -641,7 +641,7 @@
                 'adm-pembelajaran': 'module-container', 
                 'penilaian': 'penilaian-container',
                 'refleksi': 'refleksi-container',
-                'asisten-modul': 'asisten-container',
+                'asisten-modul': 'module-container', // ✅ FIX: asisten-modul uses #module-container
                 'cita-generator': 'cita-container',
                 'protsma': 'protsma-container',
                 'pembuat-soal': 'pembuat-soal-container'  // ✅ NEW: Pembuat Soal
@@ -655,9 +655,10 @@
                     case 'adm-pembelajaran': await window.safeRenderAdmPembelajaran(); break;
                     case 'penilaian': await window.safeRenderPenilaian(); break;
                     case 'refleksi': await window.safeRenderRefleksiForm(); break;
+                    // ✅ FIX: Use correct function name renderGeneratorModule (not renderAsistenModul)
                     case 'asisten-modul':
-                        if (typeof window.renderAsistenModul === 'function') await window.renderAsistenModul(j, k);
-                        else { const m = await import('./modules/asisten-modul.js'); (m.renderAsistenModul || m.default)?.(j, k); }
+                        if (typeof window.renderGeneratorModule === 'function') await window.renderGeneratorModule();
+                        else { const m = await import('./modules/asisten-modul.js'); (m.renderGeneratorModule || m.default)?.(); }
                         break;
                     case 'cita-generator':
                         if (typeof window.renderCitaGenerator === 'function') await window.renderCitaGenerator(j, k);
