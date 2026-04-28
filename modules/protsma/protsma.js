@@ -2,7 +2,7 @@
  * ============================================
  * PROTA & PROMES GENERATOR - Main Logic
  * Folder: modules/protsma/protsma.js
- * FINAL FIX: Button IDs Match Listeners
+ * FINAL FIX: AI Response Parsing + Button IDs
  * ============================================
  */
 
@@ -49,7 +49,6 @@ export async function renderProtsma() {
     container.innerHTML = getProtsmaHTML();
     loadProtsmaCSS();
     
-    // ✅ Delay untuk pastikan DOM ready sebelum attach listeners
     setTimeout(() => {
         initProtsmaListeners();
         console.log('✅ [Protsma] Event listeners attached');
@@ -292,11 +291,9 @@ function loadProtsmaCSS() {
     }
 }
 
-// ✅ FIX KRITIS: Gunakan 'prefix' untuk SEMUA element IDs (form fields + buttons)
 function initProtsmaListeners() {
     console.log('🔧 [Protsma] Initializing event listeners...');
     
-    // Tab switcher
     document.querySelectorAll('.protsma-tab').forEach(tab => {
         tab.addEventListener('click', (e) => {
             console.log('📑 [Protsma] Tab clicked:', e.target.dataset.tab);
@@ -304,22 +301,15 @@ function initProtsmaListeners() {
         });
     });
 
-    // ✅ Setup listeners for both prota & promes
     ['prota', 'promes'].forEach(type => {
-        // ✅ FIX: prefix digunakan untuk SEMUA IDs (form fields DAN buttons)
         const prefix = type === 'prota' ? 'protsma' : 'promes';
         console.log(`🔧 [Protsma] Setting up listeners for ${type} (prefix: ${prefix})`);
         
-        // Jenjang change → update kelas options
         const jenjangSelect = document.getElementById(`${prefix}-jenjang`);
         if (jenjangSelect) {
-            jenjangSelect.addEventListener('change', () => {
-                console.log(`🔄 [Protsma] ${type} jenjang changed:`, jenjangSelect.value);
-                updateKelasOptions(type);
-            });
+            jenjangSelect.addEventListener('change', () => updateKelasOptions(type));
         }
         
-        // ✅ FIX: Gunakan prefix untuk button IDs juga!
         const aiBtn = document.getElementById(`${prefix}-ai-btn`);
         if (aiBtn) {
             aiBtn.addEventListener('click', async () => {
@@ -395,9 +385,9 @@ function updateKelasOptions(type) {
     kelasSelect.innerHTML = '<option value="">Pilih Kelas</option>' +
         kelasList.map(k => `<option value="${k}">Kelas ${k}</option>`).join('');
     kelasSelect.disabled = false;
-    console.log(`📋 [Protsma] Updated kelas options for ${jenjang}:`, kelasList);
 }
 
+// ✅ FIX: Robust AI Response Parsing
 async function callAIForHelp(type) {
     const prefix = type === 'prota' ? 'protsma' : 'promes';
     const jenjang = document.getElementById(`${prefix}-jenjang`).value;
@@ -416,24 +406,58 @@ async function callAIForHelp(type) {
     try {
         console.log('🤖 [Protsma] Calling Groq API with prompt...');
         
-        const prompt = `Buatkan rencana untuk Prota/Promes:
+        // ✅ FIX: Prompt yang lebih spesifik minta format sederhana
+        const prompt = `Buatkan rencana singkat untuk Prota/Promes:
 Jenjang: ${jenjang?.toUpperCase()}
 Kelas: ${kelas}
 Topik: ${topik}
 
-Balas HANYA JSON: {"minggu": angka, "alokasi": angka}`;
+Balas HANYA JSON sederhana dengan 2 field angka:
+{"minggu": 6, "alokasi": 2}
+
+Jangan pakai array, jangan pakai objek nested. Hanya 2 angka.`;
 
         const result = await generateWithGroq(prompt);
-        console.log('🤖 [Protsma] AI response:', result);
+        console.log('🤖 [Protsma] AI raw response:', result);
 
-        const match = result.match(/\{[\s\S]*\}/);
-        if (!match) throw new Error('AI tidak mengembalikan JSON');
+        // ✅ FIX: Extract JSON yang valid
+        const jsonMatch = result.match(/\{[\s\S]*\}/);
+        if (!jsonMatch) throw new Error('AI tidak mengembalikan format JSON');
 
-        const aiResult = JSON.parse(match[0]);
+        let aiResult;
+        try {
+            aiResult = JSON.parse(jsonMatch[0]);
+        } catch (parseError) {
+            console.error('❌ JSON parse error:', parseError);
+            throw new Error('Gagal parse respon AI');
+        }
 
-        if (aiResult.minggu) document.getElementById(`${prefix}-minggu`).value = aiResult.minggu;
-        if (aiResult.alokasi) document.getElementById(`${prefix}-alokasi`).value = aiResult.alokasi;
+        // ✅ FIX: Handle berbagai format respon AI
+        let mingguValue = aiResult.minggu;
+        let alokasiValue = aiResult.alokasi;
 
+        // Jika alokasi adalah array, ambil nilai pertama yang numeric
+        if (Array.isArray(alokasiValue)) {
+            const firstItem = alokasiValue[0];
+            if (typeof firstItem === 'object' && firstItem.alokasi !== undefined) {
+                alokasiValue = firstItem.alokasi;
+            } else if (typeof firstItem === 'number') {
+                alokasiValue = firstItem;
+            }
+        }
+
+        // Konversi ke number dan validasi
+        const mingguNum = parseInt(mingguValue, 10);
+        const alokasiNum = typeof alokasiValue === 'number' ? alokasiValue : parseFloat(alokasiValue);
+
+        if (!isNaN(mingguNum) && mingguNum > 0) {
+            document.getElementById(`${prefix}-minggu`).value = mingguNum;
+        }
+        if (!isNaN(alokasiNum) && alokasiNum > 0) {
+            document.getElementById(`${prefix}-alokasi`).value = alokasiNum;
+        }
+
+        console.log(`✅ [Protsma] AI parsed: minggu=${mingguNum}, alokasi=${alokasiNum}`);
         showAlert(type, '✅ AI berhasil mengisi Minggu dan Alokasi!', 'success');
 
     } catch (error) {
@@ -470,6 +494,7 @@ function addDataRow(type) {
     protsmaData[type].push(rowData);
     renderTable(type);
 
+    // Clear form fields only (keep jenjang/kelas/mapel for convenience)
     document.getElementById(`${prefix}-topik`).value = '';
     document.getElementById(`${prefix}-minggu`).value = '';
     document.getElementById(`${prefix}-alokasi`).value = '';
@@ -522,7 +547,6 @@ function getBulanName(bulanNum) {
     return bulanMap[bulanNum] || bulanNum;
 }
 
-// ✅ Expose to window for onclick in HTML
 window.removeProtsmaRow = function(type, index) {
     console.log(`🗑️ [Protsma] Removing row from ${type} at index ${index}`);
     protsmaData[type].splice(index, 1);
@@ -653,7 +677,6 @@ function showAlert(type, message, status = 'success') {
 
     container.innerHTML = `<div class="protsma-alert ${alertClass}">${message}</div>`;
     setTimeout(() => { container.innerHTML = ''; }, 5000);
-    console.log(`🔔 [Protsma] Alert (${status}): ${message}`);
 }
 
-console.log('🟢 [Protsma] Module READY — Button IDs Fixed + All Listeners Work');
+console.log('🟢 [Protsma] Module READY — AI Parsing Fixed + All Buttons Work');
