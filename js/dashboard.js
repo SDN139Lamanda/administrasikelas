@@ -190,7 +190,62 @@ function setDefaultState() {
     window.currentUserKelas = [];
     window.currentUserMapel = [];
 }
+// ============================================
+// ✅ ROUTER MODUL - Tambah di dashboard.js
+// ============================================
 
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. Tangkap semua tombol menu modul
+    document.querySelectorAll('[data-module]').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const moduleName = btn.dataset.module; // contoh: "asisten-modul"
+            
+            // 2. Cek approval dulu
+            if (!window.isUserApproved()) {
+                alert('⏳ Akun kamu belum di-approve admin. Tunggu ya.');
+                return;
+            }
+            
+            // 3. Hide semua section dashboard
+            document.querySelector('.dashboard-hero')?.closest('section')?.classList.add('hidden');
+            document.querySelector('[aria-labelledby="rooms-heading"]')?.classList.add('hidden');
+            document.querySelectorAll('#sd-section, #smp-section, #sma-section').forEach(s => s.classList.add('hidden'));
+            
+            // 4. Load + Render modul yang diklik
+            try {
+                if (moduleName === 'asisten-modul') {
+                    await import('../modules/asisten-modul/asisten-modul.js');
+                    window.renderGeneratorModule(); // ← INI YANG BIKIN TOMBOL JALAN
+                }
+                
+                if (moduleName === 'cta-generator') {
+                    await import('../modules/cta-generator/cta-generator.js');
+                    window.renderCtaGenerator();
+                }
+                
+                if (moduleName === 'protsma') {
+                    await import('../modules/protsma/protsma.js');
+                    window.renderProtsmaModule();
+                }
+                
+                console.log(`✅ [Router] Modul ${moduleName} loaded`);
+            } catch (err) {
+                console.error(`❌ [Router] Gagal load ${moduleName}:`, err);
+                alert(`Gagal buka ${moduleName}. Cek console.`);
+            }
+        });
+    });
+});
+
+// 5. Fungsi back yang dipake asisten-modul.js
+window.backToDashboard = () => {
+    document.getElementById('module-container').innerHTML = '';
+    document.getElementById('module-container').classList.add('hidden');
+    document.querySelector('.dashboard-hero')?.closest('section')?.classList.remove('hidden');
+    document.querySelector('[aria-labelledby="rooms-heading"]')?.classList.remove('hidden');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+};
 // Log ready state
 function finalizeAuth() {
     console.log('🟢 [Dashboard.js] Auth init complete:', {
