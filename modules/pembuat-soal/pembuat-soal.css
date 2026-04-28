@@ -2,174 +2,365 @@
  * ============================================
  * GENERATOR PEMBUAT SOAL - Styles
  * Folder: modules/pembuat-soal/pembuat-soal.css
+ * RESPONSIVE VERSION - HP Chromebook Laptop
  * ============================================
  */
 
 /* Container Styles */
 .pembuat-soal-container {
-    @apply max-w-6xl mx-auto p-6;
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+@media (min-width: 768px) {
+    .pembuat-soal-container {
+        padding: 1.5rem;
+    }
 }
 
 .pembuat-soal-header {
-    @apply mb-6;
+    margin-bottom: 1.5rem;
 }
 
 .pembuat-soal-header h2 {
-    @apply text-2xl font-bold text-gray-800 mb-2;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+    line-height: 1.2;
+}
+
+@media (max-width: 640px) {
+    .pembuat-soal-header h2 {
+        font-size: 1.25rem;
+    }
 }
 
 .pembuat-soal-header p {
-    @apply text-gray-600;
+    color: #4b5563;
+    font-size: 0.95rem;
 }
 
 /* Form Styles */
 .pembuat-soal-form {
-    @apply bg-white rounded-lg shadow p-6 mb-6;
+    background: #ffffff;
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid #e5e7eb;
+}
+
+@media (min-width: 640px) {
+    .pembuat-soal-form {
+        padding: 1.5rem;
+    }
 }
 
 .pembuat-soal-form-grid {
-    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+/* Chromebook: 2 kolom mulai 720px */
+@media (min-width: 720px) {
+    .pembuat-soal-form-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Laptop: 3 kolom */
+@media (min-width: 1024px) {
+    .pembuat-soal-form-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
 }
 
 .pembuat-soal-form-group {
-    @apply space-y-1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
 }
 
 .pembuat-soal-form-group label {
-    @apply block text-sm font-medium text-gray-700;
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
 }
 
 .pembuat-soal-form-group input,
 .pembuat-soal-form-group select {
-    @apply w-full px-4 py-2 border border-gray-300 rounded-lg 
-           focus:ring-2 focus:ring-purple-500 focus:border-transparent;
+    width: 100%;
+    padding: 0.625rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    font-size: 16px; /* Cegah zoom di iOS */
+    transition: all 0.2s;
+    background: #ffffff;
+}
+
+@media (min-width: 768px) {
+    .pembuat-soal-form-group input,
+    .pembuat-soal-form-group select {
+        font-size: 0.875rem;
+        padding: 0.5rem 1rem;
+    }
+}
+
+.pembuat-soal-form-group input:focus,
+.pembuat-soal-form-group select:focus {
+    outline: none;
+    border-color: #9333ea;
+    box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.1);
 }
 
 /* Table Styles */
 .pembuat-soal-table-container {
-    @apply overflow-x-auto mb-4;
+    overflow-x: auto;
+    margin-bottom: 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid #e5e7eb;
+    -webkit-overflow-scrolling: touch;
 }
 
 .pembuat-soal-table {
-    @apply w-full border-collapse bg-white rounded-lg shadow overflow-hidden;
+    width: 100%;
+    border-collapse: collapse;
+    background: #ffffff;
+    min-width: 600px; /* Biar ga gepeng di HP */
 }
 
 .pembuat-soal-table th {
-    @apply bg-gray-50 px-4 py-3 text-left text-sm font-semibold text-gray-700 
-           border-b border-gray-200 whitespace-nowrap;
+    background: #f9fafb;
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #374151;
+    border-bottom: 1px solid #e5e7eb;
+    white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 .pembuat-soal-table td {
-    @apply px-4 py-3 text-sm text-gray-600 border-b border-gray-100;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    color: #4b5563;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+@media (max-width: 640px) {
+    .pembuat-soal-table th,
+    .pembuat-soal-table td {
+        padding: 0.5rem 0.5rem;
+        font-size: 0.75rem;
+    }
 }
 
 .pembuat-soal-table tr:hover {
-    @apply bg-gray-50;
+    background: #f9fafb;
+}
+
+.pembuat-soal-table tr:last-child td {
+    border-bottom: none;
 }
 
 .pembuat-soal-table input,
 .pembuat-soal-table select {
-    @apply w-full px-3 py-2 border border-gray-300 rounded 
-           focus:ring-2 focus:ring-purple-500 focus:border-transparent;
+    width: 100%;
+    padding: 0.375rem 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+}
+
+.pembuat-soal-table input:focus,
+.pembuat-soal-table select:focus {
+    outline: none;
+    border-color: #9333ea;
+    box-shadow: 0 0 0 2px rgba(147, 51, 234, 0.1);
 }
 
 /* Action Buttons */
 .pembuat-soal-actions {
-    @apply flex gap-3 flex-wrap;
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 640px) {
+    .pembuat-soal-actions {
+        flex-direction: column;
+    }
 }
 
 .pembuat-soal-btn {
-    @apply px-6 py-3 rounded-lg font-medium transition-all duration-200 
-           flex items-center gap-2;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border: none;
+    cursor: pointer;
+    font-size: 0.875rem;
+    min-height: 44px; /* Touch target HP */
+}
+
+@media (max-width: 640px) {
+    .pembuat-soal-btn {
+        width: 100%;
+    }
+}
+
+.pembuat-soal-btn:active {
+    transform: scale(0.98);
 }
 
 .pembuat-soal-btn-primary {
-    @apply bg-purple-600 text-white hover:bg-purple-700;
+    background: #9333ea;
+    color: #ffffff;
+}
+
+.pembuat-soal-btn-primary:hover:not(:disabled) {
+    background: #7e22ce;
 }
 
 .pembuat-soal-btn-secondary {
-    @apply bg-gray-100 text-gray-700 hover:bg-gray-200;
+    background: #f3f4f6;
+    color: #374151;
+}
+
+.pembuat-soal-btn-secondary:hover:not(:disabled) {
+    background: #e5e7eb;
 }
 
 .pembuat-soal-btn-success {
-    @apply bg-green-600 text-white hover:bg-green-700;
+    background: #16a34a;
+    color: #ffffff;
+}
+
+.pembuat-soal-btn-success:hover:not(:disabled) {
+    background: #15803d;
 }
 
 .pembuat-soal-btn:disabled {
-    @apply opacity-50 cursor-not-allowed;
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 /* Output Sections */
 .pembuat-soal-output {
-    @apply mt-6 space-y-6;
+    margin-top: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
 }
 
 .pembuat-soal-output-section {
-    @apply bg-white rounded-lg shadow p-6;
+    background: #ffffff;
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    padding: 1rem;
+    border: 1px solid #e5e7eb;
+}
+
+@media (min-width: 640px) {
+    .pembuat-soal-output-section {
+        padding: 1.5rem;
+    }
 }
 
 .pembuat-soal-output-section h3 {
-    @apply text-lg font-bold text-gray-800 mb-4 pb-2 border-b border-gray-200;
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #e5e7eb;
 }
 
 .pembuat-soal-output-content {
-    @apply prose max-w-none;
+    color: #374151;
+    line-height: 1.6;
 }
 
 .pembuat-soal-output-content p {
-    @apply mb-2;
+    margin-bottom: 0.5rem;
 }
 
 .pembuat-soal-output-content ol {
-    @apply list-decimal list-inside space-y-3;
+    list-style: decimal;
+    padding-left: 1.25rem;
+}
+
+.pembuat-soal-output-content ol li {
+    margin-bottom: 0.75rem;
 }
 
 /* Alert Messages */
 .pembuat-soal-alert {
-    @apply p-4 rounded-lg mb-4;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+    display: flex;
+    align-items: start;
+    gap: 0.5rem;
 }
 
 .pembuat-soal-alert-success {
-    @apply bg-green-50 text-green-800 border border-green-200;
+    background: #f0fdf4;
+    color: #166534;
+    border: 1px solid #bbf7d0;
 }
 
 .pembuat-soal-alert-error {
-    @apply bg-red-50 text-red-800 border border-red-200;
+    background: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
 }
 
 .pembuat-soal-alert-warning {
-    @apply bg-yellow-50 text-yellow-800 border border-yellow-200;
+    background: #fefce8;
+    color: #854d0e;
+    border: 1px solid #fef08a;
 }
 
 /* Loading State */
 .pembuat-soal-loading {
-    @apply flex items-center justify-center py-8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 0;
 }
 
 .pembuat-soal-loading-spinner {
-    @apply animate-spin h-8 w-8 text-purple-600 mr-3;
+    animation: spin 1s linear infinite;
+    height: 2rem;
+    width: 2rem;
+    color: #9333ea;
+    margin-right: 0.75rem;
 }
 
-/* Mobile Responsive */
-@media (max-width: 768px) {
-    .pembuat-soal-form-grid {
-        @apply grid-cols-1;
-    }
-    
-    .pembuat-soal-actions {
-        @apply flex-col;
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Chromebook Khusus: 720px - 1280px */
+@media (min-width: 720px) and (max-width: 1280px) {
+    .pembuat-soal-container {
+        padding: 1.25rem;
     }
     
     .pembuat-soal-btn {
-        @apply w-full justify-center;
-    }
-    
-    .pembuat-soal-table {
-        @apply text-xs;
-    }
-    
-    .pembuat-soal-table th,
-    .pembuat-soal-table td {
-        @apply px-2 py-2;
+        padding: 0.625rem 1.25rem;
     }
 }
