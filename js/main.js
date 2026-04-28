@@ -242,6 +242,36 @@ const formatRupiah = (amount) => {
     }).format(amount);
 };
 window.formatRupiah = formatRupiah;
+// ============================================
+// PROTSMA GLOBAL HELPERS
+// ============================================
+
+// ✅ FIX 1: Buat cek status user - dipake protsma.js
+window.isUserApproved = () => {
+    return window.currentUserData?.status === 'approved' || window.currentUserRole === 'admin';
+};
+
+// ✅ FIX 2: Tombol Kembali ke Dashboard - dipake protsma.js  
+window.backToDashboard = () => {
+    const protsmaContainer = document.getElementById('protsma-container');
+    const dashboardContainer = document.getElementById('dashboard-container');
+    
+    if (protsmaContainer) protsmaContainer.innerHTML = '';
+    if (dashboardContainer) dashboardContainer.style.display = 'block';
+    
+    // Scroll ke atas
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+// ✅ FIX 3: Expose currentUserData global biar protsma.js bisa baca
+window.currentUserData = window.currentUserData || null;
+window.currentUserRole = window.currentUserRole || null;
+
+// Set data user pas login di dashboard.js
+document.addEventListener('userDataReady', (e) => {
+    window.currentUserData = e.detail.userData;
+    window.currentUserRole = e.detail.role;
+});
 
 // ============================================
 // EXPORT FOR MODULE USAGE
