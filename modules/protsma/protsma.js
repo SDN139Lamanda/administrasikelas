@@ -2,7 +2,7 @@
  * ============================================
  * PROTA & PROMES GENERATOR - Main Logic
  * Folder: modules/protsma/protsma.js
- * FINAL FIX: AI Response Parsing + Button IDs
+ * FINAL FIX: PDF Download with Content
  * ============================================
  */
 
@@ -84,12 +84,16 @@ function getProtsmaHTML() {
             .protsma-btn-secondary { background: #6b7280; color: white; }
             .protsma-ai-btn { background: linear-gradient(135deg, #6366f1, #4f46e5); color: white; }
             .protsma-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-            .protsma-table-container { overflow-x: auto; background: white; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-            .protsma-table { width: 100%; border-collapse: collapse; }
-            .protsma-table th { background: #0891b2; color: white; padding: 12px; text-align: left; font-weight: 600; }
-            .protsma-table td { padding: 12px; border-bottom: 1px solid #e5e7eb; }
+            .protsma-table-container { overflow-x: auto; background: white; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin: 20px 0; }
+            .protsma-table { width: 100%; border-collapse: collapse; min-width: 600px; }
+            .protsma-table th { background: #0891b2; color: white; padding: 12px; text-align: left; font-weight: 600; font-size: 14px; }
+            .protsma-table td { padding: 12px; border-bottom: 1px solid #e5e7eb; font-size: 13px; }
             .protsma-table tr:hover { background: #f9fafb; }
+            .protsma-table-for-pdf { width: 100%; border-collapse: collapse; background: white; }
+            .protsma-table-for-pdf th { background: #0891b2; color: white; padding: 10px; text-align: left; font-weight: 600; border: 1px solid #000; }
+            .protsma-table-for-pdf td { padding: 10px; border: 1px solid #000; }
             @media (max-width: 768px) { .protsma-form-grid { grid-template-columns: 1fr; } .protsma-actions { flex-direction: column; } }
+            @media print { .protsma-table { border: 1px solid #000; } .protsma-table th, .protsma-table td { border: 1px solid #000; color: #000; } }
         </style>
         <div class="protsma-container">
             <div class="protsma-header">
@@ -387,7 +391,6 @@ function updateKelasOptions(type) {
     kelasSelect.disabled = false;
 }
 
-// ✅ FIX: Robust AI Response Parsing
 async function callAIForHelp(type) {
     const prefix = type === 'prota' ? 'protsma' : 'promes';
     const jenjang = document.getElementById(`${prefix}-jenjang`).value;
@@ -406,7 +409,6 @@ async function callAIForHelp(type) {
     try {
         console.log('🤖 [Protsma] Calling Groq API with prompt...');
         
-        // ✅ FIX: Prompt yang lebih spesifik minta format sederhana
         const prompt = `Buatkan rencana singkat untuk Prota/Promes:
 Jenjang: ${jenjang?.toUpperCase()}
 Kelas: ${kelas}
@@ -420,7 +422,6 @@ Jangan pakai array, jangan pakai objek nested. Hanya 2 angka.`;
         const result = await generateWithGroq(prompt);
         console.log('🤖 [Protsma] AI raw response:', result);
 
-        // ✅ FIX: Extract JSON yang valid
         const jsonMatch = result.match(/\{[\s\S]*\}/);
         if (!jsonMatch) throw new Error('AI tidak mengembalikan format JSON');
 
@@ -432,11 +433,9 @@ Jangan pakai array, jangan pakai objek nested. Hanya 2 angka.`;
             throw new Error('Gagal parse respon AI');
         }
 
-        // ✅ FIX: Handle berbagai format respon AI
         let mingguValue = aiResult.minggu;
         let alokasiValue = aiResult.alokasi;
 
-        // Jika alokasi adalah array, ambil nilai pertama yang numeric
         if (Array.isArray(alokasiValue)) {
             const firstItem = alokasiValue[0];
             if (typeof firstItem === 'object' && firstItem.alokasi !== undefined) {
@@ -446,7 +445,6 @@ Jangan pakai array, jangan pakai objek nested. Hanya 2 angka.`;
             }
         }
 
-        // Konversi ke number dan validasi
         const mingguNum = parseInt(mingguValue, 10);
         const alokasiNum = typeof alokasiValue === 'number' ? alokasiValue : parseFloat(alokasiValue);
 
@@ -494,7 +492,6 @@ function addDataRow(type) {
     protsmaData[type].push(rowData);
     renderTable(type);
 
-    // Clear form fields only (keep jenjang/kelas/mapel for convenience)
     document.getElementById(`${prefix}-topik`).value = '';
     document.getElementById(`${prefix}-minggu`).value = '';
     document.getElementById(`${prefix}-alokasi`).value = '';
@@ -636,30 +633,80 @@ async function loadSavedData() {
     }
 }
 
+// ✅ FIX: Robust PDF Download with Content
 function downloadPDF(type) {
+    console.log(`📄 [Protsma] Starting PDF download for ${type}...`);
+    
     if (protsmaData[type].length === 0) {
         showAlert(type, 'Tidak ada data untuk diexport!', 'warning');
         return;
     }
 
+    // Check if html2pdf is available
     if (typeof html2pdf === 'undefined') {
         showAlert(type, 'Library PDF belum dimuat. Pastikan CDN html2pdf ada di index.html', 'error');
         console.warn('⚠️ [Protsma] html2pdf library not found');
         return;
     }
 
-    const element = document.getElementById(`${type}-table`);
-    const opt = {
-        margin: 10,
-        filename: `Prota_Promes_${type}_${new Date().toISOString().split('T')[0]}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
-    };
+    const tableElement = document.getElementById(`${type}-table`);
+    if (!tableElement) {
+        console.error(`❌ [Protsma] Table element #${type}-table not found!`);
+        showAlert(type, 'Tabel tidak ditemukan!', 'error');
+        return;
+    }
 
-    html2pdf().set(opt).from(element).save();
-    showAlert(type, '✅ PDF sedang diunduh!', 'success');
-    console.log(`📄 [Protsma] PDF download initiated for ${type}`);
+    // ✅ FIX: Clone table for clean PDF capture (remove action buttons)
+    const tableClone = tableElement.cloneNode(true);
+    tableClone.classList.add('protsma-table-for-pdf');
+    
+    // Remove action column (delete buttons) from clone
+    const headers = tableClone.querySelectorAll('th');
+    const cells = tableClone.querySelectorAll('td');
+    if (headers.length >= 6) headers[5].remove(); // Remove "Aksi" header
+    cells.forEach((cell, idx) => {
+        if ((idx + 1) % 6 === 0) cell.remove(); // Remove every 6th cell (action column)
+    });
+    
+    // Create a hidden container for the clone
+    const pdfContainer = document.createElement('div');
+    pdfContainer.style.cssText = 'position:absolute;left:-9999px;top:-9999px;width:800px;background:white;padding:20px;z-index:-1;';
+    pdfContainer.appendChild(tableClone);
+    document.body.appendChild(pdfContainer);
+
+    // ✅ FIX: Wait for clone to render
+    setTimeout(() => {
+        const opt = {
+            margin: 10,
+            filename: `Prota_Promes_${type}_${new Date().toISOString().split('T')[0]}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { 
+                scale: 2,
+                useCORS: true,
+                logging: true,
+                scrollY: 0
+            },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+        };
+
+        console.log('📄 [Protsma] Generating PDF from cloned table...');
+        
+        html2pdf()
+            .set(opt)
+            .from(pdfContainer)
+            .save()
+            .then(() => {
+                console.log('✅ [Protsma] PDF download completed');
+                showAlert(type, '✅ PDF berhasil diunduh!', 'success');
+                // Clean up
+                document.body.removeChild(pdfContainer);
+            })
+            .catch(err => {
+                console.error('❌ [Protsma] PDF generation error:', err);
+                showAlert(type, `❌ Gagal generate PDF: ${err.message}`, 'error');
+                document.body.removeChild(pdfContainer);
+            });
+    }, 300); // Small delay for clone to render
 }
 
 function showAlert(type, message, status = 'success') {
@@ -679,4 +726,4 @@ function showAlert(type, message, status = 'success') {
     setTimeout(() => { container.innerHTML = ''; }, 5000);
 }
 
-console.log('🟢 [Protsma] Module READY — AI Parsing Fixed + All Buttons Work');
+console.log('🟢 [Protsma] Module READY — PDF Download Fixed + All Features Work');
