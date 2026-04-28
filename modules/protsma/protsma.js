@@ -2,13 +2,13 @@
  * ============================================
  * PROTA & PROMES GENERATOR - Main Logic
  * Folder: modules/protsma/protsma.js
- * FINAL VERSION - All Buttons Work + Robust Event Listeners
+ * FINAL FIX: Button IDs Match Listeners
  * ============================================
  */
 
 console.log('🔴 [Protsma] Module START');
 
-// ✅ STATIC IMPORT FIREBASE (path dari modules/protsma/ ke modules/)
+// ✅ STATIC IMPORT FIREBASE
 import { 
   db, auth, collection, addDoc, query, where, orderBy, 
   onSnapshot, doc, getDoc, serverTimestamp, getDocs 
@@ -16,7 +16,7 @@ import {
 
 console.log('✅ [Protsma] Firebase imports successful');
 
-// ✅ STATIC IMPORT GROQ API (untuk AI)
+// ✅ STATIC IMPORT GROQ API
 import { generateWithGroq } from '../groq-api.js';
 
 console.log('✅ [Protsma] Groq API import successful');
@@ -24,7 +24,6 @@ console.log('✅ [Protsma] Groq API import successful');
 let protsmaData = { prota: [], promes: [] };
 let currentTab = 'prota';
 
-// ✅ FIX: Export fungsi utama ke window agar bisa dipanggil dari HTML
 export async function renderProtsma() {
     console.log('📊 [Protsma] renderProtsma called');
 
@@ -34,7 +33,6 @@ export async function renderProtsma() {
         return;
     }
 
-    // ✅ Cek approval user
     const isApproved = window.isUserApproved?.() || window.currentUserRole === 'admin';
     if (!isApproved) {
         container.innerHTML = `
@@ -48,28 +46,22 @@ export async function renderProtsma() {
         return;
     }
 
-    // ✅ Render UI
     container.innerHTML = getProtsmaHTML();
-    
-    // ✅ Load CSS (dengan fallback inline jika file eksternal gagal)
     loadProtsmaCSS();
     
-    // ✅ Init event listeners (dengan delay kecil untuk pastikan DOM ready)
+    // ✅ Delay untuk pastikan DOM ready sebelum attach listeners
     setTimeout(() => {
         initProtsmaListeners();
         console.log('✅ [Protsma] Event listeners attached');
-    }, 100);
+    }, 150);
     
-    // ✅ Load saved data
     await loadSavedData();
-
-    console.log('🟢 [Protsma] Module READY — All buttons should work');
+    console.log('🟢 [Protsma] Module READY');
 }
 
 function getProtsmaHTML() {
     return `
         <style>
-            /* ✅ INLINE CSS FALLBACK - jika file eksternal tidak load */
             .protsma-container { max-width: 1200px; margin: auto; padding: 20px; font-family: system-ui, sans-serif; }
             .protsma-header { text-align: center; margin-bottom: 24px; }
             .protsma-header h2 { color: #0891b2; margin-bottom: 8px; }
@@ -289,7 +281,6 @@ function getProtsmaHTML() {
 }
 
 function loadProtsmaCSS() {
-    // ✅ Coba load CSS eksternal, jika gagal pakai inline (sudah ada di HTML)
     const linkId = 'protsma-css';
     if (!document.getElementById(linkId)) {
         const link = document.createElement('link');
@@ -301,10 +292,11 @@ function loadProtsmaCSS() {
     }
 }
 
+// ✅ FIX KRITIS: Gunakan 'prefix' untuk SEMUA element IDs (form fields + buttons)
 function initProtsmaListeners() {
     console.log('🔧 [Protsma] Initializing event listeners...');
     
-    // ✅ Tab switcher
+    // Tab switcher
     document.querySelectorAll('.protsma-tab').forEach(tab => {
         tab.addEventListener('click', (e) => {
             console.log('📑 [Protsma] Tab clicked:', e.target.dataset.tab);
@@ -314,6 +306,7 @@ function initProtsmaListeners() {
 
     // ✅ Setup listeners for both prota & promes
     ['prota', 'promes'].forEach(type => {
+        // ✅ FIX: prefix digunakan untuk SEMUA IDs (form fields DAN buttons)
         const prefix = type === 'prota' ? 'protsma' : 'promes';
         console.log(`🔧 [Protsma] Setting up listeners for ${type} (prefix: ${prefix})`);
         
@@ -326,8 +319,8 @@ function initProtsmaListeners() {
             });
         }
         
-        // AI button
-        const aiBtn = document.getElementById(`${type}-ai-btn`);
+        // ✅ FIX: Gunakan prefix untuk button IDs juga!
+        const aiBtn = document.getElementById(`${prefix}-ai-btn`);
         if (aiBtn) {
             aiBtn.addEventListener('click', async () => {
                 console.log(`🤖 [Protsma] ${type} AI button clicked`);
@@ -335,8 +328,7 @@ function initProtsmaListeners() {
             });
         }
         
-        // Add row button
-        const addBtn = document.getElementById(`${type}-add-btn`);
+        const addBtn = document.getElementById(`${prefix}-add-btn`);
         if (addBtn) {
             addBtn.addEventListener('click', () => {
                 console.log(`➕ [Protsma] ${type} add row clicked`);
@@ -344,8 +336,7 @@ function initProtsmaListeners() {
             });
         }
         
-        // Generate button
-        const genBtn = document.getElementById(`${type}-generate-btn`);
+        const genBtn = document.getElementById(`${prefix}-generate-btn`);
         if (genBtn) {
             genBtn.addEventListener('click', () => {
                 console.log(`✨ [Protsma] ${type} generate clicked`);
@@ -353,8 +344,7 @@ function initProtsmaListeners() {
             });
         }
         
-        // Save button
-        const saveBtn = document.getElementById(`${type}-save-btn`);
+        const saveBtn = document.getElementById(`${prefix}-save-btn`);
         if (saveBtn) {
             saveBtn.addEventListener('click', async () => {
                 console.log(`💾 [Protsma] ${type} save clicked`);
@@ -362,8 +352,7 @@ function initProtsmaListeners() {
             });
         }
         
-        // PDF button
-        const pdfBtn = document.getElementById(`${type}-pdf-btn`);
+        const pdfBtn = document.getElementById(`${prefix}-pdf-btn`);
         if (pdfBtn) {
             pdfBtn.addEventListener('click', () => {
                 console.log(`📄 [Protsma] ${type} PDF clicked`);
@@ -409,13 +398,12 @@ function updateKelasOptions(type) {
     console.log(`📋 [Protsma] Updated kelas options for ${jenjang}:`, kelasList);
 }
 
-// ✅ AI Helper Function (using static import)
 async function callAIForHelp(type) {
     const prefix = type === 'prota' ? 'protsma' : 'promes';
     const jenjang = document.getElementById(`${prefix}-jenjang`).value;
     const kelas = document.getElementById(`${prefix}-kelas`).value;
     const topik = document.getElementById(`${prefix}-topik`).value;
-    const aiBtn = document.getElementById(`${type}-ai-btn`);
+    const aiBtn = document.getElementById(`${prefix}-ai-btn`);
 
     if (!topik) {
         showAlert(type, 'Silakan isi Topik/Materi terlebih dahulu', 'warning');
@@ -438,7 +426,6 @@ Balas HANYA JSON: {"minggu": angka, "alokasi": angka}`;
         const result = await generateWithGroq(prompt);
         console.log('🤖 [Protsma] AI response:', result);
 
-        // Parse hasil AI
         const match = result.match(/\{[\s\S]*\}/);
         if (!match) throw new Error('AI tidak mengembalikan JSON');
 
@@ -483,7 +470,6 @@ function addDataRow(type) {
     protsmaData[type].push(rowData);
     renderTable(type);
 
-    // Clear form
     document.getElementById(`${prefix}-topik`).value = '';
     document.getElementById(`${prefix}-minggu`).value = '';
     document.getElementById(`${prefix}-alokasi`).value = '';
@@ -536,7 +522,7 @@ function getBulanName(bulanNum) {
     return bulanMap[bulanNum] || bulanNum;
 }
 
-// ✅ FIX: Expose to window for onclick attribute in HTML
+// ✅ Expose to window for onclick in HTML
 window.removeProtsmaRow = function(type, index) {
     console.log(`🗑️ [Protsma] Removing row from ${type} at index ${index}`);
     protsmaData[type].splice(index, 1);
@@ -552,14 +538,14 @@ function generateTable(type) {
     console.log(`✨ [Protsma] Generated table for ${type} with ${protsmaData[type].length} rows`);
 }
 
-// ✅ Save to Firebase (using static import)
 async function saveToFirebase(type) {
     if (protsmaData[type].length === 0) {
         showAlert(type, 'Tidak ada data untuk disimpan!', 'warning');
         return;
     }
 
-    const saveBtn = document.getElementById(`${type}-save-btn`);
+    const prefix = type === 'prota' ? 'protsma' : 'promes';
+    const saveBtn = document.getElementById(`${prefix}-save-btn`);
     saveBtn.disabled = true;
     saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
 
@@ -569,7 +555,6 @@ async function saveToFirebase(type) {
         const user = auth.currentUser;
         if (!user) throw new Error('User tidak terautentikasi!');
 
-        const prefix = type === 'prota' ? 'protsma' : 'promes';
         await addDoc(collection(db, 'protsma'), {
             uid: user.uid,
             type: type,
@@ -592,7 +577,6 @@ async function saveToFirebase(type) {
     }
 }
 
-// ✅ Load saved data from Firebase (using static import)
 async function loadSavedData() {
     try {
         console.log('📥 [Protsma] Loading saved data...');
@@ -603,7 +587,6 @@ async function loadSavedData() {
             return;
         }
 
-        // Load Prota
         const protaQuery = query(collection(db, 'protsma'), where('uid', '==', user.uid), where('type', '==', 'prota'));
         const protaSnap = await getDocs(protaQuery);
 
@@ -614,7 +597,6 @@ async function loadSavedData() {
             console.log(`📥 [Protsma] Loaded ${protsmaData.prota.length} prota rows`);
         }
 
-        // Load Promes
         const promesQuery = query(collection(db, 'protsma'), where('uid', '==', user.uid), where('type', '==', 'promes'));
         const promesSnap = await getDocs(promesQuery);
 
@@ -630,14 +612,12 @@ async function loadSavedData() {
     }
 }
 
-// ✅ Download PDF
 function downloadPDF(type) {
     if (protsmaData[type].length === 0) {
         showAlert(type, 'Tidak ada data untuk diexport!', 'warning');
         return;
     }
 
-    // Check if html2pdf is available
     if (typeof html2pdf === 'undefined') {
         showAlert(type, 'Library PDF belum dimuat. Pastikan CDN html2pdf ada di index.html', 'error');
         console.warn('⚠️ [Protsma] html2pdf library not found');
@@ -676,4 +656,4 @@ function showAlert(type, message, status = 'success') {
     console.log(`🔔 [Protsma] Alert (${status}): ${message}`);
 }
 
-console.log('🟢 [Protsma] Module READY — Static Imports + All Buttons Work + Robust Listeners');
+console.log('🟢 [Protsma] Module READY — Button IDs Fixed + All Listeners Work');
