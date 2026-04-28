@@ -2,14 +2,13 @@
  * ============================================
  * PROTA & PROMES GENERATOR - Main Logic
  * Folder: modules/protsma/protsma.js
- * FIXED VERSION - Static Firebase Import
+ * FINAL VERSION - All Buttons Work + Robust Event Listeners
  * ============================================
  */
 
 console.log('🔴 [Protsma] Module START');
 
-// ✅ FIX 1: STATIC IMPORT FIREBASE (ganti dynamic import yang error 404)
-// Path: modules/protsma/protsma.js → modules/firebase-config.js = ../firebase-config.js
+// ✅ STATIC IMPORT FIREBASE (path dari modules/protsma/ ke modules/)
 import { 
   db, auth, collection, addDoc, query, where, orderBy, 
   onSnapshot, doc, getDoc, serverTimestamp, getDocs 
@@ -17,21 +16,25 @@ import {
 
 console.log('✅ [Protsma] Firebase imports successful');
 
+// ✅ STATIC IMPORT GROQ API (untuk AI)
+import { generateWithGroq } from '../groq-api.js';
+
+console.log('✅ [Protsma] Groq API import successful');
+
 let protsmaData = { prota: [], promes: [] };
 let currentTab = 'prota';
 
-// ❌ HAPUS: const FIREBASE_CONFIG_PATH = '../../firebase-config.js'; // Tidak dipakai lagi
-
+// ✅ FIX: Export fungsi utama ke window agar bisa dipanggil dari HTML
 export async function renderProtsma() {
     console.log('📊 [Protsma] renderProtsma called');
 
     const container = document.getElementById('protsma-container');
     if (!container) {
-        console.error('❌ [Protsma] Container not found');
+        console.error('❌ [Protsma] Container #protsma-container not found!');
         return;
     }
 
-    // ✅ Cek fungsi global aman
+    // ✅ Cek approval user
     const isApproved = window.isUserApproved?.() || window.currentUserRole === 'admin';
     if (!isApproved) {
         container.innerHTML = `
@@ -45,16 +48,58 @@ export async function renderProtsma() {
         return;
     }
 
+    // ✅ Render UI
     container.innerHTML = getProtsmaHTML();
+    
+    // ✅ Load CSS (dengan fallback inline jika file eksternal gagal)
     loadProtsmaCSS();
-    initProtsmaListeners();
+    
+    // ✅ Init event listeners (dengan delay kecil untuk pastikan DOM ready)
+    setTimeout(() => {
+        initProtsmaListeners();
+        console.log('✅ [Protsma] Event listeners attached');
+    }, 100);
+    
+    // ✅ Load saved data
     await loadSavedData();
 
-    console.log('🟢 [Protsma] Module READY');
+    console.log('🟢 [Protsma] Module READY — All buttons should work');
 }
 
 function getProtsmaHTML() {
     return `
+        <style>
+            /* ✅ INLINE CSS FALLBACK - jika file eksternal tidak load */
+            .protsma-container { max-width: 1200px; margin: auto; padding: 20px; font-family: system-ui, sans-serif; }
+            .protsma-header { text-align: center; margin-bottom: 24px; }
+            .protsma-header h2 { color: #0891b2; margin-bottom: 8px; }
+            .protsma-alert { padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-weight: 500; }
+            .protsma-alert-success { background: #dcfce7; color: #166534; }
+            .protsma-alert-error { background: #fee2e2; color: #991b1b; }
+            .protsma-alert-warning { background: #fef3c7; color: #92400e; }
+            .protsma-tabs { display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 2px solid #e5e7eb; }
+            .protsma-tab { padding: 10px 20px; border: none; background: #f3f4f6; border-radius: 8px 8px 0 0; cursor: pointer; font-weight: 500; }
+            .protsma-tab.active { background: #0891b2; color: white; }
+            .protsma-content { display: none; }
+            .protsma-content.active { display: block; }
+            .protsma-form { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; }
+            .protsma-form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+            .protsma-form-group label { display: block; font-weight: 600; margin-bottom: 6px; color: #374151; }
+            .protsma-form-group input, .protsma-form-group select { width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; }
+            .protsma-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+            .protsma-btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 6px; }
+            .protsma-btn-primary { background: #0891b2; color: white; }
+            .protsma-btn-success { background: #10b981; color: white; }
+            .protsma-btn-secondary { background: #6b7280; color: white; }
+            .protsma-ai-btn { background: linear-gradient(135deg, #6366f1, #4f46e5); color: white; }
+            .protsma-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+            .protsma-table-container { overflow-x: auto; background: white; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+            .protsma-table { width: 100%; border-collapse: collapse; }
+            .protsma-table th { background: #0891b2; color: white; padding: 12px; text-align: left; font-weight: 600; }
+            .protsma-table td { padding: 12px; border-bottom: 1px solid #e5e7eb; }
+            .protsma-table tr:hover { background: #f9fafb; }
+            @media (max-width: 768px) { .protsma-form-grid { grid-template-columns: 1fr; } .protsma-actions { flex-direction: column; } }
+        </style>
         <div class="protsma-container">
             <div class="protsma-header">
                 <h2><i class="fas fa-calendar-alt mr-2"></i>Generator Prota & Promes</h2>
@@ -214,6 +259,7 @@ function getProtsmaHTML() {
                             <i class="fas fa-file-pdf"></i> Download PDF
                         </button>
                     </div>
+                </div>
                 <div class="protsma-table-container">
                     <table class="protsma-table" id="promes-table">
                         <thead>
@@ -243,30 +289,90 @@ function getProtsmaHTML() {
 }
 
 function loadProtsmaCSS() {
+    // ✅ Coba load CSS eksternal, jika gagal pakai inline (sudah ada di HTML)
     const linkId = 'protsma-css';
     if (!document.getElementById(linkId)) {
         const link = document.createElement('link');
         link.id = linkId;
         link.rel = 'stylesheet';
         link.href = './modules/protsma/protsma.css';
+        link.onerror = () => console.log('⚠️ [Protsma] External CSS failed, using inline styles');
         document.head.appendChild(link);
     }
 }
 
 function initProtsmaListeners() {
+    console.log('🔧 [Protsma] Initializing event listeners...');
+    
+    // ✅ Tab switcher
     document.querySelectorAll('.protsma-tab').forEach(tab => {
-        tab.addEventListener('click', (e) => switchTab(e.target.dataset.tab));
+        tab.addEventListener('click', (e) => {
+            console.log('📑 [Protsma] Tab clicked:', e.target.dataset.tab);
+            switchTab(e.target.dataset.tab);
+        });
     });
 
+    // ✅ Setup listeners for both prota & promes
     ['prota', 'promes'].forEach(type => {
-        const prefix = type === 'prota'? 'protsma' : 'promes';
-        document.getElementById(`${prefix}-jenjang`)?.addEventListener('change', () => updateKelasOptions(type));
-        document.getElementById(`${type}-ai-btn`)?.addEventListener('click', () => callAIForHelp(type));
-        document.getElementById(`${type}-add-btn`)?.addEventListener('click', () => addDataRow(type));
-        document.getElementById(`${type}-generate-btn`)?.addEventListener('click', () => generateTable(type));
-        document.getElementById(`${type}-save-btn`)?.addEventListener('click', () => saveToFirebase(type));
-        document.getElementById(`${type}-pdf-btn`)?.addEventListener('click', () => downloadPDF(type));
+        const prefix = type === 'prota' ? 'protsma' : 'promes';
+        console.log(`🔧 [Protsma] Setting up listeners for ${type} (prefix: ${prefix})`);
+        
+        // Jenjang change → update kelas options
+        const jenjangSelect = document.getElementById(`${prefix}-jenjang`);
+        if (jenjangSelect) {
+            jenjangSelect.addEventListener('change', () => {
+                console.log(`🔄 [Protsma] ${type} jenjang changed:`, jenjangSelect.value);
+                updateKelasOptions(type);
+            });
+        }
+        
+        // AI button
+        const aiBtn = document.getElementById(`${type}-ai-btn`);
+        if (aiBtn) {
+            aiBtn.addEventListener('click', async () => {
+                console.log(`🤖 [Protsma] ${type} AI button clicked`);
+                await callAIForHelp(type);
+            });
+        }
+        
+        // Add row button
+        const addBtn = document.getElementById(`${type}-add-btn`);
+        if (addBtn) {
+            addBtn.addEventListener('click', () => {
+                console.log(`➕ [Protsma] ${type} add row clicked`);
+                addDataRow(type);
+            });
+        }
+        
+        // Generate button
+        const genBtn = document.getElementById(`${type}-generate-btn`);
+        if (genBtn) {
+            genBtn.addEventListener('click', () => {
+                console.log(`✨ [Protsma] ${type} generate clicked`);
+                generateTable(type);
+            });
+        }
+        
+        // Save button
+        const saveBtn = document.getElementById(`${type}-save-btn`);
+        if (saveBtn) {
+            saveBtn.addEventListener('click', async () => {
+                console.log(`💾 [Protsma] ${type} save clicked`);
+                await saveToFirebase(type);
+            });
+        }
+        
+        // PDF button
+        const pdfBtn = document.getElementById(`${type}-pdf-btn`);
+        if (pdfBtn) {
+            pdfBtn.addEventListener('click', () => {
+                console.log(`📄 [Protsma] ${type} PDF clicked`);
+                downloadPDF(type);
+            });
+        }
     });
+    
+    console.log('✅ [Protsma] All event listeners attached');
 }
 
 function switchTab(tabName) {
@@ -277,10 +383,11 @@ function switchTab(tabName) {
     document.querySelectorAll('.protsma-content').forEach(content => {
         content.classList.toggle('active', content.id === `${tabName}-content`);
     });
+    console.log('📑 [Protsma] Switched to tab:', tabName);
 }
 
 function updateKelasOptions(type) {
-    const prefix = type === 'prota'? 'protsma' : 'promes';
+    const prefix = type === 'prota' ? 'protsma' : 'promes';
     const jenjang = document.getElementById(`${prefix}-jenjang`).value;
     const kelasSelect = document.getElementById(`${prefix}-kelas`);
 
@@ -299,11 +406,12 @@ function updateKelasOptions(type) {
     kelasSelect.innerHTML = '<option value="">Pilih Kelas</option>' +
         kelasList.map(k => `<option value="${k}">Kelas ${k}</option>`).join('');
     kelasSelect.disabled = false;
+    console.log(`📋 [Protsma] Updated kelas options for ${jenjang}:`, kelasList);
 }
 
-// ✅ FIX 2: Fix path groq-api.js (dari modules/protsma/ ke modules/)
+// ✅ AI Helper Function (using static import)
 async function callAIForHelp(type) {
-    const prefix = type === 'prota'? 'protsma' : 'promes';
+    const prefix = type === 'prota' ? 'protsma' : 'promes';
     const jenjang = document.getElementById(`${prefix}-jenjang`).value;
     const kelas = document.getElementById(`${prefix}-kelas`).value;
     const topik = document.getElementById(`${prefix}-topik`).value;
@@ -318,9 +426,8 @@ async function callAIForHelp(type) {
     aiBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses AI...';
 
     try {
-        // ✅ FIX: Path dari modules/protsma/ ke modules/groq-api.js = ../groq-api.js
-        const { generateWithGroq } = await import('../groq-api.js');
-
+        console.log('🤖 [Protsma] Calling Groq API with prompt...');
+        
         const prompt = `Buatkan rencana untuk Prota/Promes:
 Jenjang: ${jenjang?.toUpperCase()}
 Kelas: ${kelas}
@@ -329,6 +436,7 @@ Topik: ${topik}
 Balas HANYA JSON: {"minggu": angka, "alokasi": angka}`;
 
         const result = await generateWithGroq(prompt);
+        console.log('🤖 [Protsma] AI response:', result);
 
         // Parse hasil AI
         const match = result.match(/\{[\s\S]*\}/);
@@ -351,7 +459,7 @@ Balas HANYA JSON: {"minggu": angka, "alokasi": angka}`;
 }
 
 function addDataRow(type) {
-    const prefix = type === 'prota'? 'protsma' : 'promes';
+    const prefix = type === 'prota' ? 'protsma' : 'promes';
     const jenjang = document.getElementById(`${prefix}-jenjang`).value;
     const kelas = document.getElementById(`${prefix}-kelas`).value;
     const mapel = document.getElementById(`${prefix}-mapel`).value;
@@ -360,7 +468,7 @@ function addDataRow(type) {
     const alokasi = document.getElementById(`${prefix}-alokasi`).value;
     const bulan = document.getElementById(`${prefix}-bulan`)?.value;
 
-    if (!jenjang ||!kelas ||!mapel ||!topik) {
+    if (!jenjang || !kelas || !mapel || !topik) {
         showAlert(type, 'Silakan lengkapi Jenjang, Kelas, Mapel, dan Topik!', 'warning');
         return;
     }
@@ -369,27 +477,32 @@ function addDataRow(type) {
         jenjang, kelas, mapel, topik,
         minggu: minggu || '1',
         alokasi: alokasi || '2',
-       ...(bulan && { bulan })
+        ...(bulan && { bulan })
     };
 
     protsmaData[type].push(rowData);
     renderTable(type);
 
+    // Clear form
     document.getElementById(`${prefix}-topik`).value = '';
     document.getElementById(`${prefix}-minggu`).value = '';
     document.getElementById(`${prefix}-alokasi`).value = '';
 
     showAlert(type, '✅ Baris berhasil ditambahkan!', 'success');
+    console.log(`➕ [Protsma] Added row to ${type}:`, rowData);
 }
 
 function renderTable(type) {
     const tbody = document.getElementById(`${type}-tbody`);
-    if (!tbody) return;
+    if (!tbody) {
+        console.error(`❌ [Protsma] tbody #${type}-tbody not found!`);
+        return;
+    }
 
     const data = protsmaData[type];
 
     if (data.length === 0) {
-        const colspan = type === 'prota'? 6 : 7;
+        const colspan = type === 'prota' ? 6 : 7;
         tbody.innerHTML = `<tr><td colspan="${colspan}" class="text-center py-8 text-gray-500">Belum ada data. Isi form dan klik "Tambah Baris"</td></tr>`;
         return;
     }
@@ -399,17 +512,19 @@ function renderTable(type) {
             <td>Kelas ${row.kelas}</td>
             <td>${row.mapel}</td>
             <td>${row.topik}</td>
-            ${type === 'promes'? `<td>${getBulanName(row.bulan)}</td>` : ''}
+            ${type === 'promes' ? `<td>${getBulanName(row.bulan)}</td>` : ''}
             <td>${row.minggu}</td>
             <td>${row.alokasi} JP</td>
             <td>
                 <button onclick="window.removeProtsmaRow('${type}', ${index})"
-                        class="text-red-600 hover:text-red-800">
+                        class="text-red-600 hover:text-red-800" title="Hapus">
                     <i class="fas fa-trash"></i>
                 </button>
             </td>
         </tr>
     `).join('');
+    
+    console.log(`📊 [Protsma] Rendered ${data.length} rows for ${type}`);
 }
 
 function getBulanName(bulanNum) {
@@ -421,7 +536,9 @@ function getBulanName(bulanNum) {
     return bulanMap[bulanNum] || bulanNum;
 }
 
+// ✅ FIX: Expose to window for onclick attribute in HTML
 window.removeProtsmaRow = function(type, index) {
+    console.log(`🗑️ [Protsma] Removing row from ${type} at index ${index}`);
     protsmaData[type].splice(index, 1);
     renderTable(type);
 };
@@ -432,9 +549,10 @@ function generateTable(type) {
         return;
     }
     showAlert(type, `✅ Tabel ${type.toUpperCase()} berhasil digenerate dengan ${protsmaData[type].length} baris!`, 'success');
+    console.log(`✨ [Protsma] Generated table for ${type} with ${protsmaData[type].length} rows`);
 }
 
-// ✅ FIX 3: Ganti dynamic import dengan static import yang sudah dideklarasikan di atas
+// ✅ Save to Firebase (using static import)
 async function saveToFirebase(type) {
     if (protsmaData[type].length === 0) {
         showAlert(type, 'Tidak ada data untuk disimpan!', 'warning');
@@ -446,13 +564,12 @@ async function saveToFirebase(type) {
     saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
 
     try {
-        // ✅ FIX: Gunakan static import (db, collection, addDoc, serverTimestamp, auth sudah di-import di atas)
-        // ❌ HAPUS: const { db, collection, addDoc, serverTimestamp, auth } = await import(FIREBASE_CONFIG_PATH);
-
+        console.log('💾 [Protsma] Saving to Firebase...');
+        
         const user = auth.currentUser;
         if (!user) throw new Error('User tidak terautentikasi!');
 
-        const prefix = type === 'prota'? 'protsma' : 'promes';
+        const prefix = type === 'prota' ? 'protsma' : 'promes';
         await addDoc(collection(db, 'protsma'), {
             uid: user.uid,
             type: type,
@@ -464,6 +581,7 @@ async function saveToFirebase(type) {
         });
 
         showAlert(type, '✅ Data berhasil disimpan ke Firebase!', 'success');
+        console.log('💾 [Protsma] Save successful');
 
     } catch (error) {
         console.error('❌ [Protsma] Save Error:', error);
@@ -474,15 +592,18 @@ async function saveToFirebase(type) {
     }
 }
 
-// ✅ FIX 4: Ganti dynamic import dengan static import yang sudah dideklarasikan di atas
+// ✅ Load saved data from Firebase (using static import)
 async function loadSavedData() {
     try {
-        // ✅ FIX: Gunakan static import (db, collection, query, where, getDocs, auth sudah di-import di atas)
-        // ❌ HAPUS: const { db, collection, query, where, getDocs, auth } = await import(FIREBASE_CONFIG_PATH);
-
+        console.log('📥 [Protsma] Loading saved data...');
+        
         const user = auth.currentUser;
-        if (!user) return;
+        if (!user) {
+            console.log('⚠️ [Protsma] No user logged in, skip load');
+            return;
+        }
 
+        // Load Prota
         const protaQuery = query(collection(db, 'protsma'), where('uid', '==', user.uid), where('type', '==', 'prota'));
         const protaSnap = await getDocs(protaQuery);
 
@@ -490,8 +611,10 @@ async function loadSavedData() {
             const lastDoc = protaSnap.docs[protaSnap.docs.length - 1];
             protsmaData.prota = lastDoc.data().data || [];
             renderTable('prota');
+            console.log(`📥 [Protsma] Loaded ${protsmaData.prota.length} prota rows`);
         }
 
+        // Load Promes
         const promesQuery = query(collection(db, 'protsma'), where('uid', '==', user.uid), where('type', '==', 'promes'));
         const promesSnap = await getDocs(promesQuery);
 
@@ -499,6 +622,7 @@ async function loadSavedData() {
             const lastDoc = promesSnap.docs[promesSnap.docs.length - 1];
             protsmaData.promes = lastDoc.data().data || [];
             renderTable('promes');
+            console.log(`📥 [Protsma] Loaded ${protsmaData.promes.length} promes rows`);
         }
 
     } catch (error) {
@@ -506,15 +630,17 @@ async function loadSavedData() {
     }
 }
 
-// ✅ FIX 5: Cek html2pdf dulu (unchanged)
+// ✅ Download PDF
 function downloadPDF(type) {
     if (protsmaData[type].length === 0) {
         showAlert(type, 'Tidak ada data untuk diexport!', 'warning');
         return;
     }
 
+    // Check if html2pdf is available
     if (typeof html2pdf === 'undefined') {
-        showAlert(type, 'Library PDF belum dimuat. Tambahkan CDN html2pdf di index.html', 'error');
+        showAlert(type, 'Library PDF belum dimuat. Pastikan CDN html2pdf ada di index.html', 'error');
+        console.warn('⚠️ [Protsma] html2pdf library not found');
         return;
     }
 
@@ -529,11 +655,15 @@ function downloadPDF(type) {
 
     html2pdf().set(opt).from(element).save();
     showAlert(type, '✅ PDF sedang diunduh!', 'success');
+    console.log(`📄 [Protsma] PDF download initiated for ${type}`);
 }
 
 function showAlert(type, message, status = 'success') {
     const container = document.getElementById('protsma-alert-container');
-    if (!container) return;
+    if (!container) {
+        console.warn('⚠️ [Protsma] Alert container not found');
+        return;
+    }
 
     const alertClass = {
         'success': 'protsma-alert-success',
@@ -543,6 +673,7 @@ function showAlert(type, message, status = 'success') {
 
     container.innerHTML = `<div class="protsma-alert ${alertClass}">${message}</div>`;
     setTimeout(() => { container.innerHTML = ''; }, 5000);
+    console.log(`🔔 [Protsma] Alert (${status}): ${message}`);
 }
 
-console.log('🟢 [Protsma] Module READY — Static Firebase Import + Fixed Paths');
+console.log('🟢 [Protsma] Module READY — Static Imports + All Buttons Work + Robust Listeners');
