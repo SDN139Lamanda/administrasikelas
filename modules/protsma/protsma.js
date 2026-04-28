@@ -2,17 +2,25 @@
  * ============================================
  * PROTA & PROMES GENERATOR - Main Logic
  * Folder: modules/protsma/protsma.js
- * FIXED VERSION
+ * FIXED VERSION - Static Firebase Import
  * ============================================
  */
 
 console.log('🔴 [Protsma] Module START');
 
+// ✅ FIX 1: STATIC IMPORT FIREBASE (ganti dynamic import yang error 404)
+// Path: modules/protsma/protsma.js → modules/firebase-config.js = ../firebase-config.js
+import { 
+  db, auth, collection, addDoc, query, where, orderBy, 
+  onSnapshot, doc, getDoc, serverTimestamp, getDocs 
+} from '../firebase-config.js';
+
+console.log('✅ [Protsma] Firebase imports successful');
+
 let protsmaData = { prota: [], promes: [] };
 let currentTab = 'prota';
 
-// ✅ FIX 1: Import path Firebase - SESUAIKAN PATH INI
-const FIREBASE_CONFIG_PATH = '../../firebase-config.js'; // Ganti jika beda
+// ❌ HAPUS: const FIREBASE_CONFIG_PATH = '../../firebase-config.js'; // Tidak dipakai lagi
 
 export async function renderProtsma() {
     console.log('📊 [Protsma] renderProtsma called');
@@ -23,7 +31,7 @@ export async function renderProtsma() {
         return;
     }
 
-    // ✅ FIX 4: Cek fungsi global aman
+    // ✅ Cek fungsi global aman
     const isApproved = window.isUserApproved?.() || window.currentUserRole === 'admin';
     if (!isApproved) {
         container.innerHTML = `
@@ -293,7 +301,7 @@ function updateKelasOptions(type) {
     kelasSelect.disabled = false;
 }
 
-// ✅ FIX 2: Pake groq-api.js yang udah dibenerin
+// ✅ FIX 2: Fix path groq-api.js (dari modules/protsma/ ke modules/)
 async function callAIForHelp(type) {
     const prefix = type === 'prota'? 'protsma' : 'promes';
     const jenjang = document.getElementById(`${prefix}-jenjang`).value;
@@ -310,8 +318,8 @@ async function callAIForHelp(type) {
     aiBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses AI...';
 
     try {
-        // ✅ Langsung pake generateWithGroq dari file yang udah dibenerin
-        const { generateWithGroq } = await import('../../groq-api.js');
+        // ✅ FIX: Path dari modules/protsma/ ke modules/groq-api.js = ../groq-api.js
+        const { generateWithGroq } = await import('../groq-api.js');
 
         const prompt = `Buatkan rencana untuk Prota/Promes:
 Jenjang: ${jenjang?.toUpperCase()}
@@ -426,6 +434,7 @@ function generateTable(type) {
     showAlert(type, `✅ Tabel ${type.toUpperCase()} berhasil digenerate dengan ${protsmaData[type].length} baris!`, 'success');
 }
 
+// ✅ FIX 3: Ganti dynamic import dengan static import yang sudah dideklarasikan di atas
 async function saveToFirebase(type) {
     if (protsmaData[type].length === 0) {
         showAlert(type, 'Tidak ada data untuk disimpan!', 'warning');
@@ -437,7 +446,8 @@ async function saveToFirebase(type) {
     saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
 
     try {
-        const { db, collection, addDoc, serverTimestamp, auth } = await import(FIREBASE_CONFIG_PATH);
+        // ✅ FIX: Gunakan static import (db, collection, addDoc, serverTimestamp, auth sudah di-import di atas)
+        // ❌ HAPUS: const { db, collection, addDoc, serverTimestamp, auth } = await import(FIREBASE_CONFIG_PATH);
 
         const user = auth.currentUser;
         if (!user) throw new Error('User tidak terautentikasi!');
@@ -464,9 +474,11 @@ async function saveToFirebase(type) {
     }
 }
 
+// ✅ FIX 4: Ganti dynamic import dengan static import yang sudah dideklarasikan di atas
 async function loadSavedData() {
     try {
-        const { db, collection, query, where, getDocs, auth } = await import(FIREBASE_CONFIG_PATH);
+        // ✅ FIX: Gunakan static import (db, collection, query, where, getDocs, auth sudah di-import di atas)
+        // ❌ HAPUS: const { db, collection, query, where, getDocs, auth } = await import(FIREBASE_CONFIG_PATH);
 
         const user = auth.currentUser;
         if (!user) return;
@@ -494,7 +506,7 @@ async function loadSavedData() {
     }
 }
 
-// ✅ FIX 3: Cek html2pdf dulu
+// ✅ FIX 5: Cek html2pdf dulu (unchanged)
 function downloadPDF(type) {
     if (protsmaData[type].length === 0) {
         showAlert(type, 'Tidak ada data untuk diexport!', 'warning');
@@ -533,4 +545,4 @@ function showAlert(type, message, status = 'success') {
     setTimeout(() => { container.innerHTML = ''; }, 5000);
 }
 
-console.log('🟢 [Protsma] Module READY');
+console.log('🟢 [Protsma] Module READY — Static Firebase Import + Fixed Paths');
