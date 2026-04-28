@@ -2,37 +2,30 @@
  * ============================================
  * PROTA & PROMES GENERATOR - Main Logic
  * Folder: modules/protsma/protsma.js
+ * FIXED VERSION
  * ============================================
  */
 
 console.log('🔴 [Protsma] Module START');
 
-// ============================================
-// ✅ GLOBAL STATE
-// ============================================
-
-let protsmaData = {
-    prota: [],
-    promes: []
-};
-
+let protsmaData = { prota: [], promes: [] };
 let currentTab = 'prota';
 
-// ============================================
-// ✅ MAIN RENDER FUNCTION (Called from dashboard.js)
-// ============================================
+// ✅ FIX 1: Import path Firebase - SESUAIKAN PATH INI
+const FIREBASE_CONFIG_PATH = '../../firebase-config.js'; // Ganti jika beda
 
 export async function renderProtsma() {
     console.log('📊 [Protsma] renderProtsma called');
-    
+
     const container = document.getElementById('protsma-container');
     if (!container) {
         console.error('❌ [Protsma] Container not found');
         return;
     }
-    
-    // ✅ Auth check
-    if (!window.isUserApproved?.() && window.currentUserRole !== 'admin') {
+
+    // ✅ FIX 4: Cek fungsi global aman
+    const isApproved = window.isUserApproved?.() || window.currentUserRole === 'admin';
+    if (!isApproved) {
         container.innerHTML = `
             <div class="protsma-container">
                 <div class="protsma-alert protsma-alert-warning">
@@ -43,47 +36,28 @@ export async function renderProtsma() {
         `;
         return;
     }
-    
-    // Render UI
+
     container.innerHTML = getProtsmaHTML();
-    
-    // Load CSS
     loadProtsmaCSS();
-    
-    // Initialize event listeners
     initProtsmaListeners();
-    
-    // Load saved data from Firebase
     await loadSavedData();
-    
+
     console.log('🟢 [Protsma] Module READY');
 }
-
-// ============================================
-// ✅ HTML TEMPLATE
-// ============================================
 
 function getProtsmaHTML() {
     return `
         <div class="protsma-container">
-            <!-- Header -->
             <div class="protsma-header">
                 <h2><i class="fas fa-calendar-alt mr-2"></i>Generator Prota & Promes</h2>
                 <p>Buat Program Tahunan dan Semester dengan bantuan AI</p>
             </div>
-            
-            <!-- Alert Messages -->
             <div id="protsma-alert-container"></div>
-            
-            <!-- Tabs -->
             <div class="protsma-tabs">
                 <button class="protsma-tab active" data-tab="prota">Prota</button>
                 <button class="protsma-tab" data-tab="promes">Promes</button>
             </div>
-            
-            <!-- Prota Content -->
             <div id="prota-content" class="protsma-content active">
-                <!-- Input Form -->
                 <div class="protsma-form">
                     <div class="protsma-form-grid">
                         <div class="protsma-form-group">
@@ -122,7 +96,6 @@ function getProtsmaHTML() {
                             <input type="number" id="protsma-alokasi" placeholder="2" min="1">
                         </div>
                     </div>
-                    
                     <div class="protsma-actions">
                         <button id="protsma-ai-btn" class="protsma-ai-btn">
                             <i class="fas fa-robot"></i> Bantu Isi dengan AI
@@ -141,8 +114,6 @@ function getProtsmaHTML() {
                         </button>
                     </div>
                 </div>
-                
-                <!-- Data Table -->
                 <div class="protsma-table-container">
                     <table class="protsma-table" id="prota-table">
                         <thead>
@@ -161,10 +132,7 @@ function getProtsmaHTML() {
                     </table>
                 </div>
             </div>
-            
-            <!-- Promes Content -->
             <div id="promes-content" class="protsma-content">
-                <!-- Input Form (same as Prota) -->
                 <div class="protsma-form">
                     <div class="protsma-form-grid">
                         <div class="protsma-form-group">
@@ -221,7 +189,6 @@ function getProtsmaHTML() {
                             <input type="number" id="promes-alokasi" placeholder="2" min="1">
                         </div>
                     </div>
-                    
                     <div class="protsma-actions">
                         <button id="promes-ai-btn" class="protsma-ai-btn">
                             <i class="fas fa-robot"></i> Bantu Isi dengan AI
@@ -239,9 +206,6 @@ function getProtsmaHTML() {
                             <i class="fas fa-file-pdf"></i> Download PDF
                         </button>
                     </div>
-                </div>
-                
-                <!-- Data Table -->
                 <div class="protsma-table-container">
                     <table class="protsma-table" id="promes-table">
                         <thead>
@@ -261,20 +225,14 @@ function getProtsmaHTML() {
                     </table>
                 </div>
             </div>
-            
-            <!-- Back Button -->
             <div class="mt-6">
-                <button onclick="window.backToDashboard()" class="protsma-btn protsma-btn-secondary">
+                <button onclick="window.backToDashboard?.()" class="protsma-btn protsma-btn-secondary">
                     <i class="fas fa-arrow-left mr-2"></i>Kembali ke Dashboard
                 </button>
             </div>
         </div>
     `;
 }
-
-// ============================================
-// ✅ LOAD CSS
-// ============================================
 
 function loadProtsmaCSS() {
     const linkId = 'protsma-css';
@@ -287,199 +245,105 @@ function loadProtsmaCSS() {
     }
 }
 
-// ============================================
-// ✅ INITIALIZE EVENT LISTENERS
-// ============================================
-
 function initProtsmaListeners() {
-    // Tab switching
     document.querySelectorAll('.protsma-tab').forEach(tab => {
         tab.addEventListener('click', (e) => switchTab(e.target.dataset.tab));
     });
-    
-    // Jenjang change → update kelas options
+
     ['prota', 'promes'].forEach(type => {
-        const jenjangSelect = document.getElementById(`${type}-jenjang`);
-        if (jenjangSelect) {
-            jenjangSelect.addEventListener('change', () => updateKelasOptions(type));
-        }
-        
-        // AI button
-        const aiBtn = document.getElementById(`${type}-ai-btn`);
-        if (aiBtn) {
-            aiBtn.addEventListener('click', () => callAIForHelp(type));
-        }
-        
-        // Add button
-        const addBtn = document.getElementById(`${type}-add-btn`);
-        if (addBtn) {
-            addBtn.addEventListener('click', () => addDataRow(type));
-        }
-        
-        // Generate button
-        const genBtn = document.getElementById(`${type}-generate-btn`);
-        if (genBtn) {
-            genBtn.addEventListener('click', () => generateTable(type));
-        }
-        
-        // Save button
-        const saveBtn = document.getElementById(`${type}-save-btn`);
-        if (saveBtn) {
-            saveBtn.addEventListener('click', () => saveToFirebase(type));
-        }
-        
-        // PDF button
-        const pdfBtn = document.getElementById(`${type}-pdf-btn`);
-        if (pdfBtn) {
-            pdfBtn.addEventListener('click', () => downloadPDF(type));
-        }
+        const prefix = type === 'prota'? 'protsma' : 'promes';
+        document.getElementById(`${prefix}-jenjang`)?.addEventListener('change', () => updateKelasOptions(type));
+        document.getElementById(`${type}-ai-btn`)?.addEventListener('click', () => callAIForHelp(type));
+        document.getElementById(`${type}-add-btn`)?.addEventListener('click', () => addDataRow(type));
+        document.getElementById(`${type}-generate-btn`)?.addEventListener('click', () => generateTable(type));
+        document.getElementById(`${type}-save-btn`)?.addEventListener('click', () => saveToFirebase(type));
+        document.getElementById(`${type}-pdf-btn`)?.addEventListener('click', () => downloadPDF(type));
     });
 }
 
-// ============================================
-// ✅ TAB SWITCHING
-// ============================================
-
 function switchTab(tabName) {
     currentTab = tabName;
-    
-    // Update tab styles
     document.querySelectorAll('.protsma-tab').forEach(tab => {
         tab.classList.toggle('active', tab.dataset.tab === tabName);
     });
-    
-    // Update content visibility
     document.querySelectorAll('.protsma-content').forEach(content => {
         content.classList.toggle('active', content.id === `${tabName}-content`);
     });
 }
 
-// ============================================
-// ✅ UPDATE KELAS OPTIONS BASED ON JENJANG
-// ============================================
-
 function updateKelasOptions(type) {
-    const jenjang = document.getElementById(`${type}-jenjang`).value;
-    const kelasSelect = document.getElementById(`${type}-kelas`);
-    
+    const prefix = type === 'prota'? 'protsma' : 'promes';
+    const jenjang = document.getElementById(`${prefix}-jenjang`).value;
+    const kelasSelect = document.getElementById(`${prefix}-kelas`);
+
     if (!jenjang) {
         kelasSelect.disabled = true;
         kelasSelect.innerHTML = '<option value="">Pilih Kelas</option>';
         return;
     }
-    
-    // Kelas options per jenjang
+
     const kelasMap = {
-        'tk': ['A', 'B'],
-        'sd': ['1', '2', '3', '4', '5', '6'],
-        'mi': ['1', '2', '3', '4', '5', '6'],
-        'smp': ['7', '8', '9'],
-        'mts': ['7', '8', '9'],
-        'sma': ['10', '11', '12'],
-        'ma': ['10', '11', '12']
+        'tk': ['A', 'B'], 'sd': ['1', '2', '3', '4', '5', '6'], 'mi': ['1', '2', '3', '4', '5', '6'],
+        'smp': ['7', '8', '9'], 'mts': ['7', '8', '9'], 'sma': ['10', '11', '12'], 'ma': ['10', '11', '12']
     };
-    
+
     const kelasList = kelasMap[jenjang] || [];
-    
     kelasSelect.innerHTML = '<option value="">Pilih Kelas</option>' +
         kelasList.map(k => `<option value="${k}">Kelas ${k}</option>`).join('');
-    
     kelasSelect.disabled = false;
 }
 
-// ============================================
-// ✅ CALL AI FOR HELP (Groq API)
-// ============================================
-
+// ✅ FIX 2: Pake groq-api.js yang udah dibenerin
 async function callAIForHelp(type) {
-    const jenjang = document.getElementById(`${type}-jenjang`).value;
-    const kelas = document.getElementById(`${type}-kelas`).value;
-    const topik = document.getElementById(`${type}-topik`).value;
+    const prefix = type === 'prota'? 'protsma' : 'promes';
+    const jenjang = document.getElementById(`${prefix}-jenjang`).value;
+    const kelas = document.getElementById(`${prefix}-kelas`).value;
+    const topik = document.getElementById(`${prefix}-topik`).value;
     const aiBtn = document.getElementById(`${type}-ai-btn`);
-    
+
     if (!topik) {
         showAlert(type, 'Silakan isi Topik/Materi terlebih dahulu', 'warning');
         return;
     }
-    
-    // Disable button during AI call
+
     aiBtn.disabled = true;
     aiBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses AI...';
-    
+
     try {
-        // Get Groq API key
-        const apiKey = await window.getApiKey?.();
-        
-        if (!apiKey) {
-            showAlert(type, 'API Key tidak ditemukan. Silakan hubungi admin.', 'error');
-            return;
-        }
-        
-        // Build prompt for AI
-        const prompt = `Bantu saya membuat rencana pembelajaran untuk:
-- Jenjang: ${jenjang?.toUpperCase()}
-- Kelas: ${kelas}
-- Topik: ${topik}
+        // ✅ Langsung pake generateWithGroq dari file yang udah dibenerin
+        const { generateWithGroq } = await import('../../groq-api.js');
 
-Berikan dalam format JSON:
-{
-    "minggu": number (minggu ke berapa),
-    "alokasi": number (alokasi waktu dalam JP)
-}
+        const prompt = `Buatkan rencana untuk Prota/Promes:
+Jenjang: ${jenjang?.toUpperCase()}
+Kelas: ${kelas}
+Topik: ${topik}
 
-Hanya berikan JSON, tanpa penjelasan lain.`;
-        
-        // Call Groq API
-        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${apiKey}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                model: 'llama-3.1-8b-instant',
-                messages: [{ role: 'user', content: prompt }],
-                temperature: 0.7,
-                max_tokens: 200
-            })
-        });
-        
-        if (!response.ok) {
-            throw new Error(`API Error: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        const aiContent = data.choices?.[0]?.message?.content || '{}';
-        
-        // Parse JSON response
-        const aiResult = JSON.parse(aiContent.replace(/```json|```/g, '').trim());
-        
-        // Fill form with AI suggestions
-        if (aiResult.minggu) {
-            document.getElementById(`${type}-minggu`).value = aiResult.minggu;
-        }
-        if (aiResult.alokasi) {
-            document.getElementById(`${type}-alokasi`).value = aiResult.alokasi;
-        }
-        
+Balas HANYA JSON: {"minggu": angka, "alokasi": angka}`;
+
+        const result = await generateWithGroq(prompt);
+
+        // Parse hasil AI
+        const match = result.match(/\{[\s\S]*\}/);
+        if (!match) throw new Error('AI tidak mengembalikan JSON');
+
+        const aiResult = JSON.parse(match[0]);
+
+        if (aiResult.minggu) document.getElementById(`${prefix}-minggu`).value = aiResult.minggu;
+        if (aiResult.alokasi) document.getElementById(`${prefix}-alokasi`).value = aiResult.alokasi;
+
         showAlert(type, '✅ AI berhasil mengisi Minggu dan Alokasi!', 'success');
-        
+
     } catch (error) {
         console.error('❌ [Protsma] AI Error:', error);
         showAlert(type, `❌ Gagal memanggil AI: ${error.message}`, 'error');
     } finally {
-        // Re-enable button
         aiBtn.disabled = false;
         aiBtn.innerHTML = '<i class="fas fa-robot"></i> Bantu Isi dengan AI';
     }
 }
 
-// ============================================
-// ✅ ADD DATA ROW
-// ============================================
-
 function addDataRow(type) {
-    const prefix = type;
+    const prefix = type === 'prota'? 'protsma' : 'promes';
     const jenjang = document.getElementById(`${prefix}-jenjang`).value;
     const kelas = document.getElementById(`${prefix}-kelas`).value;
     const mapel = document.getElementById(`${prefix}-mapel`).value;
@@ -487,63 +351,51 @@ function addDataRow(type) {
     const minggu = document.getElementById(`${prefix}-minggu`).value;
     const alokasi = document.getElementById(`${prefix}-alokasi`).value;
     const bulan = document.getElementById(`${prefix}-bulan`)?.value;
-    
-    // Validation
-    if (!jenjang || !kelas || !mapel || !topik) {
-        showAlert(type, 'Silakan lengkapi semua field wajib!', 'warning');
+
+    if (!jenjang ||!kelas ||!mapel ||!topik) {
+        showAlert(type, 'Silakan lengkapi Jenjang, Kelas, Mapel, dan Topik!', 'warning');
         return;
     }
-    
-    // Add to data array
+
     const rowData = {
-        jenjang,
-        kelas,
-        mapel,
-        topik,
+        jenjang, kelas, mapel, topik,
         minggu: minggu || '1',
         alokasi: alokasi || '2',
-        ...(bulan && { bulan })
+       ...(bulan && { bulan })
     };
-    
+
     protsmaData[type].push(rowData);
-    
-    // Update table
     renderTable(type);
-    
-    // Clear form
+
     document.getElementById(`${prefix}-topik`).value = '';
     document.getElementById(`${prefix}-minggu`).value = '';
     document.getElementById(`${prefix}-alokasi`).value = '';
-    
+
     showAlert(type, '✅ Baris berhasil ditambahkan!', 'success');
 }
-
-// ============================================
-// ✅ RENDER TABLE
-// ============================================
 
 function renderTable(type) {
     const tbody = document.getElementById(`${type}-tbody`);
     if (!tbody) return;
-    
+
     const data = protsmaData[type];
-    
+
     if (data.length === 0) {
-        const colspan = type === 'prota' ? 6 : 7;
+        const colspan = type === 'prota'? 6 : 7;
         tbody.innerHTML = `<tr><td colspan="${colspan}" class="text-center py-8 text-gray-500">Belum ada data. Isi form dan klik "Tambah Baris"</td></tr>`;
         return;
     }
-    
+
     tbody.innerHTML = data.map((row, index) => `
         <tr>
             <td>Kelas ${row.kelas}</td>
             <td>${row.mapel}</td>
             <td>${row.topik}</td>
-            ${type === 'promes' ? `<td>${getBulanName(row.bulan)}</td>` : ''}
+            ${type === 'promes'? `<td>${getBulanName(row.bulan)}</td>` : ''}
             <td>${row.minggu}</td>
             <td>${row.alokasi} JP</td>
             <td>
-                <button onclick="window.removeProtsmaRow('${type}', ${index})" 
+                <button onclick="window.removeProtsmaRow('${type}', ${index})"
                         class="text-red-600 hover:text-red-800">
                     <i class="fas fa-trash"></i>
                 </button>
@@ -552,7 +404,6 @@ function renderTable(type) {
     `).join('');
 }
 
-// Helper: Get bulan name
 function getBulanName(bulanNum) {
     const bulanMap = {
         '1': 'Januari', '2': 'Februari', '3': 'Maret', '4': 'April',
@@ -562,64 +413,48 @@ function getBulanName(bulanNum) {
     return bulanMap[bulanNum] || bulanNum;
 }
 
-// ============================================
-// ✅ REMOVE ROW (Global function for onclick)
-// ============================================
-
 window.removeProtsmaRow = function(type, index) {
     protsmaData[type].splice(index, 1);
     renderTable(type);
 };
-
-// ============================================
-// ✅ GENERATE TABLE (Finalize)
-// ============================================
 
 function generateTable(type) {
     if (protsmaData[type].length === 0) {
         showAlert(type, 'Belum ada data untuk digenerate!', 'warning');
         return;
     }
-    
     showAlert(type, `✅ Tabel ${type.toUpperCase()} berhasil digenerate dengan ${protsmaData[type].length} baris!`, 'success');
 }
-
-// ============================================
-// ✅ SAVE TO FIREBASE
-// ============================================
 
 async function saveToFirebase(type) {
     if (protsmaData[type].length === 0) {
         showAlert(type, 'Tidak ada data untuk disimpan!', 'warning');
         return;
     }
-    
+
     const saveBtn = document.getElementById(`${type}-save-btn`);
     saveBtn.disabled = true;
     saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
-    
+
     try {
-        const { db, collection, addDoc, serverTimestamp, auth } = await import('../firebase-config.js');
-        
+        const { db, collection, addDoc, serverTimestamp, auth } = await import(FIREBASE_CONFIG_PATH);
+
         const user = auth.currentUser;
-        if (!user) {
-            showAlert(type, 'User tidak terautentikasi!', 'error');
-            return;
-        }
-        
-        // Save to Firestore
+        if (!user) throw new Error('User tidak terautentikasi!');
+
+        const prefix = type === 'prota'? 'protsma' : 'promes';
         await addDoc(collection(db, 'protsma'), {
             uid: user.uid,
             type: type,
-            jenjang: document.getElementById(`${type}-jenjang`).value,
-            kelas: document.getElementById(`${type}-kelas`).value,
+            jenjang: document.getElementById(`${prefix}-jenjang`).value,
+            kelas: document.getElementById(`${prefix}-kelas`).value,
             data: protsmaData[type],
             createdAt: serverTimestamp(),
             updatedAt: serverTimestamp()
         });
-        
+
         showAlert(type, '✅ Data berhasil disimpan ke Firebase!', 'success');
-        
+
     } catch (error) {
         console.error('❌ [Protsma] Save Error:', error);
         showAlert(type, `❌ Gagal menyimpan: ${error.message}`, 'error');
@@ -629,61 +464,49 @@ async function saveToFirebase(type) {
     }
 }
 
-// ============================================
-// ✅ LOAD SAVED DATA FROM FIREBASE
-// ============================================
-
 async function loadSavedData() {
     try {
-        const { db, collection, query, where, getDocs, auth } = await import('../firebase-config.js');
-        
+        const { db, collection, query, where, getDocs, auth } = await import(FIREBASE_CONFIG_PATH);
+
         const user = auth.currentUser;
         if (!user) return;
-        
-        // Load Prota
+
         const protaQuery = query(collection(db, 'protsma'), where('uid', '==', user.uid), where('type', '==', 'prota'));
         const protaSnap = await getDocs(protaQuery);
-        
+
         if (!protaSnap.empty) {
             const lastDoc = protaSnap.docs[protaSnap.docs.length - 1];
             protsmaData.prota = lastDoc.data().data || [];
             renderTable('prota');
         }
-        
-        // Load Promes
+
         const promesQuery = query(collection(db, 'protsma'), where('uid', '==', user.uid), where('type', '==', 'promes'));
         const promesSnap = await getDocs(promesQuery);
-        
+
         if (!promesSnap.empty) {
             const lastDoc = promesSnap.docs[promesSnap.docs.length - 1];
             protsmaData.promes = lastDoc.data().data || [];
             renderTable('promes');
         }
-        
+
     } catch (error) {
         console.error('❌ [Protsma] Load Error:', error);
     }
 }
 
-// ============================================
-// ✅ DOWNLOAD PDF
-// ============================================
-
+// ✅ FIX 3: Cek html2pdf dulu
 function downloadPDF(type) {
     if (protsmaData[type].length === 0) {
         showAlert(type, 'Tidak ada data untuk diexport!', 'warning');
         return;
     }
-    
-    const element = document.getElementById(`${type}-table`);
-    if (!element) return;
-    
-    // Check if html2pdf is available
+
     if (typeof html2pdf === 'undefined') {
-        showAlert(type, 'Library PDF tidak ditemukan!', 'error');
+        showAlert(type, 'Library PDF belum dimuat. Tambahkan CDN html2pdf di index.html', 'error');
         return;
     }
-    
+
+    const element = document.getElementById(`${type}-table`);
     const opt = {
         margin: 10,
         filename: `Prota_Promes_${type}_${new Date().toISOString().split('T')[0]}.pdf`,
@@ -691,39 +514,23 @@ function downloadPDF(type) {
         html2canvas: { scale: 2 },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
     };
-    
+
     html2pdf().set(opt).from(element).save();
-    
     showAlert(type, '✅ PDF sedang diunduh!', 'success');
 }
-
-// ============================================
-// ✅ SHOW ALERT
-// ============================================
 
 function showAlert(type, message, status = 'success') {
     const container = document.getElementById('protsma-alert-container');
     if (!container) return;
-    
+
     const alertClass = {
         'success': 'protsma-alert-success',
         'error': 'protsma-alert-error',
         'warning': 'protsma-alert-warning'
     }[status];
-    
-    container.innerHTML = `
-        <div class="protsma-alert ${alertClass}">
-            ${message}
-        </div>
-    `;
-    
-    // Auto-hide after 5 seconds
-    setTimeout(() => {
-        container.innerHTML = '';
-    }, 5000);
-}
 
-// ✅ EXPORT sudah di function declaration (line ~25)
-// Tidak perlu export lagi di sini
+    container.innerHTML = `<div class="protsma-alert ${alertClass}">${message}</div>`;
+    setTimeout(() => { container.innerHTML = ''; }, 5000);
+}
 
 console.log('🟢 [Protsma] Module READY');
