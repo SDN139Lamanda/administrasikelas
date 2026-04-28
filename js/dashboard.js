@@ -8,7 +8,7 @@
  * • dashboard.html inline script = UI ONLY + routing
  * • File ini = LOGIC ONLY (auth + approval + state)
  * • Admin widget init di sini (setelah role diketahui)
- * • ✅ Import path:../modules/ (karena file ini di js/)
+ * • ✅ Import path: ../modules/ (karena file ini di js/)
  * • ✅ Compatible dengan protsma module (modules/protsma/)
  * ============================================
  */
@@ -68,7 +68,7 @@ window.showPendingApprovalUI = function() {
 };
 
 // ============================================
-// ✅ BARU: ROUTER MODUL
+// ✅ BARU: ROUTER MODUL — FIXED IMPORT PATH
 // ============================================
 
 function initModulRouter() {
@@ -95,20 +95,21 @@ function initModulRouter() {
             container.innerHTML = '<div class="text-center py-8"><i class="fas fa-spinner fa-spin text-2xl"></i><p>Loading modul...</p></div>';
 
             try {
-                // ✅ FIX PATH: Sesuai struktur folder kamu
+                // ✅ FIX PATH: Gunakan path yang benar (file di modules/, bukan subfolder)
                 if (moduleName === 'asisten-modul') {
-                    await import('../modules/asisten-modul/asisten-modul.js');
+                    // ✅ FIX: Path dari js/ ke modules/asisten-modul.js = ../modules/asisten-modul.js
+                    await import('../modules/asisten-modul.js');
                     window.renderGeneratorModule();
                 }
 
                 if (moduleName === 'cta-generator') {
-                    await import('../modules/cta-generator/cta-generator.js');
-                    window.renderCtaGenerator();
+                    await import('../modules/cta-generator.js');
+                    window.renderCitaGenerator();
                 }
 
                 if (moduleName === 'protsma') {
                     await import('../modules/protsma/protsma.js');
-                    window.renderProtsmaModule();
+                    window.renderProtsma();
                 }
 
                 console.log(`✅ [Router] Modul ${moduleName} loaded`);
@@ -137,7 +138,7 @@ async function initAuth() {
     console.log('🔐 [Dashboard.js] initAuth START');
 
     try {
-        // ✅ FIX: Import path corrected to../modules/
+        // ✅ FIX: Import path corrected to ../modules/
         const { auth, onAuthStateChanged, db, doc, getDoc } = await import('../modules/firebase-config.js');
 
         onAuthStateChanged(auth, async (user) => {
@@ -159,13 +160,13 @@ async function initAuth() {
             if (avatarEl) {
                 avatarEl.src = user.photoURL || `https://ui-avatars.com/api/?name=${user.displayName || 'User'}&background=7c3aed&color=fff`;
             }
-            if (contextEl &&!contextEl.textContent.includes('Loading')) {
+            if (contextEl && !contextEl.textContent.includes('Loading')) {
                 contextEl.textContent = user.displayName || user.email;
             }
 
             // Fetch user data from Firestore
             try {
-                // ✅ FIX: Import path corrected to../modules/
+                // ✅ FIX: Import path corrected to ../modules/
                 const { db, doc, getDoc } = await import('../modules/firebase-config.js');
 
                 const snap = await getDoc(doc(db, 'users', user.uid));
@@ -189,8 +190,8 @@ async function initAuth() {
                 // ✅ Set global state from Firestore
                 window.currentUserRole = data.role || 'teacher';
                 window.currentUserJenjang = data.jenjang_sekolah || null;
-                window.currentUserKelas = Array.isArray(data.kelas_diampu)? data.kelas_diampu : [];
-                window.currentUserMapel = Array.isArray(data.mapel_diampu)? data.mapel_diampu : [];
+                window.currentUserKelas = Array.isArray(data.kelas_diampu) ? data.kelas_diampu : [];
+                window.currentUserMapel = Array.isArray(data.mapel_diampu) ? data.mapel_diampu : [];
 
                 // ✅ APPROVAL LOGIC (Simple & Direct):
                 if (window.currentUserRole === 'admin') {
@@ -225,7 +226,7 @@ async function initAuth() {
                 }
 
                 // ✅ Show pending UI if member & not approved
-                if (!window.currentUserIsApproved && window.currentUserRole!== 'admin') {
+                if (!window.currentUserIsApproved && window.currentUserRole !== 'admin') {
                     window.showPendingApprovalUI?.();
                 }
 
@@ -277,7 +278,7 @@ window.logout = async function() {
 
     // Try Firebase signOut
     try {
-        // ✅ FIX: Import path corrected to../modules/
+        // ✅ FIX: Import path corrected to ../modules/
         const { auth, signOut } = await import('../modules/firebase-config.js');
         await signOut(auth);
         console.log('✅ [Dashboard.js] Firebase signOut success');
@@ -330,6 +331,6 @@ console.log(' • logout() ← Sign out + redirect');
 console.log(' • initAuth() ← Main entry (auto-run)');
 console.log(' • backToDashboard() ← Kembali dari modul');
 console.log('🎯 Sync with dashboard.html: UI-only inline script');
-console.log('✅ FIX: Import path../modules/ (bukan./modules/)');
+console.log('✅ FIX: Import path ../modules/ (bukan ./modules/)');
 console.log('✅ Router: initModulRouter() aktif');
 console.log('✅ Compatible dengan protsma module (modules/protsma/protsma.js)');
