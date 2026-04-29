@@ -57,6 +57,17 @@
         </div>
     </nav>
 
+    <!-- ✅ NEW: RUNNING TEXT / PAPAN INFORMASI (Firebase Direct) -->
+    <div id="running-text-container" class="w-full bg-gradient-to-r from-purple-50 to-cyan-50 border-b border-purple-200 py-3 overflow-hidden hidden">
+      <div id="running-text" class="whitespace-nowrap animate-running-text hover:[animation-play-state:paused] px-4 text-sm text-gray-700 font-medium"></div>
+    </div>
+    <style>
+      @keyframes running-text { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
+      .animate-running-text { display: inline-block; animation: running-text 30s linear infinite; will-change: transform; }
+      @media (prefers-reduced-motion: reduce) { .animate-running-text { animation: none; } }
+    </style>
+    <!-- ✅ END NEW: Running Text -->
+
     <!-- Main Content Wrapper -->
     <main id="main-content">
         <!-- Hero Section -->
@@ -398,5 +409,63 @@
             console.log('✅ [Index] Chat Widget initialized');
         });
     </script>
+
+    <!-- ✅ NEW: FETCH RUNNING TEXT FROM FIREBASE (Lazy Load) -->
+    <script type="module">
+      console.log('🔴 [Running Text] Script START');
+      
+      async function loadAnnouncements() {
+        try {
+          // Lazy import Firebase config
+          const { db, collection, query, where, orderBy, limit, getDocs } = await import('./modules/firebase-config.js');
+          
+          // Fetch ONLY 1 active announcement
+          const q = query(
+            collection(db, 'announcements'),
+            where('isActive', '==', true),
+            orderBy('createdAt', 'desc'),
+            limit(1)
+          );
+          
+          const snapshot = await getDocs(q);
+          const container = document.getElementById('running-text-container');
+          const textEl = document.getElementById('running-text');
+          
+          if (!snapshot.empty) {
+            const doc = snapshot.docs[0].data();
+            // Escape HTML to prevent XSS
+            const safeText = doc.text
+              .replace(/&/g, '&amp;')
+              .replace(/</g, '&lt;')
+              .replace(/>/g, '&gt;')
+              .replace(/"/g, '&quot;')
+              .replace(/'/g, '&#039;');
+            
+            textEl.textContent = safeText;
+            container.classList.remove('hidden');
+            console.log('✅ [Running Text] Announcement loaded');
+          } else {
+            // Per spec: hide if no active announcement
+            container.classList.add('hidden');
+            console.log('ℹ️ [Running Text] No active announcement');
+          }
+        } catch (err) {
+          console.warn('⚠️ [Running Text] Load failed:', err.message);
+          // Fail silently: hide container
+          document.getElementById('running-text-container')?.classList.add('hidden');
+        }
+      }
+      
+      // Load when DOM ready
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadAnnouncements);
+      } else {
+        loadAnnouncements();
+      }
+      
+      console.log('🟢 [Running Text] READY — Lazy Load + Hover Pause');
+    </script>
+    <!-- ✅ END NEW: Running Text Firebase Fetch -->
+
 </body>
 </html>
