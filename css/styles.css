@@ -292,3 +292,55 @@ a:focus-visible {
     .btn { border: 2px solid currentColor; }
     a { text-decoration: underline; }
 }
+/* ─────────────────────────────────────────── */
+/* 11. INFO BOARD / RUNNING TEXT               */
+/* ─────────────────────────────────────────── */
+
+.info-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: linear-gradient(90deg, #7c3aed, #6d28d9);
+  color: white;
+  padding: 10px 0;
+  z-index: 9999;
+  font-size: 14px;
+  display: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.info-bar.active { display: block; }
+
+/* Geser body ke bawah biar ga ketutup info bar */
+body.has-info-bar { padding-top: 50px; }
+
+.marquee {
+  width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.marquee span {
+  display: inline-block;
+  padding-left: 100%;
+  animation: marquee 25s linear infinite;
+}
+
+.marquee:hover span { animation-play-state: paused; }
+
+@keyframes marquee {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(-100%, 0); }
+}
+
+@media (max-width: 640px) {
+  .info-bar { font-size: 13px; padding: 8px 0; }
+  body.has-info-bar { padding-top: 46px; }
+  .marquee span { animation-duration: 20s; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee span { animation: none; padding-left: 0; }
+  .marquee { text-align: center; }
+}
