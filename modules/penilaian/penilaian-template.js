@@ -1,4 +1,3 @@
-
 // ✅ NON-MODULE VERSION: Langsung ke window tanpa import/export
 (function() {
     console.log('🔴 [Penilaian Templates] START');
@@ -22,6 +21,10 @@
                     <button onclick="window.switchView('sikap')" id="btnSikap" class="w-full flex items-center space-x-4 px-4 py-3 rounded-2xl hover:bg-white/5 transition-all text-slate-300">
                         <i class="fas fa-heart w-5 text-rose-400"></i> <span class="font-bold">Sikap</span>
                     </button>
+                    <!-- ✅ NEW: Keterampilan Tab -->
+                    <button onclick="window.switchView('keterampilan')" id="btnKeterampilan" class="w-full flex items-center space-x-4 px-4 py-3 rounded-2xl hover:bg-white/5 transition-all text-slate-300">
+                        <i class="fas fa-tools w-5 text-emerald-400"></i> <span class="font-bold">Keterampilan</span>
+                    </button>
                 </nav>
             </aside>
 
@@ -43,7 +46,7 @@
                     </div>
                 </header>
 
-                <!-- Controls (Pengetahuan only) -->
+                <!-- Controls (Pengetahuan & Keterampilan only) -->
                 <div id="kontrolPengetahuan" class="flex flex-wrap gap-4 mb-8">
                     <button onclick="window.tambahKolomPH()" class="bg-blue-50 text-blue-600 px-5 py-3 rounded-xl font-bold hover:bg-blue-100 transition-all">
                         <i class="fas fa-plus-circle mr-2"></i> Tambah PH
@@ -71,5 +74,5 @@
         `;
     };
     
-    console.log('🟢 [Penilaian Templates] READY - getPenilaianTemplate tersedia');
+    console.log('🟢 [Penilaian Templates] READY - getPenilaianTemplate tersedia + Keterampilan Tab');
 })();
