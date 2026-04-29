@@ -1,25 +1,27 @@
 /**
  * PENILAIAN UTILS - Shared helpers
  * ✅ Pure functions, no side effects
+ * ✅ UPDATED: Support keterampilan aspect (same formula as pengetahuan)
  */
 
 /**
- * Calculate NA (Nilai Akhir)
+ * Calculate NA (Nilai Akhir) - Reusable for Pengetahuan & Keterampilan
  * Formula: (avg(PH) × 2 + STS + SAS) / 4, rounded
  */
-export function hitungNA(sIdx, jumlahPH, doc) {
+export function hitungNA(sIdx, jumlahPH, doc, prefix = '') {
+  // ✅ NEW: prefix allows reuse for 'keterampilan' view (e.g., 'keterampilan_')
   let totalPH = 0;
   for (let i = 0; i < jumlahPH; i++) {
-    const el = doc.getElementById(`ph_${sIdx}_${i}`);
+    const el = doc.getElementById(`${prefix}ph_${sIdx}_${i}`);
     if (el) totalPH += parseFloat(el.value) || 0;
   }
   
   const rPH = jumlahPH > 0 ? totalPH / jumlahPH : 0;
-  const sts = parseFloat(doc.getElementById(`sts_${sIdx}`)?.value || 0);
-  const sas = parseFloat(doc.getElementById(`sas_${sIdx}`)?.value || 0);
+  const sts = parseFloat(doc.getElementById(`${prefix}sts_${sIdx}`)?.value || 0);
+  const sas = parseFloat(doc.getElementById(`${prefix}sas_${sIdx}`)?.value || 0);
   const na = Math.round((rPH * 2 + sts + sas) / 4);
   
-  const elNa = doc.getElementById(`na_${sIdx}`);
+  const elNa = doc.getElementById(`${prefix}na_${sIdx}`);
   
   return { na, elNa };
 }
@@ -71,4 +73,4 @@ export function showToast(message, type = 'info') {
   }, 3000);
 }
 
-console.log('✅ [Penilaian Utils] Loaded');
+console.log('✅ [Penilaian Utils] Loaded + Keterampilan Support');
