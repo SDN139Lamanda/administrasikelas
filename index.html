@@ -410,62 +410,52 @@
         });
     </script>
 
-    <!-- ✅ NEW: FETCH RUNNING TEXT FROM FIREBASE (Lazy Load) -->
-    <script type="module">
-      console.log('🔴 [Running Text] Script START');
+<!-- ✅ PAPAN INFO BERJALAN - Realtime dari announcements/current -->
+<script type="module">
+  console.log('🔴 [Info Board] Script START');
+  
+  import { db, doc, onSnapshot } from './modules/firebase-config.js';
+  
+  const container = document.getElementById('running-text-container');
+  const textEl = document.getElementById('running-text');
+  
+  // ✅ Realtime listener ke announcements/current sesuai rules kamu
+  const unsub = onSnapshot(doc(db, 'announcements', 'current'), (snap) => {
+    if (!snap.exists()) {
+      container.classList.add('hidden');
+      document.body.classList.remove('has-info-bar');
+      console.log('ℹ️ [Info Board] Document tidak ada');
+      return;
+    }
+    
+    const data = snap.data();
+    
+    // ✅ Sesuaikan dengan field di rules: teks & aktif
+    if (data.aktif && data.teks) {
+      // Escape HTML biar aman dari XSS
+      const safeText = data.teks
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
       
-      async function loadAnnouncements() {
-        try {
-          // Lazy import Firebase config
-          const { db, collection, query, where, orderBy, limit, getDocs } = await import('./modules/firebase-config.js');
-          
-          // Fetch ONLY 1 active announcement
-          const q = query(
-            collection(db, 'announcements'),
-            where('isActive', '==', true),
-            orderBy('createdAt', 'desc'),
-            limit(1)
-          );
-          
-          const snapshot = await getDocs(q);
-          const container = document.getElementById('running-text-container');
-          const textEl = document.getElementById('running-text');
-          
-          if (!snapshot.empty) {
-            const doc = snapshot.docs[0].data();
-            // Escape HTML to prevent XSS
-            const safeText = doc.text
-              .replace(/&/g, '&amp;')
-              .replace(/</g, '&lt;')
-              .replace(/>/g, '&gt;')
-              .replace(/"/g, '&quot;')
-              .replace(/'/g, '&#039;');
-            
-            textEl.textContent = safeText;
-            container.classList.remove('hidden');
-            console.log('✅ [Running Text] Announcement loaded');
-          } else {
-            // Per spec: hide if no active announcement
-            container.classList.add('hidden');
-            console.log('ℹ️ [Running Text] No active announcement');
-          }
-        } catch (err) {
-          console.warn('⚠️ [Running Text] Load failed:', err.message);
-          // Fail silently: hide container
-          document.getElementById('running-text-container')?.classList.add('hidden');
-        }
-      }
-      
-      // Load when DOM ready
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', loadAnnouncements);
-      } else {
-        loadAnnouncements();
-      }
-      
-      console.log('🟢 [Running Text] READY — Lazy Load + Hover Pause');
-    </script>
-    <!-- ✅ END NEW: Running Text Firebase Fetch -->
-
+      textEl.textContent = safeText;
+      container.classList.remove('hidden');
+      document.body.classList.add('has-info-bar');
+      console.log('✅ [Info Board] Aktif:', data.teks);
+    } else {
+      container.classList.add('hidden');
+      document.body.classList.remove('has-info-bar');
+      console.log('ℹ️ [Info Board] Nonaktif');
+    }
+  }, (err) => {
+    console.error('❌ [Info Board] Error:', err);
+    container.classList.add('hidden');
+  });
+  
+  console.log('🟢 [Info Board] READY - Realtime onSnapshot');
+</script>
+<!-- ✅ END: Papan Info -->
 </body>
 </html>
