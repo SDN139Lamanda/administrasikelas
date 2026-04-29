@@ -1,70 +1,76 @@
 /**
- * PENILAIAN STORAGE - Reuse adm-kelas storage pattern
- * ✅ All object syntax validated - no unexpected tokens
+ * PENILAIAN UTILS - Shared helpers
+ * ✅ Pure functions, no side effects
+ * ✅ UPDATED: Support keterampilan aspect (same formula as pengetahuan)
  */
 
-import { storage as admStorage } from '../adm-kelas/storage.js';
-
-export const penilaianStorage = {
-  /**
-   * Load grades for a class
-   * Collection: 'penilaian' (separate from 'classes')
-   */
-  loadGrades: async function(classId) {
-    try {
-      const { auth, db, collection, query, where, getDocs } = await import('../firebase-config.js');
-      
-      // Set userId for consistency
-      admStorage.setUserId(auth.currentUser?.uid || null);
-      
-      const q = query(
-        collection(db, 'penilaian'),
-        where('classId', '==', classId),
-        where('userId', '==', auth.currentUser?.uid)
-      );
-      
-      const snapshot = await getDocs(q, { source: 'server' });
-      
-      if (!snapshot.empty) {
-        return snapshot.docs[0].data();
-      }
-      
-      // ✅ RETURN DENGAN SYNTAX VALID:
-      return { meta: { jumlahPH: 1 }, data: {} };
-      
-    } catch (e) {
-      console.error('❌ [PenilaianStorage] loadGrades error:', e);
-      // ✅ RETURN DENGAN SYNTAX VALID:
-      return { meta: { jumlahPH: 1 }, data: {} };
-    }
-  },
-  
-  /**
-   * Save grades for a class
-   */
-  saveGrades: async function(classId, payload) {
-    try {
-      const { auth, db, doc: docRef, setDoc, serverTimestamp } = await import('../firebase-config.js');
-      
-      admStorage.setUserId(auth.currentUser?.uid || null);
-      
-      const ref = docRef(db, 'penilaian', classId);
-      
-      await setDoc(ref, {
-        ...payload,
-        classId,
-        userId: auth.currentUser?.uid,
-        updatedAt: serverTimestamp()
-      }, { merge: true });
-      
-      console.log('✅ [PenilaianStorage] Grades saved:', classId);
-      return true;
-      
-    } catch (e) {
-      console.error('❌ [PenilaianStorage] saveGrades error:', e);
-      throw e;
-    }
+/**
+ * Calculate NA (Nilai Akhir) - Reusable for Pengetahuan & Keterampilan
+ * Formula: (avg(PH) × 2 + STS + SAS) / 4, rounded
+ */
+export function hitungNA(sIdx, jumlahPH, doc, prefix = '') {
+  // ✅ NEW: prefix allows reuse for 'keterampilan' view (e.g., 'keterampilan_')
+  let totalPH = 0;
+  for (let i = 0; i < jumlahPH; i++) {
+    const el = doc.getElementById(`${prefix}ph_${sIdx}_${i}`);
+    if (el) totalPH += parseFloat(el.value) || 0;
   }
-};
+  
+  const rPH = jumlahPH > 0 ? totalPH / jumlahPH : 0;
+  const sts = parseFloat(doc.getElementById(`${prefix}sts_${sIdx}`)?.value || 0);
+  const sas = parseFloat(doc.getElementById(`${prefix}sas_${sIdx}`)?.value || 0);
+  const na = Math.round((rPH * 2 + sts + sas) / 4);
+  
+  const elNa = doc.getElementById(`${prefix}na_${sIdx}`);
+  
+  return { na, elNa };
+}
 
-console.log('✅ [PenilaianStorage] Loaded - Syntax Validated');
+/**
+ * Format nilai untuk display
+ */
+export function formatNilai(nilai, type = 'number') {
+  if (type === 'number') {
+    return nilai != null ? Math.round(nilai) : '-';
+  }
+  if (type === 'sikap') {
+    const labels = { A: 'Sangat Baik', B: 'Baik', C: 'Cukup', D: 'Kurang' };
+    return `${nilai} (${labels[nilai] || '-'})`;
+  }
+  return String(nilai);
+}
+
+/**
+ * Toast notification helper
+ */
+export function showToast(message, type = 'info') {
+  const colors = {
+    success: 'bg-emerald-600',
+    error: 'bg-rose-600', 
+    info: 'bg-blue-600',
+    warning: 'bg-amber-600'
+  };
+  const icons = {
+    success: 'fa-check-circle',
+    error: 'fa-exclamation-circle',
+    info: 'fa-info-circle',
+    warning: 'fa-exclamation-triangle'
+  };
+  
+  // Remove existing toasts
+  document.querySelectorAll('.penilaian-toast').forEach(t => t.remove());
+  
+  const toast = document.createElement('div');
+  toast.className = `penilaian-toast fixed bottom-4 right-4 ${colors[type] || colors.info} text-white px-4 py-3 rounded-xl shadow-lg z-50 animate-fade-in flex items-center gap-2`;
+  toast.innerHTML = `<i class="fas ${icons[type] || icons.info}"></i><span>${message}</span>`;
+  
+  document.body.appendChild(toast);
+  
+  // Auto-remove after 3s
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    setTimeout(() => toast.remove(), 300);
+  }, 3000);
+}
+
+console.log('✅ [Penilaian Utils] Loaded + Keterampilan Support');
