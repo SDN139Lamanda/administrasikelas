@@ -226,10 +226,13 @@
                         <!-- ✅ UPDATED: Fitur 7 - Prota & Promes Generator -->
                         <button class="subfeature-card p-3 border border-gray-200 rounded-lg text-left hover:bg-gray-50" onclick="loadSubFeature('protsma')"><div class="flex items-center gap-2 mb-1"><i class="fas fa-calendar-alt text-cyan-500"></i><span class="font-medium text-sm">Prota & Promes</span></div><p class="text-xs text-gray-500">Generator dengan AI</p></button>
                         
-                        <!-- ✅ UPDATED: Fitur 8 - Pembuat Soal Generator (Coming Soon #2) -->
+                        <!-- ✅ UPDATED: Fitur 8 - Pembuat Soal Generator -->
                         <button class="subfeature-card p-3 border border-gray-200 rounded-lg text-left hover:bg-gray-50" onclick="loadSubFeature('pembuat-soal')"><div class="flex items-center gap-2 mb-1"><i class="fas fa-file-alt text-green-500"></i><span class="font-medium text-sm">Pembuat Soal</span></div><p class="text-xs text-gray-500">Generator dengan AI</p></button>
                         
-                        <button class="subfeature-card coming-soon p-3 border border-gray-200 rounded-lg text-left" disabled><div class="flex items-center gap-2 mb-1"><i class="fas fa-hourglass-half text-gray-400"></i><span class="font-medium text-sm text-gray-500">Fitur 9</span></div><p class="text-xs text-gray-400">Segera hadir</p></button>
+                        <!-- ✅ NEW: Fitur 9 - Tanya AI Guru (AKTIF) -->
+                        <button class="subfeature-card p-3 border border-gray-200 rounded-lg text-left hover:bg-gray-50" onclick="loadSubFeature('tanya-ai-guru')"><div class="flex items-center gap-2 mb-1"><i class="fas fa-brain text-blue-500"></i><span class="font-medium text-sm">Tanya AI Guru</span></div><p class="text-xs text-gray-500">Konsultasi pedagogis</p></button>
+                        
+                        <!-- ✅ Slot 10 masih Coming Soon -->
                         <button class="subfeature-card coming-soon p-3 border border-gray-200 rounded-lg text-left" disabled><div class="flex items-center gap-2 mb-1"><i class="fas fa-hourglass-half text-gray-400"></i><span class="font-medium text-sm text-gray-500">Fitur 10</span></div><p class="text-xs text-gray-400">Segera hadir</p></button>
                     </div>
                 </div>
@@ -636,15 +639,17 @@
             
             (window.hideMainSectionsForSubFeature || hideMainSectionsForSubFeatureFallback)();
             
+            // ✅ NEW: Tanya AI Guru uses #module-container
             const containerMap = {
                 'adm-kelas': 'module-container',
                 'adm-pembelajaran': 'module-container', 
                 'penilaian': 'penilaian-container',
                 'refleksi': 'refleksi-container',
-                'asisten-modul': 'module-container', // ✅ FIX: asisten-modul uses #module-container
+                'asisten-modul': 'module-container',
                 'cita-generator': 'cita-container',
                 'protsma': 'protsma-container',
-                'pembuat-soal': 'pembuat-soal-container'  // ✅ NEW: Pembuat Soal
+                'pembuat-soal': 'pembuat-soal-container',
+                'tanya-ai-guru': 'module-container'  // ✅ NEW: Tanya AI Guru
             };
             const targetContainer = document.getElementById(containerMap[subfitur] || 'module-container');
             if (targetContainer) targetContainer.classList.remove('hidden');
@@ -655,7 +660,6 @@
                     case 'adm-pembelajaran': await window.safeRenderAdmPembelajaran(); break;
                     case 'penilaian': await window.safeRenderPenilaian(); break;
                     case 'refleksi': await window.safeRenderRefleksiForm(); break;
-                    // ✅ FIX: Use correct function name renderGeneratorModule (not renderAsistenModul)
                     case 'asisten-modul':
                         if (typeof window.renderGeneratorModule === 'function') await window.renderGeneratorModule();
                         else { const m = await import('./modules/asisten-modul.js'); (m.renderGeneratorModule || m.default)?.(); }
@@ -664,7 +668,6 @@
                         if (typeof window.renderCitaGenerator === 'function') await window.renderCitaGenerator(j, k);
                         else { const m = await import('./modules/cta-generator.js'); (m.renderCitaGenerator || m.default)?.(j, k); }
                         break;
-                    // ✅ NEW: Prota & Promes case
                     case 'protsma':
                         if (typeof window.renderProtsma === 'function') {
                             await window.renderProtsma();
@@ -673,13 +676,20 @@
                             (m.renderProtsma || m.default)?.();
                         }
                         break;
-                    // ✅ NEW: Pembuat Soal case
                     case 'pembuat-soal':
                         if (typeof window.renderPembuatSoal === 'function') {
                             await window.renderPembuatSoal();
                         } else {
                             const m = await import('./modules/pembuat-soal/pembuat-soal.js');
                             (m.renderPembuatSoal || m.default)?.();
+                        }
+                        break;
+                    // ✅ NEW: Tanya AI Guru case
+                    case 'tanya-ai-guru':
+                        if (typeof window.renderTanyaAIGuru === 'function') await window.renderTanyaAIGuru();
+                        else {
+                            const m = await import('./modules/tanya-ai-guru.js');
+                            (m.renderTanyaAIGuru || m.default)?.();
                         }
                         break;
                     default: 
@@ -797,6 +807,8 @@
     <script type="module" src="modules/penilaian/penilaian-template.js"></script>
     <script type="module" src="modules/penilaian/penilaian-storage.js"></script>
     <script type="module" src="modules/penilaian/penilaian.js"></script>
+    <!-- ✅ NEW: Tanya AI Guru Module Import -->
+    <script type="module" src="modules/tanya-ai-guru.js"></script>
     
     <!-- ✅ ADMIN WIDGET -->
     <button id="admin-widget-btn" class="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-gradient-to-r from-purple-600 to-cyan-600 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 flex items-center justify-center z-40 hidden" aria-label="Admin Approval Panel"><i class="fas fa-crown text-xl"></i></button>
