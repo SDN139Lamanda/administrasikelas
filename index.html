@@ -25,6 +25,23 @@
     
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- ✅ FIX: CSS untuk running text container (override styles.css yang tidak match) -->
+    <style>
+      /* Running text animation - match dengan struktur HTML saat ini */
+      @keyframes running-text { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
+      .animate-running-text { 
+        display: inline-block; 
+        animation: running-text 30s linear infinite; 
+        will-change: transform; 
+      }
+      .animate-running-text:hover { animation-play-state: paused; }
+      @media (prefers-reduced-motion: reduce) { 
+        .animate-running-text { animation: none; } 
+      }
+      /* Pastikan container hidden by default, ditoggle via JS */
+      #running-text-container.hidden { display: none !important; }
+    </style>
 </head>
 <body class="bg-gray-50">
     <!-- Skip Link for Accessibility -->
@@ -57,16 +74,11 @@
         </div>
     </nav>
 
-    <!-- ✅ NEW: RUNNING TEXT / PAPAN INFORMASI (Firebase Direct) -->
+    <!-- ✅ RUNNING TEXT / PAPAN INFORMASI (Firebase Direct) -->
     <div id="running-text-container" class="w-full bg-gradient-to-r from-purple-50 to-cyan-50 border-b border-purple-200 py-3 overflow-hidden hidden">
       <div id="running-text" class="whitespace-nowrap animate-running-text hover:[animation-play-state:paused] px-4 text-sm text-gray-700 font-medium"></div>
     </div>
-    <style>
-      @keyframes running-text { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
-      .animate-running-text { display: inline-block; animation: running-text 30s linear infinite; will-change: transform; }
-      @media (prefers-reduced-motion: reduce) { .animate-running-text { animation: none; } }
-    </style>
-    <!-- ✅ END NEW: Running Text -->
+    <!-- ✅ END: Running Text Container -->
 
     <!-- Main Content Wrapper -->
     <main id="main-content">
@@ -410,52 +422,66 @@
         });
     </script>
 
-<!-- ✅ PAPAN INFO BERJALAN - Realtime dari announcements/current -->
-<script type="module">
-  console.log('🔴 [Info Board] Script START');
-  
-  import { db, doc, onSnapshot } from './modules/firebase-config.js';
-  
-  const container = document.getElementById('running-text-container');
-  const textEl = document.getElementById('running-text');
-  
-  // ✅ Realtime listener ke announcements/current sesuai rules kamu
-  const unsub = onSnapshot(doc(db, 'announcements', 'current'), (snap) => {
-    if (!snap.exists()) {
-      container.classList.add('hidden');
-      document.body.classList.remove('has-info-bar');
-      console.log('ℹ️ [Info Board] Document tidak ada');
-      return;
-    }
-    
-    const data = snap.data();
-    
-    // ✅ Sesuaikan dengan field di rules: teks & aktif
-    if (data.aktif && data.teks) {
-      // Escape HTML biar aman dari XSS
-      const safeText = data.teks
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
+    <!-- ✅ FIX: PAPAN INFO BERJALAN - Realtime dari announcements/current -->
+    <script type="module">
+      console.log('🔴 [Info Board] Script START');
       
-      textEl.textContent = safeText;
-      container.classList.remove('hidden');
-      document.body.classList.add('has-info-bar');
-      console.log('✅ [Info Board] Aktif:', data.teks);
-    } else {
-      container.classList.add('hidden');
-      document.body.classList.remove('has-info-bar');
-      console.log('ℹ️ [Info Board] Nonaktif');
-    }
-  }, (err) => {
-    console.error('❌ [Info Board] Error:', err);
-    container.classList.add('hidden');
-  });
-  
-  console.log('🟢 [Info Board] READY - Realtime onSnapshot');
-</script>
-<!-- ✅ END: Papan Info -->
+      // ✅ Tunggu Firebase init sebelum fetch
+      async function initRunningText() {
+        try {
+          // Import Firebase
+          const { db, doc, onSnapshot } = await import('./modules/firebase-config.js');
+          
+          const container = document.getElementById('running-text-container');
+          const textEl = document.getElementById('running-text');
+          
+          // ✅ Listen ke document FIXED ID 'current' dengan field sesuai spec
+          const unsub = onSnapshot(doc(db, 'announcements', 'current'), (snap) => {
+            if (!snap.exists()) {
+              container.classList.add('hidden');
+              console.log('ℹ️ [Info Board] Document "current" tidak ada');
+              return;
+            }
+            
+            const data = snap.data();
+            
+            // ✅ Field name HARUS: aktif (boolean) & teks (string)
+            if (data.aktif === true && data.teks && typeof data.teks === 'string') {
+              // Escape HTML untuk keamanan XSS
+              const safeText = data.teks
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+              
+              textEl.textContent = safeText;
+              container.classList.remove('hidden');
+              console.log('✅ [Info Board] Aktif:', safeText.substring(0, 50) + '...');
+            } else {
+              container.classList.add('hidden');
+              console.log('ℹ️ [Info Board] Nonaktif atau field tidak valid');
+            }
+          }, (err) => {
+            console.error('❌ [Info Board] Firestore error:', err);
+            container.classList.add('hidden');
+          });
+          
+          console.log('🟢 [Info Board] READY - Realtime listener active');
+          
+        } catch (err) {
+          console.error('❌ [Info Board] Init failed:', err);
+        }
+      }
+      
+      // Jalankan setelah DOM ready
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initRunningText);
+      } else {
+        initRunningText();
+      }
+    </script>
+    <!-- ✅ END: Fixed Running Text Script -->
+
 </body>
 </html>
