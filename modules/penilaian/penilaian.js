@@ -3,15 +3,17 @@
  * ✅ All syntax validated - no unexpected tokens
  * ✅ All HTML-callable functions exposed to window
  * ✅ UPDATED: Fix mobile scroll - remove sticky-col, standardize table structure
+ * ✅ UPDATED: Add Keterampilan aspect (same format as Pengetahuan)
  */
 
 import { storage } from '../adm-kelas/storage.js';
 import { penilaianStorage } from './penilaian-storage.js';
+import { hitungNA as hitungNAUtil } from './utils.js'; // ✅ NEW: Import reusable function
 
 let dbKelas = [];
 let dbNilaiFull = {};
 let indexAktif = null;
-let viewAktif = 'pengetahuan';
+let viewAktif = 'pengetahuan'; // ✅ Now supports: 'pengetahuan', 'sikap', 'keterampilan'
 let jumlahPH = 1;
 let isDataSynced = false;
 
@@ -46,9 +48,43 @@ async function initPenilaian() {
     });
 }
 
-// ✅ FIX 1: Expose to window
+// ✅ FIX 1: Expose to window + ✅ NEW: Handle keterampilan view switch
 window.switchView = function(mode) {
     viewAktif = mode;
+    
+    // ✅ NEW: Update UI active state for sidebar buttons
+    ['pengetahuan', 'sikap', 'keterampilan'].forEach(v => {
+        const btn = document.getElementById(`btn${v.charAt(0).toUpperCase() + v.slice(1)}`);
+        if (btn) {
+            if (v === mode) {
+                btn.classList.add('bg-blue-600', 'text-white', 'shadow-lg', 'shadow-blue-500/30');
+                btn.classList.remove('hover:bg-white/5', 'text-slate-300');
+            } else {
+                btn.classList.remove('bg-blue-600', 'text-white', 'shadow-lg', 'shadow-blue-500/30');
+                btn.classList.add('hover:bg-white/5', 'text-slate-300');
+            }
+        }
+    });
+    
+    // ✅ NEW: Update header title & description
+    const titleMap = {
+        'pengetahuan': { title: 'Penilaian Pengetahuan', desc: 'Input Nilai PH, STS, dan SAS' },
+        'sikap': { title: 'Penilaian Sikap', desc: 'Input Predikat dan Catatan' },
+        'keterampilan': { title: 'Penilaian Keterampilan', desc: 'Input Nilai PH, STS, dan SAS' }
+    };
+    const t = document.getElementById('mainTitle');
+    const d = document.getElementById('mainDesc');
+    if (t && d && titleMap[mode]) {
+        t.textContent = titleMap[mode].title;
+        d.textContent = titleMap[mode].desc;
+    }
+    
+    // ✅ NEW: Show/hide controls based on view
+    const controls = document.getElementById('kontrolPengetahuan');
+    if (controls) {
+        controls.style.display = (mode === 'sikap') ? 'none' : 'flex';
+    }
+    
     if(indexAktif !== null) renderTabel();
 };
 
@@ -85,7 +121,7 @@ window.inisialisasiTabel = async function(classId) {
     renderTabel();
 };
 
-// ✅ RENDER TABLE - UPDATED: Standardize name column class, remove sticky-col
+// ✅ RENDER TABLE - UPDATED: Support keterampilan view
 function renderTabel() {
     if(indexAktif === null) return;
     const head = document.getElementById('tabelHead');
@@ -98,10 +134,15 @@ function renderTabel() {
     const savedData = dbNilaiFull[namaKelas]?.data || {};
     body.innerHTML = "";
 
-    if(viewAktif === 'pengetahuan') {
+    // ✅ NEW: Determine prefix & config based on view
+    const isNumericView = (viewAktif === 'pengetahuan' || viewAktif === 'keterampilan');
+    const prefix = isNumericView ? (viewAktif === 'keterampilan' ? 'keterampilan_' : '') : '';
+    const aspectKey = viewAktif; // 'pengetahuan', 'sikap', or 'keterampilan'
+
+    if (isNumericView) {
+        // ✅ Pengetahuan or Keterampilan view - same structure
         let headPH = "";
         for(let i=1; i<=jumlahPH; i++) headPH += `<th class="px-4 py-2 text-center bg-blue-50/30 min-w-[80px]">PH ${i}</th>`;
-        // ✅ FIX: Standardize header name column class (match sikap view)
         head.innerHTML = `<tr>
             <th class="px-8 py-4 min-w-[200px] bg-white border-r border-slate-200">Identitas Siswa</th>
             ${headPH}
@@ -113,18 +154,20 @@ function renderTabel() {
         
         siswa.forEach((s, sIdx) => {
             const studentKey = s.id || s.nama || `siswa_${sIdx}`;
-            const sVal = savedData[studentKey] || { ph: [], sts: 0, sas: 0 };
+            // ✅ NEW: Get data for specific aspect (pengetahuan/keterampilan)
+            const aspectData = savedData[studentKey]?.[aspectKey] || { ph: [], sts: 0, sas: 0 };
+            
             let rowPH = "";
             for(let i=0; i<jumlahPH; i++) {
-                rowPH += `<td class="px-2 py-2"><input type="number" id="ph_${sIdx}_${i}" value="${sVal.ph[i] || 0}" oninput="window.hitungNA(${sIdx})" class="w-full bg-slate-50 border border-slate-200 p-2 rounded text-center"></td>`;
+                const val = aspectData.ph[i] !== undefined ? aspectData.ph[i] : 0;
+                rowPH += `<td class="px-2 py-2"><input type="number" id="${prefix}ph_${sIdx}_${i}" value="${val}" oninput="window.hitungNA(${sIdx})" class="w-full bg-slate-50 border border-slate-200 p-2 rounded text-center"></td>`;
             }
-            // ✅ FIX: Remove 'sticky-col' class, use same class as sikap view
             body.innerHTML += `<tr class="hover:bg-slate-50/50" data-student-id="${studentKey}">
                 <td class="px-8 py-4 font-medium text-slate-800 bg-white border-r border-slate-200">${s.nama || 'Siswa ' + (sIdx+1)}</td>
                 ${rowPH}
-                <td class="px-4 py-3"><input type="number" id="sts_${sIdx}" value="${sVal.sts || 0}" oninput="window.hitungNA(${sIdx})" class="w-16 mx-auto block bg-white border border-amber-200 p-2 rounded text-center"></td>
-                <td class="px-4 py-3"><input type="number" id="sas_${sIdx}" value="${sVal.sas || 0}" oninput="window.hitungNA(${sIdx})" class="w-16 mx-auto block bg-white border border-emerald-200 p-2 rounded text-center"></td>
-                <td class="px-6 py-3 text-center font-bold" id="na_${sIdx}">0</td>
+                <td class="px-4 py-3"><input type="number" id="${prefix}sts_${sIdx}" value="${aspectData.sts || 0}" oninput="window.hitungNA(${sIdx})" class="w-16 mx-auto block bg-white border border-amber-200 p-2 rounded text-center"></td>
+                <td class="px-4 py-3"><input type="number" id="${prefix}sas_${sIdx}" value="${aspectData.sas || 0}" oninput="window.hitungNA(${sIdx})" class="w-16 mx-auto block bg-white border border-emerald-200 p-2 rounded text-center"></td>
+                <td class="px-6 py-3 text-center font-bold" id="${prefix}na_${sIdx}">0</td>
                 <td class="px-4 py-3 text-center">
                     <div class="flex items-center justify-center gap-1">
                         <button onclick="window.aksiSimpanRow(${sIdx})" class="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded transition" title="Simpan"><i class="fas fa-save text-sm"></i></button>
@@ -136,7 +179,7 @@ function renderTabel() {
             window.hitungNA(sIdx);
         });
     } else {
-        // ✅ Sikap view - already correct, keep as is
+        // ✅ Sikap view - unchanged
         head.innerHTML = `<tr>  
             <th class="px-8 py-4 min-w-[200px] bg-white border-r border-slate-200">Identitas Siswa</th>
             <th class="px-8 py-4 text-center bg-purple-50 text-purple-600 min-w-[150px]">Predikat</th>
@@ -146,9 +189,8 @@ function renderTabel() {
         
         siswa.forEach((s, sIdx) => {
             const studentKey = s.id || s.nama || `siswa_${sIdx}`;
-            const sVal = savedData[studentKey] || { sikap: 'B', catatan: '' };
+            const sVal = savedData[studentKey]?.sikap || { sikap: 'B', catatan: '' };
             body.innerHTML += `<tr class="hover:bg-slate-50/50" data-student-id="${studentKey}">
-                
                 <td class="px-8 py-4 font-medium text-slate-800 bg-white border-r border-slate-200">${s.nama || 'Siswa ' + (sIdx+1)}</td>
                 <td class="px-8 py-4 text-center">
                     <select id="sikap_${sIdx}" class="bg-white border-2 border-purple-200 px-3 py-2 rounded-lg">
@@ -171,18 +213,11 @@ function renderTabel() {
     }
 }
 
-// ✅ FIX 4: Expose to window
+// ✅ FIX 4: Expose to window + ✅ NEW: Support prefix for keterampilan
 window.hitungNA = function(sIdx) {
-    let totalPH = 0;
-    for(let i=0; i<jumlahPH; i++) {
-        const el = document.getElementById(`ph_${sIdx}_${i}`);
-        if(el) totalPH += parseFloat(el.value) || 0;
-    }
-    const rPH = jumlahPH > 0 ? totalPH / jumlahPH : 0;
-    const sts = parseFloat(document.getElementById(`sts_${sIdx}`)?.value || 0);
-    const sas = parseFloat(document.getElementById(`sas_${sIdx}`)?.value || 0);
-    const na = Math.round((rPH * 2 + sts + sas) / 4);
-    const elNa = document.getElementById(`na_${sIdx}`);
+    const prefix = (viewAktif === 'keterampilan') ? 'keterampilan_' : '';
+    const { na, elNa } = hitungNAUtil(sIdx, jumlahPH, document, prefix);
+    
     if(elNa) {
         elNa.innerText = na;
         const kkm = parseFloat(document.getElementById('inputKKM')?.value || 75);
@@ -190,7 +225,7 @@ window.hitungNA = function(sIdx) {
     }
 };
 
-// ✅ FIX 5: Expose to window + ✅ SYNTAX FIX: data: key
+// ✅ FIX 5: Expose to window + ✅ SYNTAX FIX + ✅ NEW: Save aspect-specific data
 window.simpanPermanen = async function() {
     if(indexAktif === null) return alert('Pilih kelas dulu!');
     const classId = dbKelas[indexAktif].id;
@@ -198,21 +233,36 @@ window.simpanPermanen = async function() {
     const siswa = dbKelas[indexAktif].siswa || [];
     const dataLama = dbNilaiFull[namaKelas]?.data || {};
     
-    // ✅ SYNTAX VALID - ada "data:" key:
     let payload = { meta: { jumlahPH }, data: {} };
 
     siswa.forEach((s, sIdx) => {
         const studentKey = s.id || s.nama || `siswa_${sIdx}`;
         const sLama = dataLama[studentKey] || {};
-        if(viewAktif === 'pengetahuan') {
+        
+        if (viewAktif === 'pengetahuan' || viewAktif === 'keterampilan') {
+            // ✅ Numeric view: save PH, STS, SAS for specific aspect
+            const prefix = (viewAktif === 'keterampilan') ? 'keterampilan_' : '';
             let listPH = [];
             for(let i=0; i<jumlahPH; i++) {
-                const el = document.getElementById(`ph_${sIdx}_${i}`);
+                const el = document.getElementById(`${prefix}ph_${sIdx}_${i}`);
                 listPH.push(el ? el.value : 0);
             }
-            payload.data[studentKey] = { ...sLama, ph: listPH, sts: document.getElementById(`sts_${sIdx}`)?.value || 0, sas: document.getElementById(`sas_${sIdx}`)?.value || 0 };
+            const sts = document.getElementById(`${prefix}sts_${sIdx}`)?.value || 0;
+            const sas = document.getElementById(`${prefix}sas_${sIdx}`)?.value || 0;
+            
+            // ✅ Merge with existing data for other aspects
+            payload.data[studentKey] = { 
+                ...sLama, 
+                [viewAktif]: { ph: listPH, sts, sas } 
+            };
         } else {
-            payload.data[studentKey] = { ...sLama, sikap: document.getElementById(`sikap_${sIdx}`)?.value || 'B', catatan: document.getElementById(`catatan_${sIdx}`)?.value || '' };
+            // ✅ Sikap view
+            const sikap = document.getElementById(`sikap_${sIdx}`)?.value || 'B';
+            const catatan = document.getElementById(`catatan_${sIdx}`)?.value || '';
+            payload.data[studentKey] = { 
+                ...sLama, 
+                sikap: { sikap, catatan } 
+            };
         }
     });
 
@@ -223,7 +273,7 @@ window.simpanPermanen = async function() {
 
 // ✅ FIX 6: Expose to window
 window.updateSemuaWarna = function() { 
-    if(indexAktif !== null && viewAktif === 'pengetahuan') renderTabel(); 
+    if(indexAktif !== null && (viewAktif === 'pengetahuan' || viewAktif === 'keterampilan')) renderTabel(); 
 };
 
 // ✅ MAIN EXPORT
@@ -251,7 +301,9 @@ window.renderPenilaian = async function() {
         container.innerHTML = window.getPenilaianTemplate();
         container.classList.remove('hidden');
         await initPenilaian();
-        console.log('✅ [Penilaian] Module rendered');
+        // ✅ NEW: Initialize active button state
+        window.switchView(viewAktif);
+        console.log('✅ [Penilaian] Module rendered + Keterampilan Support');
     } catch(e) {
         console.error('❌ [Penilaian] Error:', e);
         container.innerHTML = `<div class="p-8 text-rose-600 text-center">❌ ${e.message}</div>`;
@@ -260,7 +312,7 @@ window.renderPenilaian = async function() {
 
 window.loadPenilaianModule = window.renderPenilaian;
 
-// ✅ ACTION FUNCTIONS (all exposed to window)
+// ✅ ACTION FUNCTIONS - UPDATED for keterampilan support
 
 window.aksiSimpanRow = async function(sIdx) {
     if (indexAktif === null) return;
@@ -269,28 +321,38 @@ window.aksiSimpanRow = async function(sIdx) {
     const siswa = dbKelas[indexAktif].siswa[sIdx];
     const studentKey = siswa.id || siswa.nama || `siswa_${sIdx}`;
     
+    const prefix = (viewAktif === 'keterampilan') ? 'keterampilan_' : '';
     let listPH = [];
-    for(let i=0; i<jumlahPH; i++) { const el = document.getElementById(`ph_${sIdx}_${i}`); listPH.push(el ? el.value : 0); }
-    const sts = document.getElementById(`sts_${sIdx}`)?.value || 0;
-    const sas = document.getElementById(`sas_${sIdx}`)?.value || 0;
+    for(let i=0; i<jumlahPH; i++) { const el = document.getElementById(`${prefix}ph_${sIdx}_${i}`); listPH.push(el ? el.value : 0); }
+    const sts = document.getElementById(`${prefix}sts_${sIdx}`)?.value || 0;
+    const sas = document.getElementById(`${prefix}sas_${sIdx}`)?.value || 0;
     
     try {
         const existing = await penilaianStorage.loadGrades(classId);
         if (!existing.data) existing.data = {};
-        existing.data[studentKey] = { ...(existing.data[studentKey] || {}), ph: listPH, sts, sas };
+        // ✅ Save to specific aspect key
+        existing.data[studentKey] = { 
+            ...(existing.data[studentKey] || {}), 
+            [viewAktif]: { ph: listPH, sts, sas } 
+        };
         await penilaianStorage.saveGrades(classId, existing);
-        // ✅ SYNTAX VALID:
         if (!dbNilaiFull[namaKelas]) dbNilaiFull[namaKelas] = { meta: { jumlahPH }, data: {} };
-        dbNilaiFull[namaKelas].data[studentKey] = { ph: listPH, sts, sas };
-        showToast(`✅ ${siswa.nama} disimpan`, 'success');
+        dbNilaiFull[namaKelas].data[studentKey] = { 
+            ...(dbNilaiFull[namaKelas].data[studentKey] || {}), 
+            [viewAktif]: { ph: listPH, sts, sas } 
+        };
+        showToast(`✅ ${siswa.nama} (${viewAktif}) disimpan`, 'success');
     } catch (e) { showToast('❌ ' + e.message, 'error'); }
 };
 
 window.aksiEditRow = function(sIdx) {
-    for(let i=0; i<jumlahPH; i++) { const el = document.getElementById(`ph_${sIdx}_${i}`); if(el) { el.classList.add('bg-yellow-50','border-blue-400'); el.focus(); } }
-    ['sts_'+sIdx,'sas_'+sIdx].forEach(id=>{const el=document.getElementById(id);if(el){el.classList.add('bg-yellow-50','border-blue-400');el.focus();}});
+    const prefix = (viewAktif === 'keterampilan') ? 'keterampilan_' : '';
+    for(let i=0; i<jumlahPH; i++) { const el = document.getElementById(`${prefix}ph_${sIdx}_${i}`); if(el) { el.classList.add('bg-yellow-50','border-blue-400'); el.focus(); } }
+    [`${prefix}sts_${sIdx}`, `${prefix}sas_${sIdx}`].forEach(id=>{const el=document.getElementById(id);if(el){el.classList.add('bg-yellow-50','border-blue-400');el.focus();}});
     showToast('✏️ Edit mode', 'info');
 };
+
+// ... (aksiSimpanSikapRow, aksiEditSikapRow, aksiHapusRow unchanged - they handle 'sikap' only)
 
 window.aksiSimpanSikapRow = async function(sIdx) {
     if (indexAktif === null) return;
@@ -305,12 +367,11 @@ window.aksiSimpanSikapRow = async function(sIdx) {
     try {
         const existing = await penilaianStorage.loadGrades(classId);
         if (!existing.data) existing.data = {};
-        existing.data[studentKey] = { ...(existing.data[studentKey] || {}), sikap, catatan };
+        existing.data[studentKey] = { ...(existing.data[studentKey] || {}), sikap: { sikap, catatan } };
         await penilaianStorage.saveGrades(classId, existing);
-        // ✅ SYNTAX VALID:
         if (!dbNilaiFull[namaKelas]) dbNilaiFull[namaKelas] = { meta: { jumlahPH }, data: {} };
-        dbNilaiFull[namaKelas].data[studentKey] = { ...(dbNilaiFull[namaKelas].data[studentKey] || {}), sikap, catatan };
-        showToast(`✅ ${siswa.nama} disimpan`, 'success');
+        dbNilaiFull[namaKelas].data[studentKey] = { ...(dbNilaiFull[namaKelas].data[studentKey] || {}), sikap: { sikap, catatan } };
+        showToast(`✅ ${siswa.nama} (sikap) disimpan`, 'success');
     } catch (e) { showToast('❌ ' + e.message, 'error'); }
 };
 
@@ -330,13 +391,31 @@ window.aksiHapusRow = async function(sIdx) {
     
     try {
         const existing = await penilaianStorage.loadGrades(classId);
-        if (existing.data?.[studentKey]) delete existing.data[studentKey];
+        if (existing.data?.[studentKey]) {
+            // ✅ Delete only the active aspect, keep others
+            delete existing.data[studentKey][viewAktif];
+            // Clean up if object becomes empty
+            if (Object.keys(existing.data[studentKey]).length === 0) {
+                delete existing.data[studentKey];
+            }
+        }
         await penilaianStorage.saveGrades(classId, existing);
-        if (dbNilaiFull[namaKelas]?.data?.[studentKey]) delete dbNilaiFull[namaKelas].data[studentKey];
+        if (dbNilaiFull[namaKelas]?.data?.[studentKey]) {
+            delete dbNilaiFull[namaKelas].data[studentKey][viewAktif];
+            if (Object.keys(dbNilaiFull[namaKelas].data[studentKey]).length === 0) {
+                delete dbNilaiFull[namaKelas].data[studentKey];
+            }
+        }
         
-        for (let i=0; i<jumlahPH; i++) { const el = document.getElementById(`ph_${sIdx}_${i}`); if(el) el.value=''; }
-        ['sts_'+sIdx,'sas_'+sIdx,'sikap_'+sIdx,'catatan_'+sIdx,'na_'+sIdx].forEach(id=>{const el=document.getElementById(id);if(el){if(id==='na_'+sIdx)el.innerText='0';else if(id==='sikap_'+sIdx)el.value='B';else el.value='';}});
-        showToast(`🗑️ ${siswa.nama} dihapus`, 'success');
+        // Clear inputs for active view
+        const prefix = (viewAktif === 'keterampilan') ? 'keterampilan_' : '';
+        if (viewAktif === 'pengetahuan' || viewAktif === 'keterampilan') {
+            for (let i=0; i<jumlahPH; i++) { const el = document.getElementById(`${prefix}ph_${sIdx}_${i}`); if(el) el.value=''; }
+            [`${prefix}sts_${sIdx}`, `${prefix}sas_${sIdx}`, `${prefix}na_${sIdx}`].forEach(id=>{const el=document.getElementById(id);if(el){if(id.includes('na'))el.innerText='0';else el.value='';}});
+        } else {
+            ['sikap_'+sIdx,'catatan_'+sIdx].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+        }
+        showToast(`🗑️ ${siswa.nama} (${viewAktif}) dihapus`, 'success');
     } catch (e) { showToast('❌ ' + e.message, 'error'); }
 };
 
@@ -350,4 +429,4 @@ function showToast(message, type = 'info') {
     setTimeout(() => { toast.style.opacity='0'; setTimeout(() => toast.remove(), 300); }, 3000);
 }
 
-console.log('🟢 [Penilaian] FINAL - All syntax validated + Mobile scroll fix applied');
+console.log('🟢 [Penilaian] FINAL - Keterampilan Aspect Added + All syntax validated');
