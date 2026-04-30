@@ -218,6 +218,13 @@ window.renderRefleksiForm = function() {
                   <option value="4">Kelas 4</option>
                   <option value="5">Kelas 5</option>
                   <option value="6">Kelas 6</option>
+                  <option value="7">Kelas 7</option>
+                  <option value="8">Kelas 8</option>
+                  <option value="9">Kelas 9</option>
+                  <option value="10">Kelas 10</option>
+                  <option value="11">Kelas 11</option>
+                  <option value="12">Kelas 12</option>
+                   
                 </select>
               </div>
               <div>
