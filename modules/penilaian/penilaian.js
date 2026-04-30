@@ -1,6 +1,6 @@
 /**
- * PENILAIAN MODULE - MINIMAL WORKING VERSION
- * ✅ Syntax validated - no unexpected tokens
+ * PENILAIAN MODULE - SUPER MINIMAL VERSION
+ * ✅ Validated via JS parser - no syntax errors
  * ✅ All functions exposed to window
  * ✅ Keterampilan aspect support
  */
@@ -149,8 +149,8 @@ window.simpanPermanen = async function() {
   const siswa = dbKelas[indexAktif].siswa || [];
   const lama = dbNilaiFull[nm]?.data || {};
   
-  // ✅ VALID SYNTAX: data: {}
-  let payload = { meta: { jumlahPH }, data: {} };
+  // ✅ BUILD OBJECT STEP-BY-STEP (avoid complex literal)
+  let payload = Object.assign({}, { meta: { jumlahPH: jumlahPH } }, { data: {} });
   
   siswa.forEach((s, i) => {
     const sk = s.id || s.nama || `s_${i}`;
@@ -162,23 +162,15 @@ window.simpanPermanen = async function() {
         const el = document.getElementById(`${prefix}ph_${i}_${j}`); 
         ph.push(el ? el.value : 0); 
       }
-      // ✅ VALID: [viewAktif]: { ph, sts, sas }
-      payload.data[sk] = { 
-        ...old, 
-        [viewAktif]: { 
-          ph: ph, 
-          sts: document.getElementById(`${prefix}sts_${i}`)?.value || 0, 
-          sas: document.getElementById(`${prefix}sas_${i}`)?.value || 0 
-        } 
-      };
+      const newData = { ph: ph, sts: document.getElementById(`${prefix}sts_${i}`)?.value || 0, sas: document.getElementById(`${prefix}sas_${i}`)?.value || 0 };
+      const merged = Object.assign({}, old);
+      merged[viewAktif] = newData;
+      payload.data[sk] = merged;
     } else {
-      payload.data[sk] = { 
-        ...old, 
-        sikap: { 
-          sikap: document.getElementById(`sikap_${i}`)?.value || 'B', 
-          catatan: document.getElementById(`catatan_${i}`)?.value || '' 
-        } 
-      };
+      const newSikap = { sikap: document.getElementById(`sikap_${i}`)?.value || 'B', catatan: document.getElementById(`catatan_${i}`)?.value || '' };
+      const merged = Object.assign({}, old);
+      merged.sikap = newSikap;
+      payload.data[sk] = merged;
     }
   });
   await penilaianStorage.saveGrades(cid, payload);
@@ -230,24 +222,15 @@ window.aksiSimpanRow = async function(i) {
   try {
     const ex = await penilaianStorage.loadGrades(cid);
     if (!ex.data) ex.data = {};
-    ex.data[sk] = { 
-      ...(ex.data[sk] || {}), 
-      [viewAktif]: { 
-        ph: ph, 
-        sts: document.getElementById(`${prefix}sts_${i}`)?.value || 0, 
-        sas: document.getElementById(`${prefix}sas_${i}`)?.value || 0 
-      } 
-    };
+    const newData = { ph: ph, sts: document.getElementById(`${prefix}sts_${i}`)?.value || 0, sas: document.getElementById(`${prefix}sas_${i}`)?.value || 0 };
+    const merged = Object.assign({}, ex.data[sk] || {});
+    merged[viewAktif] = newData;
+    ex.data[sk] = merged;
     await penilaianStorage.saveGrades(cid, ex);
-    if (!dbNilaiFull[nm]) dbNilaiFull[nm] = { meta: { jumlahPH }, data: {} };
-    dbNilaiFull[nm].data[sk] = { 
-      ...(dbNilaiFull[nm].data[sk] || {}), 
-      [viewAktif]: { 
-        ph: ph, 
-        sts: ex.data[sk][viewAktif].sts, 
-        sas: ex.data[sk][viewAktif].sas 
-      } 
-    };
+    if (!dbNilaiFull[nm]) dbNilaiFull[nm] = Object.assign({}, { meta: { jumlahPH: jumlahPH } }, { data: {} });
+    const localMerged = Object.assign({}, dbNilaiFull[nm].data[sk] || {});
+    localMerged[viewAktif] = { ph: ph, sts: ex.data[sk][viewAktif].sts, sas: ex.data[sk][viewAktif].sas };
+    dbNilaiFull[nm].data[sk] = localMerged;
     alert(`✅ ${s.nama} disimpan`);
   } catch (e) { alert('❌ ' + e.message); }
 };
@@ -272,19 +255,15 @@ window.aksiSimpanSikapRow = async function(i) {
   try {
     const ex = await penilaianStorage.loadGrades(cid);
     if (!ex.data) ex.data = {};
-    ex.data[sk] = { 
-      ...(ex.data[sk] || {}), 
-      sikap: { 
-        sikap: document.getElementById(`sikap_${i}`)?.value || 'B', 
-        catatan: document.getElementById(`catatan_${i}`)?.value || '' 
-      } 
-    };
+    const newSikap = { sikap: document.getElementById(`sikap_${i}`)?.value || 'B', catatan: document.getElementById(`catatan_${i}`)?.value || '' };
+    const merged = Object.assign({}, ex.data[sk] || {});
+    merged.sikap = newSikap;
+    ex.data[sk] = merged;
     await penilaianStorage.saveGrades(cid, ex);
-    if (!dbNilaiFull[nm]) dbNilaiFull[nm] = { meta: { jumlahPH }, data: {} };
-    dbNilaiFull[nm].data[sk] = { 
-      ...(dbNilaiFull[nm].data[sk] || {}), 
-      sikap: ex.data[sk].sikap 
-    };
+    if (!dbNilaiFull[nm]) dbNilaiFull[nm] = Object.assign({}, { meta: { jumlahPH: jumlahPH } }, { data: {} });
+    const localMerged = Object.assign({}, dbNilaiFull[nm].data[sk] || {});
+    localMerged.sikap = ex.data[sk].sikap;
+    dbNilaiFull[nm].data[sk] = localMerged;
     alert(`✅ ${s.nama} disimpan`);
   } catch (e) { alert('❌ ' + e.message); }
 };
@@ -340,4 +319,4 @@ window.aksiHapusRow = async function(i) {
   } catch (e) { alert('❌ ' + e.message); }
 };
 
-console.log('🟢 [Penilaian] Minimal Validated Version Loaded');
+console.log('🟢 [Penilaian] Super Minimal Validated Version Loaded');
