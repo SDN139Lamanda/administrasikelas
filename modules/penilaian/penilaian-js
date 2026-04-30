@@ -139,7 +139,7 @@ window.simpanPermanen = async function() {
   const nm = dbKelas[indexAktif].nama;
   const siswa = dbKelas[indexAktif].siswa || [];
   const lama = dbNilaiFull[nm]?.data || {};
-  let payload = { meta: { jumlahPH }, data: {} };
+  let payload = { meta: { jumlahPH },  {} };
   siswa.forEach((s, i) => {
     const sk = s.id || s.nama || `s_${i}`;
     const old = lama[sk] || {};
@@ -157,6 +157,7 @@ window.simpanPermanen = async function() {
   alert("✅ Data Berhasil Disimpan!");
 };
 
+// ✅ INI YANG PENTING: Expose ke window
 window.renderPenilaian = async function() {
   const c = document.getElementById('module-container');
   if (!c) return;
@@ -189,7 +190,7 @@ window.aksiSimpanRow = async function(i) {
     if (!ex.data) ex.data = {};
     ex.data[sk] = { ...(ex.data[sk] || {}), [viewAktif]: { ph, sts: document.getElementById(`${prefix}sts_${i}`)?.value || 0, sas: document.getElementById(`${prefix}sas_${i}`)?.value || 0 } };
     await penilaianStorage.saveGrades(cid, ex);
-    if (!dbNilaiFull[nm]) dbNilaiFull[nm] = { meta: { jumlahPH }, data: {} };
+    if (!dbNilaiFull[nm]) dbNilaiFull[nm] = { meta: { jumlahPH },  {} };
     dbNilaiFull[nm].data[sk] = { ...(dbNilaiFull[nm].data[sk] || {}), [viewAktif]: { ph, sts: ex.data[sk][viewAktif].sts, sas: ex.data[sk][viewAktif].sas } };
     alert(`✅ ${s.nama} disimpan`);
   } catch (e) { alert('❌ ' + e.message); }
@@ -209,7 +210,7 @@ window.aksiSimpanSikapRow = async function(i) {
     if (!ex.data) ex.data = {};
     ex.data[sk] = { ...(ex.data[sk] || {}), sikap: { sikap: document.getElementById(`sikap_${i}`)?.value || 'B', catatan: document.getElementById(`catatan_${i}`)?.value || '' } };
     await penilaianStorage.saveGrades(cid, ex);
-    if (!dbNilaiFull[nm]) dbNilaiFull[nm] = { meta: { jumlahPH }, data: {} };
+    if (!dbNilaiFull[nm]) dbNilaiFull[nm] = { meta: { jumlahPH },  {} };
     dbNilaiFull[nm].data[sk] = { ...(dbNilaiFull[nm].data[sk] || {}), sikap: ex.data[sk].sikap };
     alert(`✅ ${s.nama} disimpan`);
   } catch (e) { alert('❌ ' + e.message); }
