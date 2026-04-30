@@ -72,14 +72,20 @@ window.tambahKolomPH = function() {
 };
 
 window.inisialisasiTabel = async function(classId) {
-  if (classId === "") { indexAktif = null; document.getElementById('tabelNilaiBody').innerHTML = '<tr><td colspan="7">Pilih kelas</td></tr>'; return; }
+  if (classId === "") { 
+    indexAktif = null; 
+    const body = document.getElementById('tabelNilaiBody');
+    if (body) body.innerHTML = '<tr><td colspan="7">Pilih kelas</td></tr>'; 
+    return; 
+  }
   await syncData();
   const idx = dbKelas.findIndex(k => k.id === classId);
   if (idx === -1) return alert('❌ Kelas tidak ditemukan!');
   indexAktif = idx;
   const kelas = dbKelas[idx];
   if (!kelas.siswa || kelas.siswa.length === 0) {
-    document.getElementById('tabelNilaiBody').innerHTML = '<tr><td colspan="7" class="p-8 text-center">⚠️ Belum ada siswa</td></tr>';
+    const body = document.getElementById('tabelNilaiBody');
+    if (body) body.innerHTML = '<tr><td colspan="7" class="p-8 text-center">⚠️ Belum ada siswa</td></tr>';
     return;
   }
   dbNilaiFull[kelas.nama] = await penilaianStorage.loadGrades(classId);
@@ -109,7 +115,10 @@ function renderTabel() {
       const sk = s.id || s.nama || `s_${i}`;
       const val = saved[sk]?.[key] || { ph: [], sts: 0, sas: 0 };
       let rowPH = "";
-      for (let j = 0; j < jumlahPH; j++) rowPH += `<td class="px-2 py-2"><input type="number" id="${prefix}ph_${i}_${j}" value="${val.ph[j] ?? 0}" oninput="window.hitungNA(${i})" class="w-full bg-slate-50 border p-2 rounded text-center"></td>`;
+      for (let j = 0; j < jumlahPH; j++) {
+        const v = (val.ph && val.ph[j] !== undefined) ? val.ph[j] : 0;
+        rowPH += `<td class="px-2 py-2"><input type="number" id="${prefix}ph_${i}_${j}" value="${v}" oninput="window.hitungNA(${i})" class="w-full bg-slate-50 border p-2 rounded text-center"></td>`;
+      }
       body.innerHTML += `<tr><td class="px-8 py-4 font-medium bg-white border-r">${s.nama || 'Siswa ' + (i+1)}</td>${rowPH}<td class="px-4 py-3"><input type="number" id="${prefix}sts_${i}" value="${val.sts || 0}" oninput="window.hitungNA(${i})" class="w-16 mx-auto bg-white border p-2 rounded text-center"></td><td class="px-4 py-3"><input type="number" id="${prefix}sas_${i}" value="${val.sas || 0}" oninput="window.hitungNA(${i})" class="w-16 mx-auto bg-white border p-2 rounded text-center"></td><td class="px-6 py-3 text-center font-bold" id="${prefix}na_${i}">0</td><td class="px-4 py-3 text-center"><button onclick="window.aksiSimpanRow(${i})" class="p-1.5 text-emerald-600"><i class="fas fa-save"></i></button><button onclick="window.aksiEditRow(${i})" class="p-1.5 text-blue-600"><i class="fas fa-edit"></i></button><button onclick="window.aksiHapusRow(${i})" class="p-1.5 text-rose-600"><i class="fas fa-trash"></i></button></td></tr>`;
       window.hitungNA(i);
     });
@@ -139,17 +148,37 @@ window.simpanPermanen = async function() {
   const nm = dbKelas[indexAktif].nama;
   const siswa = dbKelas[indexAktif].siswa || [];
   const lama = dbNilaiFull[nm]?.data || {};
-  let payload = { meta: { jumlahPH },  {} };
+  
+  // ✅ VALID SYNTAX: data: {}
+  let payload = { meta: { jumlahPH }, data: {} };
+  
   siswa.forEach((s, i) => {
     const sk = s.id || s.nama || `s_${i}`;
     const old = lama[sk] || {};
     if (viewAktif === 'pengetahuan' || viewAktif === 'keterampilan') {
       const prefix = (viewAktif === 'keterampilan') ? 'keterampilan_' : '';
       let ph = [];
-      for (let j = 0; j < jumlahPH; j++) { const el = document.getElementById(`${prefix}ph_${i}_${j}`); ph.push(el ? el.value : 0); }
-      payload.data[sk] = { ...old, [viewAktif]: { ph, sts: document.getElementById(`${prefix}sts_${i}`)?.value || 0, sas: document.getElementById(`${prefix}sas_${i}`)?.value || 0 } };
+      for (let j = 0; j < jumlahPH; j++) { 
+        const el = document.getElementById(`${prefix}ph_${i}_${j}`); 
+        ph.push(el ? el.value : 0); 
+      }
+      // ✅ VALID: [viewAktif]: { ph, sts, sas }
+      payload.data[sk] = { 
+        ...old, 
+        [viewAktif]: { 
+          ph: ph, 
+          sts: document.getElementById(`${prefix}sts_${i}`)?.value || 0, 
+          sas: document.getElementById(`${prefix}sas_${i}`)?.value || 0 
+        } 
+      };
     } else {
-      payload.data[sk] = { ...old, sikap: { sikap: document.getElementById(`sikap_${i}`)?.value || 'B', catatan: document.getElementById(`catatan_${i}`)?.value || '' } };
+      payload.data[sk] = { 
+        ...old, 
+        sikap: { 
+          sikap: document.getElementById(`sikap_${i}`)?.value || 'B', 
+          catatan: document.getElementById(`catatan_${i}`)?.value || '' 
+        } 
+      };
     }
   });
   await penilaianStorage.saveGrades(cid, payload);
@@ -157,14 +186,20 @@ window.simpanPermanen = async function() {
   alert("✅ Data Berhasil Disimpan!");
 };
 
-// ✅ INI YANG PENTING: Expose ke window
+// ✅ MAIN EXPORT - HARUS ADA
 window.renderPenilaian = async function() {
   const c = document.getElementById('module-container');
   if (!c) return;
   document.querySelectorAll('.dashboard-hero, [aria-labelledby="rooms-heading"], #sd-section, #smp-section, #sma-section').forEach(el => el?.closest('section')?.classList.add('hidden'));
   if (typeof window.getPenilaianTemplate !== 'function') {
-    for (let i = 0; i < 20; i++) { await new Promise(r => setTimeout(r, 100)); if (typeof window.getPenilaianTemplate === 'function') break; }
-    if (typeof window.getPenilaianTemplate !== 'function') { c.innerHTML = '<div class="p-8 text-rose-600 text-center">❌ Template not found</div>'; return; }
+    for (let i = 0; i < 20; i++) { 
+      await new Promise(r => setTimeout(r, 100)); 
+      if (typeof window.getPenilaianTemplate === 'function') break; 
+    }
+    if (typeof window.getPenilaianTemplate !== 'function') { 
+      c.innerHTML = '<div class="p-8 text-rose-600 text-center">❌ Template not found</div>'; 
+      return; 
+    }
   }
   try {
     isDataSynced = false;
@@ -174,7 +209,10 @@ window.renderPenilaian = async function() {
     await initPenilaian();
     window.switchView(viewAktif);
     console.log('✅ [Penilaian] Module rendered');
-  } catch (e) { console.error('❌ [Penilaian] Error:', e); c.innerHTML = `<div class="p-8 text-rose-600 text-center">❌ ${e.message}</div>`; }
+  } catch (e) { 
+    console.error('❌ [Penilaian] Error:', e); 
+    c.innerHTML = `<div class="p-8 text-rose-600 text-center">❌ ${e.message}</div>`; 
+  }
 };
 window.loadPenilaianModule = window.renderPenilaian;
 
@@ -184,22 +222,48 @@ window.aksiSimpanRow = async function(i) {
   const s = dbKelas[indexAktif].siswa[i];
   const sk = s.id || s.nama || `s_${i}`;
   const prefix = (viewAktif === 'keterampilan') ? 'keterampilan_' : '';
-  let ph = []; for (let j = 0; j < jumlahPH; j++) { const el = document.getElementById(`${prefix}ph_${i}_${j}`); ph.push(el ? el.value : 0); }
+  let ph = []; 
+  for (let j = 0; j < jumlahPH; j++) { 
+    const el = document.getElementById(`${prefix}ph_${i}_${j}`); 
+    ph.push(el ? el.value : 0); 
+  }
   try {
     const ex = await penilaianStorage.loadGrades(cid);
     if (!ex.data) ex.data = {};
-    ex.data[sk] = { ...(ex.data[sk] || {}), [viewAktif]: { ph, sts: document.getElementById(`${prefix}sts_${i}`)?.value || 0, sas: document.getElementById(`${prefix}sas_${i}`)?.value || 0 } };
+    ex.data[sk] = { 
+      ...(ex.data[sk] || {}), 
+      [viewAktif]: { 
+        ph: ph, 
+        sts: document.getElementById(`${prefix}sts_${i}`)?.value || 0, 
+        sas: document.getElementById(`${prefix}sas_${i}`)?.value || 0 
+      } 
+    };
     await penilaianStorage.saveGrades(cid, ex);
-    if (!dbNilaiFull[nm]) dbNilaiFull[nm] = { meta: { jumlahPH },  {} };
-    dbNilaiFull[nm].data[sk] = { ...(dbNilaiFull[nm].data[sk] || {}), [viewAktif]: { ph, sts: ex.data[sk][viewAktif].sts, sas: ex.data[sk][viewAktif].sas } };
+    if (!dbNilaiFull[nm]) dbNilaiFull[nm] = { meta: { jumlahPH }, data: {} };
+    dbNilaiFull[nm].data[sk] = { 
+      ...(dbNilaiFull[nm].data[sk] || {}), 
+      [viewAktif]: { 
+        ph: ph, 
+        sts: ex.data[sk][viewAktif].sts, 
+        sas: ex.data[sk][viewAktif].sas 
+      } 
+    };
     alert(`✅ ${s.nama} disimpan`);
   } catch (e) { alert('❌ ' + e.message); }
 };
+
 window.aksiEditRow = function(i) {
   const prefix = (viewAktif === 'keterampilan') ? 'keterampilan_' : '';
-  for (let j = 0; j < jumlahPH; j++) { const el = document.getElementById(`${prefix}ph_${i}_${j}`); if (el) { el.classList.add('bg-yellow-50','border-blue-400'); el.focus(); } }
-  [`${prefix}sts_${i}`, `${prefix}sas_${i}`].forEach(id => { const el = document.getElementById(id); if (el) { el.classList.add('bg-yellow-50','border-blue-400'); el.focus(); } });
+  for (let j = 0; j < jumlahPH; j++) { 
+    const el = document.getElementById(`${prefix}ph_${i}_${j}`); 
+    if (el) { el.classList.add('bg-yellow-50','border-blue-400'); el.focus(); } 
+  }
+  [`${prefix}sts_${i}`, `${prefix}sas_${i}`].forEach(id => { 
+    const el = document.getElementById(id); 
+    if (el) { el.classList.add('bg-yellow-50','border-blue-400'); el.focus(); } 
+  });
 };
+
 window.aksiSimpanSikapRow = async function(i) {
   if (indexAktif === null) return;
   const { id: cid, nama: nm } = dbKelas[indexAktif];
@@ -208,16 +272,34 @@ window.aksiSimpanSikapRow = async function(i) {
   try {
     const ex = await penilaianStorage.loadGrades(cid);
     if (!ex.data) ex.data = {};
-    ex.data[sk] = { ...(ex.data[sk] || {}), sikap: { sikap: document.getElementById(`sikap_${i}`)?.value || 'B', catatan: document.getElementById(`catatan_${i}`)?.value || '' } };
+    ex.data[sk] = { 
+      ...(ex.data[sk] || {}), 
+      sikap: { 
+        sikap: document.getElementById(`sikap_${i}`)?.value || 'B', 
+        catatan: document.getElementById(`catatan_${i}`)?.value || '' 
+      } 
+    };
     await penilaianStorage.saveGrades(cid, ex);
-    if (!dbNilaiFull[nm]) dbNilaiFull[nm] = { meta: { jumlahPH },  {} };
-    dbNilaiFull[nm].data[sk] = { ...(dbNilaiFull[nm].data[sk] || {}), sikap: ex.data[sk].sikap };
+    if (!dbNilaiFull[nm]) dbNilaiFull[nm] = { meta: { jumlahPH }, data: {} };
+    dbNilaiFull[nm].data[sk] = { 
+      ...(dbNilaiFull[nm].data[sk] || {}), 
+      sikap: ex.data[sk].sikap 
+    };
     alert(`✅ ${s.nama} disimpan`);
   } catch (e) { alert('❌ ' + e.message); }
 };
+
 window.aksiEditSikapRow = function(i) {
-  ['sikap_'+i, 'catatan_'+i].forEach(id => { const el = document.getElementById(id); if (el) { el.classList.add('bg-yellow-50','border-blue-400'); if (id.startsWith('catatan')) el.style.minHeight = '80px'; el.focus(); } });
+  ['sikap_'+i, 'catatan_'+i].forEach(id => { 
+    const el = document.getElementById(id); 
+    if (el) { 
+      el.classList.add('bg-yellow-50','border-blue-400'); 
+      if (id.startsWith('catatan')) el.style.minHeight = '80px'; 
+      el.focus(); 
+    } 
+  });
 };
+
 window.aksiHapusRow = async function(i) {
   if (indexAktif === null) return;
   const s = dbKelas[indexAktif].siswa[i];
@@ -226,16 +308,36 @@ window.aksiHapusRow = async function(i) {
   const sk = s.id || s.nama || `s_${i}`;
   try {
     const ex = await penilaianStorage.loadGrades(cid);
-    if (ex.data?.[sk]) { delete ex.data[sk][viewAktif]; if (Object.keys(ex.data[sk]).length === 0) delete ex.data[sk]; }
+    if (ex.data?.[sk]) { 
+      delete ex.data[sk][viewAktif]; 
+      if (Object.keys(ex.data[sk]).length === 0) delete ex.data[sk]; 
+    }
     await penilaianStorage.saveGrades(cid, ex);
-    if (dbNilaiFull[nm]?.data?.[sk]) { delete dbNilaiFull[nm].data[sk][viewAktif]; if (Object.keys(dbNilaiFull[nm].data[sk]).length === 0) delete dbNilaiFull[nm].data[sk]; }
+    if (dbNilaiFull[nm]?.data?.[sk]) { 
+      delete dbNilaiFull[nm].data[sk][viewAktif]; 
+      if (Object.keys(dbNilaiFull[nm].data[sk]).length === 0) delete dbNilaiFull[nm].data[sk]; 
+    }
     const prefix = (viewAktif === 'keterampilan') ? 'keterampilan_' : '';
     if (viewAktif !== 'sikap') {
-      for (let j = 0; j < jumlahPH; j++) { const el = document.getElementById(`${prefix}ph_${i}_${j}`); if (el) el.value = ''; }
-      [`${prefix}sts_${i}`, `${prefix}sas_${i}`, `${prefix}na_${i}`].forEach(id => { const el = document.getElementById(id); if (el) { if (id.includes('na')) el.innerText = '0'; else el.value = ''; } });
-    } else { ['sikap_'+i, 'catatan_'+i].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; }); }
+      for (let j = 0; j < jumlahPH; j++) { 
+        const el = document.getElementById(`${prefix}ph_${i}_${j}`); 
+        if (el) el.value = ''; 
+      }
+      [`${prefix}sts_${i}`, `${prefix}sas_${i}`, `${prefix}na_${i}`].forEach(id => { 
+        const el = document.getElementById(id); 
+        if (el) { 
+          if (id.includes('na')) el.innerText = '0'; 
+          else el.value = ''; 
+        } 
+      });
+    } else { 
+      ['sikap_'+i, 'catatan_'+i].forEach(id => { 
+        const el = document.getElementById(id); 
+        if (el) el.value = ''; 
+      }); 
+    }
     alert(`🗑️ ${s.nama} dihapus`);
   } catch (e) { alert('❌ ' + e.message); }
 };
 
-console.log('🟢 [Penilaian] Minimal Working Version Loaded');
+console.log('🟢 [Penilaian] Minimal Validated Version Loaded');
