@@ -2,9 +2,8 @@
  * ============================================
  * AUTH LOGIN - auth-login.js
  * Platform Administrasi Kelas Digital
+ * ✅ UPDATE: Single-Session "Blokir Login Baru"
  * ============================================
- * 
- * ✅ UPDATE: Field names match Firestore schema from register.html
  */
 
 import { auth, db } from './firebase-config.js';
@@ -16,13 +15,15 @@ import {
 
 import { 
     doc, 
-    getDoc 
+    getDoc,
+    updateDoc,
+    serverTimestamp
 } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
 
 const ADMIN_EMAIL = 'radiah.tifarahs@gmail.com';
 
 // ============================================
-// FUNGSI UTAMA: Login User
+// FUNGSI UTAMA: Login User + Single-Session Check
 // ============================================
 export async function loginUser(email, password) {
     console.log('🔐 Login attempt for:', email);
@@ -34,13 +35,7 @@ export async function loginUser(email, password) {
         
         console.log('✅ Auth successful, UID:', user.uid);
         
-        // ✅ STEP 2: CEK EMAIL VERIFIED (Temporary disabled for testing)
-        // if (!user.emailVerified) {
-        //     await signOut(auth);
-        //     throw new Error('❌ Email belum terverifikasi.');
-        // }
-        
-        // ✅ STEP 3: AMBIL DATA USER dari Firestore
+        // ✅ STEP 2: AMBIL DATA USER dari Firestore
         const userDoc = await getDoc(doc(db, 'users', user.uid));
         
         if (!userDoc.exists()) {
@@ -51,7 +46,7 @@ export async function loginUser(email, password) {
         
         const userData = userDoc.data();
         
-        // ✅ STEP 4: VALIDASI STATUS USER
+        // ✅ STEP 3: VALIDASI STATUS USER
         if (userData.status === 'rejected') {
             await signOut(auth);
             throw new Error(`❌ Akun Anda ditolak. Alasan: ${userData.rejectedReason || 'Tidak ada alasan'}`);
@@ -62,30 +57,39 @@ export async function loginUser(email, password) {
             throw new Error('❌ Akun Anda dinonaktifkan. Hubungi admin.');
         }
         
-        // ✅ STEP 5: BUILD RETURN OBJECT (✅ Field names match Firestore schema)
+        // ✅ STEP 4: SINGLE-SESSION CHECK — BLOKIR LOGIN BARU
+        // Jika sudah aktif di device lain → tolak login ini
+        if (userData.isSessionActive === true && userData.role !== 'admin') {
+            await signOut(auth);
+            throw new Error('🔒 Akun Anda sudah login di device lain. Login baru diblokir.');
+        }
+        
+        // ✅ STEP 5: SET SESSION ACTIVE (kecuali admin)
+        if (userData.role !== 'admin') {
+            await updateDoc(doc(db, 'users', user.uid), {
+                isSessionActive: true,
+                lastLogin: serverTimestamp()
+            });
+            // ✅ Set flag di localStorage untuk validasi di dashboard
+            localStorage.setItem('session_active', 'true');
+            console.log('✅ Session marked active for:', user.uid);
+        }
+        
+        // ✅ STEP 6: BUILD RETURN OBJECT
         const returnUser = {
-            // Basic Auth Fields
             uid: user.uid,
             email: user.email,
             emailVerified: user.emailVerified,
-            
-            // Profile Fields (✅ Match register.html field names)
-            nama_lengkap: userData.nama_lengkap || '',  // ✅ Fixed: was namaLengkap
-            no_hp: userData.no_hp || '',                 // ✅ Fixed: was noHp
-            nama_sekolah: userData.nama_sekolah || '',   // ✅ Fixed: was sekolah
-            
-            // CONTEXT-BASED ACCESS FIELDS (✅ Match register.html)
-            jenjang_sekolah: userData.jenjang_sekolah || null,  // ✅ Fixed: was jenjang
-            kelas_diampu: userData.kelas_diampu || [],          // ✅ Fixed: was kelas (now array)
-            mapel_diampu: userData.mapel_diampu || [],          // ✅ Fixed: was mataPelajaran* (now unified array)
-            sd_mapel_type: userData.sd_mapel_type || 'kelas',   // ✅ New: for SD teacher type
-            
-            // Role & Status
+            nama_lengkap: userData.nama_lengkap || '',
+            no_hp: userData.no_hp || '',
+            nama_sekolah: userData.nama_sekolah || '',
+            jenjang_sekolah: userData.jenjang_sekolah || null,
+            kelas_diampu: userData.kelas_diampu || [],
+            mapel_diampu: userData.mapel_diampu || [],
+            sd_mapel_type: userData.sd_mapel_type || 'kelas',
             role: userData.role || 'guru',
-            isActive: userData.isActive === true,        // ✅ New
-            isApproved: userData.isApproved === true,    // ✅ New: approval status
-            
-            // Timestamps
+            isActive: userData.isActive === true,
+            isApproved: userData.isApproved === true,
             createdAt: userData.createdAt || null,
             lastLogin: userData.lastLogin || null
         };
@@ -131,12 +135,24 @@ export async function loginUser(email, password) {
 }
 
 // ============================================
-// FUNGSI: Logout User
+// FUNGSI: Logout User + Clear Session
 // ============================================
 export async function logoutUser() {
     try {
+        const user = auth.currentUser;
+        if (user) {
+            // ✅ Clear session flag di Firestore (kecuali admin)
+            const userData = await getDoc(doc(db, 'users', user.uid));
+            if (userData.exists() && userData.data().role !== 'admin') {
+                await updateDoc(doc(db, 'users', user.uid), {
+                    isSessionActive: false
+                });
+            }
+            // ✅ Clear flag di localStorage
+            localStorage.removeItem('session_active');
+        }
         await signOut(auth);
-        console.log('✅ Logout successful');
+        console.log('✅ Logout successful + session cleared');
         return { success: true };
     } catch (error) {
         console.error('❌ Logout error:', error);
@@ -150,3 +166,5 @@ export async function logoutUser() {
 export function isAdmin(email) {
     return email === ADMIN_EMAIL;
 }
+
+console.log('✅ [Auth Login] Loaded + Single-Session Active');
