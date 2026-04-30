@@ -33,14 +33,14 @@ export const penilaianStorage = {
       
       // ✅ RETURN DEFAULT STRUCTURE WITH ALL ASPECTS SUPPORTED
       return { 
-        meta: { jumlahPH: 1 }, 
-         {} 
-        // Each student: { pengetahuan: {...}, sikap: {...}, keterampilan: {...} }
-      };
+  meta: { jumlahPH: 1 }, 
+  data: {} 
+  // Each student: { pengetahuan: {...}, sikap: {...}, keterampilan: {...} }
+};
       
     } catch (e) {
       console.error('❌ [PenilaianStorage] loadGrades error:', e);
-      return { meta: { jumlahPH: 1 },  {} };
+      return { meta: { jumlahPH: 1 }, data  {} };
     }
   },
   
