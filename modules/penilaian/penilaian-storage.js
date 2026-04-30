@@ -16,6 +16,7 @@ export const penilaianStorage = {
     try {
       const { auth, db, collection, query, where, getDocs } = await import('../firebase-config.js');
       
+      // Set userId for consistency
       admStorage.setUserId(auth.currentUser?.uid || null);
       
       const q = query(
@@ -30,7 +31,12 @@ export const penilaianStorage = {
         return snapshot.docs[0].data();
       }
       
-      return { meta: { jumlahPH: 1 },  {} };
+      // ✅ RETURN DEFAULT STRUCTURE WITH ALL ASPECTS SUPPORTED
+      return { 
+        meta: { jumlahPH: 1 }, 
+         {} 
+        // Each student: { pengetahuan: {...}, sikap: {...}, keterampilan: {...} }
+      };
       
     } catch (e) {
       console.error('❌ [PenilaianStorage] loadGrades error:', e);
@@ -39,7 +45,8 @@ export const penilaianStorage = {
   },
   
   /**
-   * Save grades for a class - merges without overwriting other aspects
+   * Save grades for a class
+   * Merges new aspect data without overwriting existing aspects
    */
   saveGrades: async function(classId, payload) {
     try {
@@ -54,7 +61,7 @@ export const penilaianStorage = {
         classId,
         userId: auth.currentUser?.uid,
         updatedAt: serverTimestamp()
-      }, { merge: true });
+      }, { merge: true }); // ✅ merge: true ensures existing aspects not overwritten
       
       console.log('✅ [PenilaianStorage] Grades saved:', classId);
       return true;
