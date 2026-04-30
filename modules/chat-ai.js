@@ -22,7 +22,7 @@ TUGAS ANDA:
 FAQ YANG BISA DIJAWAB:
 1. Cara daftar: Buka register.html, isi form, verifikasi email, tunggu approval
 2. Syarat approval: Email valid, data lengkap, verifikasi email, donasi Rp. 300.000/tahun
-3. Donasi: Rp. 120.000 untuk periode 1 tahun penggunaan penuh
+3. Donasi: Rp. 300.000 untuk periode 1 tahun penggunaan penuh
 4. Waktu approval: 1-3 hari kerja setelah donasi & verifikasi
 5. Setelah approval: Bisa login dan akses semua fitur
 6. Fitur platform: CTA Generator, Asisten Modul, Refleksi, Penilaian, Admin Kelas
@@ -83,7 +83,7 @@ export function getFAQAnswer(question) {
     }
     
     if (q.includes('approval') || q.includes('persetujuan') || q.includes('disetujui')) {
-        return `⏳ **Syarat Approval**:\n\n• Email aktif & terverifikasi\n• Data profil lengkap (nama, sekolah, jenjang)\n• Kelas & mapel yang diampu terisi\n• ✅ Donasi: Rp. 120.000 untuk periode 1 tahun\n• Admin akan tinjau dalam 1-3 hari kerja\n\nSetelah approved, Anda bisa login & akses semua fitur.`;
+        return `⏳ **Syarat Approval**:\n\n• Email aktif & terverifikasi\n• Data profil lengkap (nama, sekolah, jenjang)\n• Kelas & mapel yang diampu terisi\n• ✅ Donasi: Rp. 300.000 untuk periode 1 tahun\n• Admin akan tinjau dalam 1-3 hari kerja\n\nSetelah approved, Anda bisa login & akses semua fitur.`;
     }
     
     if (q.includes('donasi') || q.includes('donate') || q.includes('bayar') || q.includes('biaya')) {
@@ -91,7 +91,7 @@ export function getFAQAnswer(question) {
     }
     
     if (q.includes('syarat')) {
-        return `✅ **Syarat Daftar**:\n\n• Email aktif (untuk verifikasi)\n• Data lengkap (nama, sekolah, jenjang)\n• Kelas & mapel yang diampu\n• Password minimal 6 karakter\n• Donasi Rp. 120.000/tahun (setelah approval)`;
+        return `✅ **Syarat Daftar**:\n\n• Email aktif (untuk verifikasi)\n• Data lengkap (nama, sekolah, jenjang)\n• Kelas & mapel yang diampu\n• Password minimal 6 karakter\n• Donasi Rp. 300.000/tahun (setelah approval)`;
     }
     
     if (q.includes('login') || q.includes('masuk')) {
