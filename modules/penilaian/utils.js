@@ -9,7 +9,6 @@
  * Formula: (avg(PH) × 2 + STS + SAS) / 4, rounded
  */
 export function hitungNA(sIdx, jumlahPH, doc, prefix = '') {
-  // ✅ NEW: prefix allows reuse for 'keterampilan' view (e.g., 'keterampilan_')
   let totalPH = 0;
   for (let i = 0; i < jumlahPH; i++) {
     const el = doc.getElementById(`${prefix}ph_${sIdx}_${i}`);
@@ -57,7 +56,6 @@ export function showToast(message, type = 'info') {
     warning: 'fa-exclamation-triangle'
   };
   
-  // Remove existing toasts
   document.querySelectorAll('.penilaian-toast').forEach(t => t.remove());
   
   const toast = document.createElement('div');
@@ -66,7 +64,6 @@ export function showToast(message, type = 'info') {
   
   document.body.appendChild(toast);
   
-  // Auto-remove after 3s
   setTimeout(() => {
     toast.style.opacity = '0';
     setTimeout(() => toast.remove(), 300);
