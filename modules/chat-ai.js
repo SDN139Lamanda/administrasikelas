@@ -21,7 +21,7 @@ TUGAS ANDA:
 
 FAQ YANG BISA DIJAWAB:
 1. Cara daftar: Buka register.html, isi form, verifikasi email, tunggu approval
-2. Syarat approval: Email valid, data lengkap, verifikasi email, donasi Rp. 500.000/tahun
+2. Syarat approval: Email valid, data lengkap, verifikasi email, donasi Rp. 300.000/tahun
 3. Donasi: Rp. 120.000 untuk periode 1 tahun penggunaan penuh
 4. Waktu approval: 1-3 hari kerja setelah donasi & verifikasi
 5. Setelah approval: Bisa login dan akses semua fitur
