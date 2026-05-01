@@ -2,7 +2,7 @@
  * ============================================
  * AUTH LOGIN - auth-login.js
  * Platform Administrasi Kelas Digital
- * ✅ UPDATE: Single-Session "Blokir Login Baru"
+ * ✅ UPDATE: Session Timeout + Force Login
  * ============================================
  */
 
@@ -21,12 +21,13 @@ import {
 } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
 
 const ADMIN_EMAIL = 'radiah.tifarahs@gmail.com';
+const SESSION_TIMEOUT_MINUTES = 30; // ✅ Auto-clear session if inactive > 30 min
 
 // ============================================
-// FUNGSI UTAMA: Login User + Single-Session Check
+// FUNGSI UTAMA: Login User + Smart Session Check
 // ============================================
-export async function loginUser(email, password) {
-    console.log('🔐 Login attempt for:', email);
+export async function loginUser(email, password, forceLogin = false) {
+    console.log('🔐 Login attempt for:', email, forceLogin ? '(FORCE)' : '');
     
     try {
         // ✅ STEP 1: SIGN IN dengan Firebase Auth
@@ -57,20 +58,40 @@ export async function loginUser(email, password) {
             throw new Error('❌ Akun Anda dinonaktifkan. Hubungi admin.');
         }
         
-        // ✅ STEP 4: SINGLE-SESSION CHECK — BLOKIR LOGIN BARU
-        // Jika sudah aktif di device lain → tolak login ini
+        // ✅ STEP 4: SMART SINGLE-SESSION CHECK
         if (userData.isSessionActive === true && userData.role !== 'admin') {
-            await signOut(auth);
-            throw new Error('🔒 Akun Anda sudah login di device lain. Login baru diblokir.');
+            const lastActive = userData.lastActive?.toDate?.() || userData.lastLogin?.toDate?.();
+            const now = new Date();
+            
+            // 🔄 CASE A: Session timeout (>30 min inactive) → auto-clear
+            if (lastActive && (now - lastActive) > SESSION_TIMEOUT_MINUTES * 60 * 1000) {
+                console.log('🔄 [Session] Stale session detected → auto-clear');
+                await updateDoc(doc(db, 'users', user.uid), { isSessionActive: false });
+                // Lanjut ke step 5 (set session active baru)
+            } 
+            // 🔄 CASE B: Force login requested → overwrite session
+            else if (forceLogin) {
+                console.log('⚡ [Session] Force login activated');
+                // Lanjut ke step 5 (overwrite session)
+            } 
+            // ❌ CASE C: Session aktif + bukan force login → blokir
+            else {
+                await signOut(auth);
+                // ✅ Return special error code for UI to show "Force Login" option
+                const error = new Error('🔒 Akun Anda sudah login di device lain.');
+                error.code = 'auth/session-active';
+                error.userData = userData; // For UI to show email/name
+                throw error;
+            }
         }
         
-        // ✅ STEP 5: SET SESSION ACTIVE (kecuali admin)
+        // ✅ STEP 5: SET SESSION ACTIVE + lastActive (kecuali admin)
         if (userData.role !== 'admin') {
             await updateDoc(doc(db, 'users', user.uid), {
                 isSessionActive: true,
+                lastActive: serverTimestamp(),  // ✅ BARU: untuk timeout detection
                 lastLogin: serverTimestamp()
             });
-            // ✅ Set flag di localStorage untuk validasi di dashboard
             localStorage.setItem('session_active', 'true');
             console.log('✅ Session marked active for:', user.uid);
         }
@@ -110,6 +131,11 @@ export async function loginUser(email, password) {
     } catch (error) {
         console.error('❌ Login error:', error);
         
+        // ✅ Preserve special error codes for UI handling
+        if (error.code === 'auth/session-active') {
+            throw error; // Re-throw untuk ditangani login.js
+        }
+        
         let errorMessage = error.message;
         
         if (error.code === 'auth/invalid-email') {
@@ -141,14 +167,12 @@ export async function logoutUser() {
     try {
         const user = auth.currentUser;
         if (user) {
-            // ✅ Clear session flag di Firestore (kecuali admin)
             const userData = await getDoc(doc(db, 'users', user.uid));
             if (userData.exists() && userData.data().role !== 'admin') {
                 await updateDoc(doc(db, 'users', user.uid), {
                     isSessionActive: false
                 });
             }
-            // ✅ Clear flag di localStorage
             localStorage.removeItem('session_active');
         }
         await signOut(auth);
@@ -167,4 +191,4 @@ export function isAdmin(email) {
     return email === ADMIN_EMAIL;
 }
 
-console.log('✅ [Auth Login] Loaded + Single-Session Active');
+console.log('✅ [Auth Login] Loaded + Session Timeout + Force Login');
