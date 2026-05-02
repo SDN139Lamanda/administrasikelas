@@ -3,6 +3,7 @@
  * GENERATOR PEMBUAT SOAL - Styles
  * Folder: modules/pembuat-soal/pembuat-soal.css
  * RESPONSIVE VERSION - HP Chromebook Laptop
+ * ✅ UPDATE: iOS zoom fix + touch optimization
  * ============================================
  */
 
@@ -98,7 +99,7 @@
     padding: 0.625rem 1rem;
     border: 1px solid #d1d5db;
     border-radius: 0.5rem;
-    font-size: 16px; /* Cegah zoom di iOS */
+    font-size: 16px; /* ✅ Cegah zoom di iOS */
     transition: all 0.2s;
     background: #ffffff;
 }
@@ -124,14 +125,15 @@
     margin-bottom: 1rem;
     border-radius: 0.5rem;
     border: 1px solid #e5e7eb;
-    -webkit-overflow-scrolling: touch;
+    -webkit-overflow-scrolling: touch; /* ✅ Smooth scroll di iOS */
+    touch-action: pan-x; /* ✅ Mencegah gesture conflict */
 }
 
 .pembuat-soal-table {
     width: 100%;
     border-collapse: collapse;
     background: #ffffff;
-    min-width: 600px; /* Biar ga gepeng di HP */
+    min-width: 600px; /* ✅ Biar ga gepeng di HP */
 }
 
 .pembuat-soal-table th {
@@ -170,13 +172,21 @@
     border-bottom: none;
 }
 
+/* ✅ FIX: Input di tabel juga harus 16px untuk cegah iOS zoom */
 .pembuat-soal-table input,
 .pembuat-soal-table select {
     width: 100%;
     padding: 0.375rem 0.75rem;
     border: 1px solid #d1d5db;
     border-radius: 0.375rem;
-    font-size: 0.875rem;
+    font-size: 16px; /* ✅ iOS zoom fix */
+}
+
+@media (min-width: 768px) {
+    .pembuat-soal-table input,
+    .pembuat-soal-table select {
+        font-size: 0.875rem;
+    }
 }
 
 .pembuat-soal-table input:focus,
@@ -211,7 +221,9 @@
     border: none;
     cursor: pointer;
     font-size: 0.875rem;
-    min-height: 44px; /* Touch target HP */
+    min-height: 44px; /* ✅ Touch target HP */
+    touch-action: manipulation; /* ✅ Cegah double-tap zoom */
+    -webkit-tap-highlight-color: transparent; /* ✅ Hilangkan highlight biru di Android */
 }
 
 @media (max-width: 640px) {
@@ -362,5 +374,23 @@
     
     .pembuat-soal-btn {
         padding: 0.625rem 1.25rem;
+    }
+}
+
+/* ✅ NEW: Fallback inline styles jika CSS gagal load */
+/* Ini akan di-inject via JS jika CSS 404 */
+.pembuat-soal-container[data-fallback] {
+    font-family: system-ui, -apple-system, sans-serif;
+}
+.pembuat-soal-container[data-fallback] .pembuat-soal-table-container {
+    overflow-x: auto;
+}
+.pembuat-soal-container[data-fallback] .pembuat-soal-btn {
+    min-height: 44px;
+    width: 100%;
+}
+@media (max-width: 640px) {
+    .pembuat-soal-container[data-fallback] .pembuat-soal-form-grid {
+        grid-template-columns: 1fr !important;
     }
 }
