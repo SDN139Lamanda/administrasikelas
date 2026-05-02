@@ -2,6 +2,7 @@
  * ============================================
  * GENERATOR PEMBUAT SOAL - Main Logic
  * Folder: modules/pembuat-soal/pembuat-soal.js
+ * ✅ UPDATE: Mobile Responsive + Touch Optimization
  * ============================================
  * 
  * ✅ FIX UTAMA: Tambah 'prompt: prompt' ke generateWithGroq()
@@ -10,10 +11,11 @@
  * 2. parseAIOutput: Regex-based parsing untuk handle variasi marker
  * 3. buildPrompt: Lebih strict + contoh output konkret + negative constraints
  * 4. Debug logging: Tampilkan raw AI response untuk troubleshooting
+ * 5. ✅ MOBILE: Responsive table, form grid, touch targets, font-size
  * ============================================
  */
 
-console.log('🔴 [PembuatSoal] Module START');
+console.log('🔴 [PembuatSoal] Module START + Mobile Optimized');
 
 // ✅ IMPORTS
 import { generateWithGroq, getGroqApiKey } from '../groq-api.js';
@@ -50,8 +52,8 @@ export async function renderPembuatSoal() {
     // ✅ Auth check
     if (!window.isUserApproved?.() && window.currentUserRole !== 'admin') {
         container.innerHTML = `
-            <div class="pembuat-soal-container">
-                <div class="pembuat-soal-alert pembuat-soal-alert-warning">
+            <div class="pembuat-soal-container p-4">
+                <div class="pembuat-soal-alert pembuat-soal-alert-warning p-4 rounded-lg bg-amber-50 border border-amber-200 text-amber-800">
                     <i class="fas fa-lock mr-2"></i>
                     Akun Anda masih menunggu persetujuan admin.
                 </div>
@@ -72,93 +74,119 @@ export async function renderPembuatSoal() {
     // Load user data
     await loadUserData();
     
-    console.log('🟢 [PembuatSoal] Module READY');
+    console.log('🟢 [PembuatSoal] Module READY + Mobile Optimized');
 }
 
 // ============================================
-// ✅ HTML TEMPLATE
+// ✅ HTML TEMPLATE - MOBILE RESPONSIVE
 // ============================================
 
 function getPembuatSoalHTML() {
     return `
-        <div class="pembuat-soal-container">
+        <!-- ✅ MOBILE CSS INLINE -->
+        <style>
+            /* Touch target minimum size for fingers */
+            .ps-touch-target { min-height: 44px !important; min-width: 44px !important; display: inline-flex; align-items: center; justify-content: center; }
+            
+            /* Prevent iOS zoom on input focus */
+            .ps-mobile-input { font-size: 16px !important; }
+            
+            /* Smooth horizontal scroll for table */
+            .ps-table-wrapper { overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; touch-action: pan-x !important; }
+            
+            /* Responsive form grid */
+            @media (max-width: 768px) {
+                .ps-form-grid { grid-template-columns: 1fr !important; gap: 1rem !important; }
+                .ps-form-group { width: 100% !important; }
+                .ps-table-container { margin: 0 -1rem !important; padding: 0 1rem !important; }
+                .ps-btn-full { width: 100% !important; margin-bottom: 0.5rem !important; }
+                .ps-header-title { font-size: 1.25rem !important; }
+            }
+            
+            /* Reduce motion for accessibility */
+            @media (prefers-reduced-motion: reduce) {
+                * { animation: none !important; transition: none !important; }
+            }
+        </style>
+
+        <div class="pembuat-soal-container p-4 md:p-6">
             <!-- Header -->
-            <div class="pembuat-soal-header">
-                <h2><i class="fas fa-file-alt mr-2"></i>Generator Pembuat Soal</h2>
-                <p>Buat soal penilaian dengan bantuan AI secara otomatis</p>
+            <div class="pembuat-soal-header mb-6">
+                <h2 class="ps-header-title text-xl md:text-2xl font-bold text-gray-800"><i class="fas fa-file-alt mr-2"></i>Generator Pembuat Soal</h2>
+                <p class="text-gray-600 mt-1 text-sm md:text-base">Buat soal penilaian dengan bantuan AI secara otomatis</p>
             </div>
             
             <!-- Alert Messages -->
-            <div id="pembuat-soal-alert-container"></div>
+            <div id="pembuat-soal-alert-container" class="mb-4"></div>
             
             <!-- Input Form -->
-            <div class="pembuat-soal-form">
+            <div class="pembuat-soal-form bg-white rounded-xl p-4 md:p-6 shadow-sm border border-gray-200">
                 <h3 class="text-lg font-semibold text-gray-800 mb-4">Informasi Umum</h3>
-                <div class="pembuat-soal-form-grid">
-                    <div class="pembuat-soal-form-group">
-                        <label>Sekolah</label>
-                        <input type="text" id="ps-sekolah" readonly class="bg-gray-100">
+                <div class="pembuat-soal-form-grid ps-form-grid grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="pembuat-soal-form-group ps-form-group">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Sekolah</label>
+                        <input type="text" id="ps-sekolah" readonly class="w-full px-3 py-2.5 border border-gray-300 rounded-lg bg-gray-100 text-gray-700 ps-mobile-input ps-touch-target">
                     </div>
-                    <div class="pembuat-soal-form-group">
-                        <label>Mata Pelajaran</label>
-                        <input type="text" id="ps-mapel" readonly class="bg-gray-100">
+                    <div class="pembuat-soal-form-group ps-form-group">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Mata Pelajaran</label>
+                        <input type="text" id="ps-mapel" readonly class="w-full px-3 py-2.5 border border-gray-300 rounded-lg bg-gray-100 text-gray-700 ps-mobile-input ps-touch-target">
                     </div>
-                    <div class="pembuat-soal-form-group">
-                        <label>Tahun Pelajaran</label>
-                        <input type="text" id="ps-tahun" placeholder="Contoh: 2024/2025">
+                    <div class="pembuat-soal-form-group ps-form-group">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Tahun Pelajaran</label>
+                        <input type="text" id="ps-tahun" placeholder="Contoh: 2024/2025" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ps-mobile-input ps-touch-target">
                     </div>
                 </div>
                 
                 <h3 class="text-lg font-semibold text-gray-800 mb-4 mt-6">Daftar Topik & Soal</h3>
-                <div class="pembuat-soal-table-container">
-                    <table class="pembuat-soal-table" id="ps-table">
-                        <thead>
+                <div class="pembuat-soal-table-container ps-table-container ps-table-wrapper">
+                    <table class="pembuat-soal-table w-full text-left border-collapse min-w-max">
+                        <thead class="bg-gray-50">
                             <tr>
-                                <th style="width: 25%;">Jenjang & Mapel</th>
-                                <th style="width: 30%;">Topik/Materi</th>
-                                <th style="width: 15%;">Jumlah Nomor</th>
-                                <th style="width: 15%;">Model Soal</th>
-                                <th style="width: 15%;">Soal Untuk</th>
-                                <th style="width: 5%;">Aksi</th>
+                                <th class="px-3 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider" style="min-width: 120px;">Jenjang & Mapel</th>
+                                <th class="px-3 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider" style="min-width: 150px;">Topik/Materi</th>
+                                <th class="px-3 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider" style="min-width: 100px;">Jml Nomor</th>
+                                <th class="px-3 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider" style="min-width: 120px;">Model Soal</th>
+                                <th class="px-3 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider" style="min-width: 120px;">Soal Untuk</th>
+                                <th class="px-3 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider" style="min-width: 50px;">Aksi</th>
                             </tr>
                         </thead>
-                        <tbody id="ps-tbody">
+                        <tbody id="ps-tbody" class="divide-y divide-gray-100">
                             <!-- Dynamic rows will be added here -->
                         </tbody>
                     </table>
                 </div>
                 
-                <div class="pembuat-soal-actions mt-4">
-                    <button id="ps-add-row-btn" class="pembuat-soal-btn pembuat-soal-btn-secondary">
+                <div class="pembuat-soal-actions mt-6 flex flex-col md:flex-row gap-3">
+                    <button id="ps-add-row-btn" class="pembuat-soal-btn pembuat-soal-btn-secondary ps-btn-full md:ps-btn-auto px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg font-medium flex items-center justify-center gap-2 ps-touch-target">
                         <i class="fas fa-plus"></i> Tambah Baris
                     </button>
-                    <button id="ps-generate-btn" class="pembuat-soal-btn pembuat-soal-btn-primary">
+                    <button id="ps-generate-btn" class="pembuat-soal-btn pembuat-soal-btn-primary ps-btn-full md:ps-btn-auto px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium flex items-center justify-center gap-2 ps-touch-target">
                         <i class="fas fa-robot"></i> Buatkan Soal
                     </button>
-                    <button id="ps-download-btn" class="pembuat-soal-btn pembuat-soal-btn-success" disabled>
+                    <button id="ps-download-btn" class="pembuat-soal-btn pembuat-soal-btn-success ps-btn-full md:ps-btn-auto px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium flex items-center justify-center gap-2 ps-touch-target" disabled>
                         <i class="fas fa-file-word"></i> Download Word
                     </button>
                 </div>
             </div>
             
             <!-- Output Sections -->
-            <div id="pembuat-soal-output" class="pembuat-soal-output hidden">
+            <div id="pembuat-soal-output" class="pembuat-soal-output hidden mt-6 space-y-6">
                 <!-- Questions Section -->
-                <div class="pembuat-soal-output-section">
-                    <h3><i class="fas fa-question-circle mr-2"></i>SOAL</h3>
-                    <div id="ps-output-questions" class="pembuat-soal-output-content"></div>
+                <div class="pembuat-soal-output-section bg-white rounded-xl p-4 md:p-6 shadow-sm border border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-3"><i class="fas fa-question-circle mr-2 text-blue-600"></i>SOAL</h3>
+                    <div id="ps-output-questions" class="pembuat-soal-output-content text-gray-700 leading-relaxed text-sm md:text-base"></div>
                 </div>
                 
                 <!-- Answers Section -->
-                <div class="pembuat-soal-output-section">
-                    <h3><i class="fas fa-check-circle mr-2"></i>KUNCI JAWABAN</h3>
-                    <div id="ps-output-answers" class="pembuat-soal-output-content"></div>
+                <div class="pembuat-soal-output-section bg-white rounded-xl p-4 md:p-6 shadow-sm border border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-3"><i class="fas fa-check-circle mr-2 text-emerald-600"></i>KUNCI JAWABAN</h3>
+                    <div id="ps-output-answers" class="pembuat-soal-output-content text-gray-700 leading-relaxed text-sm md:text-base"></div>
                 </div>
             </div>
             
             <!-- Back Button -->
             <div class="mt-6">
-                <button onclick="window.backToDashboard()" class="pembuat-soal-btn pembuat-soal-btn-secondary">
+                <button onclick="window.backToDashboard()" class="pembuat-soal-btn pembuat-soal-btn-secondary px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg font-medium flex items-center justify-center gap-2 ps-touch-target">
                     <i class="fas fa-arrow-left mr-2"></i>Kembali ke Dashboard
                 </button>
             </div>
@@ -266,7 +294,7 @@ async function fetchMapelData(jenjang) {
 }
 
 // ============================================
-// ✅ POPULATE ROW MAPEL DROPDOWN (FIXED)
+// ✅ POPULATE ROW MAPEL DROPDOWN (FIXED + MOBILE)
 // ============================================
 
 async function populateRowMapelDropdown(selectEl, jenjang, userMapelFromReg = null) {
@@ -303,6 +331,8 @@ async function populateRowMapelDropdown(selectEl, jenjang, userMapelFromReg = nu
             }
         }
         selectEl.disabled = false;
+        // ✅ Add mobile class
+        selectEl.classList.add('ps-mobile-input', 'ps-touch-target');
     } catch (error) {
         console.error('❌ Populate row mapel error:', error);
         selectEl.innerHTML = '<option value="">Gagal memuat</option>';
@@ -311,7 +341,7 @@ async function populateRowMapelDropdown(selectEl, jenjang, userMapelFromReg = nu
 }
 
 // ============================================
-// ✅ ADD ROW TO TABLE
+// ✅ ADD ROW TO TABLE - MOBILE RESPONSIVE
 // ============================================
 
 async function addRow() {
@@ -348,34 +378,35 @@ async function addRow() {
     
     const tr = document.createElement('tr');
     tr.dataset.rowId = row.id;
+    tr.className = 'hover:bg-gray-50';
     tr.innerHTML = `
-        <td>
-            <select class="ps-jenjang-mapel" data-row="${row.id}">
+        <td class="px-3 py-3 align-top">
+            <select class="ps-jenjang-mapel w-full px-3 py-2.5 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ps-mobile-input ps-touch-target" data-row="${row.id}">
                 <option value="">Memuat mapel...</option>
             </select>
         </td>
-        <td>
-            <input type="text" class="ps-topik" data-row="${row.id}" placeholder="Contoh: Pecahan">
+        <td class="px-3 py-3 align-top">
+            <input type="text" class="ps-topik w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ps-mobile-input ps-touch-target" data-row="${row.id}" placeholder="Contoh: Pecahan">
         </td>
-        <td>
-            <input type="number" class="ps-jumlah" data-row="${row.id}" value="5" min="1" max="50">
+        <td class="px-3 py-3 align-top">
+            <input type="number" class="ps-jumlah w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ps-mobile-input ps-touch-target" data-row="${row.id}" value="5" min="1" max="50">
         </td>
-        <td>
-            <select class="ps-model" data-row="${row.id}">
+        <td class="px-3 py-3 align-top">
+            <select class="ps-model w-full px-3 py-2.5 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ps-mobile-input ps-touch-target" data-row="${row.id}">
                 <option value="ganda">Pilihan Ganda</option>
                 <option value="isian">Isian</option>
                 <option value="uraian">Uraian/Essay</option>
             </select>
         </td>
-        <td>
-            <select class="ps-untuk" data-row="${row.id}">
+        <td class="px-3 py-3 align-top">
+            <select class="ps-untuk w-full px-3 py-2.5 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ps-mobile-input ps-touch-target" data-row="${row.id}">
                 <option value="harian">Tugas Harian</option>
                 <option value="pts">PTS</option>
                 <option value="pas">PAS</option>
             </select>
         </td>
-        <td>
-            <button onclick="window.removePembuatSoalRow(${row.id})" class="text-red-600 hover:text-red-800">
+        <td class="px-3 py-3 align-top text-center">
+            <button onclick="window.removePembuatSoalRow(${row.id})" class="text-red-600 hover:text-red-800 p-2 rounded-lg hover:bg-red-50 ps-touch-target" title="Hapus baris">
                 <i class="fas fa-trash"></i>
             </button>
         </td>
@@ -770,15 +801,15 @@ function downloadWord() {
 }
 
 // ============================================
-// ✅ SHOW ALERT
+// ✅ SHOW ALERT - MOBILE FRIENDLY
 // ============================================
 
 function showAlert(msg, type = 'success') {
     const c = document.getElementById('pembuat-soal-alert-container');
     if (!c) return;
-    const cls = type === 'error' ? 'pembuat-soal-alert-error' : (type === 'warning' ? 'pembuat-soal-alert-warning' : 'pembuat-soal-alert-success');
-    c.innerHTML = `<div class="pembuat-soal-alert ${cls}">${msg}</div>`;
+    const cls = type === 'error' ? 'pembuat-soal-alert-error bg-rose-50 border-rose-200 text-rose-800' : (type === 'warning' ? 'pembuat-soal-alert-warning bg-amber-50 border-amber-200 text-amber-800' : 'pembuat-soal-alert-success bg-emerald-50 border-emerald-200 text-emerald-800');
+    c.innerHTML = `<div class="pembuat-soal-alert p-4 rounded-lg border ${cls}">${msg}</div>`;
     setTimeout(() => { if(c) c.innerHTML = ''; }, 5000);
 }
 
-console.log('🟢 [PembuatSoal] Module READY');
+console.log('🟢 [PembuatSoal] Module READY + Mobile Optimized');
